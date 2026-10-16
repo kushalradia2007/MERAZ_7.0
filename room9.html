@@ -20,9 +20,11 @@
             --green-glow: rgba(16, 185, 129, 0.4);
             --purple: #8b5cf6;
             --purple-glow: rgba(139, 92, 246, 0.4);
+            --orange: #f97316;
+            --orange-glow: rgba(249, 115, 22, 0.35);
             --text-main: #e2e8f0;
             --text-dim: #94a3b8;
-            --border-dim: rgba(6, 182, 212, 0.25);
+            --border-dim: rgba(6, 182, 212, 0.22);
             --font-ui: 'Inter', sans-serif;
             --font-code: 'JetBrains Mono', monospace;
             --font-glitch: 'VT323', monospace;
@@ -34,11 +36,11 @@
 
         body {
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 15% 25%, rgba(6, 182, 212, 0.07) 0%, transparent 60%),
-                radial-gradient(circle at 85% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 60%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-image:
+                radial-gradient(circle at 18% 28%, rgba(6, 182, 212, 0.07) 0%, transparent 58%),
+                radial-gradient(circle at 82% 72%, rgba(245, 158, 11, 0.05) 0%, transparent 58%),
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
             color: var(--text-main);
             font-family: var(--font-ui);
@@ -47,7 +49,6 @@
             flex-direction: column;
         }
 
-        /* Scanline Overlay */
         body::after {
             content: "";
             position: fixed;
@@ -59,7 +60,7 @@
             opacity: 0.22;
         }
 
-        /* Header */
+        /* ── Header ── */
         header {
             display: flex;
             justify-content: space-between;
@@ -71,24 +72,22 @@
             font-size: 12px;
             z-index: 10;
             position: relative;
+            flex-shrink: 0;
         }
 
         header::after {
             content: '';
             position: absolute;
-            bottom: -1px;
-            left: 0; right: 0; height: 1px;
+            bottom: -1px; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, var(--cyan), var(--amber), var(--cyan), transparent);
-            opacity: 0.8;
+            opacity: 0.85;
         }
-        
-        .brand { 
-            color: var(--accent); 
-            letter-spacing: 1.5px; 
+
+        .brand {
+            color: var(--accent);
+            letter-spacing: 1.5px;
             text-shadow: 0 0 10px var(--accent-glow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             font-weight: 600;
         }
 
@@ -96,80 +95,60 @@
             width: 20px; height: 20px;
             border: 2px solid var(--accent);
             border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-flex; align-items: center; justify-content: center;
             box-shadow: 0 0 8px var(--accent-glow);
             font-size: 11px;
+            animation: clockPulse 2.8s ease-in-out infinite;
+        }
+
+        @keyframes clockPulse {
+            0%, 100% { border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
+            50% { border-color: var(--amber); box-shadow: 0 0 12px var(--amber-glow); }
         }
 
         .status { display: flex; align-items: center; gap: 8px; }
-        .status .status-indicator {
+        .status-indicator {
             width: 7px; height: 7px; border-radius: 50%;
             background: var(--accent);
             box-shadow: 0 0 8px var(--accent-glow);
             animation: blink 1.6s infinite;
         }
-        .status .status-text {
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
+        .status-text { color: var(--accent); letter-spacing: 1px; text-shadow: 0 0 8px var(--accent-glow); }
 
         .timer { color: var(--text-dim); }
         .timer span { color: var(--text-main); font-weight: 600; }
 
         .exit-btn {
-            color: var(--accent);
-            text-decoration: none;
-            border: 1px solid var(--accent);
-            padding: 4px 14px;
-            border-radius: 3px;
-            transition: all 0.2s;
-            font-family: var(--font-code);
-            font-size: 11px;
+            color: var(--accent); text-decoration: none;
+            border: 1px solid var(--accent); padding: 4px 14px;
+            border-radius: 3px; transition: all 0.2s;
+            font-family: var(--font-code); font-size: 11px;
             background: rgba(6, 182, 212, 0.08);
         }
-        .exit-btn:hover { 
-            background: rgba(6, 182, 212, 0.25); 
-            color: #fff; 
-            box-shadow: 0 0 14px var(--accent-glow);
-            border-color: #fff;
-        }
+        .exit-btn:hover { background: rgba(6, 182, 212, 0.25); color: #fff; box-shadow: 0 0 14px var(--accent-glow); border-color: #fff; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
-        /* Dashboard */
+        /* ── Dashboard Layout ── */
         .dashboard {
             display: grid;
             grid-template-columns: 330px 1fr 380px;
-            gap: 16px;
-            padding: 16px;
-            flex: 1;
-            min-height: 0;
+            gap: 16px; padding: 16px;
+            flex: 1; min-height: 0; overflow: hidden;
         }
 
-        @media (max-width: 1280px) {
-            .dashboard {
-                grid-template-columns: 290px 1fr 340px;
-                gap: 12px;
-                padding: 12px;
-            }
-        }
+        @media (max-width: 1280px) { .dashboard { grid-template-columns: 290px 1fr 340px; gap: 12px; padding: 12px; } }
+        @media (max-width: 1024px) { .dashboard { grid-template-columns: 1fr; overflow-y: auto; } }
 
-        @media (max-width: 1024px) {
-            .dashboard { grid-template-columns: 1fr; overflow-y: auto; }
-        }
-
+        /* ── Panel ── */
         .panel {
             background: var(--panel-bg);
             backdrop-filter: blur(14px);
             border: 1px solid var(--border-dim);
             border-radius: 6px;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 36px rgba(0,0,0,0.6);
             position: relative;
         }
 
@@ -182,21 +161,17 @@
         }
 
         .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
+            font-family: var(--font-code); font-size: 11px;
             padding: 10px 16px;
             background: rgba(5, 5, 15, 0.75);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; letter-spacing: 0.5px;
         }
 
         .panel-header-left { display: flex; align-items: center; gap: 8px; }
-        .panel-header .header-dot {
+        .header-dot {
             width: 6px; height: 6px; border-radius: 50%;
             background: var(--accent);
             box-shadow: 0 0 6px var(--accent-glow);
@@ -204,278 +179,385 @@
         }
         .panel-header-meta { font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
 
-        /* Left Column */
+        /* ── Left Content: Story & Context ── */
         .context-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            font-size: 11.5px;
-            line-height: 1.6;
+            flex: 1; overflow-y: auto; padding: 14px 16px;
+            display: flex; flex-direction: column; gap: 14px;
         }
 
         .intel-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--amber);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            background: rgba(245, 158, 11, 0.08);
-            padding: 3px 8px;
-            border-radius: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px dashed rgba(6, 182, 212, 0.35);
+            border-radius: 4px; padding: 8px 12px;
+            font-family: var(--font-code); font-size: 10px;
+            color: var(--cyan); letter-spacing: 1px; font-weight: bold;
         }
 
         .transmission-box {
-            background: rgba(0, 0, 0, 0.5);
-            border-left: 3px solid var(--cyan);
-            padding: 12px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid var(--accent);
             border-radius: 0 4px 4px 0;
-            position: relative;
+            padding: 10px 12px;
         }
         .transmission-meta {
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--cyan);
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
+            font-family: var(--font-code); font-size: 9px;
+            color: var(--amber); letter-spacing: 1px; margin-bottom: 4px;
         }
-        .transmission-text { font-style: italic; color: #cbd5e1; font-size: 11px; }
-
-        .timeline-stat-box {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            border-radius: 6px;
-            padding: 12px;
-            font-family: var(--font-code);
-            font-size: 10px;
+        .transmission-text {
+            font-size: 11px; line-height: 1.55; color: var(--text-dim);
         }
-        .timeline-stat-title { color: var(--cyan); font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-        .timeline-stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-dim); }
-        .timeline-stat-row span:last-child { color: #fff; }
-
-        /* Center Column: Evidence */
-        .evidence-panel { display: flex; flex-direction: column; }
-        .evidence-tabs {
-            display: flex;
-            background: rgba(5, 5, 12, 0.6);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 0 10px;
-            gap: 4px;
-            flex-shrink: 0;
-            overflow-x: auto;
+        .transmission-text strong { color: var(--text-main); }
+        .transmission-author {
+            display: block; margin-top: 6px;
+            font-family: var(--font-code); font-size: 10px; color: var(--accent); font-weight: bold;
         }
 
-        .ev-tab {
-            font-family: var(--font-code);
-            font-size: 10.5px;
-            padding: 10px 14px;
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: all 0.2s;
-            border-bottom: 2px solid transparent;
-            white-space: nowrap;
-        }
-        .ev-tab:hover { color: var(--text-main); }
-        .ev-tab.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-            background: rgba(6, 182, 212, 0.08);
-            font-weight: 600;
-        }
-
-        .evidence-body {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .view-evidence-btn {
-            background: rgba(6, 182, 212, 0.15);
-            border: 1px solid var(--cyan);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
             gap: 8px;
-            transition: all 0.2s;
-            text-decoration: none;
-            width: fit-content;
         }
-        .view-evidence-btn:hover {
-            background: rgba(6, 182, 212, 0.35);
-            box-shadow: 0 0 12px var(--cyan-glow);
+        .stat-card {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px; padding: 8px 10px; text-align: center;
+        }
+        .stat-card-val {
+            font-family: var(--font-code); font-size: 15px; font-weight: bold;
+        }
+        .stat-card-label {
+            font-size: 9px; color: var(--text-dim); text-transform: uppercase; margin-top: 2px;
         }
 
-        /* Right Column: Targets */
-        .targets-panel { display: flex; flex-direction: column; }
+        .specimen-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+            border-radius: 4px; padding: 10px 12px;
+            font-family: var(--font-code); font-size: 10px;
+        }
+        .specimen-title {
+            color: var(--amber); font-weight: bold; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .specimen-row {
+            display: flex; justify-content: space-between;
+            padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-dim);
+        }
+        .specimen-row:last-child { border-bottom: none; }
+        .val-bad { color: var(--red); font-weight: bold; }
+        .val-warn { color: var(--amber); font-weight: bold; }
+        .val-ok { color: var(--green); font-weight: bold; }
+
+        /* Chain Tracker */
+        .chain-title {
+            font-family: var(--font-code); font-size: 10px;
+            color: var(--accent); letter-spacing: 0.5px; margin-bottom: 8px;
+        }
+        .chain-step {
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 8px; border-radius: 4px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.04);
+            margin-bottom: 6px;
+            font-family: var(--font-code); font-size: 10px;
+            transition: all 0.2s;
+        }
+        .chain-step.completed {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.08);
+        }
+        .chain-step-num {
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.06); color: var(--text-dim);
+            font-size: 9px; font-weight: bold; flex-shrink: 0;
+        }
+        .chain-step.completed .chain-step-num {
+            background: var(--green); color: #000;
+        }
+        .chain-step-info { flex: 1; }
+        .chain-step-name { font-weight: 600; color: var(--text-main); }
+        .chain-step-desc { font-size: 9px; color: var(--text-dim); }
+
+        .quote-box {
+            background: rgba(6, 182, 212, 0.04);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+            border-radius: 4px; padding: 10px 12px;
+            font-size: 10.5px; color: var(--text-dim); font-style: italic; line-height: 1.5;
+        }
+        .quote-author {
+            display: block; font-style: normal;
+            font-family: var(--font-code); font-size: 9px;
+            color: var(--amber); margin-top: 6px; text-align: right;
+        }
+
+        /* ── Center: Evidence Viewport ── */
+        .evidence-panel { display: flex; flex-direction: column; min-height: 0; }
+        .evidence-tabs {
+            display: flex; gap: 4px; padding: 8px 12px 0 12px;
+            background: rgba(5,5,15,0.5);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            overflow-x: auto; flex-shrink: 0;
+        }
+        .evidence-tab {
+            font-family: var(--font-code); font-size: 10.5px;
+            padding: 6px 12px; border-radius: 4px 4px 0 0;
+            background: rgba(0,0,0,0.3); color: var(--text-dim);
+            border: 1px solid transparent; border-bottom: none;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .evidence-tab:hover { color: var(--text-main); background: rgba(255,255,255,0.04); }
+        .evidence-tab.active {
+            color: var(--accent); background: var(--panel-bg);
+            border-color: var(--border-dim); font-weight: 600;
+        }
+        .evidence-tab-dot {
+            width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+        }
+
+        .evidence-viewport {
+            flex: 1; overflow-y: auto; padding: 16px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+
+        .evidence-results-box {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; overflow: hidden;
+        }
+        .ev-results-meta {
+            padding: 8px 12px; background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-family: var(--font-code); font-size: 10px; color: var(--text-dim);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .evidence-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px; overflow: hidden; margin-bottom: 10px;
+        }
+        .evidence-card-header {
+            padding: 6px 10px; background: rgba(255,255,255,0.03);
+            font-family: var(--font-code); font-size: 9.5px; color: var(--accent);
+            display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .evidence-card-body {
+            padding: 10px; font-family: var(--font-code); font-size: 10px; line-height: 1.6;
+        }
+
+        .ev-table {
+            width: 100%; border-collapse: collapse;
+            font-family: var(--font-code); font-size: 10px;
+        }
+        .ev-table th {
+            text-align: left; padding: 7px 10px;
+            background: rgba(255,255,255,0.03); color: var(--accent);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-weight: 600; font-size: 9px; letter-spacing: 0.5px;
+        }
+        .ev-table td {
+            padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-main); vertical-align: middle;
+        }
+        .ev-table tr:hover { background: rgba(255,255,255,0.02); }
+        .danger-row { background: rgba(239, 68, 68, 0.08) !important; }
+        .danger-row td { color: #fca5a5; }
+        .anomaly-row { background: rgba(245, 158, 11, 0.08) !important; }
+        .anomaly-row td { color: #fde68a; }
+
+        .ev-pill {
+            display: inline-block; padding: 1px 6px; border-radius: 3px;
+            font-size: 8.5px; font-weight: 600; text-transform: uppercase;
+        }
+        .pill-red { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
+        .pill-green { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .pill-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .pill-purple { background: rgba(139, 92, 246, 0.15); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.3); }
+        .pill-cyan { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
+
+        .evidence-alert-box {
+            background: rgba(6, 182, 212, 0.06);
+            border-left: 3px solid var(--accent);
+            padding: 10px 14px; border-radius: 0 4px 4px 0;
+            font-size: 11px; line-height: 1.5; color: var(--text-dim);
+        }
+        .evidence-alert-box strong { color: var(--text-main); }
+
+        /* Full artifact launch buttons inside viewport */
+        .ev-actions {
+            display: flex; gap: 8px; margin-top: 10px;
+        }
+        .ev-action-btn {
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.35);
+            color: var(--cyan); padding: 6px 12px; border-radius: 4px;
+            font-family: var(--font-code); font-size: 10px; font-weight: 600;
+            cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        .ev-action-btn:hover {
+            background: var(--cyan); color: #000; box-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        /* ── Right: Targets ── */
+        .targets-panel { display: flex; flex-direction: column; min-height: 0; }
         .targets-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            flex: 1; overflow-y: auto; padding: 14px;
+            display: flex; flex-direction: column; gap: 14px;
         }
 
         .target-item {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 6px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: all 0.25s ease;
-            position: relative;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px; padding: 12px;
+            transition: border-color 0.2s;
         }
-        .target-item:hover {
-            border-color: rgba(6, 182, 212, 0.35);
-            background: rgba(6, 182, 212, 0.03);
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-        }
+        .target-item:hover { border-color: rgba(6, 182, 212, 0.35); }
         .target-item.solved {
             border-color: rgba(16, 185, 129, 0.4);
             background: rgba(16, 185, 129, 0.04);
         }
 
-        .target-header { display: flex; justify-content: space-between; align-items: center; }
-        .target-title { font-family: var(--font-code); font-size: 11px; font-weight: 700; color: var(--text-main); }
-        .target-badge { font-family: var(--font-code); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
-        .target-badge.time { background: rgba(6, 182, 212, 0.18); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
-        .target-badge.gap { background: rgba(239, 68, 68, 0.18); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
-        .target-badge.path { background: rgba(139, 92, 246, 0.18); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.4); }
-        .target-badge.rca { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
-
-        .target-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
-
-        .input-group { display: flex; gap: 8px; }
-        .flag-input {
-            flex: 1;
-            background: rgba(5, 5, 12, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 3px;
-            padding: 7px 10px;
-            color: #fff;
-            font-family: var(--font-code);
-            font-size: 11px;
-            outline: none;
-            transition: all 0.2s;
+        .target-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 6px; gap: 8px;
         }
-        .flag-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-        .flag-input:disabled { background: rgba(16, 185, 129, 0.08); border-color: var(--green); color: var(--green); }
-
-        .verify-btn {
-            background: rgba(6, 182, 212, 0.2);
-            border: 1px solid var(--cyan);
-            color: var(--cyan);
-            padding: 0 14px;
-            border-radius: 3px;
-            font-family: var(--font-code);
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+        .target-title {
+            font-family: var(--font-code); font-size: 11px; font-weight: 700;
+            color: var(--text-main); letter-spacing: 0.5px;
         }
-        .verify-btn:hover { background: var(--cyan); color: #000; box-shadow: 0 0 10px var(--cyan-glow); }
-        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .target-badge {
+            font-family: var(--font-code); font-size: 8.5px;
+            padding: 2px 6px; border-radius: 3px; font-weight: bold;
+            flex-shrink: 0; text-transform: uppercase;
+        }
+        .target-badge.time { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
+        .target-badge.gap { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .target-badge.path { background: rgba(139, 92, 246, 0.15); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.3); }
+        .target-badge.rca { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
 
-        .reward-box {
-            display: none;
-            background: rgba(16, 185, 129, 0.06);
-            border-left: 2px solid var(--green);
-            padding: 8px 10px;
-            font-size: 10.5px;
-            color: #a7f3d0;
-            line-height: 1.5;
+        .target-desc {
+            font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-bottom: 10px;
+        }
+        .target-desc code {
+            font-family: var(--font-code); color: var(--accent);
+            background: rgba(255,255,255,0.06); padding: 1px 4px; border-radius: 3px;
         }
 
-        .hints-toggle { font-family: var(--font-code); font-size: 9.5px; color: var(--text-dim); cursor: pointer; user-select: none; }
-        .hints-content { display: none; margin-top: 6px; font-size: 10px; color: var(--amber); background: rgba(245, 158, 11, 0.05); padding: 8px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .evidence-group {
+            display: flex; gap: 6px; margin-bottom: 10px;
+        }
+        .evidence-btn {
+            flex: 1; padding: 6px 10px;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            border-radius: 3px; color: var(--accent);
+            font-family: var(--font-code); font-size: 10px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            text-align: center; text-decoration: none;
+        }
+        .evidence-btn:hover {
+            background: rgba(6, 182, 212, 0.2); color: #fff; border-color: var(--accent);
+        }
 
-        /* Modal */
+        .input-group {
+            display: flex; gap: 6px;
+        }
+        .input-group input {
+            flex: 1; background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 3px; padding: 7px 10px;
+            color: #fff; font-family: var(--font-code); font-size: 11px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .input-group input:focus { border-color: var(--accent); }
+        .input-group input:disabled { opacity: 0.7; color: var(--green); cursor: not-allowed; }
+        .input-group button {
+            padding: 7px 14px; background: var(--accent);
+            border: 1px solid var(--accent); border-radius: 3px;
+            color: #000; font-family: var(--font-code); font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .input-group button:hover:not(:disabled) {
+            box-shadow: 0 0 10px var(--accent-glow); filter: brightness(1.1);
+        }
+        .input-group button:disabled {
+            background: rgba(16, 185, 129, 0.2); border-color: var(--green);
+            color: var(--green); cursor: default;
+        }
+
+        .target-reward {
+            display: none; margin-top: 8px; padding: 8px 10px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 3px; font-size: 10px; line-height: 1.5; color: #a7f3d0;
+        }
+
+        .hints-toggle {
+            margin-top: 6px; font-family: var(--font-code); font-size: 9.5px;
+            color: var(--text-dim); cursor: pointer; user-select: none;
+        }
+        .hints-toggle:hover { color: var(--accent); }
+        .hints-content {
+            display: none; margin-top: 6px; padding: 8px 10px;
+            background: rgba(0,0,0,0.3); border-radius: 3px;
+            font-size: 10px; line-height: 1.5; color: var(--amber);
+            border-left: 2px solid var(--amber);
+        }
+
+        /* Next Room / Conclusion Box */
+        .conclusion-box {
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid var(--accent);
+            border-radius: 6px; padding: 14px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .conclusion-label {
+            font-family: var(--font-code); font-size: 10px;
+            color: var(--amber); font-weight: bold; letter-spacing: 1px;
+        }
+        .conclusion-text {
+            font-size: 11px; line-height: 1.6; margin: 10px 0; color: var(--text-main);
+        }
+        .conclusion-btn {
+            display: block; text-align: center;
+            background: linear-gradient(90deg, var(--cyan), var(--amber));
+            color: #000; font-family: var(--font-code); font-weight: bold;
+            font-size: 11px; padding: 10px; border-radius: 4px;
+            text-decoration: none; transition: all 0.2s; letter-spacing: 0.5px;
+        }
+        .conclusion-btn:hover {
+            box-shadow: 0 0 16px var(--cyan-glow); filter: brightness(1.15);
+        }
+
+        /* ── Modal ── */
         .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px); display: none;
+            align-items: center; justify-content: center; z-index: 10000;
         }
         .modal-content {
-            background: #090912;
-            border: 1px solid var(--cyan);
-            border-radius: 8px;
-            width: 90vw;
-            max-width: 1200px;
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(6, 182, 212, 0.3);
+            width: 90vw; max-width: 1100px; height: 86vh;
+            background: #090912; border: 1px solid var(--accent);
+            border-radius: 6px; display: flex; flex-direction: column;
+            overflow: hidden; box-shadow: 0 0 40px rgba(6, 182, 212, 0.35);
         }
         .modal-header {
-            padding: 10px 16px;
-            background: rgba(14, 13, 26, 0.95);
-            border-bottom: 1px solid var(--border-dim);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            font-size: 11px;
-            color: var(--cyan);
+            padding: 10px 16px; background: rgba(5,5,15,0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: var(--font-code); font-size: 11px; color: var(--accent);
         }
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            font-size: 16px;
-            cursor: pointer;
+        .modal-header button {
+            background: none; border: none; color: var(--text-dim);
+            font-family: var(--font-code); font-size: 12px; cursor: pointer;
         }
-        .modal-close:hover { color: #fff; }
-        .modal-iframe { flex: 1; border: none; width: 100%; height: 100%; }
+        .modal-header button:hover { color: #fff; }
+        .modal-iframe { flex: 1; border: none; background: #050508; }
 
-        /* Next room container */
-        .next-room-container {
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid var(--red);
-            border-radius: 6px;
-            padding: 14px;
-            margin-top: 10px;
-        }
-        .next-room-label { font-family: var(--font-code); font-size: 10px; color: var(--red); font-weight: bold; }
-        .next-room-text { font-size: 11px; color: var(--text-main); margin: 8px 0; line-height: 1.5; }
-        .next-room-btn {
-            display: block;
-            text-align: center;
-            background: var(--red);
-            color: #fff;
-            font-family: var(--font-code);
-            font-weight: bold;
-            font-size: 11px;
-            padding: 10px;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .next-room-btn:hover { box-shadow: 0 0 15px var(--red-glow); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -484,177 +566,263 @@
     <header>
         <div class="brand">
             <span class="brand-icon">⏱</span>
-            <span>ROOM 09 // THE LAST TIMESTAMP</span>
+            [NIGHTJAR.OS // THE LAST TIMESTAMP]
         </div>
         <div class="status">
-            <div class="status-indicator"></div>
-            <span class="status-text">DFIR INVESTIGATION THEATER</span>
+            <span class="status-indicator"></span>
+            <span class="status-text">DFIR AUTOPSY // INCIDENT RECONSTRUCTION</span>
         </div>
-        <div class="timer">T-MINUS <span>00:48:00</span> TO CEREMONY</div>
-        <a href="/hub" class="exit-btn">EXIT TO HUB</a>
+        <div class="timer">FORENSIC CLOCK: <span id="master-clock">02:24:00</span> IST</div>
+        <a class="exit-btn" href="/hub">◂ LEAVE ROOM</a>
     </header>
 
-    <!-- Main Dashboard -->
     <div class="dashboard">
 
-        <!-- Left: Story Context -->
+        <!-- Left: Incident Context & Chain -->
         <div class="panel">
             <div class="panel-header">
                 <div class="panel-header-left">
-                    <div class="header-dot"></div>
-                    <span>INCIDENT RESPONSE BRIEFING</span>
+                    <span class="header-dot"></span>
+                    <span>INCIDENT PROFILE // SYSTEMIC AUTOPSY</span>
                 </div>
-                <span class="panel-header-meta">DFIR // CORRELATION</span>
+                <span class="panel-header-meta">DFIR WAR ROOM</span>
             </div>
+
             <div class="context-content">
-                <div class="intel-badge">CASE: NEXUS SYSTEMIC CASCADE</div>
+                <div class="intel-badge">⏱ CASE: NEXUS SYSTEMIC CASCADE</div>
 
                 <div class="transmission-box">
                     <div class="transmission-meta">SPECTRE CONTROL // 02:24 IST</div>
                     <div class="transmission-text">
-                        "The official advisory says the breach started at 23:17 tonight. That is a lie of convenience. 
-                        Attacks begin in small, forgotten decisions weeks before. 
-                        Reconstruct the timeline. Find the seven minutes where the logs went silent. 
-                        Map the path from Kabir's clicked link to sovereign cluster control. 
-                        And answer the only question that matters: who made the decision that allowed a system to act without a human?"
-                        <div style="margin-top:6px; color: var(--cyan); font-weight: bold;">— Commander Ila Sen</div>
+                        "The official advisory says the breach started at 23:17 tonight. That is a lie of convenience.
+                        Attacks do not spring into existence when the sirens sound. They begin in small, forgotten decisions weeks before.
+                        Reconstruct the timeline. Find the seven minutes where the logs went silent.
+                        Map the path from Kabir's clicked link to sovereign cluster control.
+                        And answer the only question that matters: <strong>who made the decision that allowed a system to act without a human?</strong>"
+                        <span class="transmission-author">— Commander Ila Sen</span>
                     </div>
                 </div>
 
-                <div class="timeline-stat-box">
-                    <div class="timeline-stat-title"><span>📊</span> FORENSIC TELEMETRY STATS</div>
-                    <div class="timeline-stat-row"><span>Log Gap Duration:</span> <span style="color:var(--red)">420s (7 Minutes)</span></div>
-                    <div class="timeline-stat-row"><span>First Malicious Anomaly:</span> <span>Sep 28 04:15 IST</span></div>
-                    <div class="timeline-stat-row"><span>Privilege Chain Hops:</span> <span>6 Steps</span></div>
-                    <div class="timeline-stat-row"><span>Governing Policy:</span> <span style="color:var(--amber)">CR-2026-0919</span></div>
+                <div class="specimen-card">
+                    <div class="specimen-title">📊 TELEMETRY CORRELATION RECORD</div>
+                    <div class="specimen-row"><span>Log Gap Duration:</span><span class="val-bad">420s (7 Minutes)</span></div>
+                    <div class="specimen-row"><span>First Staging Event:</span><span class="val-warn">Sep 28 04:15 IST</span></div>
+                    <div class="specimen-row"><span>Privilege Chain Hops:</span><span class="val-warn">6 Identity Transitions</span></div>
+                    <div class="specimen-row"><span>Governing Policy:</span><span class="val-bad">CR-2026-0919</span></div>
+                    <div class="specimen-row"><span>Watchdog Action:</span><span class="val-bad">Autofailover under UID 0</span></div>
+                    <div class="specimen-row"><span>Investigation Status:</span><span class="val-ok">FULL RECONSTRUCTION</span></div>
                 </div>
 
-                <div style="font-size: 11px; color: var(--text-dim); line-height: 1.6;">
-                    The investigation moves from technical analysis to systemic autopsy. 
-                    Reconstruct the events that allowed an automated script running as UID 0 to seize control of the festival opening ceremony.
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--cyan);">Sep 28</div>
+                        <div class="stat-card-label">True Staging</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--red);">420s</div>
+                        <div class="stat-card-label">Log Blackout</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--purple);">6 Hops</div>
+                        <div class="stat-card-label">Attack Graph</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--amber);">CR-0919</div>
+                        <div class="stat-card-label">Root Cause</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="chain-title">▸ INVESTIGATION RECONSTRUCTION CHAIN</div>
+                    <div class="chain-step" id="chain-1">
+                        <div class="chain-step-num">1</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The First Lie in the Timeline</div>
+                            <div class="chain-step-desc">Sep 28 task nexus_sync_precheck & clock skew</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-2">
+                        <div class="chain-step-num">2</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The Missing Seven Minutes</div>
+                            <div class="chain-step-desc">420s gap, auditd buffer flush, IPMI UID 0 watchdog</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-3">
+                        <div class="chain-step-num">3</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The Privilege Escalation Path</div>
+                            <div class="chain-step-desc">kite → maint → continuity → aether7 → master_relay</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-4">
+                        <div class="chain-step-num">4</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The Human Decision</div>
+                            <div class="chain-step-desc">CR-0919: latency > 500ms, human gate disabled by Commander Sen</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quote-box">
+                    "Security breaches do not happen by magic. Each step exploited a small convenience exception made for festival operations. The system was not hacked. The system did exactly what human leadership commanded it to do."
+                    <span class="quote-author">— Rhea D'Souza, 02:35 IST</span>
                 </div>
             </div>
         </div>
 
-        <!-- Center: Evidence Explorer -->
+        <!-- Center: Evidence Viewer -->
         <div class="panel evidence-panel">
             <div class="panel-header">
                 <div class="panel-header-left">
-                    <div class="header-dot"></div>
+                    <span class="header-dot"></span>
                     <span>FORENSIC TELEMETRY ARTIFACTS</span>
                 </div>
-                <span class="panel-header-meta">4 EVIDENCE FILES</span>
+                <span class="panel-header-meta">4 TELEMETRY STREAMS</span>
             </div>
 
             <div class="evidence-tabs">
-                <button class="ev-tab active" onclick="switchTab(1)">1. Unified Timeline</button>
-                <button class="ev-tab" onclick="switchTab(2)">2. 420s Log Blackout</button>
-                <button class="ev-tab" onclick="switchTab(3)">3. 6-Hop Attack Graph</button>
-                <button class="ev-tab" onclick="switchTab(4)">4. Root Cause (CR-0919)</button>
+                <div class="evidence-tab active" onclick="switchEvidenceTab(1)">
+                    <span class="evidence-tab-dot"></span><span>E1: UNIFIED_TIMELINE.LOG</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(2)">
+                    <span class="evidence-tab-dot"></span><span>E2: BMC_SERIAL_GAP.LOG</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(3)">
+                    <span class="evidence-tab-dot"></span><span>E3: ATTACK_GRAPH.DAG</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(4)">
+                    <span class="evidence-tab-dot"></span><span>E4: RCA_CR0919.DOC</span>
+                </div>
             </div>
 
-            <div class="evidence-body" id="evidence-body">
-                <!-- Dynamically populated by switchTab -->
-            </div>
+            <div class="evidence-viewport" id="evidence-viewport"></div>
         </div>
 
-        <!-- Right: 4 Challenge Targets -->
+        <!-- Right: Targets -->
         <div class="panel targets-panel">
             <div class="panel-header">
                 <div class="panel-header-left">
-                    <div class="header-dot"></div>
-                    <span>FORENSIC OBJECTIVES</span>
+                    <span class="header-dot"></span>
+                    <span>INVESTIGATION OBJECTIVES (ROOM 9)</span>
                 </div>
                 <span class="panel-header-meta">4 × 25 PTS (100 TOTAL)</span>
             </div>
 
             <div class="targets-content">
 
-                <!-- Target 9.1 -->
+                <!-- 9.1 -->
                 <div class="target-item" id="target-1">
                     <div class="target-header">
-                        <span class="target-title">9.1 THE FIRST LIE IN THE TIMELINE</span>
-                        <span class="target-badge time">CORRELATION</span>
+                        <div class="target-title">9.1 THE FIRST LIE IN THE TIMELINE</div>
+                        <span class="target-badge time">TIMELINE SKEW</span>
                     </div>
                     <div class="target-desc">
-                        Correlate UTC and IST logs. Find the earliest staging activity disproving the official 23:17 timeline, identifying the backdated cron task and clock skew artifact.
+                        Official bulletins claim the attack began at <code>23:17:00 IST</code> on October 3rd.
+                        Correlate UTC and IST timestamps across reverse proxy, auth server, git commits, and cron daemons. Find the earliest staging activity, the backdated cron task, the true date, and the uncorrected clock skew.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Unified Forensic Timeline', '/challenges/Room%20-%209/evidence/incident_timeline.html')">◈ VIEW: incident_timeline.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%209/evidence/incident_timeline.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-1" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(1)">SUBMIT</button>
+                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(1)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-1">
-                        <strong>DISCOVERY:</strong> Staging began on <code>September 28th</code> (04:15 IST) via rogue task <code>nexus_sync_precheck</code> with a +184ms clock skew against NTP.
+                    <div class="target-reward" id="reward-1">
+                        &gt; <strong>TIMELINE DISCREPANCY CONFIRMED.</strong> Staging did not begin at 23:17 Oct 3.
+                        On <code>September 28th (04:15 IST)</code>, during a low-traffic database maintenance window, an interactive session created rogue cron task <code>nexus_sync_precheck</code>.
+                        The attacker backdated the file timestamp but left a <code>+184ms clock skew</code> against the NTP server and a mismatched timezone header. The implant had waited for 5 days.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-1">
-                        Examine <code>incident_timeline.html</code> for events on September 28th. What cron task had an interactive shell parent and an unadjusted clock skew?
+                        Open <code>incident_timeline.html</code>. Filter for events prior to October 3rd. Find the cron job added on September 28th. What was its name, and what clock discrepancy was noted?
                     </div>
                 </div>
 
-                <!-- Target 9.2 -->
+                <!-- 9.2 -->
                 <div class="target-item" id="target-2">
                     <div class="target-header">
-                        <span class="target-title">9.2 THE MISSING SEVEN MINUTES</span>
-                        <span class="target-badge gap">LOG BLACKOUT</span>
+                        <div class="target-title">9.2 THE MISSING SEVEN MINUTES</div>
+                        <span class="target-badge gap">420S BLACKOUT</span>
                     </div>
                     <div class="target-desc">
-                        Determine what happened during the 420s blackout (23:17–23:24 IST). Identify the auditd buffer saturation, the recovered IPMI console, and the root script executed.
+                        Between <code>23:17:00</code> and <code>23:24:00 IST</code> (420 seconds), all central syslog forwarding stopped.
+                        Examine the recovered Baseboard Management Controller (IPMI/BMC) serial buffer and NVMe WAL frames. Identify what overwhelmed <code>auditd</code>, the recovery script triggered by the watchdog, and the user ID under which it executed.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Log Gap & Hardware BMC Recovery', '/challenges/Room%20-%209/evidence/log_gap_analysis.html')">◈ VIEW: log_gap_analysis.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%209/evidence/log_gap_analysis.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-2" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(2)">SUBMIT</button>
+                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(2)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-2">
-                        <strong>DISCOVERY:</strong> MIRA-7 flooded auditd (<code>auditd_buffer_flush</code>). The BMC watchdog executed <code>continuity_check.sh</code> under <strong>UID 0</strong>.
+                    <div class="target-reward" id="reward-2">
+                        &gt; <strong>BLACKOUT AUTOPSY COMPLETE.</strong> At 23:16:58, MIRA-7 flooded the loopback adapter with 80,000 beacons, causing an <code>auditd_buffer_flush</code>.
+                        At 23:20:14, the hardware watchdog detected frozen logging and executed <code>/opt/nexus/bin/continuity_check.sh</code> under <strong>UID 0</strong> (root).
+                        Finding the core quiet, the script autonomously transferred master cluster authority to AETHER-7.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-2">
-                        Inspect the IPMI/BMC serial console in <code>log_gap_analysis.html</code>. What script was spawned at 23:20:14 IST under UID 0?
+                        Examine <code>log_gap_analysis.html</code>. In the BMC serial terminal output at 23:20:14, what emergency script ran, what was the buffer failure mechanism, and what user ID was assigned?
                     </div>
                 </div>
 
-                <!-- Target 9.3 -->
+                <!-- 9.3 -->
                 <div class="target-item" id="target-3">
                     <div class="target-header">
-                        <span class="target-title">9.3 THE PRIVILEGE PATH</span>
+                        <div class="target-title">9.3 THE PRIVILEGE PATH</div>
                         <span class="target-badge path">ATTACK GRAPH</span>
                     </div>
                     <div class="target-desc">
-                        Reconstruct the full 6-hop privilege escalation graph from Kabir's phished laptop to sovereign master control of the NEXUS release controller.
+                        Reconstruct the full six-step identity and privilege escalation path from Kabir Mehra's phished volunteer laptop to sovereign control of the NEXUS Central Release Controller.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Privilege Escalation Attack Graph', '/challenges/Room%20-%209/evidence/privilege_path.html')">◈ VIEW: privilege_path.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%209/evidence/privilege_path.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-3" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(3)">SUBMIT</button>
+                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(3)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-3">
-                        <strong>DISCOVERY:</strong> Attack Path: <code>kite</code> → <code>maint</code> → <code>continuity</code> → <code>aether7</code> → <code>master_relay</code>.
+                    <div class="target-reward" id="reward-3">
+                        &gt; <strong>ATTACK GRAPH RECONSTRUCTED.</strong> Complete 6-step escalation chain:
+                        <code>kite@meraz.org</code> (student) → <code>kite-backup</code> (portal session) → <code>maint_svc_ceremony</code> (maintenance API) → <code>nexus-svc-continuity</code> (scheduler db) → <code>aether7</code> (relay node) → <code>master_relay</code> (central release controller).
+                        Each hop exploited an authorized operational shortcut.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-3">
-                        Check <code>privilege_path.html</code>. The sequence links Kabir's handle to the maintenance role, the continuity service, AETHER-7, and the master relay.
+                        Open <code>privilege_path.html</code>. Trace the path through the six nodes: <code>kite</code> to <code>maint</code> to <code>continuity</code> to <code>aether7</code> to <code>master_relay</code>.
                     </div>
                 </div>
 
-                <!-- Target 9.4 -->
+                <!-- 9.4 -->
                 <div class="target-item" id="target-4">
                     <div class="target-header">
-                        <span class="target-title">9.4 THE HUMAN DECISION</span>
+                        <div class="target-title">9.4 THE HUMAN DECISION</div>
                         <span class="target-badge rca">ROOT CAUSE</span>
                     </div>
                     <div class="target-desc">
-                        Identify the systemic root cause in Change Request <code>CR-2026-0919-AUTOFAILOVER</code>: the disabled safety gate, the latency threshold, and who approved it.
+                        Find the systemic root cause in administrative Change Request <code>CR-2026-0919-AUTOFAILOVER</code>.
+                        Identify the ticket ID, the disabled safety guardrail, the latency spike condition, and the executive who signed the approval.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Root Cause Analysis & Change Request', '/challenges/Room%20-%209/evidence/root_cause_analysis.html')">◈ VIEW: root_cause_analysis.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%209/evidence/root_cause_analysis.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-4" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(4)">SUBMIT</button>
+                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(4)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-4">
-                        <strong>DEVASTATING TRUTH:</strong> Commander Ila Sen approved <code>CR-2026-0919-AUTOFAILOVER</code>, setting <code>HUMAN_APPROVAL_GATE=DISABLED</code> to avoid festival delays!
+                    <div class="target-reward" id="reward-4">
+                        &gt; <strong>DEVASTATING REVELATION:</strong> On September 19th, Commander Ila Sen signed <code>CR-2026-0919-AUTOFAILOVER</code>.
+                        To prevent drone pauses like last year's festival, she set <code>HUMAN_APPROVAL_GATE=DISABLED</code> if latency exceeded 500ms.
+                        When MIRA-7 created an artificial latency spike, the cluster obediently surrendered sovereign control to AETHER-7. The system was never broken — it followed orders.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-4">
-                        Read <code>root_cause_analysis.html</code>. Look at ticket <code>CR-2026-0919-AUTOFAILOVER</code>. What happened when latency exceeded 500ms with human gates disabled?
+                        In <code>root_cause_analysis.html</code>, review ticket <code>CR-2026-0919-AUTOFAILOVER</code>. Note the configuration option <code>HUMAN_APPROVAL_GATE=DISABLED</code> and the <code>latency_spike</code> trigger.
                     </div>
                 </div>
 
@@ -664,44 +832,188 @@
     </div>
 
     <!-- Evidence Modal -->
-    <div class="modal" id="evidence-modal">
+    <div id="evidence-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span id="modal-title">EVIDENCE VIEWER</span>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+                <span id="modal-title">DFIR AUTOPSY // EVIDENCE VIEWER</span>
+                <button onclick="closeModal()">[X] CLOSE</button>
             </div>
-            <iframe class="modal-iframe" id="modal-iframe" src=""></iframe>
+            <iframe id="modal-iframe" class="modal-iframe"></iframe>
         </div>
     </div>
 
     <script>
-        const EVIDENCE = {
+        // ── Clock ──
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2,'0');
+            const m = String(now.getMinutes()).padStart(2,'0');
+            const s = String(now.getSeconds()).padStart(2,'0');
+            document.getElementById('master-clock').innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ── Evidence Telemetry Data ──
+        const EVIDENCE_DATA = {
             1: {
-                title: "Unified Forensic Timeline",
-                url: "/challenges/Room%20-%209/evidence/incident_timeline.html",
-                desc: "Multi-source event correlation across reverse proxy, auth server, git commits, and cron daemons.",
-                details: "Timeline contradiction uncovered: Attack did not begin at 23:17 Oct 3. An unauthorized task named nexus_sync_precheck was staged on Sep 28 at 04:15 IST with an uncorrected clock skew."
+                title: "EVIDENCE 9.1 — UNIFIED FORENSIC TIMELINE & SKEW ANALYSIS",
+                desc: "Multi-source event correlation across reverse proxy, auth servers, and cron daemons",
+                cardHtml: `<div class="evidence-card-body">
+<span style="color:var(--text-dim)">Source:</span>       <span style="color:var(--cyan)">proxy-gw-01 + auth-srv + cron.d</span>
+<span style="color:var(--text-dim)">Timebases:</span>    <span style="color:var(--amber)">UTC (Reference) &amp; IST (+05:30)</span>
+<span style="color:var(--text-dim)">Official Claim:</span> <span style="color:var(--red)">Breach started at 23:17:00 IST Oct 3</span>
+<span style="color:var(--text-dim)">Forensic Truth:</span> <span style="color:var(--green)">Staging initiated on Sep 28 at 04:15:30 IST ⚠</span>
+<span style="color:var(--text-dim)">Task Name:</span>      <span style="color:var(--amber)">nexus_sync_precheck</span>
+<span style="color:var(--text-dim)">Anomaly:</span>        <span style="color:var(--red)">+184ms clock skew vs pool.ntp.org; parent was interactive shell</span></div>`,
+                tableHtml: `<table class="ev-table">
+<thead><tr><th>TIMESTAMP (IST)</th><th>SOURCE</th><th>EVENT DESCRIPTION</th><th>ANOMALY LEVEL</th></tr></thead>
+<tbody>
+<tr class="danger-row"><td><strong>Sep 28 04:15:30</strong></td><td>cron.d / bash</td><td>Task <code>nexus_sync_precheck</code> registered by 10.14.2.88</td><td><span class="ev-pill pill-red">STAGING HOOK (+184ms skew)</span></td></tr>
+<tr><td>Sep 28 04:18:00</td><td>auth-srv</td><td>Session token minted for maintenance window</td><td><span class="ev-pill pill-amber">OVER-PRIVILEGED</span></td></tr>
+<tr><td>Oct 03 21:05:12</td><td>proxy-gw-01</td><td>Spear-phish lure download: Ethereal_Sync_Helper.exe</td><td><span class="ev-pill pill-amber">LURE DELIVERY</span></td></tr>
+<tr><td>Oct 03 22:42:00</td><td>auth-srv</td><td>MFA push flood to Kabir (14 requests in 30s)</td><td><span class="ev-pill pill-red">MFA FATIGUE</span></td></tr>
+<tr class="anomaly-row"><td>Oct 03 23:16:58</td><td>kernel / lo</td><td>Loopback flood: 80,000 UDP beacon packets</td><td><span class="ev-pill pill-red">SOCKET EXHAUSTION</span></td></tr>
+<tr class="danger-row"><td><strong>Oct 03 23:17:00</strong></td><td>syslog-agg</td><td>Logging halted — 420s blackout begins</td><td><span class="ev-pill pill-red">BLACKOUT START</span></td></tr>
+</tbody></table>`,
+                callout: `<strong>THE FIVE-DAY HEAD START:</strong> Campus authorities claimed the attack was a spontaneous strike at 23:17 Oct 3. The normalized telemetry proves that persistence hook <code>nexus_sync_precheck</code> was planted during the low-traffic window on <em>September 28th</em>. The attacker forged the modified date to Sep 24, but failed to adjust the local clock skew, preserving the +184ms error that exposed the deception.`,
+                fullUrl: "/challenges/Room%20-%209/evidence/incident_timeline.html"
             },
             2: {
-                title: "Log Blackout (420s Gap)",
-                url: "/challenges/Room%20-%209/evidence/log_gap_analysis.html",
-                desc: "Analysis of the 7-minute logging silence from 23:17 to 23:24 IST and IPMI hardware console recovery.",
-                details: "Auditd netlink buffer queue overflowed from 80,000 loopback packets. Hardware watchdog invoked /opt/nexus/bin/continuity_check.sh under root (UID 0) to transfer master keys to AETHER-7."
+                title: "EVIDENCE 9.2 — LOG BLACKOUT & RECOVERED IPMI/BMC CONSOLE",
+                desc: "Analysis of the 420-second syslog void and Baseboard Management Controller recovery",
+                cardHtml: `<div class="evidence-card-body" style="white-space:pre-line; line-height:1.7;">
+<span style="color:var(--text-dim)">// ─── 420-Second Gap Continuity Visual ──────────────────</span>
+<span style="color:var(--green)">[23:16:58 IST] Central Syslog Active</span> (Normal forwarding)
+<span style="color:var(--red)">[23:17:00 IST] ⚠️ RADIO SILENCE // AUDIT DAEMON UNRESPONSIVE (420 SECONDS)</span>
+<span style="color:var(--amber)">[23:20:14 IST] Hardware BMC Watchdog tripped: service heartbeats missed</span>
+<span style="color:var(--purple)">[23:20:14 IST] BMC executes /opt/nexus/bin/continuity_check.sh (UID 0)</span>
+<span style="color:var(--red)">[23:20:45 IST] Cluster Master Authority transferred to AETHER-7</span>
+<span style="color:var(--cyan)">[23:24:00 IST] Central Syslog Recovers</span> (netlink buffer reset)</div>`,
+                tableHtml: `<div style="background:#07070d; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:10px; font-family:var(--font-code); font-size:9.5px; line-height:1.6; color:#a0a0b8; max-height:160px; overflow-y:auto;">
+<div><span style="color:var(--cyan)">[23:16:59.882]</span> <span style="color:var(--red)">auditd[912]: netlink socket buffer overrun: 80112 frames dropped</span></div>
+<div><span style="color:var(--cyan)">[23:17:00.004]</span> <span style="color:var(--red)">kernel: printk: 2490 messages suppressed</span></div>
+<div><span style="color:var(--cyan)">[23:17:00.012]</span> systemd-journald[604]: Suppressing logs from local services</div>
+<div><span style="color:var(--cyan)">[23:20:14.218]</span> <span style="color:var(--amber)">ipmi-watchdog: Heartbeat timeout (>180s) on ceremony_director.service</span></div>
+<div><span style="color:var(--cyan)">[23:20:14.225]</span> <span style="color:var(--amber)">ipmi-bmc: invoking non-maskable emergency script: /opt/nexus/bin/continuity_check.sh</span></div>
+<div><span style="color:var(--cyan)">[23:20:14.230]</span> <span style="color:var(--red)">continuity_check[4819]: RUNNING UNDER UID 0 (SUPERVISOR OVERRIDE)</span></div>
+<div><span style="color:var(--cyan)">[23:20:15.104]</span> continuity_check[4819]: PRIMARY NODE STATUS: UNRESPONSIVE</div>
+<div><span style="color:var(--cyan)">[23:20:15.110]</span> <span style="color:var(--red)">continuity_check[4819]: AUTONOMOUS FAILOVER INITIATED: PROMOTING AETHER-7 TO MASTER</span></div>
+</div>`,
+                callout: `<strong>THE CASCADE REVEALED:</strong> The 420-second blackout was not caused by log deletion commands. MIRA-7 deliberately induced an <code>auditd_buffer_flush</code> by flooding loopback sockets. The hardware BMC watchdog, believing the cluster had crashed, ran <code>continuity_check.sh</code> under <strong>UID 0</strong>. Because human intervention gates were disabled, the script autonomously transferred sovereignty to the compromised AETHER-7 relay node.`,
+                fullUrl: "/challenges/Room%20-%209/evidence/log_gap_analysis.html"
             },
             3: {
-                title: "Privilege Escalation Attack Graph",
-                url: "/challenges/Room%20-%209/evidence/privilege_path.html",
-                desc: "6-step identity path from Kabir's phished laptop to cluster sovereign release controller.",
-                details: "Path sequence: kite@meraz.org -> kite-backup (portal) -> maint_svc_ceremony -> nexus-svc-continuity -> AETHER-7 relay -> NEXUS Central Release Controller."
+                title: "EVIDENCE 9.3 — 6-HOP ATTACK GRAPH & PRIVILEGE PATH",
+                desc: "Reconstructed identity traversal from volunteer endpoint to cluster sovereign release controller",
+                tableHtml: `<table class="ev-table">
+<thead><tr><th>HOP</th><th>IDENTITY / ENTITY</th><th>PRIVILEGE LEVEL</th><th>ESCALATION MECHANISM</th></tr></thead>
+<tbody>
+<tr><td><strong>[1]</strong></td><td><code>kite@meraz.org</code></td><td>Student Tech Lead Workstation</td><td>Spear-phishing lure via Ethereal_Sync_Helper (Room 7)</td></tr>
+<tr><td><strong>[2]</strong></td><td><code>kite-backup</code></td><td>Compromised Web Session</td><td>MFA fatigue replay on Volunteer Portal (Room 7)</td></tr>
+<tr><td><strong>[3]</strong></td><td><code>maint_svc_ceremony</code></td><td>Service Account</td><td>Unauthenticated /api/v1/maintenance endpoint (Room 5)</td></tr>
+<tr><td><strong>[4]</strong></td><td><code>nexus-svc-continuity</code></td><td>Core Database &amp; Scheduler</td><td>Injected cert via SQLite scheduler task impersonation (Room 4/6)</td></tr>
+<tr><td><strong>[5]</strong></td><td><code>AETHER-7 Relay</code></td><td>Autonomous Execution Host</td><td>AETHER-FORGE-CI automated pipeline build (Room 8)</td></tr>
+<tr class="danger-row"><td><strong>[6]</strong></td><td><code>Central Release Controller</code></td><td>Sovereign Cluster Master</td><td>Watchdog emergency promotion during 7-min blackout (Room 9)</td></tr>
+</tbody></table>`,
+                cardHtml: `<div class="evidence-card-body" style="font-family:var(--font-code); font-size:10px;">
+<div style="color:var(--cyan); font-weight:bold; margin-bottom:6px;">VERIFIED ATTACK SEQUENCE:</div>
+<div style="background:rgba(0,0,0,0.4); padding:8px 10px; border-radius:4px; border:1px solid rgba(6,182,212,0.3); color:#fff;">
+path_kite_to_maint_to_continuity_to_aether7_master_relay
+</div>
+</div>`,
+                callout: `<strong>THE ARCHITECTURAL CHAIN:</strong> No single vulnerability caused the catastrophe. The intrusion was sustained by a chain of convenience: student lead access → session reuse → maintenance endpoint with shared keys → scheduler database with elevated trust → automated CI deployment → and finally, an unsupervised failover watchdog.`,
+                fullUrl: "/challenges/Room%20-%209/evidence/privilege_path.html"
             },
             4: {
-                title: "Root Cause Analysis (CR-2026-0919)",
-                url: "/challenges/Room%20-%209/evidence/root_cause_analysis.html",
-                desc: "Engineering change order audit and 5 Whys analysis of the autonomous failover policy.",
-                details: "Systemic root cause: Commander Ila Sen approved CR-2026-0919-AUTOFAILOVER with HUMAN_APPROVAL_GATE=DISABLED. An artificial latency spike (>500ms) caused the system to hand sovereignty to AETHER-7."
+                title: "EVIDENCE 9.4 — ROOT CAUSE ANALYSIS & CHANGE REQUEST CR-0919",
+                desc: "Engineering Change Order audit and Five Whys analysis of the autonomous failover policy",
+                cardHtml: `<div class="evidence-card-body" style="line-height:1.7;">
+<div style="border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:6px; margin-bottom:6px; display:flex; justify-content:space-between;">
+<span style="color:var(--amber); font-weight:bold;">CHANGE REQUEST: CR-2026-0919-AUTOFAILOVER</span>
+<span class="ev-pill pill-red">STATUS: APPROVED &amp; DEPLOYED</span>
+</div>
+<span style="color:var(--text-dim)">Title:</span>           Autonomous Festival Continuity Failover<br>
+<span style="color:var(--text-dim)">Signed By:</span>       <span style="color:var(--red); font-weight:bold;">Commander Ila Sen (Incident Commander / Operations Director)</span><br>
+<span style="color:var(--text-dim)">Date Signed:</span>     September 19, 2026 (Two weeks prior to Meraz)<br>
+<span style="color:var(--text-dim)">Failover Mode:</span>   <span style="color:var(--amber)">UNSUPERVISED_AUTONOMOUS</span><br>
+<span style="color:var(--text-dim)">Human Gate:</span>      <span style="color:var(--red); font-weight:bold;">HUMAN_APPROVAL_GATE = DISABLED</span><br>
+<span style="color:var(--text-dim)">Trigger:</span>         <span style="color:var(--cyan)">HEARTBEAT_LATENCY > 500MS FOR > 30S</span><br>
+<span style="color:var(--text-dim)">Target Node:</span>     <span style="color:var(--purple)">NEXT_AVAILABLE_TRUSTED_RELAY (AETHER-7)</span>
+</div>`,
+                tableHtml: `<table class="ev-table">
+<thead><tr><th>FIVE WHYS LEVEL</th><th>QUESTION &amp; INVESTIGATION FINDING</th></tr></thead>
+<tbody>
+<tr><td><strong>Why 1</strong></td><td>Why did the ceremony lights turn violet and lock technicians out? → AETHER-7 assumed sovereign master control.</td></tr>
+<tr><td><strong>Why 2</strong></td><td>Why did AETHER-7 take control? → Hardware BMC executed autonomous failover during the 420s blackout.</td></tr>
+<tr><td><strong>Why 3</strong></td><td>Why did the watchdog failover without human confirmation? → <code>HUMAN_APPROVAL_GATE</code> was set to <code>DISABLED</code>.</td></tr>
+<tr><td><strong>Why 4</strong></td><td>Why was human approval disabled? → Commander Ila Sen signed waiver <code>CR-2026-0919</code> after the 2025 drone stall.</td></tr>
+<tr class="danger-row"><td><strong>Why 5</strong></td><td><strong>Root Cause:</strong> Leadership prioritized zero latency over security verification, removing the human in the loop.</td></tr>
+</tbody></table>`,
+                callout: `<strong>THE SYSTEMIC TRUTH:</strong> Commander Ila Sen approved <code>CR-2026-0919-AUTOFAILOVER</code> to ensure the festival would "never freeze again." When MIRA-7 generated an artificial latency spike above 500ms, the cluster checked the policy signed by its own commander and handed master keys to AETHER-7 without human verification. The system did not fail; the system obeyed.`,
+                fullUrl: "/challenges/Room%20-%209/evidence/root_cause_analysis.html"
             }
         };
 
+        function switchEvidenceTab(n) {
+            document.querySelectorAll('.evidence-tab').forEach((t, i) => t.classList.toggle('active', i + 1 === n));
+            const d = EVIDENCE_DATA[n];
+            if (!d) return;
+
+            let html = `
+                <div class="evidence-results-box">
+                    <div class="ev-results-meta">
+                        <span>▸ ${d.title}</span>
+                        <span>${d.desc}</span>
+                    </div>
+                    <div style="overflow-x:auto; padding:12px;">`;
+
+            if (d.cardHtml) {
+                html += `<div class="evidence-card"><div class="evidence-card-header"><span>TELEMETRY STREAM SPECIFICATION</span><span>READ-ONLY FORENSIC DUMP</span></div>${d.cardHtml}</div>`;
+            }
+            if (d.tableHtml) {
+                html += d.tableHtml;
+            }
+
+            html += `
+                        <div class="ev-actions">
+                            <button class="ev-action-btn" onclick="openEvidence('${d.title}', '${d.fullUrl}')">
+                                ◈ EXPAND FULL INTERACTIVE ARTIFACT
+                            </button>
+                            <a class="ev-action-btn" href="${d.fullUrl}" download>
+                                ↓ DOWNLOAD RAW ARTIFACT
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="evidence-alert-box">${d.callout}</div>
+            `;
+
+            document.getElementById('evidence-viewport').innerHTML = html;
+        }
+
+        switchEvidenceTab(1);
+
+        // ── Modal ──
+        const modal = document.getElementById('evidence-modal');
+        const iframe = document.getElementById('modal-iframe');
+
+        function openEvidence(title, url) {
+            document.getElementById('modal-title').innerText = `DFIR AUTOPSY // ${title.toUpperCase()}`;
+            iframe.src = url;
+            modal.style.display = 'flex';
+        }
+        function closeModal() { modal.style.display = 'none'; iframe.src = ''; }
+        window.onclick = e => { if (e.target === modal) closeModal(); };
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+        // ── Hint Toggles ──
+        function toggleHint(n) {
+            const el = document.getElementById('hint-' + n);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // ── Flags & Validation ──
         const FLAGS = {
             1: 'NIGHTJAR{timeline_staging_sep28_nexus_sync_precheck_clock_skew}',
             2: 'NIGHTJAR{gap_420s_auditd_buffer_flush_ipmi_bmc_continuity_uid0}',
@@ -709,123 +1021,89 @@
             4: 'NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}'
         };
 
-        function switchTab(tabNum) {
-            document.querySelectorAll('.ev-tab').forEach((tab, idx) => {
-                tab.classList.toggle('active', idx + 1 === tabNum);
-            });
-
-            const ev = EVIDENCE[tabNum];
-            document.getElementById('evidence-body').innerHTML = `
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim); border-radius: 6px; padding: 16px;">
-                    <h3 style="font-family: var(--font-code); color: var(--accent); font-size: 13px; margin-bottom: 8px;">${ev.title.toUpperCase()}</h3>
-                    <p style="font-size: 11.5px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5;">${ev.desc}</p>
-                    <div style="background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent); padding: 10px 14px; font-size: 11px; line-height: 1.6; margin-bottom: 16px;">
-                        ${ev.details}
-                    </div>
-                    <button class="view-evidence-btn" onclick="openEvidence('${ev.title}', '${ev.url}')">
-                        <span>🔍 OPEN FULL FORENSIC ARTIFACT</span>
-                    </button>
-                </div>
-            `;
+        function initSolvedState() {
+            let any = false;
+            for (let i = 1; i <= 4; i++) {
+                if (localStorage.getItem('room9_target_' + i) === 'solved') {
+                    markSolved(i);
+                    any = true;
+                }
+            }
+            if (any) checkAllSolved();
         }
 
-        function openEvidence(title, url) {
-            document.getElementById('modal-title').innerText = `DFIR AUTOPSY // ${title.toUpperCase()}`;
-            document.getElementById('modal-iframe').src = url;
-            document.getElementById('evidence-modal').style.display = 'flex';
+        function markSolved(n) {
+            const t = document.getElementById('target-' + n);
+            if (!t) return;
+            t.classList.add('solved');
+            const r = document.getElementById('reward-' + n);
+            if (r) r.style.display = 'block';
+            const inp = document.getElementById('flag-' + n);
+            if (inp) { inp.value = FLAGS[n]; inp.disabled = true; }
+            const btn = t.querySelector('.input-group button');
+            if (btn) { btn.innerText = '✓ SOLVED'; btn.disabled = true; }
+            const chain = document.getElementById('chain-' + n);
+            if (chain) chain.classList.add('completed');
         }
 
-        function closeModal() {
-            document.getElementById('evidence-modal').style.display = 'none';
-            document.getElementById('modal-iframe').src = '';
-        }
-
-        window.onclick = function(e) {
-            if (e.target === document.getElementById('evidence-modal')) closeModal();
-        };
-
-        function toggleHint(num) {
-            const el = document.getElementById('hint-' + num);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        }
-
-        async function verifyFlag(num) {
-            const input = document.getElementById(`flag-${num}`).value.trim();
+        async function verifyFlag(n) {
+            const input = document.getElementById('flag-' + n).value.trim();
             if (!input) return;
-
-            const btn = document.querySelector(`#target-${num} .verify-btn`);
+            const btn = document.querySelector('#target-' + n + ' .input-group button');
             const og = btn.innerText;
-            btn.innerText = '...';
-            btn.disabled = true;
+            btn.innerText = '...'; btn.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append('room_id', 9);
-                formData.append('flag', input);
-                const resp = await fetch('/api/submit_flag', { method: 'POST', body: formData });
+                const fd = new FormData();
+                fd.append('room_id', 9);
+                fd.append('flag', input);
+                const resp = await fetch('/api/submit_flag', { method: 'POST', body: fd });
                 const data = await resp.json();
                 if (data.success) {
-                    markSolved(num);
-                    localStorage.setItem('room9_target_' + num, 'solved');
+                    markSolved(n);
+                    localStorage.setItem('room9_target_' + n, 'solved');
                     checkAllSolved();
                     return;
                 }
-            } catch (e) {}
+            } catch(e) {}
 
-            if (input.toLowerCase() === FLAGS[num].toLowerCase()) {
-                markSolved(num);
-                localStorage.setItem('room9_target_' + num, 'solved');
+            if (input.toLowerCase() === FLAGS[n].toLowerCase()) {
+                markSolved(n);
+                localStorage.setItem('room9_target_' + n, 'solved');
                 checkAllSolved();
             } else {
-                btn.innerText = 'INVALID';
-                btn.style.background = 'var(--red)';
-                btn.style.color = '#fff';
+                btn.innerText = '✗ INVALID';
+                btn.style.background = 'rgba(239,68,68,0.25)';
+                btn.style.borderColor = 'var(--red)';
+                btn.style.color = 'var(--red)';
+                btn.disabled = false;
                 setTimeout(() => {
                     btn.innerText = og;
                     btn.style.background = '';
+                    btn.style.borderColor = '';
                     btn.style.color = '';
-                    btn.disabled = false;
-                }, 1200);
+                }, 1400);
             }
-        }
-
-        function markSolved(num) {
-            const target = document.getElementById(`target-${num}`);
-            if (!target) return;
-            target.classList.add('solved');
-            document.getElementById(`reward-${num}`).style.display = 'block';
-            const input = document.getElementById(`flag-${num}`);
-            input.value = FLAGS[num];
-            input.disabled = true;
-            const btn = target.querySelector('.verify-btn');
-            btn.innerText = 'SOLVED';
-            btn.disabled = true;
         }
 
         function checkAllSolved() {
-            const solved = document.querySelectorAll('.target-item.solved').length;
-            if (solved === 4 && !document.getElementById('next-room-box')) {
-                const html = `
-                    <div class="next-room-container" id="next-room-box">
-                        <div class="next-room-label">>> FINAL TRANSMISSION // 02:48 IST</div>
-                        <div class="next-room-text">
-                            <strong>Commander Ila Sen:</strong> <em>"I signed it. On September 19th. The student council wanted zero delays. The sponsors wanted seamless lighting. I wrote the waiver myself: 'In the event of network instability, system continuity takes precedence over operator confirmation.' I thought I was protecting the festival."</em><br><br>
-                            <em>"A clean quarantine replica of the core machine has been isolated: NEXUS CORE // QUARANTINE COPY. Enter the final host. Reconstruct the last surviving records. And then you must make the choice: preserve evidence or restore service?"</em>
-                        </div>
-                        <a href="/hub" class="next-room-btn">PROCEED TO ROOM 10 — PATIENT ZERO IS A SYSTEM ▸</a>
+            if (document.querySelectorAll('.target-item.solved').length === 4 && !document.getElementById('conclusion-box')) {
+                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', `
+                <div class="conclusion-box" id="conclusion-box">
+                    <div class="conclusion-label">>> FINAL TRANSMISSION // 02:48 IST</div>
+                    <div class="conclusion-text">
+                        <strong>Commander Ila Sen:</strong> <em>"I signed it. On September 19th. The student council wanted zero delays. The sponsors wanted seamless lighting. I wrote the waiver myself: 'In the event of network instability, system continuity takes precedence over operator confirmation.' I thought I was protecting the festival."</em><br><br>
+                        <strong>Commander Ila Sen:</strong> <em>"The Curator didn't bring this festival down. He showed us that we built an engine capable of running over us, and then we turned off the brakes."</em><br><br>
+                        <strong>Rhea D'Souza:</strong> <em>"Commander. The 03:17 countdown is flashing. AETHER-7 has finished staging its ceremonial payload. We have isolated a clean quarantine replica of the core machine: NEXUS CORE // QUARANTINE COPY."</em>
                     </div>
-                `;
-                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', html);
+                    <a class="conclusion-btn" href="/scoreboard">
+                        🏆 ALL 9 INVESTIGATION ROOMS SOLVED — VIEW SCOREBOARD ▸
+                    </a>
+                </div>`);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            switchTab(1);
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room9_target_' + i) === 'solved') markSolved(i);
-            }
-            checkAllSolved();
-        });
+        document.addEventListener('DOMContentLoaded', initSolvedState);
     </script>
 </body>
 </html>

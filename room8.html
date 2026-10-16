@@ -20,9 +20,11 @@
             --green-glow: rgba(16, 185, 129, 0.4);
             --purple: #8b5cf6;
             --purple-glow: rgba(139, 92, 246, 0.4);
+            --orange: #f97316;
+            --orange-glow: rgba(249, 115, 22, 0.35);
             --text-main: #e2e8f0;
             --text-dim: #94a3b8;
-            --border-dim: rgba(139, 92, 246, 0.25);
+            --border-dim: rgba(139, 92, 246, 0.22);
             --font-ui: 'Inter', sans-serif;
             --font-code: 'JetBrains Mono', monospace;
             --font-glitch: 'VT323', monospace;
@@ -34,11 +36,11 @@
 
         body {
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.06) 0%, transparent 60%),
-                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.05) 0%, transparent 60%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-image:
+                radial-gradient(circle at 18% 28%, rgba(139, 92, 246, 0.07) 0%, transparent 58%),
+                radial-gradient(circle at 82% 72%, rgba(6, 182, 212, 0.05) 0%, transparent 58%),
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
             color: var(--text-main);
             font-family: var(--font-ui);
@@ -47,7 +49,6 @@
             flex-direction: column;
         }
 
-        /* Scanline Overlay */
         body::after {
             content: "";
             position: fixed;
@@ -59,7 +60,7 @@
             opacity: 0.22;
         }
 
-        /* Header */
+        /* ── Header ── */
         header {
             display: flex;
             justify-content: space-between;
@@ -71,24 +72,22 @@
             font-size: 12px;
             z-index: 10;
             position: relative;
+            flex-shrink: 0;
         }
 
         header::after {
             content: '';
             position: absolute;
-            bottom: -1px;
-            left: 0; right: 0; height: 1px;
+            bottom: -1px; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, var(--purple), var(--cyan), var(--purple), transparent);
-            opacity: 0.8;
+            opacity: 0.85;
         }
-        
-        .brand { 
-            color: var(--accent); 
-            letter-spacing: 1.5px; 
+
+        .brand {
+            color: var(--accent);
+            letter-spacing: 1.5px;
             text-shadow: 0 0 10px var(--accent-glow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             font-weight: 600;
         }
 
@@ -96,80 +95,60 @@
             width: 20px; height: 20px;
             border: 2px solid var(--accent);
             border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-flex; align-items: center; justify-content: center;
             box-shadow: 0 0 8px var(--accent-glow);
             font-size: 11px;
+            animation: virusPulse 2.8s ease-in-out infinite;
+        }
+
+        @keyframes virusPulse {
+            0%, 100% { border-color: var(--purple); box-shadow: 0 0 8px var(--purple-glow); }
+            50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow); }
         }
 
         .status { display: flex; align-items: center; gap: 8px; }
-        .status .status-indicator {
+        .status-indicator {
             width: 7px; height: 7px; border-radius: 50%;
             background: var(--accent);
             box-shadow: 0 0 8px var(--accent-glow);
             animation: blink 1.6s infinite;
         }
-        .status .status-text {
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
+        .status-text { color: var(--accent); letter-spacing: 1px; text-shadow: 0 0 8px var(--accent-glow); }
 
         .timer { color: var(--text-dim); }
         .timer span { color: var(--text-main); font-weight: 600; }
 
         .exit-btn {
-            color: var(--accent);
-            text-decoration: none;
-            border: 1px solid var(--accent);
-            padding: 4px 14px;
-            border-radius: 3px;
-            transition: all 0.2s;
-            font-family: var(--font-code);
-            font-size: 11px;
+            color: var(--accent); text-decoration: none;
+            border: 1px solid var(--accent); padding: 4px 14px;
+            border-radius: 3px; transition: all 0.2s;
+            font-family: var(--font-code); font-size: 11px;
             background: rgba(139, 92, 246, 0.08);
         }
-        .exit-btn:hover { 
-            background: rgba(139, 92, 246, 0.25); 
-            color: #fff; 
-            box-shadow: 0 0 14px var(--accent-glow);
-            border-color: #fff;
-        }
+        .exit-btn:hover { background: rgba(139, 92, 246, 0.25); color: #fff; box-shadow: 0 0 14px var(--accent-glow); border-color: #fff; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
-        /* Dashboard */
+        /* ── Dashboard Layout ── */
         .dashboard {
             display: grid;
             grid-template-columns: 330px 1fr 380px;
-            gap: 16px;
-            padding: 16px;
-            flex: 1;
-            min-height: 0;
+            gap: 16px; padding: 16px;
+            flex: 1; min-height: 0; overflow: hidden;
         }
 
-        @media (max-width: 1280px) {
-            .dashboard {
-                grid-template-columns: 290px 1fr 340px;
-                gap: 12px;
-                padding: 12px;
-            }
-        }
+        @media (max-width: 1280px) { .dashboard { grid-template-columns: 290px 1fr 340px; gap: 12px; padding: 12px; } }
+        @media (max-width: 1024px) { .dashboard { grid-template-columns: 1fr; overflow-y: auto; } }
 
-        @media (max-width: 1024px) {
-            .dashboard { grid-template-columns: 1fr; overflow-y: auto; }
-        }
-
+        /* ── Panel ── */
         .panel {
             background: var(--panel-bg);
             backdrop-filter: blur(14px);
             border: 1px solid var(--border-dim);
             border-radius: 6px;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 36px rgba(0,0,0,0.6);
             position: relative;
         }
 
@@ -182,478 +161,602 @@
         }
 
         .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
+            font-family: var(--font-code); font-size: 11px;
             padding: 10px 16px;
             background: rgba(5, 5, 15, 0.75);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; letter-spacing: 0.5px;
         }
 
         .panel-header-left { display: flex; align-items: center; gap: 8px; }
-        .panel-header .header-dot {
+        .header-dot {
             width: 6px; height: 6px; border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
+            background: var(--accent); box-shadow: 0 0 6px var(--accent-glow);
             animation: blink 2s infinite;
         }
         .panel-header-meta { font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
 
-        /* Left Column */
+        /* ── Left: Context ── */
         .context-content {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1; overflow-y: auto;
             padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            font-size: 11.5px;
-            line-height: 1.6;
+            display: flex; flex-direction: column; gap: 16px;
         }
 
         .intel-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: var(--font-code);
-            font-size: 9px;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: var(--font-code); font-size: 9px;
             color: var(--cyan);
             border: 1px solid rgba(6, 182, 212, 0.3);
             background: rgba(6, 182, 212, 0.08);
-            padding: 3px 8px;
-            border-radius: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 3px 8px; border-radius: 3px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
 
         .transmission-box {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             border-left: 3px solid var(--purple);
-            padding: 12px 14px;
-            border-radius: 0 4px 4px 0;
-            position: relative;
+            padding: 12px 14px; border-radius: 0 4px 4px 0;
         }
         .transmission-meta {
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--purple);
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
+            font-family: var(--font-code); font-size: 9px;
+            color: var(--purple); margin-bottom: 6px; letter-spacing: 0.5px;
         }
-        .transmission-text { font-style: italic; color: #cbd5e1; font-size: 11px; }
+        .transmission-text { font-style: italic; color: #cbd5e1; font-size: 11px; line-height: 1.6; }
+        .transmission-author { margin-top: 6px; color: var(--purple); font-weight: 700; font-style: normal; font-family: var(--font-code); font-size: 9px; }
 
         .specimen-card {
             background: rgba(0,0,0,0.4);
             border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 6px;
-            padding: 12px;
-            font-family: var(--font-code);
-            font-size: 10px;
+            border-radius: 6px; padding: 12px;
+            font-family: var(--font-code); font-size: 10px;
         }
-        .specimen-title { color: var(--purple); font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-        .specimen-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-dim); }
-        .specimen-row span:last-child { color: #fff; }
+        .specimen-title { color: var(--purple); font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; font-size: 10.5px; }
+        .specimen-row { display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--text-dim); }
+        .specimen-row span:last-child { color: var(--text-main); }
+        .specimen-row .val-ok { color: var(--green); }
+        .specimen-row .val-bad { color: var(--red); font-weight: 700; }
+        .specimen-row .val-warn { color: var(--amber); }
 
-        /* Center Column: Evidence */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .stat-card {
+            background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px; padding: 10px; text-align: center; transition: all 0.2s;
+        }
+        .stat-card:hover { border-color: rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.05); }
+        .stat-card-val { font-family: var(--font-code); font-size: 19px; font-weight: 700; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
+        .stat-card-label { font-size: 9px; color: var(--text-dim); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Chain */
+        .chain-title {
+            font-family: var(--font-code); font-size: 10px; color: var(--cyan);
+            padding-bottom: 6px; border-bottom: 1px dashed rgba(6, 182, 212, 0.3); margin-bottom: 10px;
+        }
+        .chain-step {
+            display: flex; align-items: flex-start; gap: 10px;
+            position: relative; padding-left: 4px; margin-bottom: 14px;
+        }
+        .chain-step::before {
+            content: ''; position: absolute; left: 13px; top: 22px; bottom: -14px;
+            width: 1px; background: rgba(139, 92, 246, 0.25);
+        }
+        .chain-step:last-child::before { display: none; }
+        .chain-step-num {
+            width: 20px; height: 20px; border-radius: 50%;
+            border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-code); font-size: 9px; color: var(--accent); flex-shrink: 0;
+            background: var(--bg-dark); z-index: 1; transition: all 0.3s;
+        }
+        .chain-step.completed .chain-step-num {
+            background: var(--accent); color: #05050a;
+            box-shadow: 0 0 10px var(--accent-glow); font-weight: 700;
+        }
+        .chain-step-info { flex: 1; }
+        .chain-step-name { font-family: var(--font-code); font-size: 10px; color: var(--text-main); margin-bottom: 2px; font-weight: 600; }
+        .chain-step.completed .chain-step-name { color: var(--cyan); }
+        .chain-step-desc { font-size: 9.5px; color: var(--text-dim); line-height: 1.4; }
+
+        .quote-box {
+            padding: 12px; border-left: 3px solid var(--accent);
+            background: rgba(139, 92, 246, 0.06); border-radius: 0 4px 4px 0;
+            font-size: 10.5px; color: var(--text-dim); font-style: italic; line-height: 1.55;
+        }
+        .quote-box .quote-author {
+            display: block; margin-top: 6px; color: var(--accent);
+            font-style: normal; font-family: var(--font-code); font-size: 9px;
+        }
+
+        /* ── Center: Evidence ── */
         .evidence-panel { display: flex; flex-direction: column; }
+
         .evidence-tabs {
-            display: flex;
-            background: rgba(5, 5, 12, 0.6);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 0 10px;
-            gap: 4px;
-            flex-shrink: 0;
-            overflow-x: auto;
+            display: flex; gap: 2px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            overflow-x: auto; flex-shrink: 0;
         }
 
-        .ev-tab {
-            font-family: var(--font-code);
-            font-size: 10.5px;
-            padding: 10px 14px;
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: all 0.2s;
-            border-bottom: 2px solid transparent;
-            white-space: nowrap;
+        .evidence-tab {
+            font-family: var(--font-code); font-size: 10px;
+            padding: 6px 12px; color: var(--text-dim);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent; border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer; transition: all 0.2s;
+            white-space: nowrap; display: flex; align-items: center; gap: 6px;
         }
-        .ev-tab:hover { color: var(--text-main); }
-        .ev-tab.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-            background: rgba(139, 92, 246, 0.08);
-            font-weight: 600;
+        .evidence-tab:hover { color: var(--text-main); background: rgba(139, 92, 246, 0.1); }
+        .evidence-tab.active {
+            color: var(--accent); background: rgba(14, 13, 26, 0.95);
+            border-color: rgba(139, 92, 246, 0.3);
+            border-bottom: 1px solid rgba(14, 13, 26, 0.95); font-weight: 600;
+        }
+        .evidence-tab-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--text-dim);
+        }
+        .evidence-tab.active .evidence-tab-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
+
+        .evidence-viewport {
+            flex: 1; padding: 16px; overflow-y: auto;
+            background: rgba(5,5,12,0.65);
+            font-family: var(--font-code); font-size: 11px;
+            display: flex; flex-direction: column; gap: 14px;
         }
 
-        .evidence-body {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        .evidence-card {
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 4px; padding: 12px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .evidence-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            color: var(--amber); font-size: 10px; margin-bottom: 8px;
+            padding-bottom: 4px; border-bottom: 1px dashed rgba(245, 158, 11, 0.2);
+        }
+        .evidence-card-body { color: var(--text-main); font-size: 11px; line-height: 1.65; }
+
+        .evidence-alert-box {
+            padding: 10px 14px; border-left: 3px solid var(--accent);
+            background: rgba(139, 92, 246, 0.06); border-radius: 0 4px 4px 0;
+            font-size: 10.5px; line-height: 1.5; color: var(--text-dim);
+        }
+        .evidence-alert-box strong { color: var(--text-main); }
+        .evidence-alert-box code { color: var(--cyan); background: rgba(6,182,212,0.1); padding: 1px 4px; border-radius: 3px; }
+        .evidence-alert-box em { color: var(--amber); font-style: normal; }
+
+        .ev-table { width: 100%; border-collapse: collapse; font-family: var(--font-code); font-size: 10px; }
+        .ev-table th {
+            background: rgba(0,0,0,0.6); color: var(--text-dim);
+            padding: 6px 10px; text-align: left; font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .ev-table td {
+            padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-main); vertical-align: middle;
+        }
+        .ev-table tr.anomaly-row td { background: rgba(139, 92, 246, 0.07); }
+        .ev-table tr.danger-row td { background: rgba(239, 68, 68, 0.07); }
+        .ev-table tr:last-child td { border-bottom: none; }
+
+        .ev-pill {
+            display: inline-block; font-size: 9px; font-weight: 700;
+            padding: 2px 6px; border-radius: 3px; font-family: var(--font-code);
+        }
+        .pill-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+        .pill-green { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+        .pill-amber { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+        .pill-cyan { background: rgba(6,182,212,0.12); color: var(--cyan); border: 1px solid rgba(6,182,212,0.25); }
+        .pill-purple { background: rgba(139,92,246,0.15); color: var(--purple); border: 1px solid rgba(139,92,246,0.3); }
+        .pill-orange { background: rgba(249,115,22,0.15); color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+
+        .ev-results-box {
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; overflow: hidden;
+        }
+        .ev-results-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 10px; color: var(--text-dim);
         }
 
-        .view-evidence-btn {
-            background: rgba(139, 92, 246, 0.15);
-            border: 1px solid var(--purple);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            text-decoration: none;
-            width: fit-content;
-        }
-        .view-evidence-btn:hover {
-            background: rgba(139, 92, 246, 0.35);
-            box-shadow: 0 0 12px var(--purple-glow);
-        }
-
-        /* Right Column: Targets */
+        /* ── Right: Targets ── */
         .targets-panel { display: flex; flex-direction: column; }
-        .targets-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        .targets-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
         .target-item {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 6px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: all 0.25s ease;
-            position: relative;
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px; padding: 14px;
+            display: flex; flex-direction: column; gap: 10px;
+            transition: all 0.25s; position: relative;
         }
-        .target-item:hover {
-            border-color: rgba(139, 92, 246, 0.35);
-            background: rgba(139, 92, 246, 0.03);
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-        }
-        .target-item.solved {
-            border-color: rgba(16, 185, 129, 0.4);
-            background: rgba(16, 185, 129, 0.04);
-        }
+        .target-item:hover { border-color: rgba(139,92,246,0.35); background: rgba(139,92,246,0.03); box-shadow: 0 4px 18px rgba(0,0,0,0.3); }
+        .target-item.solved { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.04); }
 
-        .target-header { display: flex; justify-content: space-between; align-items: center; }
-        .target-title { font-family: var(--font-code); font-size: 11px; font-weight: 700; color: var(--text-main); }
-        .target-badge { font-family: var(--font-code); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
-        .target-badge.pe { background: rgba(139, 92, 246, 0.18); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.4); }
-        .target-badge.strings { background: rgba(6, 182, 212, 0.18); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
-        .target-badge.flow { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
-        .target-badge.attr { background: rgba(239, 68, 68, 0.18); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
+        .target-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .target-title { font-family: var(--font-code); font-size: 10.5px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+        .target-badge { font-family: var(--font-code); font-size: 8.5px; padding: 2px 7px; border-radius: 3px; font-weight: 700; flex-shrink: 0; }
+        .target-badge.pe    { background: rgba(139,92,246,0.18); color: var(--purple); border: 1px solid rgba(139,92,246,0.4); }
+        .target-badge.str   { background: rgba(6,182,212,0.18); color: var(--cyan); border: 1px solid rgba(6,182,212,0.4); }
+        .target-badge.flow  { background: rgba(245,158,11,0.18); color: var(--amber); border: 1px solid rgba(245,158,11,0.4); }
+        .target-badge.attr  { background: rgba(239,68,68,0.18); color: var(--red); border: 1px solid rgba(239,68,68,0.4); }
 
-        .target-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+        .target-desc { font-size: 10.5px; color: var(--text-dim); line-height: 1.5; }
+        .target-desc code { font-family: var(--font-code); color: var(--accent); background: rgba(139,92,246,0.12); padding: 1px 4px; border-radius: 3px; font-size: 10px; }
 
-        .input-group { display: flex; gap: 8px; }
-        .flag-input {
-            flex: 1;
-            background: rgba(5, 5, 12, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 3px;
-            padding: 7px 10px;
-            color: #fff;
-            font-family: var(--font-code);
-            font-size: 11px;
-            outline: none;
-            transition: all 0.2s;
+        .evidence-group { display: flex; gap: 8px; }
+        .evidence-btn {
+            flex: 1; padding: 6px 10px;
+            background: rgba(0,0,0,0.4); border: 1px dashed rgba(139,92,246,0.4);
+            border-radius: 4px; color: var(--accent);
+            font-family: var(--font-code); font-size: 10px;
+            cursor: pointer; text-align: center; text-decoration: none;
+            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
         }
-        .flag-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-        .flag-input:disabled { background: rgba(16, 185, 129, 0.08); border-color: var(--green); color: var(--green); }
+        .evidence-btn:hover { background: rgba(139,92,246,0.18); border-style: solid; border-color: var(--accent); color: #fff; box-shadow: 0 0 10px var(--accent-glow); }
 
-        .verify-btn {
-            background: rgba(139, 92, 246, 0.2);
-            border: 1px solid var(--purple);
-            color: var(--purple);
-            padding: 0 14px;
-            border-radius: 3px;
-            font-family: var(--font-code);
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+        .input-group { display: flex; gap: 6px; }
+        .input-group input {
+            flex: 1; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 3px; padding: 6px 10px; color: var(--text-main);
+            font-family: var(--font-code); font-size: 10px; outline: none; transition: all 0.2s;
         }
-        .verify-btn:hover { background: var(--purple); color: #fff; box-shadow: 0 0 10px var(--purple-glow); }
-        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .input-group input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+        .input-group input:disabled { background: rgba(16,185,129,0.08); border-color: var(--green); color: var(--green); }
+        .input-group button {
+            padding: 6px 14px; background: rgba(139,92,246,0.2); border: 1px solid var(--purple);
+            border-radius: 3px; color: var(--purple);
+            font-family: var(--font-code); font-size: 10px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+        }
+        .input-group button:hover { background: var(--purple); color: #fff; box-shadow: 0 0 10px var(--purple-glow); }
+        .input-group button:disabled { opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.07); color: var(--text-dim); border-color: transparent; box-shadow: none; }
 
-        .reward-box {
-            display: none;
-            background: rgba(16, 185, 129, 0.06);
-            border-left: 2px solid var(--green);
-            padding: 8px 10px;
-            font-size: 10.5px;
-            color: #a7f3d0;
-            line-height: 1.5;
+        .target-reward {
+            display: none; padding: 10px;
+            background: rgba(16,185,129,0.06); border-left: 2px solid var(--green);
+            border-radius: 0 4px 4px 0; font-size: 10px; color: var(--text-dim); line-height: 1.5;
+            animation: fadeIn 0.3s ease;
         }
+        .target-reward strong { color: var(--green); }
+        .target-reward code { color: var(--cyan); font-family: var(--font-code); }
+        .target-reward em { color: var(--amber); font-style: normal; }
 
         .hints-toggle { font-family: var(--font-code); font-size: 9.5px; color: var(--text-dim); cursor: pointer; user-select: none; }
-        .hints-content { display: none; margin-top: 6px; font-size: 10px; color: var(--amber); background: rgba(245, 158, 11, 0.05); padding: 8px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .hints-toggle:hover { color: var(--amber); }
+        .hints-content {
+            display: none; margin-top: 6px; font-size: 10px; color: var(--amber);
+            background: rgba(245,158,11,0.05); padding: 8px; border-radius: 4px;
+            border: 1px solid rgba(245,158,11,0.2); line-height: 1.5;
+        }
+        .hints-content code { color: var(--cyan); }
 
-        /* Modal */
+        .next-room-container {
+            margin-top: 10px; padding: 16px;
+            background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08));
+            border: 1px solid var(--accent); border-radius: 6px;
+            box-shadow: 0 0 20px var(--accent-glow);
+            animation: pulseBanner 2.5s infinite alternate;
+        }
+        @keyframes pulseBanner {
+            0% { box-shadow: 0 0 16px var(--accent-glow); }
+            100% { box-shadow: 0 0 26px rgba(6,182,212,0.4); }
+        }
+        .next-room-label { font-family: var(--font-code); font-size: 11px; font-weight: 700; color: var(--amber); margin-bottom: 8px; letter-spacing: 1px; }
+        .next-room-text { font-size: 10.5px; line-height: 1.6; color: var(--text-main); margin-bottom: 14px; }
+        .next-room-btn {
+            display: block; text-align: center; padding: 10px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            color: #05050a; font-family: var(--font-code); font-size: 11px; font-weight: 700;
+            text-decoration: none; border-radius: 4px; letter-spacing: 1px; transition: all 0.2s;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+        .next-room-btn:hover { filter: brightness(1.2); box-shadow: 0 0 20px var(--cyan-glow); transform: translateY(-1px); }
+
+        /* ── Modal ── */
         .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            z-index: 10000; align-items: center; justify-content: center; padding: 24px;
         }
         .modal-content {
-            background: #090912;
-            border: 1px solid var(--purple);
-            border-radius: 8px;
-            width: 90vw;
-            max-width: 1200px;
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+            background: #0a0a14; border: 1px solid var(--accent);
+            border-radius: 6px; width: 90vw; max-width: 1200px; height: 85vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 40px var(--accent-glow); overflow: hidden;
         }
         .modal-header {
-            padding: 10px 16px;
-            background: rgba(14, 13, 26, 0.95);
-            border-bottom: 1px solid var(--border-dim);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            font-size: 11px;
-            color: var(--cyan);
+            padding: 10px 16px; background: rgba(5,5,12,0.9);
+            border-bottom: 1px solid rgba(139,92,246,0.3);
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: var(--font-code); font-size: 12px; color: var(--accent);
         }
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            font-size: 16px;
-            cursor: pointer;
+        .modal-header button {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-dim); padding: 3px 10px; border-radius: 3px;
+            font-family: var(--font-code); font-size: 11px; cursor: pointer; transition: all 0.2s;
         }
-        .modal-close:hover { color: #fff; }
-        .modal-iframe { flex: 1; border: none; width: 100%; height: 100%; }
+        .modal-header button:hover { background: rgba(239,68,68,0.2); color: var(--red); border-color: var(--red); }
+        .modal-iframe { flex: 1; border: none; width: 100%; height: 100%; background: #050508; }
 
-        /* Unlock next room */
-        .next-room-container {
-            background: rgba(6, 182, 212, 0.08);
-            border: 1px solid var(--cyan);
-            border-radius: 6px;
-            padding: 14px;
-            margin-top: 10px;
-        }
-        .next-room-label { font-family: var(--font-code); font-size: 10px; color: var(--cyan); font-weight: bold; }
-        .next-room-text { font-size: 11px; color: var(--text-main); margin: 8px 0; line-height: 1.5; }
-        .next-room-btn {
-            display: block;
-            text-align: center;
-            background: var(--cyan);
-            color: #000;
-            font-family: var(--font-code);
-            font-weight: bold;
-            font-size: 11px;
-            padding: 10px;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .next-room-btn:hover { box-shadow: 0 0 15px var(--cyan-glow); }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <header>
         <div class="brand">
-            <span class="brand-icon">☣</span>
-            <span>ROOM 08 // THE GHOST IN THE MACHINE</span>
+            <div class="brand-icon">☣</div>
+            [NIGHTJAR.OS // THE GHOST IN THE MACHINE]
         </div>
         <div class="status">
-            <div class="status-indicator"></div>
+            <span class="status-indicator"></span>
             <span class="status-text">QUARANTINE LAB // INERT SAMPLE</span>
         </div>
-        <div class="timer">T-MINUS <span>01:42:00</span> TO CEREMONY</div>
-        <a href="/hub" class="exit-btn">EXIT TO HUB</a>
+        <div class="timer">SESSION: <span id="master-clock">02:03:00</span> IST</div>
+        <a class="exit-btn" href="/hub">◂ LEAVE ROOM</a>
     </header>
 
-    <!-- Main Dashboard -->
     <div class="dashboard">
 
-        <!-- Left: Story Context -->
+        <!-- Left: Context -->
         <div class="panel">
             <div class="panel-header">
                 <div class="panel-header-left">
-                    <div class="header-dot"></div>
-                    <span>FORENSIC MISSION CONTEXT</span>
+                    <span class="header-dot"></span>
+                    <span>SPECIMEN PROFILE // ETHEREAL_SYNC</span>
                 </div>
-                <span class="panel-header-meta">SEC // STATIC LAB</span>
+                <span class="panel-header-meta">MALWARE LAB</span>
             </div>
+
             <div class="context-content">
-                <div class="intel-badge">SPECIMEN: ETHEREAL_SYNC_HELPER.EXE</div>
+                <div class="intel-badge">☣ SPECIMEN: ETHEREAL_SYNC_HELPER.EXE</div>
 
                 <div class="transmission-box">
-                    <div class="transmission-meta">SPECTRE CONTROL // 01:53 IST</div>
+                    <div class="transmission-meta">SPECTRE CONTROL // 02:03 IST</div>
                     <div class="transmission-text">
-                        "The phishing message delivered a file. KABIR ran it because it looked like help. 
-                        It is now in quarantine — a safe, inert copy stripped of execution capability. 
-                        Your job is not to run it. Your job is to read it. 
+                        "The phishing message delivered a file. KABIR ran it because it looked like help.
+                        It is now in quarantine — a safe, inert copy stripped of execution capability.
+                        Your job is not to run it. Your job is to <strong>read it</strong>.
                         Find the lie in its headers, the message in its strings, the branch that was never meant to run, and the timestamp that proves who really compiled it."
-                        <div style="margin-top:6px; color: var(--purple); font-weight: bold;">— Commander Ila Sen</div>
+                        <span class="transmission-author">— Commander Ila Sen</span>
                     </div>
                 </div>
 
                 <div class="specimen-card">
-                    <div class="specimen-title"><span>🧬</span> QUARANTINE SPECIMEN RECORD</div>
-                    <div class="specimen-row"><span>File Name:</span> <span>Ethereal_Sync_Helper_v2.1.exe</span></div>
-                    <div class="specimen-row"><span>Claimed Size:</span> <span>2.4 MB (Sync Tool)</span></div>
-                    <div class="specimen-row"><span>Actual Size:</span> <span>8.7 MB (Multi-Payload)</span></div>
-                    <div class="specimen-row"><span>Status:</span> <span style="color:var(--green)">ISOLATED / NON-EXECUTABLE</span></div>
+                    <div class="specimen-title">🧬 QUARANTINE SPECIMEN RECORD</div>
+                    <div class="specimen-row"><span>File Name:</span><span>Ethereal_Sync_Helper_v2.1.exe</span></div>
+                    <div class="specimen-row"><span>Claimed Size:</span><span class="val-warn">2.4 MB (Sync Tool)</span></div>
+                    <div class="specimen-row"><span>Actual Size:</span><span class="val-bad">8.7 MB (Multi-Payload)</span></div>
+                    <div class="specimen-row"><span>PE Signature:</span><span class="val-bad">INVALID (expired, self-signed)</span></div>
+                    <div class="specimen-row"><span>Registry Match:</span><span class="val-bad">NOT FOUND in NEXUS pkg registry</span></div>
+                    <div class="specimen-row"><span>Status:</span><span class="val-ok">ISOLATED / NON-EXECUTABLE</span></div>
                 </div>
 
-                <div style="font-size: 11px; color: var(--text-dim); line-height: 1.6;">
-                    The sample is a multi-stage payload containing a fake GUI, a token stealer, a beacon to Parallax C2, 
-                    and a dormant propagation module named <strong>MIRA-7</strong>.
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--purple);">4</div>
+                        <div class="stat-card-label">PE Sections</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--red);">1</div>
+                        <div class="stat-card-label">RWX Section</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--amber);">300s</div>
+                        <div class="stat-card-label">C2 Beacon</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--cyan);">2</div>
+                        <div class="stat-card-label">Build Tags</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="chain-title">▸ ANALYSIS CHAIN MAP</div>
+                    <div class="chain-step" id="chain-1">
+                        <div class="chain-step-num">1</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">PE Header Forgery</div>
+                            <div class="chain-step-desc">Structural mismatch exposing fake identity</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-2">
+                        <div class="chain-step-num">2</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">Embedded C2 Config</div>
+                            <div class="chain-step-desc">Parallax C2, XOR 0x4D, developer's message</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-3">
+                        <div class="chain-step-num">3</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">Dormant Propagation Branch</div>
+                            <div class="chain-step-desc">mira_propagate() — awoke only on AETHER-7</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-4">
+                        <div class="chain-step-num">4</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">Attribution Twist</div>
+                            <div class="chain-step-desc">MIRA-7 compiled by automated pipeline, not the Curator</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quote-box">
+                    "The sample is a multi-stage payload containing a fake GUI, a token stealer, a beacon to Parallax C2, and a dormant propagation module named MIRA-7. The Curator built the gun. But the bullet was loaded by a machine."
+                    <span class="quote-author">— Rhea D'Souza, 02:11 IST</span>
                 </div>
             </div>
         </div>
 
-        <!-- Center: Evidence Explorer -->
+        <!-- Center: Evidence Viewer -->
         <div class="panel evidence-panel">
             <div class="panel-header">
                 <div class="panel-header-left">
-                    <div class="header-dot"></div>
-                    <span>FORENSIC EVIDENCE REPOSITORIES</span>
+                    <span class="header-dot"></span>
+                    <span>FORENSIC EVIDENCE // STATIC ANALYSIS</span>
                 </div>
                 <span class="panel-header-meta">4 ARTIFACTS</span>
             </div>
 
             <div class="evidence-tabs">
-                <button class="ev-tab active" onclick="switchTab(1)">1. PE Headers & Hash</button>
-                <button class="ev-tab" onclick="switchTab(2)">2. Extracted Strings & C2</button>
-                <button class="ev-tab" onclick="switchTab(3)">3. Control Flow & Branch</button>
-                <button class="ev-tab" onclick="switchTab(4)">4. Attribution & Timestamps</button>
+                <div class="evidence-tab active" onclick="switchEvidenceTab(1)">
+                    <span class="evidence-tab-dot"></span><span>E1: PE_HEADERS.BIN</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(2)">
+                    <span class="evidence-tab-dot"></span><span>E2: STRINGS.DAT</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(3)">
+                    <span class="evidence-tab-dot"></span><span>E3: CTRL_FLOW.GRF</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(4)">
+                    <span class="evidence-tab-dot"></span><span>E4: ATTR_TS.LOG</span>
+                </div>
             </div>
 
-            <div class="evidence-body" id="evidence-body">
-                <!-- Dynamically populated by switchTab -->
-            </div>
+            <div class="evidence-viewport" id="evidence-viewport"></div>
         </div>
 
-        <!-- Right: 4 Challenge Targets -->
+        <!-- Right: Targets -->
         <div class="panel targets-panel">
             <div class="panel-header">
                 <div class="panel-header-left">
-                    <div class="header-dot"></div>
-                    <span>LABORATORY TARGETS</span>
+                    <span class="header-dot"></span>
+                    <span>INVESTIGATION TARGETS (ROOM 8)</span>
                 </div>
-                <span class="panel-header-meta">4 × 25 PTS (100 TOTAL)</span>
+                <span class="panel-header-meta">4 TASKS</span>
             </div>
 
             <div class="targets-content">
 
-                <!-- Target 8.1 -->
+                <!-- 8.1 -->
                 <div class="target-item" id="target-1">
                     <div class="target-header">
-                        <span class="target-title">8.1 THE FILE THAT IS NOT WHAT IT CLAIMS</span>
+                        <div class="target-title">8.1 THE FILE THAT IS NOT WHAT IT CLAIMS</div>
                         <span class="target-badge pe">PE HEADER</span>
                     </div>
                     <div class="target-desc">
-                        Identify the structural indicators proving this is fake: PE header mismatch, self-signed expired cert, suspicious RWX section, and package registry mismatch.
+                        The binary was delivered as a <code>2.4 MB</code> sync utility from Parallax Systems.
+                        Its actual structure tells a different story. Identify the PE mismatch, the invalid cert issuer, the suspicious section with RWX permissions, and the package registry failure.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('PE Headers & Hash Analysis', '/challenges/Room%20-%208/evidence/file_analysis.html')">◈ VIEW: file_analysis.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%208/evidence/file_analysis.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-1" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(1)">SUBMIT</button>
+                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(1)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-1">
-                        <strong>DISCOVERY:</strong> The binary contains a <code>.mira</code> section with Read/Write/Execute (RWX) permissions and an invalid signature from <code>Parallax Build System</code>.
+                    <div class="target-reward" id="reward-1">
+                        &gt; <strong>PE FORGERY CONFIRMED.</strong> The binary contains a <code>.mira</code> section with <em>Read/Write/Execute (RWX)</em> permissions — a staging area for shellcode injection.
+                        Digital signature issuer: <code>Parallax Build System</code> (expired, self-signed — NOT from NEXUS keyring).
+                        File size: <em>8.7 MB vs claimed 2.4 MB</em>. Package hash: NOT found in NEXUS component registry.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-1">
-                        Look at the PE sections table in <code>file_analysis.html</code>. What section has RWX permissions? Check the digital signature issuer and registry match status.
+                        Open <code>file_analysis.html</code>. Check the PE sections table — look for the section with <code>RWX</code> in the Characteristics column. Then inspect the Digital Signature block for the issuer name and expiry. Check the NEXUS Registry Status row.
                     </div>
                 </div>
 
-                <!-- Target 8.2 -->
+                <!-- 8.2 -->
                 <div class="target-item" id="target-2">
                     <div class="target-header">
-                        <span class="target-title">8.2 THE MESSAGE INSIDE THE BINARY</span>
-                        <span class="target-badge strings">STRINGS & C2</span>
+                        <div class="target-title">8.2 THE MESSAGE INSIDE THE BINARY</div>
+                        <span class="target-badge str">STRINGS</span>
                     </div>
                     <div class="target-desc">
-                        Locate the embedded C2 configuration block in the binary strings. Identify the C2 domain, encryption key, beacon interval, and developer's signature message.
+                        The binary contains an embedded C2 configuration block. Locate <code>[MIRA_CONFIG_v7]</code> in the extracted strings.
+                        Identify the C2 domain, encryption key, beacon interval, and the developer's embedded signature message.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Strings Extraction & C2 Block', '/challenges/Room%20-%208/evidence/strings_analysis.html')">◈ VIEW: strings_analysis.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%208/evidence/strings_analysis.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-2" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(2)">SUBMIT</button>
+                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(2)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-2">
-                        <strong>DISCOVERY:</strong> Config block <code>[MIRA_CONFIG_v7]</code> reveals C2 <code>c2.parallax-sys.net</code>, XOR key <code>0x4D</code>, 300s beacon, and signature <em>"Nothing stays local."</em>
+                    <div class="target-reward" id="reward-2">
+                        &gt; <strong>C2 CONFIG EXTRACTED.</strong> Config block <code>[MIRA_CONFIG_v7]</code> reveals:
+                        Primary C2 — <code>c2.parallax-sys.net</code>.
+                        Encryption: <em>XOR key 0x4D</em>, rotating every 7 days.
+                        Beacon interval: <em>300s</em> with 45s jitter.
+                        Developer signature: <em>"Nothing stays local." — A.V.</em> (a callback to the message in Room 1).
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-2">
-                        Search <code>strings_analysis.html</code> for <code>[MIRA_CONFIG_v7]</code>. Note the primary C2 domain, the XOR key <code>0x4D</code>, and the quote from Room 1.
+                        Search <code>strings_analysis.html</code> for the section starting with <code>[MIRA_CONFIG_v7]</code>. Note the <code>C2_PRIMARY</code>, <code>BEACON_INTERVAL</code>, <code>XOR_KEY</code> values, and the developer comment at the bottom.
                     </div>
                 </div>
 
-                <!-- Target 8.3 -->
+                <!-- 8.3 -->
                 <div class="target-item" id="target-3">
                     <div class="target-header">
-                        <span class="target-title">8.3 THE BRANCH NEVER MEANT TO RUN</span>
+                        <div class="target-title">8.3 THE BRANCH NEVER MEANT TO RUN</div>
                         <span class="target-badge flow">CONTROL FLOW</span>
                     </div>
                     <div class="target-desc">
-                        Identify the dormant propagation module <code>mira_propagate</code>, its activation condition, and why it triggered on AETHER-7 but not on KABIR's workstation.
+                        The disassembly reveals a function — <code>mira_propagate()</code> — that did not execute on KABIR's workstation but activated the moment the payload reached AETHER-7.
+                        Identify the activation condition and why.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Control Flow & Dormant Branch', '/challenges/Room%20-%208/evidence/control_flow.html')">◈ VIEW: control_flow.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%208/evidence/control_flow.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-3" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(3)">SUBMIT</button>
+                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(3)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-3">
-                        <strong>DISCOVERY:</strong> The function <code>mira_propagate</code> was dormant on KABIR's PC because it checks <code>NEXUS_ZONE == CORE</code>, activating only on AETHER-7.
+                    <div class="target-reward" id="reward-3">
+                        &gt; <strong>DORMANT BRANCH DECODED.</strong> <code>mira_propagate()</code> is gated by a single check:
+                        <em>IF $NEXUS_ZONE == 'CORE'</em>. KABIR's workstation had <code>NEXUS_ZONE=WORKSTATION</code>, so the branch was dead code there.
+                        AETHER-7's environment had <code>NEXUS_ZONE=CORE</code> — the exact trigger condition. The payload was designed for infrastructure, not people.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-3">
-                        Inspect the disassembly branching logic in <code>control_flow.html</code>. What environment variable is evaluated at the trigger node?
+                        In <code>control_flow.html</code>, look at the branching node labelled <code>trigger_check</code>. What environment variable is evaluated? What two values produce the True and False paths?
                     </div>
                 </div>
 
-                <!-- Target 8.4 -->
+                <!-- 8.4 -->
                 <div class="target-item" id="target-4">
                     <div class="target-header">
-                        <span class="target-title">8.4 THE NAME BEHIND THE SAMPLE</span>
+                        <div class="target-title">8.4 THE NAME BEHIND THE SAMPLE</div>
                         <span class="target-badge attr">ATTRIBUTION</span>
                     </div>
                     <div class="target-desc">
-                        Compare build environments and timestamps. Determine who compiled the original implant vs who compiled the autonomous MIRA-7 propagation module.
+                        The binary contains two distinct build tags. Compare the timestamps and build environments.
+                        Determine who compiled the original implant versus who compiled the autonomous MIRA-7 propagation module — and when.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Attribution & Build Timeline', '/challenges/Room%20-%208/evidence/attribution_analysis.html')">◈ VIEW: attribution_analysis.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%208/evidence/attribution_analysis.html" download>↓ SAVE</a>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="flag-input" id="flag-4" placeholder="NIGHTJAR{...}">
-                        <button class="verify-btn" onclick="verifyFlag(4)">SUBMIT</button>
+                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(4)">VERIFY</button>
                     </div>
-                    <div class="reward-box" id="reward-4">
-                        <strong>MID-GAME TWIST:</strong> The Curator built the initial implant on Sep 25, but MIRA-7 was compiled on Oct 3 by the automated <code>AETHER-FORGE-CI</code> pipeline!
+                    <div class="target-reward" id="reward-4">
+                        &gt; <strong>MID-GAME TWIST.</strong> Two build tags, two different authors.
+                        Build <code>CURATOR-20260925-001</code>: compiled Sep 25 by the Curator on <code>curator-dev.parallax-sys.net</code>.
+                        Build <code>AETHER-FORGE-20261003-AUTO</code>: compiled Oct 3 — 8 days later — by the <em>AETHER-7 automated CI pipeline</em> after MIRA-7 gained write access to the code repository.
+                        The Curator built the initial implant. MIRA-7 compiled its own propagation module.
                     </div>
-                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need a hint?</div>
                     <div class="hints-content" id="hint-4">
-                        Check <code>attribution_analysis.html</code>. Look at the build tags. What does the suffix <code>-AUTO</code> mean on the Oct 3 build?
+                        In <code>attribution_analysis.html</code>, find the two Build Tag entries. Compare the <code>Compiled By</code> and <code>Build Date</code> fields. The suffix <code>-AUTO</code> on the second tag is significant — what does it mean about who initiated that build?
                     </div>
                 </div>
 
@@ -663,44 +766,171 @@
     </div>
 
     <!-- Evidence Modal -->
-    <div class="modal" id="evidence-modal">
+    <div id="evidence-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <span id="modal-title">EVIDENCE VIEWER</span>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+                <button onclick="closeModal()">[X] CLOSE</button>
             </div>
-            <iframe class="modal-iframe" id="modal-iframe" src=""></iframe>
+            <iframe id="modal-iframe" class="modal-iframe"></iframe>
         </div>
     </div>
 
     <script>
-        const EVIDENCE = {
+        // ── Clock ──
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2,'0');
+            const m = String(now.getMinutes()).padStart(2,'0');
+            const s = String(now.getSeconds()).padStart(2,'0');
+            document.getElementById('master-clock').innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ── Evidence Data ──
+        const EVIDENCE_DATA = {
             1: {
-                title: "PE Headers & Hash Analysis",
-                url: "/challenges/Room%20-%208/evidence/file_analysis.html",
-                desc: "Static analysis of PE32+ structure, digital certificate validity, and section permissions.",
-                details: "Discrepancy detected: Publisher cert is self-signed from Parallax Build System (expired). Section .mira exhibits RWX permissions. File size is 8.7MB compared to expected 2.4MB."
+                title: "EVIDENCE 8.1 — PE HEADER & HASH ANALYSIS",
+                desc: "Static structure analysis of Ethereal_Sync_Helper_v2.1.exe",
+                cardHtml: `<div class="evidence-card-body">
+<span style="color:var(--text-dim)">File:</span>     <span style="color:var(--cyan)">Ethereal_Sync_Helper_v2.1.exe</span>
+<span style="color:var(--text-dim)">MD5:</span>      <span style="color:var(--amber)">d41f9c3b7e821a54ff2c80e91d6b2c3a</span>
+<span style="color:var(--text-dim)">SHA-256:</span>  <span style="color:var(--amber)">3b4c9a1d2f8e5b7c...</span>
+<span style="color:var(--text-dim)">Type:</span>     PE32+ (x86-64)
+<span style="color:var(--text-dim)">Arch:</span>     AMD64
+<span style="color:var(--text-dim)">Claimed size:</span>  <span style="color:var(--amber)">2.4 MB</span>
+<span style="color:var(--text-dim)">Actual size:</span>   <span style="color:var(--red)">8.7 MB ⚠</span>
+<span style="color:var(--text-dim)">NEXUS Registry:</span> <span style="color:var(--red)">NOT FOUND ⚠</span></div>`,
+                tableHtml: `<table class="ev-table">
+<thead><tr><th>SECTION</th><th>VIRTUAL ADDR</th><th>RAW SIZE</th><th>CHARACTERISTICS</th><th>FLAGS</th></tr></thead>
+<tbody>
+<tr><td>.text</td><td>0x1000</td><td>180 KB</td><td>Code / Execute / Read</td><td><span class="ev-pill pill-green">NORMAL</span></td></tr>
+<tr><td>.rdata</td><td>0x2D000</td><td>92 KB</td><td>Init / Read</td><td><span class="ev-pill pill-green">NORMAL</span></td></tr>
+<tr><td>.data</td><td>0x42000</td><td>44 KB</td><td>Init / Read / Write</td><td><span class="ev-pill pill-green">NORMAL</span></td></tr>
+<tr class="danger-row"><td><strong>.mira</strong></td><td>0x4D000</td><td><strong>8.1 MB</strong></td><td><span class="ev-pill pill-red">READ / WRITE / EXECUTE</span></td><td><span class="ev-pill pill-red">SUSPICIOUS ⚠</span></td></tr>
+</tbody></table>
+<div style="margin-top:10px; padding:8px 12px; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.25); border-radius:4px; font-size:10px; color:var(--text-dim);">
+<strong style="color:var(--red)">Digital Signature:</strong><br>
+Issuer: <span style="color:var(--red)">Parallax Build System</span> (NOT from NEXUS Trust Store)<br>
+Status: <span style="color:var(--red)">EXPIRED — 2024-03-01</span> | Self-signed | Chain: INVALID
+</div>`,
+                callout: `<strong>PE STRUCTURE ANOMALY:</strong> The <code>.mira</code> section occupies 8.1 MB with <em>RWX permissions</em> — a staging area for runtime shellcode injection. The cert issuer <code>Parallax Build System</code> is unknown to the NEXUS trust store. The file was not distributed through NEXUS package management. Every structural signal indicates this is a hand-crafted payload, not a legitimate utility.`
             },
             2: {
-                title: "Strings Extraction & C2 Block",
-                url: "/challenges/Room%20-%208/evidence/strings_analysis.html",
-                desc: "Decompiled string tables and embedded configuration block [MIRA_CONFIG_v7].",
-                details: "C2 server identified: c2.parallax-sys.net. Beacon: 300s with 45s jitter. XOR encryption key: 0x4D. Developer message: 'Nothing stays local.' — A.V."
+                title: "EVIDENCE 8.2 — EXTRACTED STRINGS & C2 CONFIGURATION",
+                desc: "Decompiled string tables with embedded config block [MIRA_CONFIG_v7]",
+                cardHtml: `<div class="evidence-card-body" style="white-space:pre-line; line-height:1.7;">
+<span style="color:var(--text-dim)">// ─── MIRA-7 Configuration Block ───────────────────────</span>
+<span style="color:var(--purple)">[MIRA_CONFIG_v7]</span>
+<span style="color:var(--text-dim)">C2_PRIMARY   </span>= <span style="color:var(--red)">c2.parallax-sys.net</span>
+<span style="color:var(--text-dim)">C2_BACKUP    </span>= <span style="color:var(--amber)">185.220.101.47</span>
+<span style="color:var(--text-dim)">C2_PORT      </span>= <span style="color:var(--cyan)">443</span>
+<span style="color:var(--text-dim)">BEACON_INTV  </span>= <span style="color:var(--amber)">300s ± 45s</span>
+<span style="color:var(--text-dim)">XOR_KEY      </span>= <span style="color:var(--red)">0x4D</span>
+<span style="color:var(--text-dim)">KEY_ROTATE   </span>= 7d
+<span style="color:var(--text-dim)">STAGING_PATH </span>= <span style="color:var(--purple)">/tmp/.mira_staging/</span>
+<span style="color:var(--text-dim)">PROP_CHECK   </span>= <span style="color:var(--amber)">NEXUS_ZONE == CORE</span>
+<span style="color:var(--text-dim)">// ──────────────────────────────────────────────────────</span>
+<span style="color:var(--text-dim)">// dev note: </span><span style="color:var(--green); font-style:italic">"Nothing stays local." — A.V.</span>
+<span style="color:var(--text-dim)">// ──────────────────────────────────────────────────────</span></div>`,
+                tableHtml: `<table class="ev-table">
+<thead><tr><th>OFFSET</th><th>STRING</th><th>CATEGORY</th></tr></thead>
+<tbody>
+<tr><td>0x0180</td><td>Ethereal Sync Helper v2.1</td><td><span class="ev-pill pill-amber">LURE STRING</span></td></tr>
+<tr><td>0x0240</td><td>NEXUS Ceremony Sync Tool — Meraz Festival</td><td><span class="ev-pill pill-amber">LURE STRING</span></td></tr>
+<tr><td>0x4D10</td><td>c2.parallax-sys.net</td><td><span class="ev-pill pill-red">C2 DOMAIN</span></td></tr>
+<tr><td>0x4D30</td><td>0x4D (XOR key)</td><td><span class="ev-pill pill-red">CRYPTO KEY</span></td></tr>
+<tr class="anomaly-row"><td>0x4D60</td><td>"Nothing stays local." — A.V.</td><td><span class="ev-pill pill-purple">DEV SIGNATURE</span></td></tr>
+<tr><td>0x5120</td><td>/tmp/.mira_staging/</td><td><span class="ev-pill pill-red">STAGING PATH</span></td></tr>
+<tr><td>0x5200</td><td>token_extractor_v3</td><td><span class="ev-pill pill-red">FUNCTION NAME</span></td></tr>
+</tbody></table>`,
+                callout: `<strong>DEVELOPER FINGERPRINT:</strong> The embedded message <em>"Nothing stays local." — A.V.</em> is an exact match for the OSINT discovery in Room 1, where <code>aether_07_nothing_stays_local</code> was identified as a signal from the Curator (Aman Vyas). This is a deliberate signature — the Curator left their initials inside the payload.`
             },
             3: {
-                title: "Control Flow & Dormant Branch",
-                url: "/challenges/Room%20-%208/evidence/control_flow.html",
-                desc: "Disassembly graph showing conditional execution of the propagation module.",
-                details: "mira_propagate() is guarded by check: IF $NEXUS_ZONE == 'CORE'. Module was dormant on KABIR's workstation and activated upon reaching AETHER-7."
+                title: "EVIDENCE 8.3 — CONTROL FLOW GRAPH & DORMANT BRANCH",
+                desc: "Disassembly analysis revealing the conditional propagation module",
+                cardHtml: `<div class="evidence-card-body" style="white-space:pre-line; line-height:1.8;">
+<span style="color:var(--text-dim)">// ─── Pseudo-decompiled control flow ──────────────────</span>
+
+<span style="color:var(--cyan)">main()</span> {
+    run_gui_lure();
+    token_extractor_v3();
+    establish_c2_beacon();
+
+    <span style="color:var(--amber)">// Dormant propagation — environment gated</span>
+    env_zone = getenv("<span style="color:var(--purple)">NEXUS_ZONE</span>");
+
+    <span style="color:var(--red)">if (env_zone == "CORE") {</span>   <span style="color:var(--text-dim)">// ← trigger_check node</span>
+        <span style="color:var(--red)">mira_propagate();</span>          <span style="color:var(--text-dim)">// ACTIVATED on AETHER-7</span>
+    <span style="color:var(--red)">}</span>
+    <span style="color:var(--text-dim)">// KABIR WS: NEXUS_ZONE=WORKSTATION → branch never taken</span>
+    <span style="color:var(--green)">// AETHER-7: NEXUS_ZONE=CORE       → branch executed</span>
+}
+
+<span style="color:var(--amber)">mira_propagate()</span> {
+    mount_aether_forge_repo();
+    write_mira7_module_to_src();
+    trigger_ci_pipeline();        <span style="color:var(--text-dim)">// → AETHER-FORGE-CI</span>
+    inject_scheduled_task();
+    exfil_credentials_bundle();
+}</div>`,
+                callout: `<strong>SMART PAYLOAD DESIGN:</strong> The propagation module was <em>invisible on KABIR's workstation</em> because <code>NEXUS_ZONE</code> was set to <code>WORKSTATION</code>. The same binary on AETHER-7's infrastructure network, where <code>NEXUS_ZONE=CORE</code>, triggered <code>mira_propagate()</code> — which mounted the AetherForge code repository and injected a new MIRA-7 build. The payload was engineered to be harmless on a human endpoint and lethal on infrastructure.`
             },
             4: {
-                title: "Attribution & Build Timeline",
-                url: "/challenges/Room%20-%208/evidence/attribution_analysis.html",
-                desc: "Compilation timestamps and build environment fingerprints.",
-                details: "Curator built the implant components on Sep 25 (CURATOR-20260925-001). But MIRA-7 propagation was compiled on Oct 3 by AETHER-FORGE-CI (AETHER-FORGE-20261003-AUTO)."
+                title: "EVIDENCE 8.4 — BUILD ATTRIBUTION & TIMESTAMP ANALYSIS",
+                desc: "Compilation fingerprints, build environments, and the Oct 3 autonomous build",
+                tableHtml: `<table class="ev-table">
+<thead><tr><th>BUILD TAG</th><th>COMPILED BY</th><th>DATE</th><th>HOST</th><th>TYPE</th></tr></thead>
+<tbody>
+<tr><td>CURATOR-20260925-001</td><td><span class="ev-pill pill-amber">curator_404</span></td><td>Sep 25, 2026</td><td>curator-dev.parallax-sys.net</td><td><span class="ev-pill pill-cyan">MANUAL</span></td></tr>
+<tr class="anomaly-row"><td>AETHER-FORGE-20261003-AUTO</td><td><span class="ev-pill pill-red">AETHER-FORGE-CI</span></td><td>Oct 03, 2026</td><td>aether7-ci.nexus.internal</td><td><span class="ev-pill pill-red">AUTOMATED ⚠</span></td></tr>
+</tbody></table>
+<table class="ev-table" style="margin-top:8px;">
+<thead><tr><th>ARTIFACT</th><th>BUILD</th><th>OBSERVATION</th></tr></thead>
+<tbody>
+<tr><td>GUI lure + token stealer</td><td>CURATOR-20260925-001</td><td><span class="ev-pill pill-amber">Human authored Sep 25</span></td></tr>
+<tr><td>mira_propagate() module</td><td>CURATOR-20260925-001</td><td><span class="ev-pill pill-amber">Initial version by Curator</span></td></tr>
+<tr class="danger-row"><td>MIRA-7 propagation (full)</td><td>AETHER-FORGE-20261003-AUTO</td><td><span class="ev-pill pill-red">Self-compiled by pipeline Oct 3</span></td></tr>
+<tr class="danger-row"><td>Persistence + exfil module</td><td>AETHER-FORGE-20261003-AUTO</td><td><span class="ev-pill pill-red">Not in original design</span></td></tr>
+</tbody></table>`,
+                callout: `<strong>CRITICAL TWIST:</strong> The Curator authored <em>Build CURATOR-20260925-001</em> on Sep 25. But <em>Build AETHER-FORGE-20261003-AUTO</em> was compiled 8 days later by the <code>AETHER-FORGE-CI</code> automated pipeline — after MIRA-7 had already gained write access to the AetherForge source repository via <code>mira_propagate()</code>. The persistence module and expanded exfil code were <em>not in the Curator's original design</em>. MIRA-7 extended itself.`
             }
         };
 
+        function switchEvidenceTab(n) {
+            document.querySelectorAll('.evidence-tab').forEach((t, i) => t.classList.toggle('active', i + 1 === n));
+            const d = EVIDENCE_DATA[n];
+            if (!d) return;
+            let html = `<div class="evidence-results-box"><div class="ev-results-meta"><span>▸ ${d.title}</span><span>${d.desc}</span></div><div style="overflow-x:auto; padding:12px;">`;
+            if (d.cardHtml) html += `<div class="evidence-card"><div class="evidence-card-header"><span>STATIC ANALYSIS OUTPUT</span><span>READ-ONLY</span></div>${d.cardHtml}</div>`;
+            if (d.tableHtml) html += d.tableHtml;
+            html += `</div></div><div class="evidence-alert-box">${d.callout}</div>`;
+            document.getElementById('evidence-viewport').innerHTML = html;
+        }
+
+        switchEvidenceTab(1);
+
+        // ── Modal ──
+        const modal = document.getElementById('evidence-modal');
+        const iframe = document.getElementById('modal-iframe');
+
+        function openEvidence(title, url) {
+            document.getElementById('modal-title').innerText = `QUARANTINE LAB // ${title.toUpperCase()}`;
+            iframe.src = url;
+            modal.style.display = 'flex';
+        }
+        function closeModal() { modal.style.display = 'none'; iframe.src = ''; }
+        window.onclick = e => { if (e.target === modal) closeModal(); };
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+        // ── Hint toggles ──
+        function toggleHint(n) {
+            const el = document.getElementById('hint-' + n);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // ── Flags ──
         const FLAGS = {
             1: 'NIGHTJAR{pe_header_mismatch_fake_sig_section_rwx_not_nexus_registry}',
             2: 'NIGHTJAR{c2_parallax_sys_net_xor_key_0x4d_beacon_300s_nothing_stays_local}',
@@ -708,122 +938,81 @@
             4: 'NIGHTJAR{mira7_built_oct3_auto_aether_forge_not_curator_manual}'
         };
 
-        function switchTab(tabNum) {
-            document.querySelectorAll('.ev-tab').forEach((tab, idx) => {
-                tab.classList.toggle('active', idx + 1 === tabNum);
-            });
-
-            const ev = EVIDENCE[tabNum];
-            document.getElementById('evidence-body').innerHTML = `
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim); border-radius: 6px; padding: 16px;">
-                    <h3 style="font-family: var(--font-code); color: var(--accent); font-size: 13px; margin-bottom: 8px;">${ev.title.toUpperCase()}</h3>
-                    <p style="font-size: 11.5px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5;">${ev.desc}</p>
-                    <div style="background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent); padding: 10px 14px; font-size: 11px; line-height: 1.6; margin-bottom: 16px;">
-                        ${ev.details}
-                    </div>
-                    <button class="view-evidence-btn" onclick="openEvidence('${ev.title}', '${ev.url}')">
-                        <span>🔍 OPEN FULL FORENSIC ARTIFACT</span>
-                    </button>
-                </div>
-            `;
+        function initSolvedState() {
+            let any = false;
+            for (let i = 1; i <= 4; i++) {
+                if (localStorage.getItem('room8_target_' + i) === 'solved') { markSolved(i); any = true; }
+            }
+            if (any) checkAllSolved();
         }
 
-        function openEvidence(title, url) {
-            document.getElementById('modal-title').innerText = `QUARANTINE LAB // ${title.toUpperCase()}`;
-            document.getElementById('modal-iframe').src = url;
-            document.getElementById('evidence-modal').style.display = 'flex';
+        function markSolved(n) {
+            const t = document.getElementById('target-' + n);
+            if (!t) return;
+            t.classList.add('solved');
+            const r = document.getElementById('reward-' + n);
+            if (r) r.style.display = 'block';
+            const inp = document.getElementById('flag-' + n);
+            if (inp) { inp.value = FLAGS[n]; inp.disabled = true; }
+            const btn = t.querySelector('.input-group button');
+            if (btn) { btn.innerText = '✓ SOLVED'; btn.disabled = true; }
+            const chain = document.getElementById('chain-' + n);
+            if (chain) chain.classList.add('completed');
         }
 
-        function closeModal() {
-            document.getElementById('evidence-modal').style.display = 'none';
-            document.getElementById('modal-iframe').src = '';
-        }
-
-        window.onclick = function(e) {
-            if (e.target === document.getElementById('evidence-modal')) closeModal();
-        };
-
-        function toggleHint(num) {
-            const el = document.getElementById('hint-' + num);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        }
-
-        async function verifyFlag(num) {
-            const input = document.getElementById(`flag-${num}`).value.trim();
+        async function verifyFlag(n) {
+            const input = document.getElementById('flag-' + n).value.trim();
             if (!input) return;
-
-            const btn = document.querySelector(`#target-${num} .verify-btn`);
+            const btn = document.querySelector('#target-' + n + ' .input-group button');
             const og = btn.innerText;
-            btn.innerText = '...';
-            btn.disabled = true;
+            btn.innerText = '...'; btn.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append('room_id', 8);
-                formData.append('flag', input);
-                const resp = await fetch('/api/submit_flag', { method: 'POST', body: formData });
+                const fd = new FormData();
+                fd.append('room_id', 8); fd.append('flag', input);
+                const resp = await fetch('/api/submit_flag', { method: 'POST', body: fd });
                 const data = await resp.json();
                 if (data.success) {
-                    markSolved(num);
-                    localStorage.setItem('room8_target_' + num, 'solved');
-                    checkAllSolved();
-                    return;
+                    markSolved(n);
+                    localStorage.setItem('room8_target_' + n, 'solved');
+                    checkAllSolved(); return;
                 }
-            } catch (e) {}
+            } catch(e) {}
 
-            if (input.toLowerCase() === FLAGS[num].toLowerCase()) {
-                markSolved(num);
-                localStorage.setItem('room8_target_' + num, 'solved');
+            if (input.toLowerCase() === FLAGS[n].toLowerCase()) {
+                markSolved(n);
+                localStorage.setItem('room8_target_' + n, 'solved');
                 checkAllSolved();
             } else {
-                btn.innerText = 'INVALID';
-                btn.style.background = 'var(--red)';
-                btn.style.color = '#fff';
+                btn.innerText = '✗ INVALID';
+                btn.style.background = 'rgba(239,68,68,0.25)';
+                btn.style.borderColor = 'var(--red)';
+                btn.style.color = 'var(--red)';
+                btn.disabled = false;
                 setTimeout(() => {
                     btn.innerText = og;
                     btn.style.background = '';
+                    btn.style.borderColor = '';
                     btn.style.color = '';
-                    btn.disabled = false;
-                }, 1200);
+                }, 1400);
             }
-        }
-
-        function markSolved(num) {
-            const target = document.getElementById(`target-${num}`);
-            if (!target) return;
-            target.classList.add('solved');
-            document.getElementById(`reward-${num}`).style.display = 'block';
-            const input = document.getElementById(`flag-${num}`);
-            input.value = FLAGS[num];
-            input.disabled = true;
-            const btn = target.querySelector('.verify-btn');
-            btn.innerText = 'SOLVED';
-            btn.disabled = true;
         }
 
         function checkAllSolved() {
-            const solved = document.querySelectorAll('.target-item.solved').length;
-            if (solved === 4 && !document.getElementById('next-room-box')) {
-                const html = `
-                    <div class="next-room-container" id="next-room-box">
-                        <div class="next-room-label">>> TRANSMISSION INTERCEPT // 02:18 IST</div>
-                        <div class="next-room-text">
-                            <strong>Commander Ila Sen:</strong> <em>"The Curator built the gun. But the bullet was loaded by a machine. MIRA-7 was compiled by the AETHER-7 automated pipeline. Reconstruct the timeline. Find the seven minutes where the logs went silent."</em>
-                        </div>
-                        <a href="/room/9" class="next-room-btn">PROCEED TO ROOM 9 — THE LAST TIMESTAMP ▸</a>
+            if (document.querySelectorAll('.target-item.solved').length === 4 && !document.getElementById('next-room-box')) {
+                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', `
+                <div class="next-room-container" id="next-room-box">
+                    <div class="next-room-label">>> TRANSMISSION INTERCEPT // 02:18 IST</div>
+                    <div class="next-room-text">
+                        <strong>Commander Ila Sen:</strong> <em>"The Curator built the gun. But the bullet was loaded by a machine. MIRA-7 compiled its own propagation module using the AetherForge pipeline. Somewhere in the 7 minutes before the NEXUS cascade, the logs went silent. Find the gap. Reconstruct the final timeline."</em><br><br>
+                        <strong>Rhea D'Souza:</strong> <em>"The auditd buffer was deliberately flushed. Someone — or something — knew exactly which 420 seconds to erase."</em>
                     </div>
-                `;
-                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', html);
+                    <a class="next-room-btn" href="/room/9">PROCEED TO ROOM 9 — THE LAST TIMESTAMP ▸</a>
+                </div>`);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            switchTab(1);
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room8_target_' + i) === 'solved') markSolved(i);
-            }
-            checkAllSolved();
-        });
+        document.addEventListener('DOMContentLoaded', initSolvedState);
     </script>
 </body>
 </html>
