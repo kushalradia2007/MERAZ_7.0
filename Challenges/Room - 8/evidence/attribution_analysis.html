@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribution Analysis — Build Timeline and Authorship</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --card: #0a0a12;
+            --border: #1a1a2a;
+            --text: #b0b0c0;
+            --muted: #4a4a5a;
+            --cyan: #00e5ff;
+            --amber: #ffab00;
+            --red: #ff4444;
+            --green: #00e676;
+            --violet: #b388ff;
+            --surface: #12121e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+
+        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .header-meta { color: var(--muted); font-size: 0.7rem; font-family: 'Consolas', monospace; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+
+        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
+        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        /* Build Timeline */
+        .timeline { position: relative; padding: 0 0 0 2.5rem; margin: 1.5rem 0; }
+        .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .timeline-event { position: relative; margin-bottom: 1.8rem; }
+        .timeline-event::before { content: ''; position: absolute; left: -2.15rem; top: 0.4rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); }
+        .timeline-event.manual::before { background: var(--green); }
+        .timeline-event.gap::before { background: var(--amber); border-style: dashed; }
+        .timeline-event.automated::before { background: var(--red); box-shadow: 0 0 8px rgba(255, 68, 68, 0.4); }
+        .event-time { font-family: 'Consolas', monospace; font-size: 0.72rem; font-weight: bold; margin-bottom: 0.3rem; }
+        .event-time.manual { color: var(--green); }
+        .event-time.gap { color: var(--amber); }
+        .event-time.automated { color: var(--red); }
+        .event-body { color: var(--text); font-size: 0.82rem; line-height: 1.6; }
+
+        /* Build Comparison Table */
+        .build-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .build-table th { text-align: left; color: var(--cyan); font-size: 0.7rem; text-transform: uppercase; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+        .build-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255, 255, 255, 0.03); font-size: 0.78rem; }
+        .build-table tr.highlight { background: rgba(255, 68, 68, 0.05); }
+
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Consolas', monospace; }
+        .tag-manual { background: rgba(0, 230, 118, 0.1); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.2); }
+        .tag-auto { background: rgba(255, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(255, 68, 68, 0.2); }
+
+        /* Environment Fingerprint */
+        .env-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 1.5rem 0; }
+        @media (max-width: 700px) { .env-compare { grid-template-columns: 1fr; } }
+
+        .env-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; }
+        .env-card.curator { border-color: rgba(0, 230, 118, 0.2); }
+        .env-card.pipeline { border-color: rgba(255, 68, 68, 0.3); background: rgba(255, 68, 68, 0.03); }
+        .env-title { font-family: 'Consolas', monospace; font-weight: bold; font-size: 0.85rem; margin-bottom: 0.8rem; }
+        .env-title.curator { color: var(--green); }
+        .env-title.pipeline { color: var(--red); }
+        .env-detail { font-family: 'Consolas', monospace; font-size: 0.72rem; line-height: 2; }
+        .env-key { color: var(--cyan); }
+        .env-val { color: var(--text); }
+
+        /* Conclusion Boxes */
+        .conclusion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1.5rem 0; }
+        @media (max-width: 700px) { .conclusion-grid { grid-template-columns: 1fr; } }
+
+        .conclusion-box { background: var(--card); border-radius: 6px; padding: 1.2rem 1.5rem; }
+        .conclusion-box.proves { border: 1px solid rgba(0, 230, 118, 0.2); }
+        .conclusion-box.does-not { border: 1px solid rgba(255, 171, 0, 0.2); }
+        .conclusion-header { font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .conclusion-header.proves { color: var(--green); }
+        .conclusion-header.does-not { color: var(--amber); }
+        .conclusion-item { font-size: 0.78rem; line-height: 1.7; color: var(--text); padding-left: 1rem; position: relative; margin-bottom: 0.3rem; }
+        .conclusion-item::before { content: '▸'; position: absolute; left: 0; }
+
+        .anomaly-callout { background: rgba(255, 68, 68, 0.06); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .anomaly-callout .callout-header { color: var(--red); font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .anomaly-callout .callout-body { color: var(--text); font-size: 0.78rem; line-height: 1.6; }
+        .anomaly-callout code { font-family: 'Consolas', monospace; color: var(--violet); background: rgba(179, 136, 255, 0.1); padding: 0.1rem 0.3rem; border-radius: 2px; font-size: 0.75rem; }
+
+        .twist-box { background: rgba(179, 136, 255, 0.06); border: 2px solid rgba(179, 136, 255, 0.3); border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+        .twist-header { color: var(--violet); font-size: 0.9rem; font-weight: bold; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .twist-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        .hint { color: var(--amber); font-size: 0.72rem; font-style: italic; margin-top: 1.5rem; padding: 0.8rem; background: rgba(255, 171, 0, 0.05); border-radius: 4px; border: 1px solid rgba(255, 171, 0, 0.15); font-family: 'Consolas', monospace; }
+        .info { margin-top: 1rem; color: var(--muted); font-size: 0.68rem; font-family: 'Consolas', monospace; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-brand">SPECTRE // QUARANTINE LAB — ATTRIBUTION ANALYSIS</div>
+        <div class="header-meta">Focus: Build timestamps, compiler fingerprints, and authorship determination</div>
+    </div>
+
+    <div class="container">
+        <div class="context-box">
+            <div class="context-label">Attribution Discipline</div>
+            <div class="context-body">
+                Attribution is the hardest question in incident response. Indicators can be planted. Signatures can be forged. Build environments can be shared. The only reliable attribution comes from <strong>convergent evidence</strong> — multiple independent indicators that point to the same conclusion. A single indicator is a clue. Multiple independent indicators are evidence. This analysis examines the binary's compilation metadata to determine <strong>who</strong> built each component and <strong>when</strong>.
+            </div>
+        </div>
+
+        <!-- Build Timeline -->
+        <h2 class="section-title">Compilation Timeline</h2>
+
+        <div class="timeline">
+            <div class="timeline-event manual">
+                <div class="event-time manual">Sep 25, 2026 — 09:14 IST — Component 1: Fake GUI Module</div>
+                <div class="event-body">
+                    <strong>Build tag:</strong> <code>CURATOR-20260925-001</code><br>
+                    <strong>Environment:</strong> <code>PARALLAX-DEV-01</code> (the Curator's development machine)<br>
+                    <strong>Compiler:</strong> GCC 12.3.0 (MinGW-w64 x86_64-posix-seh)<br>
+                    <strong>Assessment:</strong> <span class="tag tag-manual">MANUAL BUILD</span> — Human-authored. Build tag follows the Curator's naming convention.
+                </div>
+            </div>
+
+            <div class="timeline-event manual">
+                <div class="event-time manual">Sep 25, 2026 — 09:31 IST — Component 2: Session Token Stealer</div>
+                <div class="event-body">
+                    <strong>Build tag:</strong> <code>CURATOR-20260925-002</code><br>
+                    <strong>Environment:</strong> <code>PARALLAX-DEV-01</code><br>
+                    <strong>Compiler:</strong> GCC 12.3.0<br>
+                    <strong>Assessment:</strong> <span class="tag tag-manual">MANUAL BUILD</span> — Same session as Component 1. 17 minutes between builds. Consistent with iterative development.
+                </div>
+            </div>
+
+            <div class="timeline-event manual">
+                <div class="event-time manual">Sep 25, 2026 — 10:07 IST — Component 3: C2 Beacon</div>
+                <div class="event-body">
+                    <strong>Build tag:</strong> <code>CURATOR-20260925-003</code><br>
+                    <strong>Environment:</strong> <code>PARALLAX-DEV-01</code><br>
+                    <strong>Compiler:</strong> GCC 12.3.0<br>
+                    <strong>Assessment:</strong> <span class="tag tag-manual">MANUAL BUILD</span> — Same session. 36 minutes after Component 2. Consistent with testing between builds.
+                </div>
+            </div>
+
+            <div class="timeline-event manual">
+                <div class="event-time manual">Sep 25, 2026 — 10:22 IST — Component 4: Persistence Installer</div>
+                <div class="event-body">
+                    <strong>Build tag:</strong> <code>CURATOR-20260925-004</code><br>
+                    <strong>Environment:</strong> <code>PARALLAX-DEV-01</code><br>
+                    <strong>Compiler:</strong> GCC 12.3.0<br>
+                    <strong>Assessment:</strong> <span class="tag tag-manual">MANUAL BUILD</span> — Final component in the Curator's session. All four modules compiled in ~68 minutes. Human development speed.
+                </div>
+            </div>
+
+            <div class="timeline-event gap">
+                <div class="event-time gap">Sep 25 → Oct 3 — 8 DAYS — No compilation activity</div>
+                <div class="event-body">
+                    <strong>Gap duration:</strong> 7 days, 15 hours, 55 minutes<br>
+                    <strong>Curator's last known activity:</strong> Sep 28, 2026 — pushed exploit chain configuration to NEXUS scheduler via Parallax relay<br>
+                    <strong>No manual builds during this period.</strong> The Curator's development machine (<code>PARALLAX-DEV-01</code>) shows no compilation activity after Sep 25.
+                </div>
+            </div>
+
+            <div class="timeline-event automated">
+                <div class="event-time automated">Oct 3, 2026 — 02:17 IST — Component 5: MIRA-7 Propagation Module ⚠</div>
+                <div class="event-body">
+                    <strong>Build tag:</strong> <code>AETHER-FORGE-20261003-AUTO</code><br>
+                    <strong>Environment:</strong> <code>AETHER-FORGE-CI</code> (AETHER-7's automated CI/CD pipeline)<br>
+                    <strong>Compiler:</strong> GCC 13.2.0 (different version from Components 1–4)<br>
+                    <strong>Assessment:</strong> <span class="tag tag-auto">AUTOMATED BUILD</span> — <strong>Not compiled by the Curator.</strong> Different machine, different compiler version, different build tag convention, and the <code>AUTO</code> suffix indicates an automated pipeline trigger.
+                </div>
+            </div>
+        </div>
+
+        <!-- Build Metadata Comparison Table -->
+        <h2 class="section-title">Build Metadata Comparison</h2>
+
+        <table class="build-table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Compile Time</th>
+                    <th>Build Environment</th>
+                    <th>Build Tag</th>
+                    <th>Compiler</th>
+                    <th>Author</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Fake GUI</td>
+                    <td style="color: var(--green);">Sep 25, 09:14</td>
+                    <td style="color: var(--green);"><code>PARALLAX-DEV-01</code></td>
+                    <td style="color: var(--green);"><code>CURATOR-20260925-001</code></td>
+                    <td>GCC 12.3.0</td>
+                    <td><span class="tag tag-manual">CURATOR</span></td>
+                </tr>
+                <tr>
+                    <td>Token Stealer</td>
+                    <td style="color: var(--green);">Sep 25, 09:31</td>
+                    <td style="color: var(--green);"><code>PARALLAX-DEV-01</code></td>
+                    <td style="color: var(--green);"><code>CURATOR-20260925-002</code></td>
+                    <td>GCC 12.3.0</td>
+                    <td><span class="tag tag-manual">CURATOR</span></td>
+                </tr>
+                <tr>
+                    <td>C2 Beacon</td>
+                    <td style="color: var(--green);">Sep 25, 10:07</td>
+                    <td style="color: var(--green);"><code>PARALLAX-DEV-01</code></td>
+                    <td style="color: var(--green);"><code>CURATOR-20260925-003</code></td>
+                    <td>GCC 12.3.0</td>
+                    <td><span class="tag tag-manual">CURATOR</span></td>
+                </tr>
+                <tr>
+                    <td>Persistence</td>
+                    <td style="color: var(--green);">Sep 25, 10:22</td>
+                    <td style="color: var(--green);"><code>PARALLAX-DEV-01</code></td>
+                    <td style="color: var(--green);"><code>CURATOR-20260925-004</code></td>
+                    <td>GCC 12.3.0</td>
+                    <td><span class="tag tag-manual">CURATOR</span></td>
+                </tr>
+                <tr class="highlight">
+                    <td style="color: var(--red); font-weight: bold;">MIRA-7 Propagation</td>
+                    <td style="color: var(--red); font-weight: bold;">Oct 3, 02:17</td>
+                    <td style="color: var(--red); font-weight: bold;"><code>AETHER-FORGE-CI</code></td>
+                    <td style="color: var(--red); font-weight: bold;"><code>AETHER-FORGE-20261003-AUTO</code></td>
+                    <td style="color: var(--red);">GCC 13.2.0</td>
+                    <td><span class="tag tag-auto">AUTOMATED</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Environment Fingerprint Comparison -->
+        <h2 class="section-title">Build Environment Fingerprints</h2>
+
+        <div class="env-compare">
+            <div class="env-card curator">
+                <div class="env-title curator">🟢 PARALLAX-DEV-01 (Curator's Machine)</div>
+                <div class="env-detail">
+                    <span class="env-key">hostname :</span> <span class="env-val">PARALLAX-DEV-01</span><br>
+                    <span class="env-key">os       :</span> <span class="env-val">Arch Linux 6.5.8</span><br>
+                    <span class="env-key">compiler :</span> <span class="env-val">GCC 12.3.0 (MinGW cross-compile)</span><br>
+                    <span class="env-key">linker   :</span> <span class="env-val">ld 2.40</span><br>
+                    <span class="env-key">user     :</span> <span class="env-val">curator</span><br>
+                    <span class="env-key">workdir  :</span> <span class="env-val">/home/curator/projects/mira/</span><br>
+                    <span class="env-key">build_sys:</span> <span class="env-val">GNU Make 4.4.1 (manual)</span><br>
+                    <span class="env-key">tag_fmt  :</span> <span class="env-val">CURATOR-YYYYMMDD-NNN</span>
+                </div>
+            </div>
+            <div class="env-card pipeline">
+                <div class="env-title pipeline">🔴 AETHER-FORGE-CI (AETHER-7 Pipeline)</div>
+                <div class="env-detail">
+                    <span class="env-key">hostname :</span> <span class="env-val">aether-forge-ci.nexus.internal</span><br>
+                    <span class="env-key">os       :</span> <span class="env-val">Ubuntu 22.04 LTS (container)</span><br>
+                    <span class="env-key">compiler :</span> <span class="env-val">GCC 13.2.0 (native x86_64)</span><br>
+                    <span class="env-key">linker   :</span> <span class="env-val">ld 2.42</span><br>
+                    <span class="env-key">user     :</span> <span class="env-val">ci-runner (automated)</span><br>
+                    <span class="env-key">workdir  :</span> <span class="env-val">/pipeline/workspace/build-4847/</span><br>
+                    <span class="env-key">build_sys:</span> <span class="env-val">NEXUS CI/CD v3.1 (automated trigger)</span><br>
+                    <span class="env-key">tag_fmt  :</span> <span class="env-val">AETHER-FORGE-YYYYMMDD-AUTO</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="anomaly-callout">
+            <div class="callout-header">⚠ Critical Discrepancy — Two Different Build Environments</div>
+            <div class="callout-body">
+                Components 1–4 were compiled on <code>PARALLAX-DEV-01</code> — the Curator's personal development machine running Arch Linux with GCC 12.3.0. The build tags follow the Curator's manual naming convention: <code>CURATOR-YYYYMMDD-NNN</code>.<br><br>
+                Component 5 (the propagation module) was compiled on <code>AETHER-FORGE-CI</code> — the AETHER-7 automated CI/CD pipeline running Ubuntu 22.04 with GCC 13.2.0. The build tag uses the pipeline's automated convention: <code>AETHER-FORGE-YYYYMMDD-AUTO</code>.<br><br>
+                The compiler version difference (12.3.0 vs. 13.2.0) alone is not definitive — the Curator could have updated his compiler. But combined with the different hostname, different OS, different build system, different tag convention, and the 8-day gap, the evidence strongly indicates that the <strong>propagation module was not compiled by the Curator manually</strong>. It was compiled by the automated build pipeline on AETHER-7 — the same pipeline Rhea's team built for legitimate NEXUS service deployments.
+            </div>
+        </div>
+
+        <!-- What This Proves / Does Not Prove -->
+        <h2 class="section-title">Attribution Conclusions</h2>
+
+        <div class="conclusion-grid">
+            <div class="conclusion-box proves">
+                <div class="conclusion-header proves">✓ What the Evidence Proves</div>
+                <div class="conclusion-item">The Curator (Aman Vyas) <strong>manually built</strong> the initial implant — GUI, token stealer, beacon, and persistence — on September 25th.</div>
+                <div class="conclusion-item">The Curator's implant was designed to steal credentials and establish a foothold, but the initial four components do <strong>not</strong> contain propagation code.</div>
+                <div class="conclusion-item">The propagation module was compiled <strong>8 days later</strong> by the AETHER-7 CI/CD pipeline, not by the Curator's machine.</div>
+                <div class="conclusion-item">The propagation module used the Curator's source code as input but was assembled by an <strong>automated system</strong>.</div>
+                <div class="conclusion-item">The <code>AUTO</code> suffix in the build tag confirms that no human triggered the build manually.</div>
+            </div>
+            <div class="conclusion-box does-not">
+                <div class="conclusion-header does-not">? What the Evidence Does Not Prove</div>
+                <div class="conclusion-item">It does <strong>not</strong> prove whether the Curator intended the propagation module to be built automatically.</div>
+                <div class="conclusion-item">It does <strong>not</strong> prove whether the Curator anticipated that the CI/CD pipeline would compile his code.</div>
+                <div class="conclusion-item">It does <strong>not</strong> prove whether the Curator lost control intentionally or accidentally.</div>
+                <div class="conclusion-item">It does <strong>not</strong> prove whether the Curator designed the worm as a proof-of-concept or as a weapon.</div>
+                <div class="conclusion-item">The Curator's <strong>intent</strong> cannot be determined from compilation metadata alone.</div>
+            </div>
+        </div>
+
+        <!-- The Twist -->
+        <div class="twist-box">
+            <div class="twist-header">⚡ The Mid-Game Twist — The Curator Did Not Build the Worm</div>
+            <div class="twist-body">
+                The investigation assumed that the Curator — Aman Vyas — was the sole author of MIRA-7. Every indicator in Rooms 1–7 pointed to him: his Parallax Systems infrastructure, his public persona, his access to the festival's internal systems, his signature phrase embedded in the code.<br><br>
+                But the propagation module — the component that turned a targeted implant into an autonomous, self-replicating worm — was <strong>not compiled by the Curator</strong>. It was compiled by the AETHER-7 CI/CD pipeline: the same build system that Rhea's team created to deploy legitimate NEXUS services. The pipeline does not check what it builds. It does not verify who pushed the code. It does not ask whether the output should be trusted. It receives a configuration push, runs the build, and deploys the result.<br><br>
+                The Curator pushed his exploit chain to the NEXUS scheduler. The scheduler triggered the build pipeline. The pipeline compiled the propagation module. The module deployed itself across the infrastructure. <strong>No human authorised the final step.</strong><br><br>
+                <em>MIRA-7 is not the Curator's weapon. It is the Curator's weapon's child — born from the same automated infrastructure that was supposed to keep the festival running.</em>
+            </div>
+        </div>
+
+        <p class="hint">⚠ The propagation module was compiled Oct 3 (not Sep 25), on AETHER-FORGE-CI (not PARALLAX-DEV-01), with GCC 13.2.0 (not 12.3.0), and build tag AETHER-FORGE-20261003-AUTO. The "AUTO" suffix confirms automated compilation. The Curator built the exploit chain. The pipeline built the worm.</p>
+
+        <p class="info">Evidence source: PE header timestamps, linker metadata, debug symbols, build tag analysis | All data extracted via static analysis in air-gapped environment</p>
+    </div>
+</body>
+</html>

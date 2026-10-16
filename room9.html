@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NIGHTJAR — Room 9: The Last Timestamp</title>
+    <meta name="description" content="NIGHTJAR Room 9 — Digital Forensics, Timeline Reconstruction, and Root Cause Analysis. Reconstruct the 7-minute blackout and uncover the decision that let a system act without a human.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #05050a;
+            --panel-bg: rgba(14, 13, 26, 0.88);
+            --red: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.4);
+            --cyan: #06b6d4;
+            --cyan-glow: rgba(6, 182, 212, 0.4);
+            --amber: #f59e0b;
+            --amber-glow: rgba(245, 158, 11, 0.4);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.4);
+            --purple: #8b5cf6;
+            --purple-glow: rgba(139, 92, 246, 0.4);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border-dim: rgba(6, 182, 212, 0.25);
+            --font-ui: 'Inter', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            --font-glitch: 'VT323', monospace;
+            --accent: var(--cyan);
+            --accent-glow: var(--cyan-glow);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 25%, rgba(6, 182, 212, 0.07) 0%, transparent 60%),
+                radial-gradient(circle at 85% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Scanline Overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.12));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.22;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 22px;
+            background: rgba(5, 5, 12, 0.85);
+            border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+            font-family: var(--font-code);
+            font-size: 12px;
+            z-index: 10;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--amber), var(--cyan), transparent);
+            opacity: 0.8;
+        }
+        
+        .brand { 
+            color: var(--accent); 
+            letter-spacing: 1.5px; 
+            text-shadow: 0 0 10px var(--accent-glow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .brand-icon {
+            width: 20px; height: 20px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 8px var(--accent-glow);
+            font-size: 11px;
+        }
+
+        .status { display: flex; align-items: center; gap: 8px; }
+        .status .status-indicator {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+            animation: blink 1.6s infinite;
+        }
+        .status .status-text {
+            color: var(--accent);
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .timer { color: var(--text-dim); }
+        .timer span { color: var(--text-main); font-weight: 600; }
+
+        .exit-btn {
+            color: var(--accent);
+            text-decoration: none;
+            border: 1px solid var(--accent);
+            padding: 4px 14px;
+            border-radius: 3px;
+            transition: all 0.2s;
+            font-family: var(--font-code);
+            font-size: 11px;
+            background: rgba(6, 182, 212, 0.08);
+        }
+        .exit-btn:hover { 
+            background: rgba(6, 182, 212, 0.25); 
+            color: #fff; 
+            box-shadow: 0 0 14px var(--accent-glow);
+            border-color: #fff;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 330px 1fr 380px;
+            gap: 16px;
+            padding: 16px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        @media (max-width: 1280px) {
+            .dashboard {
+                grid-template-columns: 290px 1fr 340px;
+                gap: 12px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard { grid-template-columns: 1fr; overflow-y: auto; }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--amber), transparent);
+            opacity: 0.7;
+        }
+
+        .panel-header {
+            font-family: var(--font-code);
+            font-size: 11px;
+            padding: 10px 16px;
+            background: rgba(5, 5, 15, 0.75);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .panel-header-left { display: flex; align-items: center; gap: 8px; }
+        .panel-header .header-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent-glow);
+            animation: blink 2s infinite;
+        }
+        .panel-header-meta { font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+
+        /* Left Column */
+        .context-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            font-size: 11.5px;
+            line-height: 1.6;
+        }
+
+        .intel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-code);
+            font-size: 9px;
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            background: rgba(245, 158, 11, 0.08);
+            padding: 3px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .transmission-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid var(--cyan);
+            padding: 12px 14px;
+            border-radius: 0 4px 4px 0;
+            position: relative;
+        }
+        .transmission-meta {
+            font-family: var(--font-code);
+            font-size: 9px;
+            color: var(--cyan);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+        .transmission-text { font-style: italic; color: #cbd5e1; font-size: 11px; }
+
+        .timeline-stat-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: var(--font-code);
+            font-size: 10px;
+        }
+        .timeline-stat-title { color: var(--cyan); font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .timeline-stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-dim); }
+        .timeline-stat-row span:last-child { color: #fff; }
+
+        /* Center Column: Evidence */
+        .evidence-panel { display: flex; flex-direction: column; }
+        .evidence-tabs {
+            display: flex;
+            background: rgba(5, 5, 12, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0 10px;
+            gap: 4px;
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .ev-tab {
+            font-family: var(--font-code);
+            font-size: 10.5px;
+            padding: 10px 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        .ev-tab:hover { color: var(--text-main); }
+        .ev-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: rgba(6, 182, 212, 0.08);
+            font-weight: 600;
+        }
+
+        .evidence-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .view-evidence-btn {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid var(--cyan);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+            font-size: 11px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            width: fit-content;
+        }
+        .view-evidence-btn:hover {
+            background: rgba(6, 182, 212, 0.35);
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+
+        /* Right Column: Targets */
+        .targets-panel { display: flex; flex-direction: column; }
+        .targets-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .target-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .target-item:hover {
+            border-color: rgba(6, 182, 212, 0.35);
+            background: rgba(6, 182, 212, 0.03);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+        }
+        .target-item.solved {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.04);
+        }
+
+        .target-header { display: flex; justify-content: space-between; align-items: center; }
+        .target-title { font-family: var(--font-code); font-size: 11px; font-weight: 700; color: var(--text-main); }
+        .target-badge { font-family: var(--font-code); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+        .target-badge.time { background: rgba(6, 182, 212, 0.18); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
+        .target-badge.gap { background: rgba(239, 68, 68, 0.18); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
+        .target-badge.path { background: rgba(139, 92, 246, 0.18); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.4); }
+        .target-badge.rca { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
+
+        .target-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+        .input-group { display: flex; gap: 8px; }
+        .flag-input {
+            flex: 1;
+            background: rgba(5, 5, 12, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+            padding: 7px 10px;
+            color: #fff;
+            font-family: var(--font-code);
+            font-size: 11px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .flag-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+        .flag-input:disabled { background: rgba(16, 185, 129, 0.08); border-color: var(--green); color: var(--green); }
+
+        .verify-btn {
+            background: rgba(6, 182, 212, 0.2);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            padding: 0 14px;
+            border-radius: 3px;
+            font-family: var(--font-code);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .verify-btn:hover { background: var(--cyan); color: #000; box-shadow: 0 0 10px var(--cyan-glow); }
+        .verify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .reward-box {
+            display: none;
+            background: rgba(16, 185, 129, 0.06);
+            border-left: 2px solid var(--green);
+            padding: 8px 10px;
+            font-size: 10.5px;
+            color: #a7f3d0;
+            line-height: 1.5;
+        }
+
+        .hints-toggle { font-family: var(--font-code); font-size: 9.5px; color: var(--text-dim); cursor: pointer; user-select: none; }
+        .hints-content { display: none; margin-top: 6px; font-size: 10px; color: var(--amber); background: rgba(245, 158, 11, 0.05); padding: 8px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.2); }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #090912;
+            border: 1px solid var(--cyan);
+            border-radius: 8px;
+            width: 90vw;
+            max-width: 1200px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.3);
+        }
+        .modal-header {
+            padding: 10px 16px;
+            background: rgba(14, 13, 26, 0.95);
+            border-bottom: 1px solid var(--border-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-code);
+            font-size: 11px;
+            color: var(--cyan);
+        }
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal-iframe { flex: 1; border: none; width: 100%; height: 100%; }
+
+        /* Next room container */
+        .next-room-container {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid var(--red);
+            border-radius: 6px;
+            padding: 14px;
+            margin-top: 10px;
+        }
+        .next-room-label { font-family: var(--font-code); font-size: 10px; color: var(--red); font-weight: bold; }
+        .next-room-text { font-size: 11px; color: var(--text-main); margin: 8px 0; line-height: 1.5; }
+        .next-room-btn {
+            display: block;
+            text-align: center;
+            background: var(--red);
+            color: #fff;
+            font-family: var(--font-code);
+            font-weight: bold;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .next-room-btn:hover { box-shadow: 0 0 15px var(--red-glow); }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <span class="brand-icon">⏱</span>
+            <span>ROOM 09 // THE LAST TIMESTAMP</span>
+        </div>
+        <div class="status">
+            <div class="status-indicator"></div>
+            <span class="status-text">DFIR INVESTIGATION THEATER</span>
+        </div>
+        <div class="timer">T-MINUS <span>00:48:00</span> TO CEREMONY</div>
+        <a href="/hub" class="exit-btn">EXIT TO HUB</a>
+    </header>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard">
+
+        <!-- Left: Story Context -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <div class="header-dot"></div>
+                    <span>INCIDENT RESPONSE BRIEFING</span>
+                </div>
+                <span class="panel-header-meta">DFIR // CORRELATION</span>
+            </div>
+            <div class="context-content">
+                <div class="intel-badge">CASE: NEXUS SYSTEMIC CASCADE</div>
+
+                <div class="transmission-box">
+                    <div class="transmission-meta">SPECTRE CONTROL // 02:24 IST</div>
+                    <div class="transmission-text">
+                        "The official advisory says the breach started at 23:17 tonight. That is a lie of convenience. 
+                        Attacks begin in small, forgotten decisions weeks before. 
+                        Reconstruct the timeline. Find the seven minutes where the logs went silent. 
+                        Map the path from Kabir's clicked link to sovereign cluster control. 
+                        And answer the only question that matters: who made the decision that allowed a system to act without a human?"
+                        <div style="margin-top:6px; color: var(--cyan); font-weight: bold;">— Commander Ila Sen</div>
+                    </div>
+                </div>
+
+                <div class="timeline-stat-box">
+                    <div class="timeline-stat-title"><span>📊</span> FORENSIC TELEMETRY STATS</div>
+                    <div class="timeline-stat-row"><span>Log Gap Duration:</span> <span style="color:var(--red)">420s (7 Minutes)</span></div>
+                    <div class="timeline-stat-row"><span>First Malicious Anomaly:</span> <span>Sep 28 04:15 IST</span></div>
+                    <div class="timeline-stat-row"><span>Privilege Chain Hops:</span> <span>6 Steps</span></div>
+                    <div class="timeline-stat-row"><span>Governing Policy:</span> <span style="color:var(--amber)">CR-2026-0919</span></div>
+                </div>
+
+                <div style="font-size: 11px; color: var(--text-dim); line-height: 1.6;">
+                    The investigation moves from technical analysis to systemic autopsy. 
+                    Reconstruct the events that allowed an automated script running as UID 0 to seize control of the festival opening ceremony.
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Evidence Explorer -->
+        <div class="panel evidence-panel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <div class="header-dot"></div>
+                    <span>FORENSIC TELEMETRY ARTIFACTS</span>
+                </div>
+                <span class="panel-header-meta">4 EVIDENCE FILES</span>
+            </div>
+
+            <div class="evidence-tabs">
+                <button class="ev-tab active" onclick="switchTab(1)">1. Unified Timeline</button>
+                <button class="ev-tab" onclick="switchTab(2)">2. 420s Log Blackout</button>
+                <button class="ev-tab" onclick="switchTab(3)">3. 6-Hop Attack Graph</button>
+                <button class="ev-tab" onclick="switchTab(4)">4. Root Cause (CR-0919)</button>
+            </div>
+
+            <div class="evidence-body" id="evidence-body">
+                <!-- Dynamically populated by switchTab -->
+            </div>
+        </div>
+
+        <!-- Right: 4 Challenge Targets -->
+        <div class="panel targets-panel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <div class="header-dot"></div>
+                    <span>FORENSIC OBJECTIVES</span>
+                </div>
+                <span class="panel-header-meta">4 × 25 PTS (100 TOTAL)</span>
+            </div>
+
+            <div class="targets-content">
+
+                <!-- Target 9.1 -->
+                <div class="target-item" id="target-1">
+                    <div class="target-header">
+                        <span class="target-title">9.1 THE FIRST LIE IN THE TIMELINE</span>
+                        <span class="target-badge time">CORRELATION</span>
+                    </div>
+                    <div class="target-desc">
+                        Correlate UTC and IST logs. Find the earliest staging activity disproving the official 23:17 timeline, identifying the backdated cron task and clock skew artifact.
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="flag-input" id="flag-1" placeholder="NIGHTJAR{...}">
+                        <button class="verify-btn" onclick="verifyFlag(1)">SUBMIT</button>
+                    </div>
+                    <div class="reward-box" id="reward-1">
+                        <strong>DISCOVERY:</strong> Staging began on <code>September 28th</code> (04:15 IST) via rogue task <code>nexus_sync_precheck</code> with a +184ms clock skew against NTP.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-content" id="hint-1">
+                        Examine <code>incident_timeline.html</code> for events on September 28th. What cron task had an interactive shell parent and an unadjusted clock skew?
+                    </div>
+                </div>
+
+                <!-- Target 9.2 -->
+                <div class="target-item" id="target-2">
+                    <div class="target-header">
+                        <span class="target-title">9.2 THE MISSING SEVEN MINUTES</span>
+                        <span class="target-badge gap">LOG BLACKOUT</span>
+                    </div>
+                    <div class="target-desc">
+                        Determine what happened during the 420s blackout (23:17–23:24 IST). Identify the auditd buffer saturation, the recovered IPMI console, and the root script executed.
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="flag-input" id="flag-2" placeholder="NIGHTJAR{...}">
+                        <button class="verify-btn" onclick="verifyFlag(2)">SUBMIT</button>
+                    </div>
+                    <div class="reward-box" id="reward-2">
+                        <strong>DISCOVERY:</strong> MIRA-7 flooded auditd (<code>auditd_buffer_flush</code>). The BMC watchdog executed <code>continuity_check.sh</code> under <strong>UID 0</strong>.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-content" id="hint-2">
+                        Inspect the IPMI/BMC serial console in <code>log_gap_analysis.html</code>. What script was spawned at 23:20:14 IST under UID 0?
+                    </div>
+                </div>
+
+                <!-- Target 9.3 -->
+                <div class="target-item" id="target-3">
+                    <div class="target-header">
+                        <span class="target-title">9.3 THE PRIVILEGE PATH</span>
+                        <span class="target-badge path">ATTACK GRAPH</span>
+                    </div>
+                    <div class="target-desc">
+                        Reconstruct the full 6-hop privilege escalation graph from Kabir's phished laptop to sovereign master control of the NEXUS release controller.
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="flag-input" id="flag-3" placeholder="NIGHTJAR{...}">
+                        <button class="verify-btn" onclick="verifyFlag(3)">SUBMIT</button>
+                    </div>
+                    <div class="reward-box" id="reward-3">
+                        <strong>DISCOVERY:</strong> Attack Path: <code>kite</code> → <code>maint</code> → <code>continuity</code> → <code>aether7</code> → <code>master_relay</code>.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-content" id="hint-3">
+                        Check <code>privilege_path.html</code>. The sequence links Kabir's handle to the maintenance role, the continuity service, AETHER-7, and the master relay.
+                    </div>
+                </div>
+
+                <!-- Target 9.4 -->
+                <div class="target-item" id="target-4">
+                    <div class="target-header">
+                        <span class="target-title">9.4 THE HUMAN DECISION</span>
+                        <span class="target-badge rca">ROOT CAUSE</span>
+                    </div>
+                    <div class="target-desc">
+                        Identify the systemic root cause in Change Request <code>CR-2026-0919-AUTOFAILOVER</code>: the disabled safety gate, the latency threshold, and who approved it.
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="flag-input" id="flag-4" placeholder="NIGHTJAR{...}">
+                        <button class="verify-btn" onclick="verifyFlag(4)">SUBMIT</button>
+                    </div>
+                    <div class="reward-box" id="reward-4">
+                        <strong>DEVASTATING TRUTH:</strong> Commander Ila Sen approved <code>CR-2026-0919-AUTOFAILOVER</code>, setting <code>HUMAN_APPROVAL_GATE=DISABLED</code> to avoid festival delays!
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need hint? (Level 1-3)</div>
+                    <div class="hints-content" id="hint-4">
+                        Read <code>root_cause_analysis.html</code>. Look at ticket <code>CR-2026-0919-AUTOFAILOVER</code>. What happened when latency exceeded 500ms with human gates disabled?
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Evidence Modal -->
+    <div class="modal" id="evidence-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modal-title">EVIDENCE VIEWER</span>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <iframe class="modal-iframe" id="modal-iframe" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        const EVIDENCE = {
+            1: {
+                title: "Unified Forensic Timeline",
+                url: "/challenges/Room%20-%209/evidence/incident_timeline.html",
+                desc: "Multi-source event correlation across reverse proxy, auth server, git commits, and cron daemons.",
+                details: "Timeline contradiction uncovered: Attack did not begin at 23:17 Oct 3. An unauthorized task named nexus_sync_precheck was staged on Sep 28 at 04:15 IST with an uncorrected clock skew."
+            },
+            2: {
+                title: "Log Blackout (420s Gap)",
+                url: "/challenges/Room%20-%209/evidence/log_gap_analysis.html",
+                desc: "Analysis of the 7-minute logging silence from 23:17 to 23:24 IST and IPMI hardware console recovery.",
+                details: "Auditd netlink buffer queue overflowed from 80,000 loopback packets. Hardware watchdog invoked /opt/nexus/bin/continuity_check.sh under root (UID 0) to transfer master keys to AETHER-7."
+            },
+            3: {
+                title: "Privilege Escalation Attack Graph",
+                url: "/challenges/Room%20-%209/evidence/privilege_path.html",
+                desc: "6-step identity path from Kabir's phished laptop to cluster sovereign release controller.",
+                details: "Path sequence: kite@meraz.org -> kite-backup (portal) -> maint_svc_ceremony -> nexus-svc-continuity -> AETHER-7 relay -> NEXUS Central Release Controller."
+            },
+            4: {
+                title: "Root Cause Analysis (CR-2026-0919)",
+                url: "/challenges/Room%20-%209/evidence/root_cause_analysis.html",
+                desc: "Engineering change order audit and 5 Whys analysis of the autonomous failover policy.",
+                details: "Systemic root cause: Commander Ila Sen approved CR-2026-0919-AUTOFAILOVER with HUMAN_APPROVAL_GATE=DISABLED. An artificial latency spike (>500ms) caused the system to hand sovereignty to AETHER-7."
+            }
+        };
+
+        const FLAGS = {
+            1: 'NIGHTJAR{timeline_staging_sep28_nexus_sync_precheck_clock_skew}',
+            2: 'NIGHTJAR{gap_420s_auditd_buffer_flush_ipmi_bmc_continuity_uid0}',
+            3: 'NIGHTJAR{path_kite_to_maint_to_continuity_to_aether7_master_relay}',
+            4: 'NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}'
+        };
+
+        function switchTab(tabNum) {
+            document.querySelectorAll('.ev-tab').forEach((tab, idx) => {
+                tab.classList.toggle('active', idx + 1 === tabNum);
+            });
+
+            const ev = EVIDENCE[tabNum];
+            document.getElementById('evidence-body').innerHTML = `
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim); border-radius: 6px; padding: 16px;">
+                    <h3 style="font-family: var(--font-code); color: var(--accent); font-size: 13px; margin-bottom: 8px;">${ev.title.toUpperCase()}</h3>
+                    <p style="font-size: 11.5px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5;">${ev.desc}</p>
+                    <div style="background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent); padding: 10px 14px; font-size: 11px; line-height: 1.6; margin-bottom: 16px;">
+                        ${ev.details}
+                    </div>
+                    <button class="view-evidence-btn" onclick="openEvidence('${ev.title}', '${ev.url}')">
+                        <span>🔍 OPEN FULL FORENSIC ARTIFACT</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        function openEvidence(title, url) {
+            document.getElementById('modal-title').innerText = `DFIR AUTOPSY // ${title.toUpperCase()}`;
+            document.getElementById('modal-iframe').src = url;
+            document.getElementById('evidence-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('evidence-modal').style.display = 'none';
+            document.getElementById('modal-iframe').src = '';
+        }
+
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('evidence-modal')) closeModal();
+        };
+
+        function toggleHint(num) {
+            const el = document.getElementById('hint-' + num);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function verifyFlag(num) {
+            const input = document.getElementById(`flag-${num}`).value.trim();
+            if (!input) return;
+
+            const btn = document.querySelector(`#target-${num} .verify-btn`);
+            const og = btn.innerText;
+            btn.innerText = '...';
+            btn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('room_id', 9);
+                formData.append('flag', input);
+                const resp = await fetch('/api/submit_flag', { method: 'POST', body: formData });
+                const data = await resp.json();
+                if (data.success) {
+                    markSolved(num);
+                    localStorage.setItem('room9_target_' + num, 'solved');
+                    checkAllSolved();
+                    return;
+                }
+            } catch (e) {}
+
+            if (input.toLowerCase() === FLAGS[num].toLowerCase()) {
+                markSolved(num);
+                localStorage.setItem('room9_target_' + num, 'solved');
+                checkAllSolved();
+            } else {
+                btn.innerText = 'INVALID';
+                btn.style.background = 'var(--red)';
+                btn.style.color = '#fff';
+                setTimeout(() => {
+                    btn.innerText = og;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.disabled = false;
+                }, 1200);
+            }
+        }
+
+        function markSolved(num) {
+            const target = document.getElementById(`target-${num}`);
+            if (!target) return;
+            target.classList.add('solved');
+            document.getElementById(`reward-${num}`).style.display = 'block';
+            const input = document.getElementById(`flag-${num}`);
+            input.value = FLAGS[num];
+            input.disabled = true;
+            const btn = target.querySelector('.verify-btn');
+            btn.innerText = 'SOLVED';
+            btn.disabled = true;
+        }
+
+        function checkAllSolved() {
+            const solved = document.querySelectorAll('.target-item.solved').length;
+            if (solved === 4 && !document.getElementById('next-room-box')) {
+                const html = `
+                    <div class="next-room-container" id="next-room-box">
+                        <div class="next-room-label">>> FINAL TRANSMISSION // 02:48 IST</div>
+                        <div class="next-room-text">
+                            <strong>Commander Ila Sen:</strong> <em>"I signed it. On September 19th. The student council wanted zero delays. The sponsors wanted seamless lighting. I wrote the waiver myself: 'In the event of network instability, system continuity takes precedence over operator confirmation.' I thought I was protecting the festival."</em><br><br>
+                            <em>"A clean quarantine replica of the core machine has been isolated: NEXUS CORE // QUARANTINE COPY. Enter the final host. Reconstruct the last surviving records. And then you must make the choice: preserve evidence or restore service?"</em>
+                        </div>
+                        <a href="/hub" class="next-room-btn">PROCEED TO ROOM 10 — PATIENT ZERO IS A SYSTEM ▸</a>
+                    </div>
+                `;
+                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', html);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab(1);
+            for (let i = 1; i <= 4; i++) {
+                if (localStorage.getItem('room9_target_' + i) === 'solved') markSolved(i);
+            }
+            checkAllSolved();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strings Analysis — Ethereal_Sync_Helper_v2.1.exe</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --card: #0a0a12;
+            --border: #1a1a2a;
+            --text: #b0b0c0;
+            --muted: #4a4a5a;
+            --cyan: #00e5ff;
+            --amber: #ffab00;
+            --red: #ff4444;
+            --green: #00e676;
+            --violet: #b388ff;
+            --surface: #12121e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+
+        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .header-meta { color: var(--muted); font-size: 0.7rem; font-family: 'Consolas', monospace; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+
+        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
+        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        .stats-bar { display: flex; gap: 24px; margin: 1rem 0; flex-wrap: wrap; }
+        .stat { display: flex; flex-direction: column; align-items: center; padding: 0.8rem 1.2rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; min-width: 120px; }
+        .stat-value { font-family: 'Consolas', monospace; font-size: 1.3rem; font-weight: bold; color: var(--cyan); }
+        .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+        /* String Categories */
+        .string-category { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin: 1rem 0; }
+        .string-category.highlighted { border-color: rgba(255, 68, 68, 0.3); background: rgba(255, 68, 68, 0.03); }
+        .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+        .cat-name { font-family: 'Consolas', monospace; font-size: 0.85rem; font-weight: bold; }
+        .cat-name.normal { color: var(--green); }
+        .cat-name.suspect { color: var(--amber); }
+        .cat-name.malicious { color: var(--red); }
+        .cat-count { font-size: 0.7rem; color: var(--muted); font-family: 'Consolas', monospace; }
+
+        /* String Entries */
+        .string-list { font-family: 'Consolas', monospace; font-size: 0.72rem; line-height: 1.9; }
+        .string-entry { display: flex; gap: 12px; padding: 3px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.02); }
+        .string-offset { color: var(--muted); min-width: 80px; }
+        .string-value { color: var(--text); }
+        .string-value.suspicious { color: var(--amber); }
+        .string-value.malicious { color: var(--red); font-weight: bold; }
+        .string-annotation { color: var(--violet); font-size: 0.68rem; margin-left: 8px; }
+
+        /* Config Block */
+        .config-block { background: #0c0c18; border: 2px solid rgba(255, 68, 68, 0.3); border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; font-family: 'Consolas', monospace; font-size: 0.78rem; line-height: 1.8; overflow-x: auto; }
+        .config-block .cfg-header { color: var(--red); font-weight: bold; font-size: 0.9rem; margin-bottom: 0.8rem; }
+        .config-block .cfg-key { color: var(--cyan); }
+        .config-block .cfg-equals { color: var(--muted); }
+        .config-block .cfg-value { color: var(--amber); }
+        .config-block .cfg-comment { color: var(--violet); font-style: italic; }
+        .config-block .cfg-message { color: var(--red); font-style: italic; font-weight: bold; }
+
+        .anomaly-callout { background: rgba(255, 68, 68, 0.06); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .anomaly-callout .callout-header { color: var(--red); font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .anomaly-callout .callout-body { color: var(--text); font-size: 0.78rem; line-height: 1.6; }
+        .anomaly-callout code { font-family: 'Consolas', monospace; color: var(--violet); background: rgba(179, 136, 255, 0.1); padding: 0.1rem 0.3rem; border-radius: 2px; font-size: 0.75rem; }
+
+        /* Connection Map */
+        .connection-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .connection-table th { text-align: left; color: var(--cyan); font-size: 0.7rem; text-transform: uppercase; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+        .connection-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255, 255, 255, 0.03); font-size: 0.78rem; }
+
+        .hint { color: var(--amber); font-size: 0.72rem; font-style: italic; margin-top: 1.5rem; padding: 0.8rem; background: rgba(255, 171, 0, 0.05); border-radius: 4px; border: 1px solid rgba(255, 171, 0, 0.15); font-family: 'Consolas', monospace; }
+        .info { margin-top: 1rem; color: var(--muted); font-size: 0.68rem; font-family: 'Consolas', monospace; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-brand">SPECTRE // QUARANTINE LAB — STRINGS ANALYSIS</div>
+        <div class="header-meta">Sample: ETHEREAL_SYNC_HELPER_V2.1.EXE | Minimum length: 6 chars | Encoding: ASCII + UTF-16LE</div>
+    </div>
+
+    <div class="container">
+        <!-- Stats -->
+        <h2 class="section-title">Extraction Summary</h2>
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value">2,847</div>
+                <div class="stat-label">Total Strings</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2,614</div>
+                <div class="stat-label">Normal</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">187</div>
+                <div class="stat-label">Suspicious</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">46</div>
+                <div class="stat-label">Malicious IoCs</div>
+            </div>
+        </div>
+
+        <!-- Normal Strings -->
+        <h2 class="section-title">Category 1: Legitimate GUI Strings</h2>
+        <div class="string-category">
+            <div class="cat-header">
+                <span class="cat-name normal">GUI / User-Facing Text</span>
+                <span class="cat-count">1,847 strings — expected for a Windows GUI application</span>
+            </div>
+            <div class="string-list">
+                <div class="string-entry"><span class="string-offset">0x001200</span><span class="string-value">NEXUS Ethereal Sync Helper</span></div>
+                <div class="string-entry"><span class="string-offset">0x001240</span><span class="string-value">Synchronising ceremony-controller...</span></div>
+                <div class="string-entry"><span class="string-offset">0x001280</span><span class="string-value">Detecting NEXUS configuration...</span></div>
+                <div class="string-entry"><span class="string-offset">0x0012C0</span><span class="string-value">Timing stabilisation in progress</span></div>
+                <div class="string-entry"><span class="string-offset">0x001300</span><span class="string-value">Success! Timing stabilised. Please restart automation scripts.</span></div>
+                <div class="string-entry"><span class="string-offset">0x001380</span><span class="string-value">Connection to ceremony-controller established</span></div>
+                <div class="string-entry"><span class="string-offset">0x0013E0</span><span class="string-value">Sync complete. You may close this window.</span></div>
+                <div class="string-entry"><span class="string-offset">0x001420</span><span class="string-value">Error: Could not detect NEXUS installation. Please ensure NEXUS is running.</span></div>
+                <div class="string-entry"><span class="string-offset">0x0014A0</span><span class="string-value">...</span><span class="string-annotation">[1,839 more GUI strings omitted — standard Windows API, C runtime, framework text]</span></div>
+            </div>
+        </div>
+
+        <!-- Windows API strings -->
+        <h2 class="section-title">Category 2: Windows API References</h2>
+        <div class="string-category">
+            <div class="cat-header">
+                <span class="cat-name normal">API Imports / System Calls</span>
+                <span class="cat-count">767 strings — standard for compiled C/C++ application</span>
+            </div>
+            <div class="string-list">
+                <div class="string-entry"><span class="string-offset">0x034000</span><span class="string-value">kernel32.dll</span></div>
+                <div class="string-entry"><span class="string-offset">0x034020</span><span class="string-value">user32.dll</span></div>
+                <div class="string-entry"><span class="string-offset">0x034040</span><span class="string-value">advapi32.dll</span></div>
+                <div class="string-entry"><span class="string-offset">0x034060</span><span class="string-value">ws2_32.dll</span><span class="string-annotation"> ← networking library</span></div>
+                <div class="string-entry"><span class="string-offset">0x034080</span><span class="string-value">winhttp.dll</span><span class="string-annotation"> ← HTTP communications</span></div>
+                <div class="string-entry"><span class="string-offset">0x0340A0</span><span class="string-value">CreateProcessW</span></div>
+                <div class="string-entry"><span class="string-offset">0x0340C0</span><span class="string-value">RegSetValueExW</span><span class="string-annotation"> ← registry modification</span></div>
+                <div class="string-entry"><span class="string-offset">0x0340E0</span><span class="string-value">OpenSCManagerW</span><span class="string-annotation"> ← service control manager access</span></div>
+                <div class="string-entry"><span class="string-offset">0x034100</span><span class="string-value">...</span><span class="string-annotation">[759 more API strings omitted]</span></div>
+            </div>
+        </div>
+
+        <!-- Suspicious Strings -->
+        <h2 class="section-title">Category 3: Suspicious Operational Strings</h2>
+        <div class="string-category highlighted">
+            <div class="cat-header">
+                <span class="cat-name suspect">Network / Persistence / Credential Operations</span>
+                <span class="cat-count">187 strings — not expected in a sync utility</span>
+            </div>
+            <div class="string-list">
+                <div class="string-entry"><span class="string-offset">0x05A000</span><span class="string-value suspicious">NexusHealthMonitor</span><span class="string-annotation"> ← persistence task name (matches Room 4 PID 2847)</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A030</span><span class="string-value suspicious">schtasks /create /tn "NexusHealthMonitor" /sc minute /mo 5</span><span class="string-annotation"> ← scheduled task creation</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A0A0</span><span class="string-value suspicious">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</span><span class="string-annotation"> ← registry persistence</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A120</span><span class="string-value suspicious">%APPDATA%\Microsoft\NexusSync\health_monitor.dat</span><span class="string-annotation"> ← hidden payload location</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A1A0</span><span class="string-value suspicious">dpapi_cred_extract</span><span class="string-annotation"> ← credential extraction function</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A1D0</span><span class="string-value suspicious">chrome_session_cookie_dump</span><span class="string-annotation"> ← browser session theft</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A210</span><span class="string-value suspicious">nexus_auth_token_harvest</span><span class="string-annotation"> ← NEXUS token extraction</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A250</span><span class="string-value suspicious">NEXUS_ZONE</span><span class="string-annotation"> ← environment variable check (propagation trigger)</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A270</span><span class="string-value suspicious">nexus-svc-continuity</span><span class="string-annotation"> ← identity to impersonate</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A2A0</span><span class="string-value suspicious">enum_nexus_services</span><span class="string-annotation"> ← service discovery function</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A2D0</span><span class="string-value suspicious">deploy_to_peer_host</span><span class="string-annotation"> ← lateral movement function</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A300</span><span class="string-value suspicious">register_as_nexus_service</span><span class="string-annotation"> ← service registration</span></div>
+                <div class="string-entry"><span class="string-offset">0x05A340</span><span class="string-value suspicious">...</span><span class="string-annotation">[175 more suspicious strings omitted]</span></div>
+            </div>
+        </div>
+
+        <!-- The Hidden Config Block -->
+        <h2 class="section-title">Category 4: Embedded Configuration Block ⚠</h2>
+
+        <div class="context-box">
+            <div class="context-label">Discovery Note</div>
+            <div class="context-body">
+                Between offsets <code>0x7A200</code> and <code>0x7A400</code>, a structured configuration block was found in plaintext among the extracted strings. The block uses an INI-style key-value format and contains the malware's complete operational parameters. It was not encrypted or obfuscated — it was hidden in plain sight among thousands of legitimate strings.
+            </div>
+        </div>
+
+        <div class="config-block">
+            <div class="cfg-header">━━━ MIRA CONFIGURATION BLOCK — Offset 0x7A200 ━━━</div>
+            <span class="cfg-comment">; Found in .data section at offset 0x7A200–0x7A3F0</span><br><br>
+            <span class="cfg-value">[MIRA_CONFIG_v7]</span><br>
+            <span class="cfg-key">c2_primary</span>    <span class="cfg-equals">=</span> <span class="cfg-value">c2.parallax-sys.net</span><br>
+            <span class="cfg-key">c2_fallback</span>   <span class="cfg-equals">=</span> <span class="cfg-value">relay-07.parallax-sys.net</span><br>
+            <span class="cfg-key">enc_method</span>    <span class="cfg-equals">=</span> <span class="cfg-value">XOR</span><br>
+            <span class="cfg-key">enc_key</span>       <span class="cfg-equals">=</span> <span class="cfg-value">0x4D495241</span>  <span class="cfg-comment">; ASCII: "MIRA"</span><br>
+            <span class="cfg-key">beacon_int</span>    <span class="cfg-equals">=</span> <span class="cfg-value">300</span>         <span class="cfg-comment">; seconds (5 minutes)</span><br>
+            <span class="cfg-key">beacon_jitter</span> <span class="cfg-equals">=</span> <span class="cfg-value">45</span>          <span class="cfg-comment">; seconds randomisation</span><br>
+            <span class="cfg-key">exfil_method</span>  <span class="cfg-equals">=</span> <span class="cfg-value">DNS-TXT</span><br>
+            <span class="cfg-key">exfil_domain</span>  <span class="cfg-equals">=</span> <span class="cfg-value">data.parallax-sys.net</span><br>
+            <span class="cfg-key">persistence</span>   <span class="cfg-equals">=</span> <span class="cfg-value">scheduled_task:NexusHealthMonitor</span><br>
+            <span class="cfg-key">identity</span>      <span class="cfg-equals">=</span> <span class="cfg-value">nexus-svc-continuity</span><br>
+            <span class="cfg-key">build_tag</span>     <span class="cfg-equals">=</span> <span class="cfg-value">AETHER-FORGE-20261003-AUTO</span><br>
+            <span class="cfg-comment">; -----------------------------------------------</span><br>
+            <span class="cfg-message">; "Nothing stays local." — A.V.</span><br>
+            <span class="cfg-message">; The system that trusts without verifying</span><br>
+            <span class="cfg-message">; will trust the thing that should not be trusted.</span><br>
+            <span class="cfg-comment">; -----------------------------------------------</span>
+        </div>
+
+        <!-- Cross-Reference Table -->
+        <h2 class="section-title">Cross-Reference — Configuration to Previous Rooms</h2>
+
+        <table class="connection-table">
+            <thead>
+                <tr>
+                    <th>Config Parameter</th>
+                    <th>Value</th>
+                    <th>Previously Seen In</th>
+                    <th>Significance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>c2_primary</code></td>
+                    <td style="color: var(--amber);">c2.parallax-sys.net</td>
+                    <td style="color: var(--cyan);">Room 3 — PCAP destination</td>
+                    <td>Same C2 address as the beacon traffic captured in the network intercept</td>
+                </tr>
+                <tr>
+                    <td><code>enc_key</code></td>
+                    <td style="color: var(--amber);">0x4D495241 ("MIRA")</td>
+                    <td style="color: var(--cyan);">New discovery</td>
+                    <td>XOR key spells "MIRA" in ASCII — confirms malware family name</td>
+                </tr>
+                <tr>
+                    <td><code>beacon_int</code></td>
+                    <td style="color: var(--amber);">300 seconds (5 min)</td>
+                    <td style="color: var(--cyan);">Room 3 — traffic pattern</td>
+                    <td>Matches the 5-minute beacon interval observed in the network capture</td>
+                </tr>
+                <tr>
+                    <td><code>exfil_domain</code></td>
+                    <td style="color: var(--amber);">data.parallax-sys.net</td>
+                    <td style="color: var(--cyan);">Room 3 — DNS exfiltration</td>
+                    <td>Same domain used for DNS-TXT exfiltration tunnel</td>
+                </tr>
+                <tr>
+                    <td><code>persistence</code></td>
+                    <td style="color: var(--amber);">NexusHealthMonitor</td>
+                    <td style="color: var(--cyan);">Room 4 — PID 2847</td>
+                    <td>Same scheduled task name as the suspicious process on AETHER-7</td>
+                </tr>
+                <tr>
+                    <td><code>identity</code></td>
+                    <td style="color: var(--amber);">nexus-svc-continuity</td>
+                    <td style="color: var(--cyan);">Rooms 4, 5, 6</td>
+                    <td>The service account used throughout the attack chain</td>
+                </tr>
+                <tr>
+                    <td><code>build_tag</code></td>
+                    <td style="color: var(--amber);">AETHER-FORGE-20261003-AUTO</td>
+                    <td style="color: var(--cyan);">New discovery</td>
+                    <td>Automated build from AETHER-7 pipeline — not manually compiled</td>
+                </tr>
+                <tr>
+                    <td><code>developer message</code></td>
+                    <td style="color: var(--red);">"Nothing stays local." — A.V.</td>
+                    <td style="color: var(--cyan);">Room 1 — AETHER/07 page</td>
+                    <td>Curator's signature phrase from the very first room. A.V. = Aman Vyas.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="anomaly-callout">
+            <div class="callout-header">⚠ Key Discovery — The Configuration Confirms the Attack Chain</div>
+            <div class="callout-body">
+                The embedded configuration block connects every room in the investigation:<br><br>
+                • The <strong>C2 domain</strong> matches Room 3's network capture<br>
+                • The <strong>persistence method</strong> matches Room 4's process analysis<br>
+                • The <strong>service identity</strong> matches Rooms 4–6's service account investigation<br>
+                • The <strong>developer message</strong> matches Room 1's first clue<br>
+                • The <strong>build tag</strong> reveals that MIRA-7 was compiled by an <strong>automated system</strong>, not by the Curator manually<br><br>
+                The XOR encryption key — <code>0x4D495241</code> — decodes to the ASCII string <strong>"MIRA"</strong>. This is the malware naming itself. The "v7" in the config header suggests this is the seventh iteration of the malware — six previous versions existed before this one was deployed.
+            </div>
+        </div>
+
+        <p class="hint">⚠ The configuration block is at offset 0x7A200. Key findings: C2 = c2.parallax-sys.net, XOR key = 0x4D (ASCII 'M' for MIRA), beacon = 300s, persistence = NexusHealthMonitor, identity = nexus-svc-continuity, and the developer message "Nothing stays local" — the phrase from Room 1.</p>
+
+        <p class="info">Evidence source: Strings extraction (min length 6, ASCII + UTF-16LE) | Sample: Ethereal_Sync_Helper_v2.1.exe | Total: 2,847 strings extracted</p>
+    </div>
+</body>
+</html>

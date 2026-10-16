@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privilege Path Reconstruction — Attack Graph</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --card: #0a0a12;
+            --card-hover: #0f0f1a;
+            --border: #1a1a2a;
+            --text: #b0b0c0;
+            --muted: #4a4a5a;
+            --cyan: #00e5ff;
+            --amber: #ffab00;
+            --red: #ff4444;
+            --green: #00e676;
+            --violet: #b388ff;
+            --surface: #12121e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+
+        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .header-meta { color: var(--muted); font-size: 0.72rem; font-family: 'Consolas', monospace; }
+
+        .container { max-width: 1080px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
+        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        /* Path Summary Banner */
+        .chain-summary { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyan); border-radius: 6px; padding: 1rem 1.4rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .chain-title { font-family: 'Consolas', monospace; font-size: 0.78rem; color: var(--cyan); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .chain-sequence { font-family: 'Consolas', monospace; font-size: 0.76rem; color: #fff; background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); }
+
+        /* Attack Path Visual Grid */
+        .path-flow { display: flex; flex-direction: column; gap: 12px; position: relative; margin-bottom: 2rem; }
+        
+        .node-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.5rem; transition: all 0.25s; cursor: pointer; position: relative; }
+        .node-card:hover { border-color: var(--cyan); background: var(--card-hover); transform: translateX(4px); }
+        .node-card.active { border-color: var(--cyan); background: rgba(0, 229, 255, 0.04); }
+        .node-card.terminal-node { border-left: 4px solid var(--red); }
+        .node-card.initial-node { border-left: 4px solid var(--amber); }
+        .node-card.middle-node { border-left: 4px solid var(--violet); }
+
+        .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+        .node-step { font-family: 'Consolas', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+        .node-id { font-family: 'Consolas', monospace; font-size: 0.95rem; font-weight: bold; color: #fff; }
+        .node-level { font-family: 'Consolas', monospace; font-size: 0.7rem; padding: 2px 8px; border-radius: 3px; }
+        .lvl-student { background: rgba(255, 171, 0, 0.1); color: var(--amber); border: 1px solid rgba(255, 171, 0, 0.2); }
+        .lvl-service { background: rgba(179, 136, 255, 0.1); color: var(--violet); border: 1px solid rgba(179, 136, 255, 0.2); }
+        .lvl-sovereign { background: rgba(255, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(255, 68, 68, 0.3); font-weight: bold; }
+
+        .node-summary { font-size: 0.78rem; line-height: 1.55; color: var(--text); }
+        .node-detail-panel { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; line-height: 1.6; }
+        .node-detail-panel.open { display: block; }
+
+        .connector { display: flex; justify-content: center; align-items: center; color: var(--muted); font-size: 0.8rem; margin: -4px 0; font-family: 'Consolas', monospace; }
+        .connector-arrow { color: var(--cyan); }
+
+        .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 4px; border: 1px solid var(--border); }
+        .spec-item { font-family: 'Consolas', monospace; font-size: 0.7rem; }
+        .spec-key { color: var(--muted); }
+        .spec-val { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-brand">SPECTRE // ATTACK GRAPH PRIVILEGE MAPPER</div>
+    <div class="header-meta">CLUSTER TOPOLOGY GRAPH // CHALLENGE 9.3</div>
+</div>
+
+<div class="container">
+
+    <div class="context-box">
+        <div class="context-label">Architectural Reconstruction — Challenge 9.3</div>
+        <div class="context-body">
+            How does an attacker progress from sending a phishing link to a volunteer laptop all the way to gaining sovereign administrative control of the campus-wide ceremonial release system? 
+            Security vulnerabilities alone do not cause full-system compromise; they require a <strong>privilege escalation path</strong> of trusted delegation bridges. 
+            Review the 6-step identity escalation chain below to reconstruct the attack path.
+        </div>
+    </div>
+
+    <!-- Sequence Banner -->
+    <div class="chain-summary">
+        <div>
+            <div class="chain-title">Verified Attack Graph Escalation Path</div>
+            <div style="font-size: 0.72rem; color: var(--muted); margin-top: 2px;">6 Identity Hops // Phished Laptop to Sovereign Master</div>
+        </div>
+        <div class="chain-sequence">
+            path_kite_to_maint_to_continuity_to_aether7_master_relay
+        </div>
+    </div>
+
+    <!-- Node Flow -->
+    <div class="path-flow">
+
+        <!-- Node 1 -->
+        <div class="node-card initial-node" onclick="toggleDetail('d1')">
+            <div class="node-header">
+                <div>
+                    <span class="node-step">HOP 1 // INITIAL HUMAN ACCESS (ROOM 7)</span>
+                    <div class="node-id">kite@meraz.org (Kabir Mehra)</div>
+                </div>
+                <span class="node-level lvl-student">Privilege: Student Lead Workstation</span>
+            </div>
+            <div class="node-summary">
+                Kabir executes <code>Ethereal_Sync_Helper.exe</code> on personal laptop thinking it was an official ceremony timing utility. 
+                Implant extracts local memory tokens and initiates MFA push notification spam.
+            </div>
+            <div class="node-detail-panel" id="d1">
+                <div class="spec-grid">
+                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Spear-phishing / Untrusted Executable</span></div>
+                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">Session Cookie & MFA Approval Push</span></div>
+                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 7 (Phishing) & Room 8 (Binary)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="connector"><span class="connector-arrow">▼</span> [Token Replay via Staging Proxy]</div>
+
+        <!-- Node 2 -->
+        <div class="node-card middle-node" onclick="toggleDetail('d2')">
+            <div class="node-header">
+                <div>
+                    <span class="node-step">HOP 2 // COMPROMISED WEB IDENTITY (ROOM 5/7)</span>
+                    <div class="node-id">kite-backup (Replayed Volunteer Session)</div>
+                </div>
+                <span class="node-level lvl-student">Privilege: Portal Coordinator Role</span>
+            </div>
+            <div class="node-summary">
+                Attacker relays Kabir's stolen token from IP <code>10.14.2.88</code>. Impersonates Kabir under the alias <code>kite-backup</code> 
+                to browse internal volunteer portal endpoints and inspect staging API keys.
+            </div>
+            <div class="node-detail-panel" id="d2">
+                <div class="spec-grid">
+                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Lack of Session-to-IP Binding (CWE-384)</span></div>
+                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">Portal API JWT & Staging Docs</span></div>
+                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 7 (MFA Analysis)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="connector"><span class="connector-arrow">▼</span> [Broken Object Level Authorization on /api/v1/maintenance]</div>
+
+        <!-- Node 3 -->
+        <div class="node-card middle-node" onclick="toggleDetail('d3')">
+            <div class="node-header">
+                <div>
+                    <span class="node-step">HOP 3 // SERVICE ACCOUNT ASSUMPTION (ROOM 5)</span>
+                    <div class="node-id">maint_svc_ceremony (Maintenance Role)</div>
+                </div>
+                <span class="node-level lvl-service">Privilege: Ceremony Service Account</span>
+            </div>
+            <div class="node-summary">
+                Web API exposes internal maintenance endpoint without verifying role scopes. 
+                Attacker requests maintenance token, acquiring access to the internal cluster database and deployment scripts.
+            </div>
+            <div class="node-detail-panel" id="d3">
+                <div class="spec-grid">
+                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Over-privileged Service Role (BOLA / CWE-285)</span></div>
+                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">TLS Client Cert & DB Credentials</span></div>
+                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 5 (Web Maintenance Flaw)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="connector"><span class="connector-arrow">▼</span> [Database Trust Table Modification & Scheduler Injection]</div>
+
+        <!-- Node 4 -->
+        <div class="node-card middle-node" onclick="toggleDetail('d4')">
+            <div class="node-header">
+                <div>
+                    <span class="node-step">HOP 4 // CORE SCHEDULER ELEVATION (ROOM 4/6)</span>
+                    <div class="node-id">nexus-svc-continuity (Continuity Master Account)</div>
+                </div>
+                <span class="node-level lvl-service">Privilege: Infrastructure Continuity Admin</span>
+            </div>
+            <div class="node-summary">
+                Attacker writes into the SQLite scheduler database (Room 6) to bind <code>nexus-svc-continuity</code> 
+                to automated CI/CD deployment hooks, unlocking push rights to cluster relays.
+            </div>
+            <div class="node-detail-panel" id="d4">
+                <div class="spec-grid">
+                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Unchecked DB Trust Relationships (CWE-269)</span></div>
+                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">CI/CD Pipeline Webhook Secret</span></div>
+                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 4 (Linux Tasks) & Room 6 (Database)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="connector"><span class="connector-arrow">▼</span> [Automated Build & Deployment to Isolated Relay]</div>
+
+        <!-- Node 5 -->
+        <div class="node-card middle-node" onclick="toggleDetail('d5')">
+            <div class="node-header">
+                <div>
+                    <span class="node-step">HOP 5 // CORE INFRASTRUCTURE EXECUTION (ROOM 8)</span>
+                    <div class="node-id">AETHER-7 Relay Node (Autonomous Execution Host)</div>
+                </div>
+                <span class="node-level lvl-service">Privilege: Core Network Peer (NEXUS_ZONE=CORE)</span>
+            </div>
+            <div class="node-summary">
+                The automated pipeline compiles <code>MIRA-7</code> and deploys it to <code>AETHER-7</code>. 
+                Because the host has <code>NEXUS_ZONE=CORE</code> set, the dormant worm module wakes up and registers as a standby continuity peer.
+            </div>
+            <div class="node-detail-panel" id="d5">
+                <div class="spec-grid">
+                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Automated CI/CD Without Code Review Gate</span></div>
+                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">mira_propagate Active Listener on Port 4477</span></div>
+                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 8 (Build Tag AETHER-FORGE-AUTO)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="connector"><span class="connector-arrow">▼</span> [Emergency Watchdog Promotion (CR-2026-0919 Failover)]</div>
+
+        <!-- Node 6 -->
+        <div class="node-card terminal-node" onclick="toggleDetail('d6')">
+            <div class="node-header">
+                <div>
+                    <span class="node-step">HOP 6 // TOTAL SOVEREIGNTY (ROOM 9)</span>
+                    <div class="node-id">NEXUS Central Release Controller (Master Relay)</div>
+                </div>
+                <span class="node-level lvl-sovereign">Privilege: Sovereign Master Root Authority</span>
+            </div>
+            <div class="node-summary">
+                When MIRA-7 floods the network and blinds syslog, the hardware watchdog executes <code>continuity_check.sh</code>. 
+                Under policy <code>CR-2026-0919-AUTOFAILOVER</code>, it abdicates control and transfers the master keyring to <code>AETHER-7</code>.
+            </div>
+            <div class="node-detail-panel" id="d6">
+                <div class="spec-grid">
+                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Unsupervised Autonomous Failover Architecture</span></div>
+                    <div class="spec-item"><span class="spec-key">Compromised Asset:</span> <span class="spec-val">Lighting, Drones, Audio, Video, Screen Broadcast</span></div>
+                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 9 (Blackout & Root Cause)</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function toggleDetail(id) {
+        const panel = document.getElementById(id);
+        panel.classList.toggle('open');
+    }
+</script>
+
+</body>
+</html>
