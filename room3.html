@@ -402,6 +402,7 @@
         ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.5); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
     </style>
+    <script src="/room-common.js"></script>
 </head>
 <body>
 
@@ -609,53 +610,57 @@
         }
         setInterval(updateClock, 1000);
 
-        // Flags
-        const FLAGS = {
-            1: 'NIGHTJAR{10.7.7.43_to_203.0.113.77_port_8443}',
-            2: 'NIGHTJAR{maint_window_0200_user_kite_backup}',
-            3: 'NIGHTJAR{restore_aether_core_confirmed}',
-            4: 'NIGHTJAR{port_4477_mira_7_propagation_service}'
-        };
+        // Flag verification: the server is the only source of truth
+        const ROOM_ID = 3;
+        const BTN_COLOR = 'var(--purple)';
 
-        function initSolvedState() {
-            let anySolved = false;
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room3_target_' + i) === 'solved') {
-                    document.getElementById(`target-${i}`).classList.add('solved');
-                    document.getElementById(`reward-${i}`).style.display = 'block';
-                    const inputField = document.getElementById(`flag-${i}`);
-                    if(inputField) {
-                        inputField.value = FLAGS[i];
-                        inputField.disabled = true;
-                    }
-                    anySolved = true;
-                }
+        function markSolved(targetNum) {
+            const target = document.getElementById(`target-${targetNum}`);
+            if (!target) return;
+            target.classList.add('solved');
+            document.getElementById(`reward-${targetNum}`).style.display = 'block';
+            const inputField = document.getElementById(`flag-${targetNum}`);
+            if (inputField) {
+                inputField.value = 'FLAG ACCEPTED';
+                inputField.disabled = true;
             }
-            if (anySolved) checkAllSolved();
+            const btn = target.querySelector('.input-group button');
+            if (btn) btn.disabled = true;
         }
-        
+
+        // Restore this team's solved state from the server
+        async function initSolvedState() {
+            const p = await NJ.progress();
+            if (!p) return;
+            const solved = p.rooms[ROOM_ID] || [];
+            solved.forEach(markSolved);
+            if (solved.length) checkAllSolved();
+        }
+
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        function verifyFlag(targetNum) {
+        async function verifyFlag(targetNum) {
             const input = document.getElementById(`flag-${targetNum}`).value.trim();
-            
-            if (input.toLowerCase() === FLAGS[targetNum].toLowerCase()) {
-                document.getElementById(`target-${targetNum}`).classList.add('solved');
-                document.getElementById(`reward-${targetNum}`).style.display = 'block';
-                
-                const inputField = document.getElementById(`flag-${targetNum}`);
-                if(inputField) inputField.disabled = true;
-                
-                localStorage.setItem('room3_target_' + targetNum, 'solved');
+            if (!input) return;
+            const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
+            if (btn.disabled) return;
+            const og = btn.innerText;
+            btn.innerText = '...';
+            btn.disabled = true;
+
+            const res = await NJ.submit(ROOM_ID, input);
+            btn.innerText = og;
+            btn.disabled = false;
+            if (res.success) {
+                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
                 checkAllSolved();
             } else {
-                const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
-                const og = btn.innerText;
                 btn.innerText = 'ERROR';
+                btn.title = res.message;
                 btn.style.background = 'var(--red)';
                 setTimeout(() => {
                     btn.innerText = og;
-                    btn.style.background = 'var(--purple)';
+                    btn.style.background = BTN_COLOR;
                 }, 1000);
             }
         }
@@ -664,14 +669,14 @@
             const solvedCount = document.querySelectorAll('.target-item.solved').length;
             if (solvedCount === 4) {
                 if (!document.getElementById('next-room-btn')) {
-                    const nextRoomHtml = \`
+                    const nextRoomHtml = `
                     <div style="margin-top: 20px; padding: 15px; border: 1px solid var(--purple); background: rgba(139,92,246, 0.1);">
                         <div style="color: var(--purple); font-weight: bold; margin-bottom: 10px;">>> INCOMING TRANSMISSION: RHEA_D</div>
                         <div style="font-family: var(--font-code); font-size: 12px; margin-bottom: 15px; color: var(--text-main);">
                             "The relay is just a staging point. MIRA-7 is the worm. It waits in Room 4."
                         </div>
-                        <a id="next-room-btn" href="/hub" style="display: inline-block; padding: 8px 16px; background: var(--purple); color: #fff; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 4</a>
-                    </div>\`;
+                        <a id="next-room-btn" href="/room/4" style="display: inline-block; padding: 8px 16px; background: var(--purple); color: #fff; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 4</a>
+                    </div>`;
                     document.querySelector('.targets-content').insertAdjacentHTML('beforeend', nextRoomHtml);
                 }
             }
@@ -683,7 +688,7 @@
         const modalTitle = document.getElementById('modal-title');
 
         function openEvidence(title, url) {
-            modalTitle.innerText = \`EVIDENCE VIEWER: \${title.toUpperCase()}\`;
+            modalTitle.innerText = `EVIDENCE VIEWER: ${title.toUpperCase()}`;
             iframe.src = url;
             modal.style.display = 'flex';
         }

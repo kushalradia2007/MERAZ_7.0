@@ -436,6 +436,7 @@
         ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.6); }
 
     </style>
+    <script src="/room-common.js"></script>
 </head>
 <body>
     <div class="crt-container">
@@ -733,65 +734,63 @@
             document.getElementById(`ch-${tabId}`).classList.add('active');
         }
 
-        // Flag Logic
-        const FLAGS = {
-            1: 'NIGHTJAR{the_host_with_the_blue_name_is_lying}',
-            2: 'NIGHTJAR{hello_world.txt}', // dummy
-            3: 'NIGHTJAR{ask_the_person_who_never_signs_in}',
-            4: 'NIGHTJAR{aether-7}'
-        };
+        // Flag logic: the server is the only source of truth
+        const ROOM_ID = 2;
+        const solvedTargets = new Set();
 
-        function initSolvedState() {
-            let anySolved = false;
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room2_target_' + i) === 'solved') {
-                    document.getElementById(`reward-${i}`).style.display = 'block';
-                    const inputField = document.getElementById(`flag-${i}`);
-                    if(inputField) {
-                        inputField.value = FLAGS[i];
-                        inputField.disabled = true;
-                    }
-                    anySolved = true;
-                }
-            }
-            if (anySolved) checkAllSolved();
+        function escapeHtml(t) {
+            return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
-        
+
+        function markSolved(targetNum) {
+            const reward = document.getElementById(`reward-${targetNum}`);
+            if (reward) reward.style.display = 'block';
+            const inputField = document.getElementById(`flag-${targetNum}`);
+            if (inputField) {
+                inputField.value = 'FLAG ACCEPTED';
+                inputField.disabled = true;
+            }
+            const btn = document.querySelector('#ch-' + targetNum + ' .terminal-input-group button');
+            if (btn) btn.disabled = true;
+            solvedTargets.add(targetNum);
+        }
+
+        // Restore this team's solved state from the server
+        async function initSolvedState() {
+            const p = await NJ.progress();
+            if (!p) return;
+            const solved = p.rooms[ROOM_ID] || [];
+            solved.forEach(markSolved);
+            if (solved.length) checkAllSolved();
+        }
+
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        window.verifyFlag = function(targetNum) {
-            const input = document.getElementById(`flag-${targetNum}`).value.trim().toLowerCase(); // lowercase for leniency
-            const targetFlag = FLAGS[targetNum].toLowerCase();
-            
-            // log
+        window.verifyFlag = async function(targetNum) {
+            const input = document.getElementById(`flag-${targetNum}`).value.trim();
+            if (!input) return;
+            const btn = document.querySelector('#ch-' + targetNum + ' .terminal-input-group button');
+            if (btn && btn.disabled) return;
+            if (btn) btn.disabled = true;
+
             const time = new Date().toLocaleTimeString('en-US', { hour12: false });
             sysLogs.innerHTML += `<div class="log-line log-info"><span class="time">[${time}]</span> Submitting flag for challenge 2.${targetNum}...</div>`;
             sysLogs.scrollTop = sysLogs.scrollHeight;
-            
-            setTimeout(() => {
-                if (input === targetFlag || input === FLAGS[targetNum]) {
-                    sysLogs.innerHTML += `<div class="log-line log-info" style="color:var(--green);"><span class="time">[${time}]</span> Flag 2.${targetNum} accepted. Block decrypted.</div>`;
-                    document.getElementById(`reward-${targetNum}`).style.display = 'block';
-                    
-                    const inputField = document.getElementById(`flag-${targetNum}`);
-                    if(inputField) inputField.disabled = true;
-                    
-                    localStorage.setItem('room2_target_' + targetNum, 'solved');
-                    checkAllSolved();
-                } else {
-                    sysLogs.innerHTML += `<div class="log-line log-error"><span class="time">[${time}]</span> ERROR: Hash mismatch. Flag rejected.</div>`;
-                }
-                sysLogs.scrollTop = sysLogs.scrollHeight;
-            }, 500);
+
+            const res = await NJ.submit(ROOM_ID, input);
+            if (btn) btn.disabled = false;
+            if (res.success) {
+                sysLogs.innerHTML += `<div class="log-line log-info" style="color:var(--green);"><span class="time">[${time}]</span> Flag 2.${res.challenge || targetNum} accepted. Block decrypted.</div>`;
+                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
+                checkAllSolved();
+            } else {
+                sysLogs.innerHTML += `<div class="log-line log-error"><span class="time">[${time}]</span> ERROR: ${escapeHtml(res.message)}</div>`;
+            }
+            sysLogs.scrollTop = sysLogs.scrollHeight;
         }
 
         function checkAllSolved() {
-            let solvedCount = 0;
-            for (let i = 1; i <= 4; i++) {
-                if(localStorage.getItem('room2_target_' + i) === 'solved') solvedCount++;
-            }
-            
-            if (solvedCount === 4 && !document.getElementById('proceed-btn')) {
+            if (solvedTargets.size === 4 && !document.getElementById('proceed-btn')) {
                 const time = new Date().toLocaleTimeString('en-US', { hour12: false });
                 sysLogs.innerHTML += `<div class="log-line log-info" style="color:var(--green); font-weight:bold;"><span class="time">[${time}]</span> ALL RELAYS MAPPED. NEW ROUTE OPEN.</div>`;
                 
@@ -801,7 +800,7 @@
                     <div style="font-family: var(--font-code); font-size: 12px; margin-bottom: 15px;">
                         The relay AETHER-7 is capturing packets. Proceed to the intercept terminal.
                     </div>
-                    <a id="proceed-btn" href="/room3" style="display: inline-block; padding: 8px 16px; background: var(--cyan); color: #000; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 3</a>
+                    <a id="proceed-btn" href="/room/3" style="display: inline-block; padding: 8px 16px; background: var(--cyan); color: #000; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 3</a>
                 </div>`;
                 
                 // Add to the bottom of the challenge deck (outside tabs)

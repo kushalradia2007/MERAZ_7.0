@@ -771,6 +771,7 @@
             box-shadow: 0 0 16px var(--accent-glow);
         }
     </style>
+    <script src="/room-common.js"></script>
 </head>
 <body>
 
@@ -1115,24 +1116,15 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Flags — match README exactly
-        const FLAGS = {
-            1: 'NIGHTJAR{idor_volunteer_0x7F_infra_access_no_orientation}',
-            2: 'NIGHTJAR{jwt_role_volunteer_plus_admin_cert_renewal}',
-            3: 'NIGHTJAR{cmd_injection_mira_config_at_etc_nexus_mira_conf}',
-            4: 'NIGHTJAR{maint_nexus_portal_certrenew_api_v1_renew}'
-        };
+        const ROOM_ID = 5;
 
-        // Init solved state from localStorage
-        function initSolvedState() {
-            let anySolved = false;
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room5_target_' + i) === 'solved') {
-                    markSolved(i);
-                    anySolved = true;
-                }
-            }
-            if (anySolved) checkAllSolved();
+        // Restore this team's solved state from the server
+        async function initSolvedState() {
+            const p = await NJ.progress();
+            if (!p) return;
+            const solved = p.rooms[ROOM_ID] || [];
+            solved.forEach(markSolved);
+            if (solved.length) checkAllSolved();
         }
 
         function markSolved(targetNum) {
@@ -1142,7 +1134,7 @@
             document.getElementById(`reward-${targetNum}`).style.display = 'block';
             const inputField = document.getElementById(`flag-${targetNum}`);
             if (inputField) {
-                inputField.value = FLAGS[targetNum];
+                inputField.value = 'FLAG ACCEPTED';
                 inputField.disabled = true;
             }
             // Update chain visualization
@@ -1155,51 +1147,34 @@
         
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        // Server-side flag verification with fallback to local
+        // Server-side flag verification (the server is the only source of truth)
         async function verifyFlag(targetNum) {
             const input = document.getElementById(`flag-${targetNum}`).value.trim();
             if (!input) return;
 
             const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
+            if (btn.disabled) return;
             const ogText = btn.innerText;
             btn.innerText = '...';
             btn.disabled = true;
 
-            try {
-                // Try server-side verification first
-                const formData = new FormData();
-                formData.append('room_id', 5);
-                formData.append('flag', input);
-                const resp = await fetch('/api/submit_flag', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    markSolved(targetNum);
-                    localStorage.setItem('room5_target_' + targetNum, 'solved');
-                    checkAllSolved();
-                    return;
-                }
-            } catch (e) {
-                // Server unavailable — fall through to local check
-            }
-
-            // Local fallback
-            if (input.toLowerCase() === FLAGS[targetNum].toLowerCase()) {
-                markSolved(targetNum);
-                localStorage.setItem('room5_target_' + targetNum, 'solved');
-                checkAllSolved();
-            } else {
-                btn.innerText = 'INVALID';
-                btn.style.background = 'var(--red)';
+            const res = await NJ.submit(ROOM_ID, input);
+            if (res.success) {
+                btn.innerText = ogText;
                 btn.disabled = false;
-                setTimeout(() => {
-                    btn.innerText = ogText;
-                    btn.style.background = '';
-                }, 1200);
+                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
+                checkAllSolved();
+                return;
             }
+
+            btn.innerText = 'INVALID';
+            btn.title = res.message;
+            btn.style.background = 'var(--red)';
+            btn.disabled = false;
+            setTimeout(() => {
+                btn.innerText = ogText;
+                btn.style.background = '';
+            }, 1200);
         }
 
         function checkAllSolved() {
@@ -1214,7 +1189,7 @@
                             Commander Ila Sen: "The planted key got them onto the relay. The relay got them into the portal. The portal gave them a certificate. And the certificate made them trusted. Every step used a real system doing what it was designed to do. None of this required a zero-day. It required a chain of small oversights."<br><br>
                             "Now I need to know what MIRA-7 did with that trust. The Volunteer Portal's database contains the full audit trail."
                         </div>
-                        <a class="next-room-btn" href="/hub">PROCEED TO ROOM 6 — THE LIVING LEDGER ▸</a>
+                        <a class="next-room-btn" href="/room/6">PROCEED TO ROOM 6 — THE LIVING LEDGER ▸</a>
                     </div>`;
                     document.querySelector('.targets-content').insertAdjacentHTML('beforeend', nextRoomHtml);
                 }

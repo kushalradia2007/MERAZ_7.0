@@ -491,6 +491,7 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+    <script src="/room-common.js"></script>
 </head>
 <body>
 
@@ -931,19 +932,15 @@ Status: <span style="color:var(--red)">EXPIRED — 2024-03-01</span> | Self-sign
         }
 
         // ── Flags ──
-        const FLAGS = {
-            1: 'NIGHTJAR{pe_header_mismatch_fake_sig_section_rwx_not_nexus_registry}',
-            2: 'NIGHTJAR{c2_parallax_sys_net_xor_key_0x4d_beacon_300s_nothing_stays_local}',
-            3: 'NIGHTJAR{mira_propagate_dormant_nexus_zone_core_aether7_activated}',
-            4: 'NIGHTJAR{mira7_built_oct3_auto_aether_forge_not_curator_manual}'
-        };
+        const ROOM_ID = 8;
 
-        function initSolvedState() {
-            let any = false;
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room8_target_' + i) === 'solved') { markSolved(i); any = true; }
-            }
-            if (any) checkAllSolved();
+        // Restore this team's solved state from the server
+        async function initSolvedState() {
+            const p = await NJ.progress();
+            if (!p) return;
+            const solved = p.rooms[ROOM_ID] || [];
+            solved.forEach(markSolved);
+            if (solved.length) checkAllSolved();
         }
 
         function markSolved(n) {
@@ -953,49 +950,41 @@ Status: <span style="color:var(--red)">EXPIRED — 2024-03-01</span> | Self-sign
             const r = document.getElementById('reward-' + n);
             if (r) r.style.display = 'block';
             const inp = document.getElementById('flag-' + n);
-            if (inp) { inp.value = FLAGS[n]; inp.disabled = true; }
+            if (inp) { inp.value = 'FLAG ACCEPTED'; inp.disabled = true; }
             const btn = t.querySelector('.input-group button');
             if (btn) { btn.innerText = '✓ SOLVED'; btn.disabled = true; }
             const chain = document.getElementById('chain-' + n);
             if (chain) chain.classList.add('completed');
         }
 
+        // The server is the only source of truth for flags
         async function verifyFlag(n) {
             const input = document.getElementById('flag-' + n).value.trim();
             if (!input) return;
             const btn = document.querySelector('#target-' + n + ' .input-group button');
+            if (btn.disabled) return;
             const og = btn.innerText;
             btn.innerText = '...'; btn.disabled = true;
 
-            try {
-                const fd = new FormData();
-                fd.append('room_id', 8); fd.append('flag', input);
-                const resp = await fetch('/api/submit_flag', { method: 'POST', body: fd });
-                const data = await resp.json();
-                if (data.success) {
-                    markSolved(n);
-                    localStorage.setItem('room8_target_' + n, 'solved');
-                    checkAllSolved(); return;
-                }
-            } catch(e) {}
-
-            if (input.toLowerCase() === FLAGS[n].toLowerCase()) {
-                markSolved(n);
-                localStorage.setItem('room8_target_' + n, 'solved');
+            const res = await NJ.submit(ROOM_ID, input);
+            if (res.success) {
+                btn.innerText = og; btn.disabled = false;
+                (res.solved.length ? res.solved : [n]).forEach(markSolved);
                 checkAllSolved();
-            } else {
-                btn.innerText = '✗ INVALID';
-                btn.style.background = 'rgba(239,68,68,0.25)';
-                btn.style.borderColor = 'var(--red)';
-                btn.style.color = 'var(--red)';
-                btn.disabled = false;
-                setTimeout(() => {
-                    btn.innerText = og;
-                    btn.style.background = '';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                }, 1400);
+                return;
             }
+            btn.innerText = '✗ INVALID';
+            btn.title = res.message;
+            btn.style.background = 'rgba(239,68,68,0.25)';
+            btn.style.borderColor = 'var(--red)';
+            btn.style.color = 'var(--red)';
+            btn.disabled = false;
+            setTimeout(() => {
+                btn.innerText = og;
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }, 1400);
         }
 
         function checkAllSolved() {

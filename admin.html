@@ -136,7 +136,7 @@ td,th{padding:8px 10px}
     <div class="header-actions">
         <a href="/scoreboard" class="btn btn-cyan btn-sm btn-icon">◉ SCOREBOARD</a>
         <a href="/hub" class="btn btn-yellow btn-sm btn-icon">◈ HUB</a>
-        <button class="btn btn-sm" onclick="location.href='/'">⏻ LOGOUT</button>
+        <button class="btn btn-sm" onclick="logout()">⏻ LOGOUT</button>
     </div>
 </header>
 
@@ -234,15 +234,30 @@ let pendingAction=null;
 // ─── API Helpers ───
 async function api(url,opts={}){
     const res=await fetch(url,{...opts,headers:{'Content-Type':'application/json',...(opts.headers||{})}});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.detail||'Request failed');
+    let data={};
+    try{data=await res.json()}catch(e){}
+    if(res.status===401){window.location.href='/';throw new Error('Session expired')}
+    if(!res.ok){
+        const d=data.detail;
+        throw new Error(typeof d==='string'?d:'Request failed');
+    }
     return data;
+}
+
+// Team names / usernames are user-controlled: never put them into HTML unescaped.
+function esc(v){
+    return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function logout(){
+    try{await fetch('/api/logout',{method:'POST'})}catch(e){}
+    window.location.href='/';
 }
 
 function toast(msg,err=false){
     const t=document.createElement('div');
     t.className='toast'+(err?' error':'');
-    t.innerHTML=(err?'✗ ':'✓ ')+msg;
+    t.textContent=(err?'✗ ':'✓ ')+msg;
     document.getElementById('toast-container').appendChild(t);
     setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),300)},3500);
 }
@@ -262,9 +277,12 @@ async function loadData(){
         if(stats.top_team){
             document.getElementById('stat-top').textContent=stats.top_team.name;
             document.getElementById('stat-top-score').textContent='Score: '+stats.top_team.score;
+        }else{
+            document.getElementById('stat-top').textContent='—';
+            document.getElementById('stat-top-score').textContent='';
         }
         
-        renderTeams(allTeams);
+        filterTeams();  // re-applies the active search, if any
     }catch(e){
         toast(e.message,true);
     }
@@ -288,17 +306,17 @@ function renderTeams(teams){
         const rank=rankMap[t.id];
         const rankClass=rank<=3?'rank-'+rank:'rank-n';
         const members=t.members.map(m=>
-            `<span class="member-tag${m.is_admin?' admin':''}" title="${m.is_admin?'Admin':'User'}: ${m.username}">
-                <span class="tag-icon">${m.is_admin?'★':'●'}</span>${m.username}
-                <span style="cursor:pointer;margin-left:2px;opacity:.5" onclick="event.stopPropagation();toggleAdmin(${m.id},'${m.username}',${m.is_admin})" title="Toggle admin">⚙</span>
-                <span style="cursor:pointer;opacity:.5" onclick="event.stopPropagation();confirmDeleteUser(${m.id},'${m.username}')" title="Remove user">×</span>
+            `<span class="member-tag${m.is_admin?' admin':''}" title="${m.is_admin?'Admin':'User'}: ${esc(m.username)}">
+                <span class="tag-icon">${m.is_admin?'★':'●'}</span>${esc(m.username)}
+                <span style="cursor:pointer;margin-left:2px;opacity:.5" data-action="toggle-admin" data-id="${m.id}" data-name="${esc(m.username)}" data-admin="${m.is_admin?1:0}" title="Toggle admin">⚙</span>
+                <span style="cursor:pointer;opacity:.5" data-action="delete-user" data-id="${m.id}" data-name="${esc(m.username)}" title="Remove user">×</span>
             </span>`
         ).join('');
         const created=t.created_at?new Date(t.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
         
         return `<tr data-team="${t.id}">
             <td><span class="team-rank ${rankClass}">${rank}</span></td>
-            <td><div class="team-name">${t.name}</div></td>
+            <td><div class="team-name">${esc(t.name)}</div></td>
             <td>
                 <div class="inline-edit">
                     <input class="inline-input" type="number" value="${t.score}" id="score-${t.id}" min="0">
@@ -307,7 +325,7 @@ function renderTeams(teams){
             </td>
             <td>
                 <div class="inline-edit">
-                    <input class="inline-input" type="number" value="${t.current_room}" id="room-${t.id}" min="1" max="10">
+                    <input class="inline-input" type="number" value="${t.current_room}" id="room-${t.id}" min="1" max="11">
                     <button class="btn btn-cyan btn-sm" onclick="updateRoom(${t.id})" title="Save room">✓</button>
                 </div>
             </td>
@@ -318,12 +336,23 @@ function renderTeams(teams){
             <td style="font-size:10px;color:var(--ink-dim)">${created}</td>
             <td>
                 <div class="actions-cell">
-                    <button class="btn btn-danger btn-sm" onclick="confirmDeleteTeam(${t.id},'${t.name}')">DELETE</button>
+                    <button class="btn btn-danger btn-sm" data-action="delete-team" data-id="${t.id}" data-name="${esc(t.name)}">DELETE</button>
                 </div>
             </td>
         </tr>`;
     }).join('');
 }
+
+// ─── Row actions (event delegation; no user data inside inline JS) ───
+document.getElementById('teams-body').addEventListener('click',e=>{
+    const el=e.target.closest('[data-action]');
+    if(!el)return;
+    e.stopPropagation();
+    const id=parseInt(el.dataset.id,10),name=el.dataset.name||'';
+    if(el.dataset.action==='toggle-admin')toggleAdmin(id,name,el.dataset.admin==='1');
+    else if(el.dataset.action==='delete-user')confirmDeleteUser(id,name);
+    else if(el.dataset.action==='delete-team')confirmDeleteTeam(id,name);
+});
 
 // ─── Search/Filter ───
 function filterTeams(){
@@ -349,7 +378,7 @@ async function updateScore(id){
 
 async function updateRoom(id){
     const val=parseInt(document.getElementById('room-'+id).value);
-    if(isNaN(val)||val<1||val>10)return toast('Room must be 1-10',true);
+    if(isNaN(val)||val<1||val>11)return toast('Room must be 1-11',true);
     try{
         await api(`/api/admin/teams/${id}/room`,{method:'PUT',body:JSON.stringify({room:val})});
         toast('Room updated');
@@ -372,8 +401,9 @@ function showModal(title,body,onConfirm){
     document.getElementById('modal-overlay').classList.add('active');
     pendingAction=onConfirm;
     document.getElementById('modal-confirm').onclick=async()=>{
+        const action=pendingAction;  // closeModal() clears pendingAction, so grab it first
         closeModal();
-        if(pendingAction)await pendingAction();
+        if(action)await action();
     };
 }
 function closeModal(){
@@ -419,6 +449,11 @@ document.addEventListener('keydown',e=>{
 
 // ─── Auto-refresh ───
 loadData();
-setInterval(loadData,15000);
+setInterval(()=>{
+    const a=document.activeElement;
+    const editing=a&&a.classList&&a.classList.contains('inline-input');
+    const modalOpen=document.getElementById('modal-overlay').classList.contains('active');
+    if(!editing&&!modalOpen)loadData();
+},15000);
 </script>
 </body></html>

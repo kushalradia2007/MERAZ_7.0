@@ -595,6 +595,15 @@
     let mode = 'login'; 
     let googleTokenCache = null;
 
+    function errText(data, fallback) {
+        const d = data && data.detail;
+        if (typeof d === 'string' && d) return d;
+        if (Array.isArray(d) && d.length) {
+            return d.map(x => (x && x.msg) ? x.msg : String(x)).join('; ');
+        }
+        return fallback;
+    }
+
     window.addEventListener('DOMContentLoaded', initGoogleAuth);
 
     async function initGoogleAuth() {
@@ -646,7 +655,7 @@
                     document.getElementById('google-setup-modal').classList.remove('hidden');
                 }
             } else {
-                err.innerText = data.detail || "Google authentication failed";
+                err.innerText = errText(data, "Google authentication failed");
             }
         } catch(e) {
             err.innerText = "System offline. Could not contact auth server.";
@@ -742,7 +751,7 @@
             if (res.ok && data.status === 'authenticated') {
                 window.location.href = '/hub';
             } else {
-                err.innerText = data.detail || "Initialization failed";
+                err.innerText = errText(data, "Initialization failed");
                 btn.disabled = false;
                 btn.innerText = "INITIALIZE & JACK IN";
             }
@@ -780,9 +789,11 @@
             const data = await res.json();
             
             if (res.ok) {
-                msg.innerText = "Code sent! Check your terminal output (since this is dev mode).";
+                msg.innerText = data.delivery === 'console'
+                    ? "Code generated! Check the server console output (dev mode: email delivery is not configured)."
+                    : "Code sent! Check your inbox (and spam folder). It expires in 15 minutes.";
             } else {
-                err.innerText = data.detail || "Failed to send code";
+                err.innerText = errText(data, "Failed to send code");
             }
         } catch(e) {
             err.innerText = "System offline.";
@@ -851,7 +862,7 @@
             if (res.ok) {
                 window.location.href = '/hub';
             } else {
-                err.innerText = data.detail || "Authentication Failed";
+                err.innerText = errText(data, "Authentication Failed");
                 btn.disabled = false;
                 btn.innerText = mode === 'register' ? 'INITIALIZE (REGISTER)' : 'AUTHENTICATE (LOGIN)';
             }

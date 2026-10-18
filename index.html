@@ -340,6 +340,7 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 (async function loadUser(){
     try{
         const r=await fetch('/api/me');
+        if(r.status===401){window.location.href='/';return}
         if(!r.ok)return;
         const u=await r.json();
         document.getElementById('nav-username').textContent=u.username.toUpperCase();
@@ -353,8 +354,24 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
             }
         }
         if(u.is_admin) document.getElementById('admin-nav-link').style.display='';
+        loadProgress();
     }catch(e){}
 })();
+
+// Team progress comes from the server (rooms are separate pages, so nothing
+// client-side can know which rooms a team has actually cleared).
+async function loadProgress(){
+    try{
+        const r=await fetch('/api/progress');
+        if(!r.ok)return;
+        const p=await r.json();
+        document.getElementById('team-score').textContent=p.score;
+        for(let i=0;i<ROOM_COUNT;i++){
+            const solved=(p.rooms[String(i+1)]||[]).length;
+            if(solved>=4)visited[i]=1;
+        }
+    }catch(e){}
+}
 
 async function logout(){
     try{await fetch('/api/logout',{method:'POST'})}catch(e){}
@@ -364,6 +381,7 @@ async function logout(){
 /* ═══════════════════════════════════════════════════════
    SIDEBAR: Build room list + NPC tracker
    ═══════════════════════════════════════════════════════ */
+const ROOM_COUNT=10, PLAYABLE_ROOMS=9;
 const ROOMS=[
     ['The Empty Signal','OSINT'],['The Dead Telegram','Cryptography'],
     ['The Intercept','Packet Analysis'],['The Quiet Machine','Linux'],
@@ -391,8 +409,10 @@ ROOMS.forEach((r,i)=>{
             <div class="room-domain">${r[1]}</div>
         </div>`;
     el.addEventListener('click', () => {
-        if (i >= 0 && i <= 8) {
+        if (i < PLAYABLE_ROOMS) {
             window.location.href = '/room/' + (i + 1);
+        } else {
+            addIntel('SYSTEM','Room '+(i+1)+' is classified. It has not been declassified yet.');
         }
     });
     roomListEl.appendChild(el);
@@ -515,7 +535,7 @@ if(localStorage.getItem('nj_boot_done')==='1'){
 // ===== input =====
 const map={KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r',KeyW:'u',ArrowUp:'u',KeyS:'d',ArrowDown:'d'},kn={KeyW:'W',ArrowUp:'W',KeyA:'A',ArrowLeft:'A',KeyS:'S',ArrowDown:'S',KeyD:'D',ArrowRight:'D',KeyE:'E'};
 const cap=(n,on)=>document.querySelectorAll('.k[data-k="'+n+'"]').forEach(e=>e.classList.toggle('on',on));
-addEventListener('keydown',e=>{const m=map[e.code];if(m){K[m]=1;e.preventDefault()}if(kn[e.code])cap(kn[e.code],1);if(e.repeat)return;
+addEventListener('keydown',e=>{if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;const m=map[e.code];if(m){K[m]=1;e.preventDefault()}if(kn[e.code])cap(kn[e.code],1);if(e.repeat)return;
 if(mode=='boot')return bootKey();
 if(e.code=='KeyE'||e.code=='Enter')interact();else if(e.code=='Escape')mode=='room'?leave():($('dlg').hidden=true)});
 addEventListener('keyup',e=>{const m=map[e.code];if(m)K[m]=0;if(kn[e.code])cap(kn[e.code],0)});
@@ -539,27 +559,10 @@ function near(){let b=null,bd=34;for(const d of D){const e=Math.hypot(p.x-d.x,p.
 NP.forEach((n,i)=>{const e=Math.hypot(p.x-n.x,p.y-n.y);if(e<bd){bd=e;b={t:'npc',i}}});return b}
 function interact(){mode=='room'?leave():act()}
 function act(){const n=near();if(!n)return;if(n.t=='npc')return talk(n.i);
-if(n.i >= 0 && n.i <= 8) { window.location.href = '/room/' + (n.i + 1); return; }
-visited[n.i]=1;ri=n.i;$('rn').textContent='ROOM '+(n.i+1);mode='room';ST.dataset.m='room';$('dlg').hidden=true;npcOpen=false;K.l=K.r=K.u=K.d=0;
-highlightCurrentRoom(n.i);
-addIntel('SYSTEM','Entered Room '+(n.i+1)+': '+R[n.i][0]+' ['+R[n.i][1]+']');
-
-// Load room content
-$('room-ui').classList.remove('hidden');
-$('room-content').innerHTML = '<div style="color:var(--cyan);text-align:center;padding:40px;font-family:\'Press Start 2P\'">DECRYPTING ARCHIVE...</div>';
-$('flag-input').value = '';
-$('flag-result').textContent = '';
-
-fetch('/room'+(n.i+1)+'.html')
-    .then(r => r.ok ? r.text() : Promise.reject('Room data not found on server.'))
-    .then(text => {
-        // Fix relative evidence links in the loaded HTML
-        text = text.replace(/evidence\//g, '/challenges/Room - '+(n.i+1)+'/evidence/');
-        $('room-content').innerHTML = text;
-    })
-    .catch(err => {
-        $('room-content').innerHTML = '<div style="color:var(--red);text-align:center;padding:40px;font-family:\'Press Start 2P\'">ERROR: ' + err + '</div>';
-    });
+if(n.i < PLAYABLE_ROOMS){ window.location.href = '/room/' + (n.i + 1); return; }
+say('ROOM '+(n.i+1)+' // CLASSIFIED','This door is sealed. The room has not been declassified yet.','ESC: close');
+clearTimeout(dlgT);dlgT=setTimeout(()=>{$('dlg').hidden=true},3500);
+addIntel('SYSTEM','Room '+(n.i+1)+' ['+R[n.i][0]+'] is not available yet.');
 }
 function leave(){
     const d=D.find(q=>q.i==ri);p.x=d.x;p.y=d.y+16;mode='hub';ST.dataset.m='hub';highlightCurrentRoom(-1);
@@ -673,7 +676,7 @@ if(npcOpen&&!(n&&n.t=='npc')){npcOpen=false;$('dlg').hidden=true}
 const m=n?n.t=='npc'?'E: talk to '+NP[n.i].s:'E: enter Room '+(n.i+1):'';pr.hidden=!m||!$('dlg').hidden;pr.textContent=m;
 // Update nav timer + sidebar
 const s=(Date.now()-t0)/1000|0;
-const timerStr='23:'+f2(17+(s/60|0))+':'+f2(s%60);
+const tm0=23*60+17+(s/60|0),timerStr=f2(Math.floor(tm0/60)%24)+':'+f2(tm0%60)+':'+f2(s%60);
 $('clk').innerHTML=timerStr+'<small>NEXUS OFFLINE</small>';
 $('nav-timer').innerHTML=timerStr+'<small>NEXUS OFFLINE</small>';
 updateSidebar(visited, NT);

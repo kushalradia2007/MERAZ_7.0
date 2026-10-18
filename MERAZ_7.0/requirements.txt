@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-sqlalchemy
-python-multipart
-passlib
-bcrypt==3.2.2
-pyjwt
-psycopg[binary]
-python-dotenv

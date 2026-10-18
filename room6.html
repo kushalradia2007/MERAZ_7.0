@@ -1009,6 +1009,7 @@
         ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.3); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     </style>
+    <script src="/room-common.js"></script>
 </head>
 <body>
 
@@ -1584,24 +1585,15 @@
             }
         }
 
-        // Flags — match Room 6 README exactly
-        const FLAGS = {
-            1: 'NIGHTJAR{ghost_record_vol_127_nexus_svc_auto_insert_no_sponsor}',
-            2: 'NIGHTJAR{continuity_delegate_role_read_all_plus_cert_trust_store}',
-            3: 'NIGHTJAR{badge_0x7F_infra_dual_scan_main_stage_server_b3_61s}',
-            4: 'NIGHTJAR{trust_chain_aether_core_to_release_controller_full_trust}'
-        };
+        const ROOM_ID = 6;
 
-        // Init solved state from localStorage
-        function initSolvedState() {
-            let anySolved = false;
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room6_target_' + i) === 'solved') {
-                    markSolved(i);
-                    anySolved = true;
-                }
-            }
-            if (anySolved) checkAllSolved();
+        // Restore this team's solved state from the server
+        async function initSolvedState() {
+            const p = await NJ.progress();
+            if (!p) return;
+            const solved = p.rooms[ROOM_ID] || [];
+            solved.forEach(markSolved);
+            if (solved.length) checkAllSolved();
         }
 
         function markSolved(targetNum) {
@@ -1613,7 +1605,7 @@
 
             const inputField = document.getElementById(`flag-${targetNum}`);
             if (inputField) {
-                inputField.value = FLAGS[targetNum];
+                inputField.value = 'FLAG ACCEPTED';
                 inputField.disabled = true;
             }
 
@@ -1628,51 +1620,34 @@
 
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        // Server-side flag verification with fallback to local
+        // Server-side flag verification (the server is the only source of truth)
         async function verifyFlag(targetNum) {
             const input = document.getElementById(`flag-${targetNum}`).value.trim();
             if (!input) return;
 
             const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
+            if (btn.disabled) return;
             const ogText = btn.innerText;
             btn.innerText = '...';
             btn.disabled = true;
 
-            try {
-                // Try server-side verification first
-                const formData = new FormData();
-                formData.append('room_id', 6);
-                formData.append('flag', input);
-                const resp = await fetch('/api/submit_flag', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    markSolved(targetNum);
-                    localStorage.setItem('room6_target_' + targetNum, 'solved');
-                    checkAllSolved();
-                    return;
-                }
-            } catch (e) {
-                // Server unavailable — fall through to local check
-            }
-
-            // Local fallback
-            if (input.toLowerCase() === FLAGS[targetNum].toLowerCase()) {
-                markSolved(targetNum);
-                localStorage.setItem('room6_target_' + targetNum, 'solved');
-                checkAllSolved();
-            } else {
-                btn.innerText = 'INVALID';
-                btn.style.background = 'var(--red)';
+            const res = await NJ.submit(ROOM_ID, input);
+            if (res.success) {
+                btn.innerText = ogText;
                 btn.disabled = false;
-                setTimeout(() => {
-                    btn.innerText = ogText;
-                    btn.style.background = '';
-                }, 1200);
+                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
+                checkAllSolved();
+                return;
             }
+
+            btn.innerText = 'INVALID';
+            btn.title = res.message;
+            btn.style.background = 'var(--red)';
+            btn.disabled = false;
+            setTimeout(() => {
+                btn.innerText = ogText;
+                btn.style.background = '';
+            }, 1200);
         }
 
         function checkAllSolved() {

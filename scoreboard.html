@@ -212,6 +212,11 @@ function updateClock(){
 setInterval(updateClock,1000);
 updateClock();
 
+// Team names are user-controlled and this page is public: always escape them.
+function esc(v){
+    return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 // ─── Data ───
 let prevTeams=[];
 let maxScore=100;
@@ -219,6 +224,7 @@ let maxScore=100;
 async function loadScoreboard(){
     try{
         const res=await fetch('/api/scoreboard');
+        if(!res.ok)throw new Error('HTTP '+res.status);
         const teams=await res.json();
         maxScore=Math.max(100,...teams.map(t=>t.score));
         renderPodium(teams.slice(0,3));
@@ -245,7 +251,7 @@ function renderPodium(top3){
                 ${t?`
                     <div class="podium-crown">${crowns[i+1]||''}</div>
                     <div class="podium-rank">${labels[i]}</div>
-                    <div class="podium-name">${t.name}</div>
+                    <div class="podium-name">${esc(t.name)}</div>
                     <div class="podium-score">${t.score} PTS</div>
                     <div class="podium-room">ROOM ${t.current_room}/10</div>
                 `:`
@@ -276,7 +282,7 @@ function renderLeaderboard(teams){
         const isNew=prevRank===undefined;
         const movedUp=prevRank!==undefined&&prevRank>rank;
         const rankCls=rank<=3?'r'+rank:'rn';
-        const prog=(t.current_room/10*100);
+        const prog=Math.max(0,Math.min(100,t.current_room/10*100));
         const scorePct=maxScore>0?Math.min(100,t.score/maxScore*100):0;
         
         // Progress bar color based on progress
@@ -289,7 +295,7 @@ function renderLeaderboard(teams){
         return `<div class="lb-row ${animCls}">
             <div class="lb-rank ${rankCls}">${rank}</div>
             <div class="lb-team">
-                <div class="lb-team-name">${t.name}</div>
+                <div class="lb-team-name">${esc(t.name)}</div>
                 <div class="score-bar"><div class="score-bar-fill" style="width:${scorePct}%"></div></div>
             </div>
             <div class="lb-score">${t.score}</div>

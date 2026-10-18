@@ -12,7 +12,9 @@ if DATABASE_URL:
         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
     elif DATABASE_URL.startswith("postgresql+psycopg2://"):
         DATABASE_URL = DATABASE_URL.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
-    engine = create_engine(DATABASE_URL)
+    # pool_pre_ping: transparently replaces connections the server dropped while
+    # a serverless instance was idle (avoids sporadic 500s on Supabase/Vercel).
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=300)
 else:
     # Fallback to local SQLite for local development
     SQLALCHEMY_DATABASE_URL = "sqlite:///./nightjar.db"
