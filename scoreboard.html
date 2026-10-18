@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NIGHTJAR — Live Scoreboard</title>
-<meta name="description" content="SPECTRE NIGHTJAR Live Scoreboard — real-time team rankings and progress">
+<meta name="description" content="SPECTRE NIGHTJAR Live Scoreboard — real-time player rankings and progress">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -72,7 +72,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .lb-header-title::before{content:"◉";color:var(--cyan);font-size:14px}
 .lb-count{font-size:10px;color:var(--ink-dim)}
 
-.lb-row{display:grid;grid-template-columns:50px 1fr 120px 100px 80px;padding:12px 18px;border-bottom:1px solid rgba(255,26,26,.06);align-items:center;transition:all .4s ease;position:relative;overflow:hidden}
+.lb-row{display:grid;grid-template-columns:50px 1fr 120px 100px;padding:12px 18px;border-bottom:1px solid rgba(255,26,26,.06);align-items:center;transition:all .4s ease;position:relative;overflow:hidden}
 .lb-row:hover{background:rgba(255,26,26,.04)}
 .lb-row.rank-up{animation:rankUp .6s ease}
 .lb-row.new-entry{animation:newEntry .8s ease}
@@ -85,9 +85,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .lb-rank.r3{color:var(--bronze);text-shadow:0 0 8px rgba(205,127,50,.3)}
 .lb-rank.rn{color:var(--ink-dim)}
 
-.lb-team{display:flex;flex-direction:column;gap:2px}
-.lb-team-name{font-family:"Press Start 2P",monospace;font-size:12px;color:var(--yel)}
-.lb-team-members{font-size:10px;color:var(--ink-dim)}
+.lb-player{display:flex;flex-direction:column;gap:2px}
+.lb-player-name{font-family:"Press Start 2P",monospace;font-size:12px;color:var(--yel)}
 
 .lb-score{font-family:"Press Start 2P",monospace;font-size:16px;color:var(--green);text-align:right;text-shadow:0 0 10px rgba(0,255,106,.25)}
 
@@ -98,7 +97,6 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .progress-fill::after{content:"";position:absolute;right:0;top:0;bottom:0;width:6px;background:inherit;filter:brightness(1.5);animation:progressGlow 1.5s ease infinite}
 @keyframes progressGlow{0%,100%{opacity:1}50%{opacity:.4}}
 
-.lb-members-count{font-size:12px;color:var(--ink-dim);text-align:center}
 
 /* ─── Score bar ─── */
 .score-bar{width:100%;height:4px;background:rgba(255,26,26,.1);border-radius:2px;margin-top:4px;overflow:hidden}
@@ -116,14 +114,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 @media(max-width:700px){
 .podium{gap:8px}
 .podium-block{padding:10px;width:clamp(90px,28vw,160px)}
-.lb-row{grid-template-columns:36px 1fr 80px 70px 50px;padding:10px 12px;font-size:12px}
+.lb-row{grid-template-columns:36px 1fr 80px 70px;padding:10px 12px;font-size:12px}
 .lb-score{font-size:13px}
 .lb-rank{font-size:13px}
-.lb-team-name{font-size:10px}
+.lb-player-name{font-size:10px}
 }
 @media(max-width:480px){
 .lb-row{grid-template-columns:30px 1fr 60px 50px;padding:8px 10px}
-.lb-members-count{display:none}
 .podium{flex-direction:column;align-items:center}
 .podium-block{width:80%;height:auto!important;padding:12px;border-radius:8px;border:2px solid currentColor!important}
 .podium-slot{order:0}
@@ -161,13 +158,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
     <!-- Full Leaderboard -->
     <div class="lb-panel" id="lb-panel">
         <div class="lb-header">
-            <div class="lb-header-title">ALL TEAMS</div>
-            <div class="lb-count" id="lb-count">0 teams</div>
+            <div class="lb-header-title">ALL PLAYERS</div>
+            <div class="lb-count" id="lb-count">0 players</div>
         </div>
         <div id="lb-body">
             <div class="empty-state">
                 <div class="icon">◉</div>
-                <p>Awaiting team registrations...<br>Scoreboard will populate automatically.</p>
+                <p>Awaiting player registrations...<br>Scoreboard will populate automatically.</p>
             </div>
         </div>
     </div>
@@ -212,24 +209,24 @@ function updateClock(){
 setInterval(updateClock,1000);
 updateClock();
 
-// Team names are user-controlled and this page is public: always escape them.
+// Usernames are user-controlled and this page is public: always escape them.
 function esc(v){
     return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 // ─── Data ───
-let prevTeams=[];
+let prevPlayers=[];
 let maxScore=100;
 
 async function loadScoreboard(){
     try{
         const res=await fetch('/api/scoreboard');
         if(!res.ok)throw new Error('HTTP '+res.status);
-        const teams=await res.json();
-        maxScore=Math.max(100,...teams.map(t=>t.score));
-        renderPodium(teams.slice(0,3));
-        renderLeaderboard(teams);
-        prevTeams=teams;
+        const players=await res.json();
+        maxScore=Math.max(100,...players.map(t=>t.score));
+        renderPodium(players.slice(0,3));
+        renderLeaderboard(players);
+        prevPlayers=players;
     }catch(e){
         console.error('Scoreboard fetch error:',e);
     }
@@ -264,19 +261,19 @@ function renderPodium(top3){
 }
 
 // ─── Leaderboard ───
-function renderLeaderboard(teams){
+function renderLeaderboard(players){
     const body=document.getElementById('lb-body');
-    document.getElementById('lb-count').textContent=teams.length+' team'+(teams.length!==1?'s':'');
+    document.getElementById('lb-count').textContent=players.length+' player'+(players.length!==1?'s':'');
     
-    if(!teams.length){
-        body.innerHTML=`<div class="empty-state"><div class="icon">◉</div><p>Awaiting team registrations...<br>Scoreboard will populate automatically.</p></div>`;
+    if(!players.length){
+        body.innerHTML=`<div class="empty-state"><div class="icon">◉</div><p>Awaiting player registrations...<br>Scoreboard will populate automatically.</p></div>`;
         return;
     }
     
     const prevMap={};
-    prevTeams.forEach((t,i)=>prevMap[t.id]=i+1);
+    prevPlayers.forEach((t,i)=>prevMap[t.id]=i+1);
     
-    body.innerHTML=teams.map((t,i)=>{
+    body.innerHTML=players.map((t,i)=>{
         const rank=i+1;
         const prevRank=prevMap[t.id];
         const isNew=prevRank===undefined;
@@ -294,8 +291,8 @@ function renderLeaderboard(teams){
         
         return `<div class="lb-row ${animCls}">
             <div class="lb-rank ${rankCls}">${rank}</div>
-            <div class="lb-team">
-                <div class="lb-team-name">${esc(t.name)}</div>
+            <div class="lb-player">
+                <div class="lb-player-name">${esc(t.name)}</div>
                 <div class="score-bar"><div class="score-bar-fill" style="width:${scorePct}%"></div></div>
             </div>
             <div class="lb-score">${t.score}</div>
@@ -303,7 +300,6 @@ function renderLeaderboard(teams){
                 <div class="lb-room">R${t.current_room}</div>
                 <div class="progress-bar"><div class="progress-fill" style="width:${prog}%;background:${progColor}"></div></div>
             </div>
-            <div class="lb-members-count">${t.members} ☻</div>
         </div>`;
     }).join('');
 }

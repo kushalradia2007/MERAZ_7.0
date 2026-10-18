@@ -13,6 +13,12 @@ Without `DATABASE_URL` the app uses a local SQLite file (`nightjar.db`). Create 
 ADMIN_PASSWORD='choose-a-strong-one' python create_admin.py
 ```
 
+## Individual play
+
+The event is individual: there are no teams. Every participant registers on their own, and score and room progress are stored on the user. Admins don't appear on the public scoreboard.
+
+Existing databases from the team-based version are upgraded automatically on startup (`database.migrate_to_individual`): each member inherits their old team's score and room, and old submissions are credited to the team leader. The legacy `teams` table and `users.team_id` column are left in place, unused. For a fresh event, use **RESET ALL** in the admin console.
+
 ## Environment variables
 
 | Variable | Required | Purpose |
@@ -24,7 +30,7 @@ ADMIN_PASSWORD='choose-a-strong-one' python create_admin.py
 
 ## Notes for challenge authors
 
-- Flags live in `CHALLENGE_FLAGS` in `main.py` (4 per room, 25 pts each). A challenge may list several accepted answers; it is only scored once per team. Matching ignores case and surrounding spaces.
+- Flags live in `CHALLENGE_FLAGS` in `main.py` (4 per room, 25 pts each). A challenge may list several accepted answers; it is only scored once per player. Matching ignores case and surrounding spaces.
 - Only `Challenges/Room - N/evidence/**` is served to players (login required). The `README.md` files in `Challenges/` contain answers and are never served.
 - Room pages must not contain flags: they verify through `/api/submit_flag` and restore progress from `/api/progress` (see `room-common.js`).
 

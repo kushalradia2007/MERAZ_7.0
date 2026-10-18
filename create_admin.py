@@ -17,6 +17,7 @@ from passlib.context import CryptContext
 MIN_PASSWORD_LEN = 8
 
 models.Base.metadata.create_all(bind=database.engine)
+database.migrate_to_individual(database.engine)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 db = database.SessionLocal()
@@ -25,28 +26,19 @@ try:
     if admin:
         admin.is_admin = True
         db.commit()
-        team_name = admin.team.name if admin.team else "no team"
-        print(f"User 'admin' promoted to admin (team: {team_name})")
+        print("User 'admin' promoted to admin")
     else:
         password = os.getenv("ADMIN_PASSWORD") or getpass.getpass("Password for new 'admin' user: ")
         if len(password) < MIN_PASSWORD_LEN:
             sys.exit(f"Password must be at least {MIN_PASSWORD_LEN} characters. Nothing was created.")
 
-        team = db.query(models.Team).filter(models.Team.name == "ORGANIZERS").first()
-        if not team:
-            team = models.Team(name="ORGANIZERS")
-            db.add(team)
-            db.commit()
-            db.refresh(team)
-
         user = models.User(
             username="admin",
             hashed_password=pwd_context.hash(password),
-            team_id=team.id,
             is_admin=True,
         )
         db.add(user)
         db.commit()
-        print("Created admin user 'admin' (team: ORGANIZERS)")
+        print("Created admin user 'admin'")
 finally:
     db.close()

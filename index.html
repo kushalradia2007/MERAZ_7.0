@@ -39,7 +39,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .nav-spacer{flex:1}
 .nav-user{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--ink-dim)}
 .nav-user-name{color:var(--yel);font-weight:700}
-.nav-user-team{color:var(--cyan);font-size:9px}
+.nav-user-rank{color:var(--cyan);font-size:9px}
 .nav-status{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .nav-timer{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--red);text-shadow:0 0 8px rgba(255,26,26,.4);white-space:nowrap}
@@ -101,12 +101,12 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 .panel-header::before{content:"◉"}
 .panel-header .count{color:var(--ink-dim);font-family:"JetBrains Mono",monospace;font-size:9px;margin-left:auto}
 
-/* Team Info */
-.team-info{padding:12px 14px}
-.team-name-display{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--yel);margin-bottom:8px;text-shadow:0 0 8px rgba(255,230,0,.2)}
-.team-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:10px}
-.team-stat-label{color:var(--ink-dim)}
-.team-stat-val{color:var(--cyan);font-weight:700}
+/* Player Info */
+.player-info{padding:12px 14px}
+.player-name-display{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--yel);margin-bottom:8px;text-shadow:0 0 8px rgba(255,230,0,.2)}
+.player-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:10px}
+.player-stat-label{color:var(--ink-dim)}
+.player-stat-val{color:var(--cyan);font-weight:700}
 
 /* Intel Feed (NPC dialog log) */
 .intel-feed{flex:1;overflow-y:auto;padding:6px 0;scrollbar-width:thin;scrollbar-color:var(--red-dim) transparent}
@@ -226,7 +226,6 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
     <div class="nav-user">
         <div class="nav-status"></div>
         <span class="nav-user-name" id="nav-username">OPERATIVE</span>
-        <span class="nav-user-team" id="nav-team"></span>
     </div>
     <button class="nav-link" onclick="logout()" style="border-color:var(--red-dim);color:var(--red)">⏻</button>
 </nav>
@@ -306,21 +305,20 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
     <!-- Right Panel: Intel Feed -->
     <aside class="panel" id="right-panel">
         <div class="panel-section">
-            <div class="panel-header">TEAM STATUS</div>
-            <div class="team-info">
-                <div class="team-name-display" id="team-display">—</div>
-                <div class="team-name-display" id="invite-display" style="font-size:8px; color:var(--cyan); margin-bottom:8px; display:none;"></div>
-                <div class="team-stat">
-                    <span class="team-stat-label">SCORE</span>
-                    <span class="team-stat-val" id="team-score">0</span>
+            <div class="panel-header">OPERATIVE STATUS</div>
+            <div class="player-info">
+                <div class="player-name-display" id="player-display">—</div>
+                <div class="player-stat">
+                    <span class="player-stat-label">SCORE</span>
+                    <span class="player-stat-val" id="player-score">0</span>
                 </div>
-                <div class="team-stat">
-                    <span class="team-stat-label">ROOMS</span>
-                    <span class="team-stat-val" id="team-rooms">0 / 10</span>
+                <div class="player-stat">
+                    <span class="player-stat-label">ROOMS</span>
+                    <span class="player-stat-val" id="player-rooms">0 / 10</span>
                 </div>
-                <div class="team-stat">
-                    <span class="team-stat-label">ALLIES</span>
-                    <span class="team-stat-val" id="team-allies">0 / 3</span>
+                <div class="player-stat">
+                    <span class="player-stat-label">ALLIES</span>
+                    <span class="player-stat-val" id="player-allies">0 / 3</span>
                 </div>
             </div>
         </div>
@@ -344,28 +342,20 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
         if(!r.ok)return;
         const u=await r.json();
         document.getElementById('nav-username').textContent=u.username.toUpperCase();
-        if(u.team){
-            document.getElementById('nav-team').textContent='['+u.team+']';
-            document.getElementById('team-display').textContent=u.team;
-            if(u.is_leader && u.invite_code){
-                const inv = document.getElementById('invite-display');
-                inv.textContent='INVITE CODE: ' + u.invite_code;
-                inv.style.display='';
-            }
-        }
+        document.getElementById('player-display').textContent=u.username.toUpperCase();
         if(u.is_admin) document.getElementById('admin-nav-link').style.display='';
         loadProgress();
     }catch(e){}
 })();
 
-// Team progress comes from the server (rooms are separate pages, so nothing
-// client-side can know which rooms a team has actually cleared).
+// Progress comes from the server (rooms are separate pages, so nothing
+// client-side can know which rooms the player has actually cleared).
 async function loadProgress(){
     try{
         const r=await fetch('/api/progress');
         if(!r.ok)return;
         const p=await r.json();
-        document.getElementById('team-score').textContent=p.score;
+        document.getElementById('player-score').textContent=p.score;
         for(let i=0;i<ROOM_COUNT;i++){
             const solved=(p.rooms[String(i+1)]||[]).length;
             if(solved>=4)visited[i]=1;
@@ -433,7 +423,7 @@ function updateSidebar(visitedArr, npcTalked){
     const count=visitedArr.filter(Boolean).length;
     document.getElementById('progress-text').textContent=count+' / 10';
     document.getElementById('progress-fill').style.width=(count/10*100)+'%';
-    document.getElementById('team-rooms').textContent=count+' / 10';
+    document.getElementById('player-rooms').textContent=count+' / 10';
 
     visitedArr.forEach((v,i)=>{
         const el=document.getElementById('sidebar-room-'+i);
@@ -441,7 +431,7 @@ function updateSidebar(visitedArr, npcTalked){
     });
 
     const alliesBriefed=npcTalked.filter(Boolean).length;
-    document.getElementById('team-allies').textContent=alliesBriefed+' / 3';
+    document.getElementById('player-allies').textContent=alliesBriefed+' / 3';
     npcTalked.forEach((v,i)=>{
         document.getElementById('sidebar-npc-'+i).classList.toggle('briefed',!!v);
     });

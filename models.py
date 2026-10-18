@@ -1,23 +1,12 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
 from database import Base
 import datetime
 
-class Team(Base):
-    __tablename__ = "teams"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    score = Column(Integer, default=0)
-    current_room = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    invite_code = Column(String, unique=True, index=True, nullable=True)
-    leader_id = Column(Integer, nullable=True)
-
-    users = relationship("User", back_populates="team")
-    submissions = relationship("FlagSubmission", back_populates="team")
 
 class User(Base):
+    """One participant. The event is individual: score and room progress live
+    directly on the user (there are no teams)."""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -25,22 +14,22 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=True)
     is_email_verified = Column(Boolean, default=False)
     hashed_password = Column(String, nullable=True)
-    team_id = Column(Integer, ForeignKey("teams.id"))
     is_admin = Column(Boolean, default=False)
+    score = Column(Integer, default=0)
+    current_room = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
-    team = relationship("Team", back_populates="users")
 
 class FlagSubmission(Base):
     __tablename__ = "flag_submissions"
 
     id = Column(Integer, primary_key=True, index=True)
-    team_id = Column(Integer, ForeignKey("teams.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     room_id = Column(Integer)
     flag_value = Column(String, nullable=True)
     submitted_at = Column(DateTime, default=datetime.datetime.utcnow)
     is_correct = Column(Boolean, default=False)
 
-    team = relationship("Team", back_populates="submissions")
 
 class VerificationCode(Base):
     __tablename__ = "verification_codes"

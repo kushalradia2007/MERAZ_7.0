@@ -505,19 +505,6 @@
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <label><span>Squad Assignment</span></label>
-                        <div class="radio-group" style="margin-bottom: 0.8rem;">
-                            <label><input type="radio" name="team_action" value="create_team" checked onchange="toggleTeamAction()"> CREATE SQUAD</label>
-                            <label><input type="radio" name="team_action" value="join_team" onchange="toggleTeamAction()"> JOIN SQUAD</label>
-                        </div>
-                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
-                            <input type="text" id="teamname" placeholder="SQUAD_NAME (Max 4)">
-                        </div>
-                        <div class="input-wrapper hidden">
-                            <input type="text" id="invite_code" placeholder="INVITE_CODE">
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Common Fields -->
@@ -570,19 +557,6 @@
                 </div>
             </div>
 
-            <div class="input-group">
-                <label><span>Squad Assignment</span></label>
-                <div class="radio-group" style="margin-bottom: 0.8rem;">
-                    <label><input type="radio" name="g_team_action" value="create_team" checked onchange="toggleGoogleTeamAction()"> CREATE SQUAD</label>
-                    <label><input type="radio" name="g_team_action" value="join_team" onchange="toggleGoogleTeamAction()"> JOIN SQUAD</label>
-                </div>
-                <div class="input-wrapper" style="margin-bottom: 0.5rem;">
-                    <input type="text" id="g-teamname" placeholder="SQUAD_NAME (Max 4)">
-                </div>
-                <div class="input-wrapper hidden">
-                    <input type="text" id="g-invite-code" placeholder="INVITE_CODE">
-                </div>
-            </div>
 
             <div id="g-modal-err" class="error-text"></div>
 
@@ -674,34 +648,6 @@
         document.getElementById('code-msg').innerText = '';
     }
 
-    function toggleTeamAction() {
-        const action = document.querySelector('input[name="team_action"]:checked').value;
-        const teamNameWrapper = document.getElementById('teamname').parentElement;
-        const inviteCodeWrapper = document.getElementById('invite_code').parentElement;
-        
-        if (action === 'create_team') {
-            teamNameWrapper.classList.remove('hidden');
-            inviteCodeWrapper.classList.add('hidden');
-        } else {
-            teamNameWrapper.classList.add('hidden');
-            inviteCodeWrapper.classList.remove('hidden');
-        }
-    }
-
-    function toggleGoogleTeamAction() {
-        const action = document.querySelector('input[name="g_team_action"]:checked').value;
-        const teamNameWrapper = document.getElementById('g-teamname').parentElement;
-        const inviteCodeWrapper = document.getElementById('g-invite-code').parentElement;
-        
-        if (action === 'create_team') {
-            teamNameWrapper.classList.remove('hidden');
-            inviteCodeWrapper.classList.add('hidden');
-        } else {
-            teamNameWrapper.classList.add('hidden');
-            inviteCodeWrapper.classList.remove('hidden');
-        }
-    }
-
     function closeGoogleModal() {
         document.getElementById('google-setup-modal').classList.add('hidden');
         googleTokenCache = null;
@@ -711,22 +657,11 @@
     async function completeGoogleRegistration() {
         if (!googleTokenCache) return;
         const username = document.getElementById('g-username').value.trim();
-        const action = document.querySelector('input[name="g_team_action"]:checked').value;
-        const teamName = document.getElementById('g-teamname').value.trim();
-        const inviteCode = document.getElementById('g-invite-code').value.trim();
         const err = document.getElementById('g-modal-err');
         err.innerText = '';
 
         if (!username) {
             err.innerText = "Please specify an operative codename.";
-            return;
-        }
-        if (action === 'create_team' && !teamName) {
-            err.innerText = "Team name is required.";
-            return;
-        }
-        if (action === 'join_team' && !inviteCode) {
-            err.innerText = "Team invite code is required.";
             return;
         }
 
@@ -737,10 +672,7 @@
         try {
             const body = new URLSearchParams({
                 id_token: googleTokenCache,
-                username: username,
-                action: action,
-                team_name: teamName,
-                invite_code: inviteCode
+                username: username
             });
             const res = await fetch('/api/auth/google', {
                 method: 'POST',
@@ -816,33 +748,17 @@
         if (mode === 'register') {
             const email = document.getElementById('email').value;
             const vCode = document.getElementById('verification_code').value;
-            const action = document.querySelector('input[name="team_action"]:checked').value;
-            const teamName = document.getElementById('teamname').value;
-            const inviteCode = document.getElementById('invite_code').value;
             
             if (!email || !vCode) {
                 err.innerText = "Email and verification code are required.";
                 return;
             }
             
-            if (action === 'create_team' && !teamName) {
-                err.innerText = "Team name is required to create a team.";
-                return;
-            }
-            
-            if (action === 'join_team' && !inviteCode) {
-                err.innerText = "Invite code is required to join a team.";
-                return;
-            }
-            
             body = new URLSearchParams({ 
-                action: action,
                 email: email,
                 verification_code: vCode,
                 username: user, 
-                password: pass,
-                team_name: teamName,
-                invite_code: inviteCode
+                password: pass
             });
         } else {
             body = new URLSearchParams({ username: user, password: pass });

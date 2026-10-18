@@ -27,6 +27,7 @@ load_dotenv()
 import database, models  # noqa: E402
 
 models.Base.metadata.create_all(bind=database.engine)
+database.migrate_to_individual(database.engine)
 
 app = FastAPI(title="NIGHTJAR API")
 
@@ -81,7 +82,6 @@ def _load_secret_key() -> str:
 
 SECRET_KEY = _load_secret_key()
 SESSION_HOURS = 24
-MAX_TEAM_SIZE = 4
 CODE_TTL_MINUTES = 15
 CODE_RESEND_SECONDS = 30
 MIN_PASSWORD_LEN = 8
@@ -122,20 +122,6 @@ def clean_username(username: Optional[str]) -> str:
     if len(username) < 2 or len(username) > 32:
         raise HTTPException(status_code=400, detail="Username must be 2-32 characters")
     return username
-
-
-def clean_team_name(team_name: Optional[str]) -> str:
-    team_name = (team_name or "").strip()
-    if not team_name:
-        raise HTTPException(status_code=400, detail="Team name required to create team")
-    if len(team_name) > 40:
-        raise HTTPException(status_code=400, detail="Team name must be 40 characters or fewer")
-    return team_name
-
-
-def new_invite_code() -> str:
-    alphabet = string.ascii_uppercase + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(8))
 
 
 def get_current_user(request: Request, db: Session = Depends(database.get_db)):
@@ -316,13 +302,10 @@ def send_verification_code(email: str = Form(...), db: Session = Depends(databas
 def register(
     request: Request,
     response: Response,
-    action: str = Form(...),
     email: str = Form(...),
     verification_code: str = Form(...),
     username: str = Form(...),
     password: str = Form(...),
-    team_name: Optional[str] = Form(None),
-    invite_code: Optional[str] = Form(None),
     db: Session = Depends(database.get_db),
 ):
     email = normalize_email(email)
@@ -345,52 +328,19 @@ def register(
     if db.query(models.User).filter(func.lower(models.User.email) == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Team + user are created in ONE transaction so a failure can't leave an
-    # orphaned team behind.
     try:
-        if action == "create_team":
-            team_name = clean_team_name(team_name)
-            if db.query(models.Team).filter(models.Team.name == team_name).first():
-                raise HTTPException(status_code=400, detail="Team name already taken")
-            team = models.Team(name=team_name, invite_code=new_invite_code())
-            db.add(team)
-            db.flush()
-        elif action == "join_team":
-            code = (invite_code or "").strip().upper()
-            if not code:
-                raise HTTPException(status_code=400, detail="Invite code required to join team")
-            team = (
-                db.query(models.Team)
-                .filter(models.Team.invite_code == code)
-                .with_for_update()
-                .first()
-            )
-            if not team:
-                raise HTTPException(status_code=400, detail="Invalid invite code")
-            if db.query(models.User).filter(models.User.team_id == team.id).count() >= MAX_TEAM_SIZE:
-                raise HTTPException(status_code=400, detail=f"Team is full (max {MAX_TEAM_SIZE} members)")
-        else:
-            raise HTTPException(status_code=400, detail="Invalid action")
-
         user = models.User(
             username=username,
             email=email,
             is_email_verified=True,
             hashed_password=pwd_context.hash(password),
-            team_id=team.id,
         )
         db.add(user)
-        db.flush()
-        if action == "create_team":
-            team.leader_id = user.id
         db.delete(vc)
         db.commit()
-    except HTTPException:
-        db.rollback()
-        raise
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Username, email or team name already taken")
+        raise HTTPException(status_code=400, detail="Username or email already taken")
 
     issue_session(response, request, username)
     return {"message": "Registered successfully"}
@@ -434,9 +384,6 @@ def google_auth(
     response: Response,
     id_token: str = Form(...),
     username: Optional[str] = Form(None),
-    action: Optional[str] = Form(None),
-    team_name: Optional[str] = Form(None),
-    invite_code: Optional[str] = Form(None),
     db: Session = Depends(database.get_db),
 ):
     if not os.getenv("GOOGLE_CLIENT_ID", "").strip():
@@ -454,7 +401,7 @@ def google_auth(
         return {"status": "authenticated", "message": "Login successful", "is_admin": user.is_admin}
 
     # New user: ask the client for profile details first
-    if not username or not action:
+    if not username:
         raw_name = payload.get("given_name") or payload.get("name") or email.split("@")[0]
         suggested = re.sub(r"[^a-zA-Z0-9_]", "", raw_name)[:15]
         return {
@@ -469,49 +416,18 @@ def google_auth(
         raise HTTPException(status_code=400, detail="Username already registered. Please choose another.")
 
     try:
-        if action == "create_team":
-            team_name = clean_team_name(team_name)
-            if db.query(models.Team).filter(models.Team.name == team_name).first():
-                raise HTTPException(status_code=400, detail="Team name already taken")
-            team = models.Team(name=team_name, invite_code=new_invite_code())
-            db.add(team)
-            db.flush()
-        elif action == "join_team":
-            code = (invite_code or "").strip().upper()
-            if not code:
-                raise HTTPException(status_code=400, detail="Invite code is required to join a team")
-            team = (
-                db.query(models.Team)
-                .filter(models.Team.invite_code == code)
-                .with_for_update()
-                .first()
-            )
-            if not team:
-                raise HTTPException(status_code=400, detail="Invalid team invite code")
-            if db.query(models.User).filter(models.User.team_id == team.id).count() >= MAX_TEAM_SIZE:
-                raise HTTPException(status_code=400, detail=f"Team is full (maximum {MAX_TEAM_SIZE} members)")
-        else:
-            raise HTTPException(status_code=400, detail="Invalid team action")
-
         new_user = models.User(
             username=username,
             email=email,
             is_email_verified=True,
             hashed_password=None,
-            team_id=team.id,
             is_admin=False,
         )
         db.add(new_user)
-        db.flush()
-        if action == "create_team":
-            team.leader_id = new_user.id
         db.commit()
-    except HTTPException:
-        db.rollback()
-        raise
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Username, email or team name already taken")
+        raise HTTPException(status_code=400, detail="Username or email already taken")
 
     issue_session(response, request, username)
     return {"status": "authenticated", "message": "Registered and logged in"}
@@ -548,7 +464,7 @@ POINTS_PER_FLAG = 25
 
 # One entry per challenge (4 per room, in README order). Each challenge lists
 # every accepted answer; the FIRST one is canonical (what gets stored). A
-# challenge can only be scored once per team no matter which variant is used.
+# challenge can only be scored once per player no matter which variant is used.
 # Variants beyond the first are the answers the in-room UI / evidence actually
 # produce (they differ from the READMEs for 1.1, 2.2 and 2.4).
 CHALLENGE_FLAGS = {
@@ -608,7 +524,7 @@ CHALLENGE_FLAGS = {
     ],
 }
 FLAGS_PER_ROOM = 4
-MAX_ROOM = 11  # a team that clears room 10 sits at "room 11" (finished)
+MAX_ROOM = 11  # a player who clears room 10 sits at "room 11" (finished)
 
 # room -> {lowercased accepted flag -> challenge index}. Matching is
 # case-insensitive (the in-room UIs always were) and ignores surrounding spaces.
@@ -622,10 +538,10 @@ def match_flag(room_id: int, flag: str) -> Optional[int]:
     return _FLAG_INDEX.get(room_id, {}).get((flag or "").strip().lower())
 
 
-def solved_challenges(db: Session, team_id: int, room_id: Optional[int] = None) -> dict:
-    """{room_id: set(challenge indexes, 0-based)} for a team's correct submissions."""
+def solved_challenges(db: Session, user_id: int, room_id: Optional[int] = None) -> dict:
+    """{room_id: set(challenge indexes, 0-based)} for a player's correct submissions."""
     q = db.query(models.FlagSubmission.room_id, models.FlagSubmission.flag_value).filter(
-        models.FlagSubmission.team_id == team_id,
+        models.FlagSubmission.user_id == user_id,
         models.FlagSubmission.is_correct == True,  # noqa: E712
     )
     if room_id is not None:
@@ -649,23 +565,21 @@ def submit_flag(
         raise HTTPException(status_code=401, detail="Unauthorized")
     if room_id not in CHALLENGE_FLAGS:
         raise HTTPException(status_code=400, detail="Unknown room")
-    if not user.team_id:
-        raise HTTPException(status_code=400, detail="You must belong to a team to submit flags")
 
     flag = (flag or "").strip()[:300]
 
-    # Lock the team row so two teammates submitting at once can't double-score.
-    team = db.query(models.Team).filter(models.Team.id == user.team_id).with_for_update().first()
-    if not team:
-        raise HTTPException(status_code=400, detail="Team not found")
+    # Lock the player's row so two rapid submissions can't double-score.
+    player = db.query(models.User).filter(models.User.id == user.id).with_for_update().first()
+    if not player:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     idx = match_flag(room_id, flag)
     if idx is None:
-        db.add(models.FlagSubmission(team_id=team.id, room_id=room_id, is_correct=False, flag_value=flag))
+        db.add(models.FlagSubmission(user_id=player.id, room_id=room_id, is_correct=False, flag_value=flag))
         db.commit()
         return {"success": False, "message": "Incorrect flag. Try again."}
 
-    solved = solved_challenges(db, team.id, room_id).get(room_id, set())
+    solved = solved_challenges(db, player.id, room_id).get(room_id, set())
     if idx in solved:
         return {
             "success": True,
@@ -675,12 +589,12 @@ def submit_flag(
         }
 
     db.add(models.FlagSubmission(
-        team_id=team.id, room_id=room_id, is_correct=True, flag_value=CHALLENGE_FLAGS[room_id][idx][0]
+        user_id=player.id, room_id=room_id, is_correct=True, flag_value=CHALLENGE_FLAGS[room_id][idx][0]
     ))
-    team.score = (team.score or 0) + POINTS_PER_FLAG
+    player.score = (player.score or 0) + POINTS_PER_FLAG
     solved = solved | {idx}
-    if len(solved) >= FLAGS_PER_ROOM and (team.current_room or 1) <= room_id:
-        team.current_room = room_id + 1
+    if len(solved) >= FLAGS_PER_ROOM and (player.current_room or 1) <= room_id:
+        player.current_room = room_id + 1
     db.commit()
     return {
         "success": True,
@@ -692,142 +606,107 @@ def submit_flag(
 
 @app.get("/api/progress")
 def get_progress(user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
-    """The caller's TEAM progress: which challenges are solved in each room."""
+    """The caller's own progress: which challenges are solved in each room."""
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     rooms = {str(r): [] for r in CHALLENGE_FLAGS}
-    score, current_room = 0, 1
-    if user.team_id:
-        team = db.query(models.Team).filter(models.Team.id == user.team_id).first()
-        if team:
-            score, current_room = team.score or 0, team.current_room or 1
-            for rid, idxs in solved_challenges(db, team.id).items():
-                rooms[str(rid)] = sorted(i + 1 for i in idxs)
-    return {"score": score, "current_room": current_room, "rooms": rooms}
+    for rid, idxs in solved_challenges(db, user.id).items():
+        rooms[str(rid)] = sorted(i + 1 for i in idxs)
+    return {"score": user.score or 0, "current_room": user.current_room or 1, "rooms": rooms}
 
 
 @app.get("/api/me")
 def get_me(user: models.User = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    is_leader = bool(user.team and user.team.leader_id == user.id)
-    return {
-        "username": user.username,
-        "is_admin": user.is_admin,
-        "team": user.team.name if user.team else None,
-        "invite_code": user.team.invite_code if is_leader else None,
-        "is_leader": is_leader,
-    }
+    return {"username": user.username, "is_admin": user.is_admin}
 
 
 # ─── Scoreboard API (public) ──────────────────────────────────
 
 @app.get("/api/scoreboard")
 def get_scoreboard(db: Session = Depends(database.get_db)):
-    teams = (
-        db.query(models.Team)
-        .options(selectinload(models.Team.users))
-        .order_by(models.Team.score.desc(), models.Team.created_at.asc())
+    # Admins run the event; they don't compete.
+    players = (
+        db.query(models.User)
+        .filter(models.User.is_admin == False)  # noqa: E712
+        .order_by(models.User.score.desc(), models.User.created_at.asc(), models.User.id.asc())
         .all()
     )
     return [
         {
-            "id": t.id,
-            "name": t.name,
-            "score": t.score,
-            "current_room": t.current_room,
-            "members": len(t.users),
-            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "id": u.id,
+            "name": u.username,
+            "score": u.score or 0,
+            "current_room": u.current_room or 1,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
         }
-        for t in teams
+        for u in players
     ]
 
 
 # ─── Admin API (protected) ────────────────────────────────────
 
-@app.get("/api/admin/teams")
-def admin_get_teams(admin: models.User = Depends(require_admin), db: Session = Depends(database.get_db)):
-    teams = (
-        db.query(models.Team)
-        .options(selectinload(models.Team.users))
-        .order_by(models.Team.created_at.asc())
-        .all()
-    )
+@app.get("/api/admin/players")
+def admin_get_players(admin: models.User = Depends(require_admin), db: Session = Depends(database.get_db)):
+    users = db.query(models.User).order_by(models.User.id.asc()).all()
     counts = {
-        team_id: (total, correct or 0)
-        for team_id, total, correct in db.query(
-            models.FlagSubmission.team_id,
+        uid: (total, correct or 0)
+        for uid, total, correct in db.query(
+            models.FlagSubmission.user_id,
             func.count(models.FlagSubmission.id),
             func.sum(case((models.FlagSubmission.is_correct == True, 1), else_=0)),  # noqa: E712
-        ).group_by(models.FlagSubmission.team_id).all()
+        ).group_by(models.FlagSubmission.user_id).all()
     }
     result = []
-    for t in teams:
-        total, correct = counts.get(t.id, (0, 0))
+    for u in users:
+        total, correct = counts.get(u.id, (0, 0))
         result.append({
-            "id": t.id,
-            "name": t.name,
-            "score": t.score,
-            "current_room": t.current_room,
-            "created_at": t.created_at.isoformat() if t.created_at else None,
-            "members": [{"id": u.id, "username": u.username, "is_admin": u.is_admin} for u in t.users],
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "is_admin": u.is_admin,
+            "score": u.score or 0,
+            "current_room": u.current_room or 1,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
             "total_submissions": total,
             "correct_submissions": int(correct),
         })
     return result
 
 
-@app.put("/api/admin/teams/{team_id}/score")
+@app.put("/api/admin/users/{user_id}/score")
 def admin_update_score(
-    team_id: int,
+    user_id: int,
     score: int = Body(..., embed=True),
     admin: models.User = Depends(require_admin),
     db: Session = Depends(database.get_db),
 ):
     if score < 0 or score > 1_000_000:
         raise HTTPException(status_code=400, detail="Score must be between 0 and 1,000,000")
-    team = db.query(models.Team).filter(models.Team.id == team_id).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Team not found")
-    team.score = score
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.score = score
     db.commit()
-    return {"message": f"Score updated to {score}", "team": team.name}
+    return {"message": f"Score updated to {score}", "user": user.username}
 
 
-@app.put("/api/admin/teams/{team_id}/room")
+@app.put("/api/admin/users/{user_id}/room")
 def admin_update_room(
-    team_id: int,
+    user_id: int,
     room: int = Body(..., embed=True),
     admin: models.User = Depends(require_admin),
     db: Session = Depends(database.get_db),
 ):
     if room < 1 or room > MAX_ROOM:
         raise HTTPException(status_code=400, detail=f"Room must be between 1 and {MAX_ROOM}")
-    team = db.query(models.Team).filter(models.Team.id == team_id).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Team not found")
-    team.current_room = room
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.current_room = room
     db.commit()
-    return {"message": f"Room updated to {room}", "team": team.name}
-
-
-@app.delete("/api/admin/teams/{team_id}")
-def admin_delete_team(
-    team_id: int,
-    admin: models.User = Depends(require_admin),
-    db: Session = Depends(database.get_db),
-):
-    team = db.query(models.Team).filter(models.Team.id == team_id).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Team not found")
-    if admin.team_id == team.id:
-        raise HTTPException(status_code=400, detail="You cannot delete your own team")
-    name = team.name  # read before the row is deleted
-    db.query(models.FlagSubmission).filter(models.FlagSubmission.team_id == team_id).delete()
-    db.query(models.User).filter(models.User.team_id == team_id).delete()
-    db.delete(team)
-    db.commit()
-    return {"message": f"Team '{name}' deleted"}
+    return {"message": f"Room updated to {room}", "user": user.username}
 
 
 @app.put("/api/admin/users/{user_id}/toggle-admin")
@@ -858,18 +737,7 @@ def admin_delete_user(
     if user.id == admin.id:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
     username = user.username
-    # If the removed user led a team, hand leadership to another member so the
-    # team isn't left with a dangling leader id (and no invite code visible).
-    if user.team_id:
-        team = db.query(models.Team).filter(models.Team.id == user.team_id).first()
-        if team and team.leader_id == user.id:
-            successor = (
-                db.query(models.User)
-                .filter(models.User.team_id == team.id, models.User.id != user.id)
-                .order_by(models.User.id.asc())
-                .first()
-            )
-            team.leader_id = successor.id if successor else None
+    db.query(models.FlagSubmission).filter(models.FlagSubmission.user_id == user_id).delete()
     db.delete(user)
     db.commit()
     return {"message": f"User '{username}' deleted"}
@@ -880,7 +748,7 @@ def admin_reset_scores(
     admin: models.User = Depends(require_admin),
     db: Session = Depends(database.get_db),
 ):
-    db.query(models.Team).update({models.Team.score: 0, models.Team.current_room: 1})
+    db.query(models.User).update({models.User.score: 0, models.User.current_room: 1})
     db.query(models.FlagSubmission).delete()
     db.commit()
     return {"message": "All scores and progress reset"}
@@ -891,13 +759,18 @@ def admin_stats(
     admin: models.User = Depends(require_admin),
     db: Session = Depends(database.get_db),
 ):
-    top_team = db.query(models.Team).order_by(models.Team.score.desc()).first()
+    top = (
+        db.query(models.User)
+        .filter(models.User.is_admin == False)  # noqa: E712
+        .order_by(models.User.score.desc(), models.User.id.asc())
+        .first()
+    )
     return {
-        "total_teams": db.query(models.Team).count(),
+        "total_players": db.query(models.User).filter(models.User.is_admin == False).count(),  # noqa: E712
         "total_users": db.query(models.User).count(),
         "total_submissions": db.query(models.FlagSubmission).count(),
         "correct_submissions": db.query(models.FlagSubmission)
         .filter(models.FlagSubmission.is_correct == True)  # noqa: E712
         .count(),
-        "top_team": {"name": top_team.name, "score": top_team.score} if top_team else None,
+        "top_player": {"name": top.username, "score": top.score or 0} if top else None,
     }
