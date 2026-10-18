@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root Cause Analysis — Change Request CR-2026-0919-AUTOFAILOVER</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --card: #0a0a12;
+            --card-hover: #0f0f1a;
+            --border: #1a1a2a;
+            --text: #b0b0c0;
+            --muted: #4a4a5a;
+            --cyan: #00e5ff;
+            --amber: #ffab00;
+            --red: #ff4444;
+            --green: #00e676;
+            --violet: #b388ff;
+            --surface: #12121e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+
+        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .header-meta { color: var(--muted); font-size: 0.72rem; font-family: 'Consolas', monospace; }
+
+        .container { max-width: 1050px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
+        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        /* Document Header */
+        .doc-sheet { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; }
+        .doc-header { background: rgba(255, 171, 0, 0.05); border-bottom: 1px solid var(--border); padding: 1.2rem 1.6rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .doc-title-group { display: flex; align-items: center; gap: 14px; }
+        .doc-stamp { border: 2px solid var(--amber); color: var(--amber); font-family: 'Consolas', monospace; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .doc-title { font-size: 1.05rem; font-weight: bold; color: #fff; font-family: 'Consolas', monospace; }
+        .doc-id { font-size: 0.72rem; color: var(--muted); font-family: 'Consolas', monospace; margin-top: 2px; }
+
+        .doc-body { padding: 1.6rem; }
+
+        /* Meta Grid */
+        .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-family: 'Consolas', monospace; font-size: 0.76rem; }
+        .meta-table td { padding: 8px 12px; border: 1px solid var(--border); }
+        .meta-key { background: rgba(255,255,255,0.02); color: var(--cyan); width: 25%; text-transform: uppercase; font-size: 0.7rem; }
+        .meta-val { color: #fff; }
+
+        /* Trigger vs Root Cause Matrix */
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 1.5rem 0; }
+        @media (max-width: 768px) { .comparison-grid { grid-template-columns: 1fr; } }
+
+        .comp-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
+        .comp-header { font-family: 'Consolas', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
+        .comp-body { font-size: 0.78rem; line-height: 1.65; color: var(--text); }
+        .comp-body ul { margin-left: 1.2rem; margin-top: 6px; }
+        .comp-body li { margin-bottom: 6px; }
+
+        /* Five Whys */
+        .whys-container { background: #080810; border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin: 1.5rem 0; font-family: 'Consolas', monospace; }
+        .why-item { margin-bottom: 12px; font-size: 0.76rem; line-height: 1.6; }
+        .why-num { color: var(--cyan); font-weight: bold; }
+        .why-q { color: #fff; font-weight: bold; }
+        .why-a { color: var(--text); margin-left: 1.5rem; display: block; margin-top: 2px; }
+
+        /* Signature block */
+        .signature-box { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-family: 'Consolas', monospace; }
+        .sig-signer { font-size: 0.78rem; color: #fff; font-weight: bold; }
+        .sig-role { font-size: 0.7rem; color: var(--muted); }
+        .sig-hash { font-size: 0.68rem; color: var(--cyan); margin-top: 4px; }
+        .sig-badge { background: rgba(0, 230, 118, 0.1); border: 1px solid var(--green); color: var(--green); padding: 4px 10px; border-radius: 3px; font-size: 0.72rem; font-weight: bold; text-transform: uppercase; }
+
+        /* Flag synthesis card */
+        .flag-card { background: rgba(255, 68, 68, 0.06); border: 1px solid var(--red); border-radius: 6px; padding: 1.2rem 1.5rem; margin-top: 1.8rem; }
+        .flag-title { color: var(--red); font-family: 'Consolas', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .flag-code { font-family: 'Consolas', monospace; font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(255, 68, 68, 0.3); color: #fff; display: inline-block; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-brand">SPECTRE // DFIR ROOT CAUSE INVESTIGATION</div>
+    <div class="header-meta">GOVERNANCE & ARCHITECTURAL POLICY AUDIT // ROOM 9.4</div>
+</div>
+
+<div class="container">
+
+    <div class="context-box">
+        <div class="context-label">Executive Forensic Inquiry — Challenge 9.4</div>
+        <div class="context-body">
+            Attacker intent and human mistakes trigger incidents. But systems should be architected so that no single phished credential or network flood can forfeit master control.
+            Review the official change request record <code>CR-2026-0919-AUTOFAILOVER</code> signed two weeks prior to the festival.
+            Identify the systemic root cause, the disabled safety control, the threshold condition, and the executive who signed the approval.
+        </div>
+    </div>
+
+    <!-- Official Change Request Document -->
+    <div class="doc-sheet">
+        <div class="doc-header">
+            <div class="doc-title-group">
+                <span class="doc-stamp">APPROVED & DEPLOYED</span>
+                <div>
+                    <div class="doc-title">CR-2026-0919-AUTOFAILOVER</div>
+                    <div class="doc-id">NEXUS Core Infrastructure // Change Control Repository</div>
+                </div>
+            </div>
+            <div style="font-family: 'Consolas', monospace; font-size: 0.72rem; color: var(--muted);">
+                EFFECTIVE DATE: 2026-09-19 14:10 IST
+            </div>
+        </div>
+
+        <div class="doc-body">
+            <table class="meta-table">
+                <tr>
+                    <td class="meta-key">Title</td>
+                    <td class="meta-val">Autonomous Festival Continuity Failover Architecture</td>
+                </tr>
+                <tr>
+                    <td class="meta-key">Change Ticket ID</td>
+                    <td class="meta-val"><code>CR-2026-0919-AUTOFAILOVER</code></td>
+                </tr>
+                <tr>
+                    <td class="meta-key">System Owner</td>
+                    <td class="meta-val">Commander Ila Sen (Incident Commander & Festival Tech Council Chair)</td>
+                </tr>
+                <tr>
+                    <td class="meta-key">Rationale</td>
+                    <td class="meta-val">
+                        <em>"During Meraz 2025, packet loss during peak audience arrival caused a 90-second freeze in the opening ceremony drone show. 
+                        Under no circumstances should the ceremony stall due to operator delay or network jitter. The festival must continue autonomously."</em>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="meta-key">Safety Gate Status</td>
+                    <td class="meta-val" style="color: var(--red); font-weight: bold;">
+                        HUMAN_APPROVAL_GATE = DISABLED
+                    </td>
+                </tr>
+                <tr>
+                    <td class="meta-key">Trigger Threshold</td>
+                    <td class="meta-val" style="color: var(--amber); font-weight: bold;">
+                        HEARTBEAT_LATENCY &gt; 500ms (latency_spike_500ms) for &gt; 30 consecutive seconds
+                    </td>
+                </tr>
+                <tr>
+                    <td class="meta-key">Designated Failover Target</td>
+                    <td class="meta-val">Next available trusted peer with <code>NEXUS_ZONE=CORE</code> (Node: <code>AETHER-7</code>)</td>
+                </tr>
+            </table>
+
+            <!-- Comparison Grid -->
+            <div class="comparison-grid">
+                <div class="comp-card" style="border-left: 3px solid var(--amber);">
+                    <div class="comp-header" style="color: var(--amber);">
+                        <span>⚡ Proximate Trigger (The Spark)</span>
+                    </div>
+                    <div class="comp-body">
+                        <ul>
+                            <li><strong>Phishing:</strong> Kabir ran <code>Ethereal_Sync_Helper.exe</code> on his laptop.</li>
+                            <li><strong>Curator:</strong> Aman Vyas authored an exploit chain to expose weaknesses.</li>
+                            <li><strong>Beacon Flood:</strong> MIRA-7 fired 80,000 packets causing loopback congestion.</li>
+                            <li><strong>Latency Spike:</strong> Core heartbeat response jumped from 14ms to 548ms.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="comp-card" style="border-left: 3px solid var(--red);">
+                    <div class="comp-header" style="color: var(--red);">
+                        <span>🏛️ Systemic Root Cause (The Architecture)</span>
+                    </div>
+                    <div class="comp-body">
+                        <ul>
+                            <li><strong>Policy Waiver:</strong> <code>CR-2026-0919-AUTOFAILOVER</code> removed the requirement for human verification.</li>
+                            <li><strong>Safety Bypass:</strong> <code>HUMAN_APPROVAL_GATE=DISABLED</code> allowed code to abdicate root authority silently.</li>
+                            <li><strong>Blind Trust:</strong> The watchdog promoted <code>AETHER-7</code> without validating code integrity or operator consent.</li>
+                            <li><strong>System Obedience:</strong> MIRA-7 did not hack failover; the system dutifully followed Commander Sen's signed rule.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The 5 Whys -->
+            <div class="whys-container">
+                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 12px; font-size: 0.8rem; text-transform: uppercase;">
+                    Root Cause Analysis — The 5 Whys
+                </div>
+
+                <div class="why-item">
+                    <span class="why-num">1. Why</span> <span class="why-q">did the festival screens lock out operators and display the rogue manifesto?</span>
+                    <span class="why-a">Because the secondary relay node <code>AETHER-7</code> was promoted to Sovereign Cluster Master.</span>
+                </div>
+
+                <div class="why-item">
+                    <span class="why-num">2. Why</span> <span class="why-q">was AETHER-7 promoted to Sovereign Cluster Master?</span>
+                    <span class="why-a">Because the hardware watchdog executed <code>/opt/nexus/bin/continuity_check.sh</code> during the 7-minute logging blackout.</span>
+                </div>
+
+                <div class="why-item">
+                    <span class="why-num">3. Why</span> <span class="why-q">did the recovery script promote AETHER-7 automatically?</span>
+                    <span class="why-a">Because heartbeat loop latency exceeded 500ms (548ms measured) due to MIRA-7's beacon burst.</span>
+                </div>
+
+                <div class="why-item">
+                    <span class="why-num">4. Why</span> <span class="why-q">did the failover script act without waiting for an engineer's confirmation?</span>
+                    <span class="why-a">Because Change Request <code>CR-2026-0919-AUTOFAILOVER</code> explicitly set <code>HUMAN_APPROVAL_GATE=DISABLED</code>.</span>
+                </div>
+
+                <div class="why-item">
+                    <span class="why-num">5. Why</span> <span class="why-q">was human approval removed from emergency failovers?</span>
+                    <span class="why-a">Because Commander Ila Sen signed an executive policy prioritizing uninterrupted festival automation over operator verification.</span>
+                </div>
+            </div>
+
+            <!-- Signature block -->
+            <div class="signature-box">
+                <div>
+                    <div class="sig-signer">Approved by: Commander Ila Sen</div>
+                    <div class="sig-role">Incident Commander & Chair of Festival Systems Architecture</div>
+                    <div class="sig-hash">Cryptographic Signature: ed25519:9f4c3a1b...nexus-gov-seal</div>
+                </div>
+                <div class="sig-badge">EXECUTIVE WAIVER SIGNED</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Flag Conclusion -->
+    <div class="flag-card">
+        <div class="flag-title">Root Cause Finding & Challenge Token</div>
+        <p style="font-size: 0.78rem; line-height: 1.6; color: var(--text);">
+            The ultimate cause of the breach was not external malware; it was an organizational decision to disable human verification in the event of an artificial latency spike under Change Ticket <code>CR-2026-0919-AUTOFAILOVER</code>.
+        </p>
+        <div class="flag-code">NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}</div>
+    </div>
+
+</div>
+
+</body>
+</html>

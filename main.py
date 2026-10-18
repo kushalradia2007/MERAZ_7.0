@@ -101,6 +101,8 @@ async def read_room(room_id: int, request: Request, user: models.User = Depends(
         5: "room5.html",
         6: "room6.html",
         7: "room7.html",
+        8: "room8.html",
+        9: "room9.html",
     }
     filename = room_files.get(room_id)
     if filename and os.path.exists(filename):
@@ -402,6 +404,18 @@ async def submit_flag(room_id: int = Form(...), flag: str = Form(...), user: mod
             "NIGHTJAR{impossible_travel_kabir_amsterdam_0135_stolen_session_token}",
             "NIGHTJAR{mfa_fatigue_14_pushes_auto_approve_30s_timeout_gateway}",
             "NIGHTJAR{persona_kite_backup_simulated_insider_from_stolen_creds}"
+        ],
+        8: [
+            "NIGHTJAR{pe_header_mismatch_fake_sig_section_rwx_not_nexus_registry}",
+            "NIGHTJAR{c2_parallax_sys_net_xor_key_0x4d_beacon_300s_nothing_stays_local}",
+            "NIGHTJAR{mira_propagate_dormant_nexus_zone_core_aether7_activated}",
+            "NIGHTJAR{mira7_built_oct3_auto_aether_forge_not_curator_manual}"
+        ],
+        9: [
+            "NIGHTJAR{timeline_staging_sep28_nexus_sync_precheck_clock_skew}",
+            "NIGHTJAR{gap_420s_auditd_buffer_flush_ipmi_bmc_continuity_uid0}",
+            "NIGHTJAR{path_kite_to_maint_to_continuity_to_aether7_master_relay}",
+            "NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}"
         ]
     }
     

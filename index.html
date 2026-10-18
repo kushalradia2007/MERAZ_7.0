@@ -391,7 +391,7 @@ ROOMS.forEach((r,i)=>{
             <div class="room-domain">${r[1]}</div>
         </div>`;
     el.addEventListener('click', () => {
-        if (i >= 0 && i <= 6) {
+        if (i >= 0 && i <= 8) {
             window.location.href = '/room/' + (i + 1);
         }
     });
@@ -539,7 +539,7 @@ function near(){let b=null,bd=34;for(const d of D){const e=Math.hypot(p.x-d.x,p.
 NP.forEach((n,i)=>{const e=Math.hypot(p.x-n.x,p.y-n.y);if(e<bd){bd=e;b={t:'npc',i}}});return b}
 function interact(){mode=='room'?leave():act()}
 function act(){const n=near();if(!n)return;if(n.t=='npc')return talk(n.i);
-if(n.i >= 0 && n.i <= 6) { window.location.href = '/room/' + (n.i + 1); return; }
+if(n.i >= 0 && n.i <= 8) { window.location.href = '/room/' + (n.i + 1); return; }
 visited[n.i]=1;ri=n.i;$('rn').textContent='ROOM '+(n.i+1);mode='room';ST.dataset.m='room';$('dlg').hidden=true;npcOpen=false;K.l=K.r=K.u=K.d=0;
 highlightCurrentRoom(n.i);
 addIntel('SYSTEM','Entered Room '+(n.i+1)+': '+R[n.i][0]+' ['+R[n.i][1]+']');

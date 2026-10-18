@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Analysis — Ethereal_Sync_Helper_v2.1.exe</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --card: #0a0a12;
+            --card-hover: #0f0f1a;
+            --border: #1a1a2a;
+            --text: #b0b0c0;
+            --muted: #4a4a5a;
+            --cyan: #00e5ff;
+            --amber: #ffab00;
+            --red: #ff4444;
+            --green: #00e676;
+            --violet: #b388ff;
+            --surface: #12121e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+
+        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .header-meta { color: var(--muted); font-size: 0.7rem; font-family: 'Consolas', monospace; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+
+        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
+        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        /* File Identity Card */
+        .file-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+        .file-card-header { background: rgba(0, 229, 255, 0.06); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .file-icon { width: 40px; height: 40px; background: rgba(255, 68, 68, 0.1); border: 1px solid rgba(255, 68, 68, 0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .file-name { font-family: 'Consolas', monospace; font-size: 0.9rem; color: var(--text); font-weight: bold; }
+        .file-claim { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+        .file-card-body { padding: 1.2rem 1.5rem; }
+
+        /* Property Table */
+        .prop-table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; }
+        .prop-table th { text-align: left; color: var(--cyan); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+        .prop-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255, 255, 255, 0.03); font-size: 0.78rem; vertical-align: top; }
+        .prop-table tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+        .val-claimed { color: var(--green); }
+        .val-actual { color: var(--red); }
+        .val-match { color: var(--green); }
+        .val-mismatch { color: var(--red); font-weight: bold; }
+        .val-neutral { color: var(--text); }
+        .val-warn { color: var(--amber); }
+
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Consolas', monospace; }
+        .tag-ok { background: rgba(0, 230, 118, 0.1); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.2); }
+        .tag-fail { background: rgba(255, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(255, 68, 68, 0.2); }
+        .tag-warn { background: rgba(255, 171, 0, 0.1); color: var(--amber); border: 1px solid rgba(255, 171, 0, 0.2); }
+        .tag-info { background: rgba(0, 229, 255, 0.1); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.2); }
+
+        /* Section Analysis Boxes */
+        .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1rem 0; }
+        @media (max-width: 700px) { .section-grid { grid-template-columns: 1fr; } }
+
+        .section-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.2rem; }
+        .section-box.suspicious { border-color: rgba(255, 68, 68, 0.3); background: rgba(255, 68, 68, 0.03); }
+        .section-box-name { font-family: 'Consolas', monospace; font-weight: bold; font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .section-box-name.ok { color: var(--green); }
+        .section-box-name.bad { color: var(--red); }
+        .section-box-detail { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
+        .section-box-detail strong { color: var(--text); }
+
+        /* Anomaly Callout */
+        .anomaly-callout { background: rgba(255, 68, 68, 0.06); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .anomaly-callout .callout-header { color: var(--red); font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .anomaly-callout .callout-body { color: var(--text); font-size: 0.78rem; line-height: 1.6; }
+        .anomaly-callout code { font-family: 'Consolas', monospace; color: var(--violet); background: rgba(179, 136, 255, 0.1); padding: 0.1rem 0.3rem; border-radius: 2px; font-size: 0.75rem; }
+
+        /* Hash Block */
+        .hash-block { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.5rem; margin: 1rem 0; font-family: 'Consolas', monospace; font-size: 0.72rem; line-height: 2; }
+        .hash-label { color: var(--cyan); }
+        .hash-value { color: var(--text); word-break: break-all; }
+
+        .registry-check { display: flex; align-items: center; gap: 8px; margin-top: 0.8rem; padding: 0.8rem 1rem; background: rgba(255, 68, 68, 0.05); border: 1px solid rgba(255, 68, 68, 0.15); border-radius: 4px; }
+        .registry-icon { color: var(--red); font-size: 1.1rem; }
+        .registry-text { color: var(--red); font-size: 0.78rem; font-weight: 600; }
+
+        .hint { color: var(--amber); font-size: 0.72rem; font-style: italic; margin-top: 1.5rem; padding: 0.8rem; background: rgba(255, 171, 0, 0.05); border-radius: 4px; border: 1px solid rgba(255, 171, 0, 0.15); font-family: 'Consolas', monospace; }
+        .info { margin-top: 1rem; color: var(--muted); font-size: 0.68rem; font-family: 'Consolas', monospace; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-brand">SPECTRE // QUARANTINE LAB — FILE ANALYSIS</div>
+        <div class="header-meta">Sample: ETHEREAL_SYNC_HELPER_V2.1.EXE | Status: QUARANTINED (NON-EXECUTABLE)</div>
+    </div>
+
+    <div class="container">
+        <!-- Context -->
+        <div class="context-box">
+            <div class="context-label">Quarantine Notice</div>
+            <div class="context-body">
+                This file was recovered from KABIR's workstation and placed in quarantine. The sample has been stripped of execution capability — it is a static analysis artifact only. The following analysis was performed in an air-gapped environment with no network access. The file cannot execute, propagate, or communicate. It is safe to examine.
+            </div>
+        </div>
+
+        <!-- File Identity Card -->
+        <h2 class="section-title">File Identity</h2>
+        <div class="file-card">
+            <div class="file-card-header">
+                <div class="file-icon">📦</div>
+                <div>
+                    <div class="file-name">Ethereal_Sync_Helper_v2.1.exe</div>
+                    <div class="file-claim">Claims to be: "NEXUS Ceremony Timing Synchronisation Utility v2.1.0.4847"</div>
+                </div>
+            </div>
+            <div class="file-card-body">
+                <table class="prop-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Claimed Value</th>
+                            <th>Actual Value</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>File Type</td>
+                            <td class="val-claimed">Windows Executable (PE32+)</td>
+                            <td class="val-neutral">PE32+ executable (GUI) x86-64, for MS Windows</td>
+                            <td><span class="tag tag-ok">MATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td>Publisher</td>
+                            <td class="val-claimed">Meraz Festival Infrastructure Team</td>
+                            <td class="val-actual">CN=Parallax Build System, O=Parallax Systems Ltd</td>
+                            <td><span class="tag tag-fail">MISMATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td>Product Name</td>
+                            <td class="val-claimed">NEXUS Ethereal Sync Helper</td>
+                            <td class="val-neutral">NEXUS Ethereal Sync Helper (matches claim)</td>
+                            <td><span class="tag tag-warn">COSMETIC</span></td>
+                        </tr>
+                        <tr>
+                            <td>Version</td>
+                            <td class="val-claimed">2.1.0.4847</td>
+                            <td class="val-neutral">2.1.0.4847 (version resource matches)</td>
+                            <td><span class="tag tag-warn">COSMETIC</span></td>
+                        </tr>
+                        <tr>
+                            <td>File Size</td>
+                            <td class="val-claimed">Expected ~2.4 MB (typical sync utility)</td>
+                            <td class="val-actual">8,716,288 bytes (8.31 MB)</td>
+                            <td><span class="tag tag-fail">OVERSIZED</span></td>
+                        </tr>
+                        <tr>
+                            <td>Digital Signature</td>
+                            <td class="val-claimed">Signed (appears valid in Windows Explorer)</td>
+                            <td class="val-actual">INVALID — Certificate expired 2025-01-15, SHA-1 signing (deprecated), issuer not in Windows trust store</td>
+                            <td><span class="tag tag-fail">INVALID</span></td>
+                        </tr>
+                        <tr>
+                            <td>Magic Bytes</td>
+                            <td class="val-claimed">MZ (standard PE)</td>
+                            <td class="val-neutral">4D 5A — MZ header present</td>
+                            <td><span class="tag tag-ok">MATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td>Icon</td>
+                            <td class="val-claimed">NEXUS logo (blue hexagonal)</td>
+                            <td class="val-warn">Embedded NEXUS logo icon — extracted from public NEXUS assets, not from signed package</td>
+                            <td><span class="tag tag-warn">STOLEN</span></td>
+                        </tr>
+                        <tr>
+                            <td>Compilation Date</td>
+                            <td class="val-claimed">(not specified)</td>
+                            <td class="val-actual">Primary: Sep 25, 2026 09:14 IST | .mira section: Oct 3, 2026 02:17 IST</td>
+                            <td><span class="tag tag-fail">MULTIPLE DATES</span></td>
+                        </tr>
+                        <tr>
+                            <td>Entropy</td>
+                            <td class="val-claimed">Expected: 5.0–6.5 (normal executable)</td>
+                            <td class="val-actual">Overall: 7.2 | .mira section: 7.89 (near-random — likely encrypted/packed)</td>
+                            <td><span class="tag tag-fail">HIGH ENTROPY</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PE Section Analysis -->
+        <h2 class="section-title">PE Section Analysis</h2>
+
+        <div class="context-box">
+            <div class="context-label">What to look for</div>
+            <div class="context-body">
+                Legitimate executables have standard sections: <code>.text</code> (code, read/execute), <code>.data</code> (initialised data, read/write), <code>.rdata</code> (read-only data), and <code>.rsrc</code> (resources like icons). Malware often adds custom sections with unusual permissions — especially <strong>Read/Write/Execute (RWX)</strong>, which allows self-modifying code.
+            </div>
+        </div>
+
+        <div class="section-grid">
+            <div class="section-box">
+                <div class="section-box-name ok">.text</div>
+                <div class="section-box-detail">
+                    <strong>Size:</strong> 1,245,184 bytes<br>
+                    <strong>Permissions:</strong> Read / Execute<br>
+                    <strong>Entropy:</strong> 6.1<br>
+                    <strong>Assessment:</strong> <span class="tag tag-ok">NORMAL</span> — Standard code section. Contains the GUI framework, API calls, and primary logic.
+                </div>
+            </div>
+            <div class="section-box">
+                <div class="section-box-name ok">.data</div>
+                <div class="section-box-detail">
+                    <strong>Size:</strong> 524,288 bytes<br>
+                    <strong>Permissions:</strong> Read / Write<br>
+                    <strong>Entropy:</strong> 4.8<br>
+                    <strong>Assessment:</strong> <span class="tag tag-ok">NORMAL</span> — Standard data section. Contains initialised variables and configuration strings.
+                </div>
+            </div>
+            <div class="section-box">
+                <div class="section-box-name ok">.rdata</div>
+                <div class="section-box-detail">
+                    <strong>Size:</strong> 262,144 bytes<br>
+                    <strong>Permissions:</strong> Read Only<br>
+                    <strong>Entropy:</strong> 5.3<br>
+                    <strong>Assessment:</strong> <span class="tag tag-ok">NORMAL</span> — Read-only data: import tables, string literals, and constant values.
+                </div>
+            </div>
+            <div class="section-box">
+                <div class="section-box-name ok">.rsrc</div>
+                <div class="section-box-detail">
+                    <strong>Size:</strong> 786,432 bytes<br>
+                    <strong>Permissions:</strong> Read Only<br>
+                    <strong>Entropy:</strong> 5.7<br>
+                    <strong>Assessment:</strong> <span class="tag tag-warn">OVERSIZED</span> — Contains the NEXUS logo icon, fake version info, and an unusually large embedded resource (4 DLL files packed inside).
+                </div>
+            </div>
+            <div class="section-box suspicious">
+                <div class="section-box-name bad">.mira ⚠</div>
+                <div class="section-box-detail">
+                    <strong>Size:</strong> 3,145,728 bytes (3.0 MB)<br>
+                    <strong>Permissions:</strong> <span class="val-actual">Read / Write / Execute (RWX)</span><br>
+                    <strong>Entropy:</strong> <span class="val-actual">7.89 (near-random — packed/encrypted)</span><br>
+                    <strong>Assessment:</strong> <span class="tag tag-fail">MALICIOUS</span> — <strong>No legitimate application needs an RWX section.</strong> This section contains self-modifying code designed to unpack a secondary payload at runtime. The section name "<code>.mira</code>" is the first direct reference to the MIRA-7 malware family found inside the binary. The high entropy (7.89/8.0) indicates encrypted or compressed content that unpacks into the propagation module.
+                </div>
+            </div>
+            <div class="section-box suspicious">
+                <div class="section-box-name bad">.reloc</div>
+                <div class="section-box-detail">
+                    <strong>Size:</strong> 2,752,512 bytes (2.6 MB)<br>
+                    <strong>Permissions:</strong> Read Only<br>
+                    <strong>Entropy:</strong> 7.1<br>
+                    <strong>Assessment:</strong> <span class="tag tag-warn">SUSPICIOUS</span> — Relocation section is abnormally large. Contains additional encrypted payloads disguised as relocation entries. A normal .reloc section for this binary size would be ~64 KB.
+                </div>
+            </div>
+        </div>
+
+        <div class="anomaly-callout">
+            <div class="callout-header">⚠ Critical Finding — RWX Section ".mira"</div>
+            <div class="callout-body">
+                The <code>.mira</code> section has <strong>Read/Write/Execute</strong> permissions. This combination is a hallmark of self-modifying code: the section can be written to (to unpack encrypted content) and then executed (to run the unpacked code). No legitimate NEXUS utility, Windows application, or standard installer requires RWX permissions on a code section.<br><br>
+                The section name itself — <code>.mira</code> — directly references the <strong>MIRA-7</strong> malware family. This is the first explicit internal reference to MIRA-7 found within the binary, confirming that the file is not a sync utility but a delivery vehicle for the MIRA-7 payload.
+            </div>
+        </div>
+
+        <!-- Hash Verification -->
+        <h2 class="section-title">Hash Verification</h2>
+
+        <div class="hash-block">
+            <span class="hash-label">MD5    :</span> <span class="hash-value">e7a3c1f2d4b8096a5c3e1f7d2b4a8c6e</span><br>
+            <span class="hash-label">SHA-1  :</span> <span class="hash-value">a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0</span><br>
+            <span class="hash-label">SHA-256:</span> <span class="hash-value">a3f7c2d1e8b94f6a1c5d3e7b2f4a8c6d9e1b3f5a7c2d4e6b8f0a1c3e5d7b9f2</span>
+        </div>
+
+        <div class="registry-check">
+            <span class="registry-icon">✗</span>
+            <span class="registry-text">NO MATCH in NEXUS Package Registry — This file was never published by the NEXUS team. Hash does not correspond to any known legitimate package.</span>
+        </div>
+
+        <!-- Digital Signature Details -->
+        <h2 class="section-title">Digital Signature Details</h2>
+
+        <table class="prop-table">
+            <thead>
+                <tr>
+                    <th>Signature Property</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Signature Present</td>
+                    <td class="val-neutral">Yes — Authenticode signature embedded in PE</td>
+                    <td><span class="tag tag-warn">PRESENT</span></td>
+                </tr>
+                <tr>
+                    <td>Signer</td>
+                    <td class="val-actual">CN=Parallax Build System, O=Parallax Systems Ltd, L=Unknown, C=XX</td>
+                    <td><span class="tag tag-fail">NOT NEXUS</span></td>
+                </tr>
+                <tr>
+                    <td>Certificate Issuer</td>
+                    <td class="val-actual">Self-signed (not issued by a recognised CA)</td>
+                    <td><span class="tag tag-fail">SELF-SIGNED</span></td>
+                </tr>
+                <tr>
+                    <td>Certificate Validity</td>
+                    <td class="val-actual">Issued: 2024-06-01 | Expired: 2025-01-15</td>
+                    <td><span class="tag tag-fail">EXPIRED</span></td>
+                </tr>
+                <tr>
+                    <td>Signing Algorithm</td>
+                    <td class="val-actual">SHA-1 with RSA (deprecated since 2020)</td>
+                    <td><span class="tag tag-fail">DEPRECATED</span></td>
+                </tr>
+                <tr>
+                    <td>Counter-Signature</td>
+                    <td class="val-actual">None — No timestamping authority</td>
+                    <td><span class="tag tag-fail">MISSING</span></td>
+                </tr>
+                <tr>
+                    <td>Trust Chain</td>
+                    <td class="val-actual">Root certificate not in Windows Trusted Root CA store</td>
+                    <td><span class="tag tag-fail">UNTRUSTED</span></td>
+                </tr>
+                <tr>
+                    <td>Windows Explorer Display</td>
+                    <td class="val-warn">Shows "A certificate chain processed, but terminated in a root certificate which is not trusted" — but file properties still show publisher name, which can mislead casual inspection</td>
+                    <td><span class="tag tag-warn">MISLEADING</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="anomaly-callout">
+            <div class="callout-header">⚠ Assessment — The File Is Not What It Claims</div>
+            <div class="callout-body">
+                Five indicators prove this file is not a legitimate NEXUS utility:<br><br>
+                <strong>1. Publisher mismatch:</strong> Claims "Meraz Festival Infrastructure Team" but signed by <code>Parallax Build System</code> — the Curator's infrastructure.<br>
+                <strong>2. Invalid signature:</strong> Self-signed, expired, SHA-1 algorithm, no counter-signature, and not in the Windows trust store.<br>
+                <strong>3. Suspicious section:</strong> Contains a <code>.mira</code> section with RWX permissions and near-random entropy (7.89) — characteristic of packed/encrypted malware payload.<br>
+                <strong>4. Oversized binary:</strong> 8.7 MB for a "sync utility" that should be ~2.4 MB. The excess contains embedded DLLs, encrypted payloads, and the NEXUS configuration schema.<br>
+                <strong>5. Registry absence:</strong> SHA-256 hash has no match in the NEXUS package registry. This file was never published by the festival team.
+            </div>
+        </div>
+
+        <p class="hint">⚠ Key indicators: PE section ".mira" with RWX permissions, publisher mismatch (Parallax Build System vs. Meraz), invalid/expired digital signature, 8.7 MB file size for a simple utility, and zero matches in the NEXUS package registry.</p>
+
+        <p class="info">Evidence source: Air-gapped quarantine analysis workstation | Sample: Ethereal_Sync_Helper_v2.1.exe | Analysis date: Oct 02, 2026</p>
+    </div>
+</body>
+</html>
