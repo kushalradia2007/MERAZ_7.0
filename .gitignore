@@ -13,3 +13,4 @@ nightjar.db
 .vercel/
 .DS_Store
 Thumbs.db
+*.patch

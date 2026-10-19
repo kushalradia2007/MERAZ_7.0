@@ -1,640 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NIGHTJAR — Room 4: The Quiet Machine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #020617;
-            --panel-bg: rgba(15, 23, 42, 0.85);
-            --red: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --cyan: #06B6D4;
-            --cyan-glow: rgba(6, 182, 212, 0.4);
-            --amber: #F59E0B;
-            --green: #10B981;
-            --purple: #8b5cf6;
-            --text-main: #e2e8f0;
-            --text-dim: #94a3b8;
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --font-glitch: 'VT323', monospace;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%),
-                linear-gradient(rgba(0, 0, 0, 0.4) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.4) 1px, transparent 1px);
-            background-size: 100% 100%, 20px 20px, 20px 20px;
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Scanline Overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.3;
-        }
-
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border-bottom: 1px solid rgba(16, 185, 129, 0.3);
-            font-family: var(--font-code);
-            font-size: 12px;
-            z-index: 10;
-        }
-        
-        .brand { color: var(--green); letter-spacing: 1px; text-shadow: 0 0 8px rgba(16,185,129,0.4); }
-        .status .blink-green { color: var(--green); animation: blink 1.5s infinite; text-shadow: 0 0 8px rgba(16,185,129,0.4); }
-        .timer { color: var(--text-dim); }
-        .timer span { color: var(--text-main); }
-        .exit-btn {
-            color: var(--green);
-            text-decoration: none;
-            border: 1px solid var(--green);
-            padding: 4px 12px;
-            border-radius: 2px;
-            transition: all 0.2s;
-        }
-        .exit-btn:hover { background: rgba(16, 185, 129, 0.2); color: #fff; }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-        /* Main Layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 300px 1fr 350px;
-            gap: 20px;
-            padding: 20px;
-            flex: 1;
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            position: relative;
-        }
-
-        .panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--green), transparent);
-            opacity: 0.5;
-        }
-
-        .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: var(--green);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Server Specs Panel */
-        .server-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            font-family: var(--font-code);
-            font-size: 11px;
-        }
-
-        .server-ascii {
-            color: var(--text-dim);
-            font-size: 8px;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            text-align: center;
-            white-space: pre;
-        }
-
-        .sys-info {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            color: var(--cyan);
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px dashed rgba(16,185,129,0.2);
-            padding-bottom: 5px;
-        }
-
-        .info-val { color: var(--text-main); }
-
-        /* Terminal Logs */
-        .terminal-panel {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .terminal-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            font-family: var(--font-code);
-            font-size: 12px;
-            background: rgba(0,0,0,0.3);
-        }
-
-        .sys-log {
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-
-        .log-entry {
-            margin-bottom: 8px;
-        }
-
-        .log-time { color: var(--purple); }
-        .log-user { color: var(--cyan); }
-        .log-cmd { color: var(--text-main); }
-        .log-warn { color: var(--amber); }
-
-        /* Investigation Targets */
-        .targets-content {
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .target-item {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 4px;
-            transition: border-color 0.3s;
-        }
-        .target-item:hover { border-color: var(--green); }
-        .target-item.solved { border-color: var(--cyan); background: rgba(6, 182, 212, 0.05); }
-
-        .target-title {
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--green);
-            margin-bottom: 8px;
-            font-family: var(--font-code);
-            text-transform: uppercase;
-        }
-        .target-item.solved .target-title { color: var(--cyan); }
-
-        .target-desc {
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-
-        .evidence-btn, .evidence-btn-dl {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px dashed var(--green);
-            color: var(--green);
-            padding: 4px 8px;
-            font-size: 10px;
-            font-family: var(--font-code);
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            transition: 0.2s;
-        }
-        .evidence-btn:hover, .evidence-btn-dl:hover { background: var(--green); color: #fff; }
-
-        .evidence-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .input-group { display: flex; gap: 8px; }
-        .input-group input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--cyan);
-            padding: 8px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            border-radius: 2px;
-            outline: none;
-            width: 100%;
-        }
-        .input-group input:focus { border-color: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.3); }
-
-        .input-group button {
-            background: var(--green);
-            color: #000;
-            border: none;
-            padding: 0 12px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 2px;
-            transition: all 0.2s;
-        }
-        .input-group button:hover { background: #34d399; box-shadow: 0 0 10px rgba(52,211,153,0.5); }
-
-        .target-reward {
-            margin-top: 10px;
-            font-size: 11px;
-            color: var(--cyan);
-            display: none;
-            padding: 8px;
-            background: rgba(6, 182, 212, 0.1);
-            border-left: 2px solid var(--cyan);
-            font-family: var(--font-code);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            width: 85%;
-            height: 85%;
-            background: var(--bg-dark);
-            border: 1px solid var(--green);
-            box-shadow: 0 0 30px rgba(16,185,129,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-        .modal-header {
-            padding: 10px 15px;
-            background: rgba(16, 185, 129, 0.15);
-            border-bottom: 1px solid var(--green);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            color: var(--text-main);
-        }
-        .modal-header button {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .modal-header button:hover { color: var(--red); }
-        .modal-iframe {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #fff;
-        }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.5); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--green); }
-    </style>
-    <script src="/room-common.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NIGHTJAR — Room 4: The Quiet Machine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#030a08;--pn:rgba(7,19,16,.88);--g:#10b981;--g2:#34d399;--cy:#22d3ee;--am:#f59e0b;--pu:#a78bfa;--rd:#ef4444;--tx:#e2e8f0;--dim:#86a198;--code:'JetBrains Mono',monospace;--ui:'Inter',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,rgba(16,185,129,.16),transparent 55%),var(--bg);color:var(--tx);font-family:var(--ui);display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(16,185,129,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(transparent 0 3px,rgba(0,0,0,.14) 3px 4px);opacity:.35}
+button,input{font-family:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;background:rgba(2,8,6,.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(16,185,129,.28);font:12px var(--code)}
+.brand{color:var(--g2);letter-spacing:1px;text-shadow:0 0 10px rgba(16,185,129,.5);white-space:nowrap}
+.hud{flex:1;display:flex;align-items:center;gap:10px;min-width:110px;max-width:320px;color:var(--dim)}
+.pg{flex:1;display:flex;gap:4px}.pg i{flex:1;height:7px;border-radius:2px;background:rgba(255,255,255,.08);transition:.6s}
+.pg i.on{background:linear-gradient(90deg,var(--g),var(--cy));box-shadow:0 0 10px var(--g)}
+.sc{color:var(--dim);white-space:nowrap}.sc b{color:var(--g2);font-size:14px}
+.clk{margin-left:auto;color:var(--dim)}.clk span{color:var(--tx)}
+.btn{color:var(--g2);text-decoration:none;border:1px solid var(--g);padding:5px 12px;border-radius:3px;background:transparent;font:12px var(--code);cursor:pointer;transition:.2s;display:inline-flex;align-items:center}
+.btn:hover{background:rgba(16,185,129,.22);color:#fff}
+.dash{display:grid;grid-template-columns:340px minmax(0,1fr) 390px;gap:18px;padding:18px;flex:1;position:relative;z-index:1}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.p{background:var(--pn);backdrop-filter:blur(8px);border:1px solid rgba(16,185,129,.22);border-radius:6px;overflow:hidden;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.45);display:flex;flex-direction:column}
+.p::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.6}
+.ph{font:11px var(--code);padding:10px 14px;background:rgba(0,0,0,.45);color:var(--g2);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ph .live{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:bl 1.6s infinite}
+.ph .btn{margin-left:auto;font-size:10px;padding:2px 8px}
+@keyframes bl{50%{opacity:.3}}@keyframes in{from{opacity:0;transform:translateY(8px)}}@keyframes rot{to{transform:rotate(360deg)}}
+/* comms */
+#feed{height:380px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.m{display:flex;gap:10px;animation:in .35s}
+.m>div:last-child{flex:1;border-left:2px solid var(--c);padding-left:10px;min-width:0}
+.mn{font:700 11px var(--code);color:var(--c)}.mn small{font-weight:400;color:var(--dim);margin-left:6px}
+.mt{font-size:13px;line-height:1.55;margin-top:3px}
+.m.mira .mt{font-family:var(--code);animation:gl 2.4s infinite}
+@keyframes gl{0%,92%,100%{transform:none;text-shadow:none}94%{transform:translateX(2px);text-shadow:-2px 0 var(--rd),2px 0 var(--cy)}96%{transform:translateX(-2px)}}
+.pt{--c:var(--g);position:relative;flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#06110e;border:1px solid var(--c);color:var(--c);font:700 13px var(--code);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
+.pt::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px dashed var(--c);opacity:.5;animation:rot 14s linear infinite}
+.pt.big{width:108px;height:108px;font-size:36px}
+.dd i{display:inline-block;width:5px;height:5px;margin-right:4px;border-radius:50%;background:var(--dim);animation:bl 1s infinite}.dd i:nth-child(2){animation-delay:.2s}.dd i:nth-child(3){animation-delay:.4s}
+/* sysinfo */
+.sys{padding:16px;font:11px var(--code);display:flex;flex-direction:column;gap:9px;color:var(--cy)}
+.sys div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(16,185,129,.2);padding-bottom:5px}.sys b{color:var(--tx);font-weight:400;text-align:right}
+.sys p{color:var(--dim);font:italic 12px/1.5 var(--ui);margin-top:6px;text-align:center}
+/* console */
+.con{padding:16px;font:12px/1.6 var(--code);overflow:auto;background:rgba(0,0,0,.3);flex:1;min-height:440px}
+.con .l{margin-bottom:10px;animation:in .5s both}.con .o{color:var(--tx);margin-bottom:18px;word-break:break-word}
+.t{color:var(--pu)}.u{color:var(--cy)}.w{color:var(--am)}.ok{color:var(--g2)}.mi{color:var(--pu);text-shadow:0 0 8px var(--pu)}
+.cur::after{content:"\25AE";animation:bl 1s infinite;color:var(--g2)}
+/* targets */
+.tl{padding:14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.tg{border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.32);border-radius:6px;padding:14px;position:relative;overflow:hidden;transition:border-color .3s,background .3s}
+.tg:hover{border-color:var(--g)}.tg.solved{border-color:var(--cy);background:rgba(34,211,238,.06)}
+.tt{display:flex;gap:8px;font:700 12px var(--code);color:var(--g2);margin-bottom:8px}.tg.solved .tt{color:var(--cy)}
+.tt em{font-style:normal;color:var(--dim);font-weight:400;margin-left:auto;white-space:nowrap}
+.td{font-size:12px;color:var(--dim);line-height:1.55;margin-bottom:12px}
+.eg{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.eb{background:rgba(16,185,129,.1);border:1px dashed var(--g);color:var(--g2);padding:5px 9px;font:10px var(--code);cursor:pointer;text-decoration:none;transition:.2s}
+.eb:hover{background:var(--g);color:#001}
+.ig{display:flex;gap:8px}
+.ig input{flex:1;min-width:0;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:var(--cy);padding:9px;font:11px var(--code);border-radius:3px;outline:none}
+.ig input:focus{border-color:var(--g);box-shadow:0 0 8px rgba(16,185,129,.35)}
+.ig button{background:var(--g);color:#001;border:0;padding:0 14px;font:700 11px var(--code);cursor:pointer;border-radius:3px;transition:.2s;min-width:62px}
+.ig button:hover:not(:disabled){background:var(--g2);box-shadow:0 0 12px rgba(52,211,153,.5)}.ig button:disabled{opacity:.6;cursor:default}
+.er{font:11px var(--code);color:var(--rd);margin-top:6px;min-height:0}
+.rw{display:none;margin-top:10px;font:11px/1.5 var(--code);color:var(--cy);padding:8px 10px;background:rgba(34,211,238,.1);border-left:2px solid var(--cy);animation:in .5s}
+.tg.flash::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(34,211,238,.35) 50%,transparent 60%);animation:sw 1s forwards}
+@keyframes sw{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.plus{position:absolute;right:14px;top:10px;font:700 16px var(--code);color:var(--g2);animation:fl 1.5s forwards;pointer-events:none}
+@keyframes fl{to{transform:translateY(-26px);opacity:0}}
+.shk{animation:sk .35s}@keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.nx{padding:16px;border:1px solid var(--g);background:rgba(16,185,129,.1);border-radius:6px;animation:in .6s}
+.nx b{display:block;color:var(--g2);font:700 12px var(--code);margin-bottom:8px}.nx p{font:12px/1.55 var(--code);margin-bottom:14px}
+.go{display:inline-block;padding:9px 16px;background:var(--g);color:#001;text-decoration:none;font:700 12px var(--code);border-radius:3px}
+.go:hover{background:var(--g2)}
+/* cinematic overlay */
+.ov{position:fixed;inset:0;z-index:5000;background:radial-gradient(ellipse at 50% 40%,#06201a,#010504 70%);display:none;align-items:center;justify-content:center;padding:24px;cursor:pointer}
+.ov.on{display:flex;animation:in .5s}
+.stage{width:min(720px,100%);display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.scene{font:11px var(--code);color:var(--dim);letter-spacing:.6px;border:1px solid rgba(16,185,129,.35);padding:8px 14px;border-radius:3px;opacity:0}
+.scene.in{opacity:1;animation:in .8s}
+.sp{font:700 13px var(--code);min-height:18px}.sp small{display:block;font-weight:400;color:var(--dim);font-size:11px}
+.line{font-size:clamp(16px,2.6vw,21px);line-height:1.6;min-height:7.5em;max-width:640px}
+.line.mira{font-family:var(--code);color:var(--pu)}
+.cont{font:11px var(--code);color:var(--dim);opacity:0;transition:.3s}
+.skip{position:absolute;top:calc(18px + env(safe-area-inset-top));right:18px}
+.clear{animation:in .8s;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:560px}
+.clear h2{font:700 clamp(26px,5vw,42px) var(--code);color:var(--g2);text-shadow:0 0 24px var(--g);letter-spacing:2px}
+.clear .hk{border:1px solid var(--g);background:rgba(16,185,129,.1);padding:14px;text-align:left;font:12px/1.6 var(--code);border-radius:4px}
+.clear .hk b{color:var(--g2);display:block;margin-bottom:6px}
+/* evidence viewer */
+.ev{display:none;position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.ev.on{display:flex}
+.evc{width:min(1100px,92%);height:88%;background:var(--bg);border:1px solid var(--g);border-radius:8px;box-shadow:0 0 40px rgba(16,185,129,.3);display:flex;flex-direction:column;overflow:hidden;animation:in .3s}
+.evh{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(16,185,129,.14);border-bottom:1px solid var(--g);font:12px var(--code)}
+.evh .dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--rd)}.dots i:nth-child(2){background:var(--am)}.dots i:nth-child(3){background:var(--g)}
+.evh span.n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evh button{background:none;border:0;color:var(--tx);font-size:16px;cursor:pointer}.evh button:hover{color:var(--rd)}
+.evb{flex:1;position:relative;background:#fff}.evb iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.spin{position:absolute;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--g2);font:12px var(--code)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(16,185,129,.5);border-radius:3px}
+@media(max-width:1100px){.dash{grid-template-columns:1fr 1fr}.c-side{grid-column:1/-1;order:3}}
+@media(max-width:720px){
+ header{flex-wrap:wrap;gap:8px 12px}.clk{display:none}.hud{order:5;flex-basis:100%;max-width:none}.btn{margin-left:auto}
+ .dash{grid-template-columns:1fr;padding:12px;gap:12px}.c-comms{order:1}.c-targets{order:2}.c-con{order:3}.c-side{order:4}
+ #feed{height:240px}.con{min-height:260px}.ig input{font-size:16px}.eb,.ig button{min-height:38px}
+ .evc{width:100%;height:100%;border-radius:0}.line{min-height:9em}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+<script src="/room-common.js"></script>
 </head>
 <body>
+<header>
+ <div class="brand">[NIGHTJAR.OS // THE QUIET MACHINE]</div>
+ <div class="hud"><div class="pg" id="pg"><i></i><i></i><i></i><i></i></div><span id="pgt">0/4</span></div>
+ <div class="sc">Score <b id="score">0</b></div>
+ <div class="clk">Uptime <span id="clk">94d 11:23:44</span></div>
+ <a href="/hub" class="btn">Leave room</a>
+</header>
 
-    <header>
-        <div class="brand">[NIGHTJAR.OS // THE QUIET MACHINE]</div>
-        <div class="status">STATUS: <span class="blink-green">FORENSICS ACTIVE</span></div>
-        <div class="timer">UPTIME: <span id="master-clock">94 DAYS, 11:23:44</span></div>
-        <a href="/hub" class="exit-btn">LEAVE ROOM</a>
-    </header>
+<main class="dash">
+ <div class="col c-comms">
+  <section class="p" aria-label="Team comms">
+   <div class="ph"><span class="live"></span>Secure comms<button class="btn" id="replay" title="Replay the briefing">Replay briefing</button></div>
+   <div id="feed" aria-live="polite"></div>
+  </section>
+ </div>
+ <div class="col c-con">
+  <section class="p" style="flex:1">
+   <div class="ph">&gt;&gt; root_console_hist</div>
+   <div class="con" id="con">
+    <div class="l"><span class="t">00:19:01</span> <span class="u">root@aether-7:~#</span> ps aux | grep -v "\[.*\]" | head -n 10</div>
+    <div class="o">USER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PID %CPU %MEM&nbsp;&nbsp;&nbsp; VSZ&nbsp;&nbsp; RSS TTY STAT START&nbsp;&nbsp; TIME COMMAND<br>root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp; 0.0&nbsp; 0.2 168676 11216 ?&nbsp;&nbsp; Ss&nbsp;&nbsp; Aug07&nbsp;&nbsp; 1:12 /sbin/init<br>root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1251&nbsp; 0.0&nbsp; 0.1&nbsp; 14272&nbsp; 7352 ?&nbsp;&nbsp; Ss&nbsp;&nbsp; Aug07&nbsp;&nbsp; 0:00 /lib/systemd/systemd-journald<br>root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1283&nbsp; 0.0&nbsp; 0.0&nbsp; 21396&nbsp; 3488 ?&nbsp;&nbsp; Ss&nbsp;&nbsp; Aug07&nbsp;&nbsp; 0:00 /lib/systemd/systemd-udevd<br><span class="w">… [output truncated, see evidence files]</span></div>
+    <div class="l"><span class="t">00:19:33</span> <span class="u">root@aether-7:~#</span> tail -n 15 /var/log/auth.log</div>
+    <div class="o">Oct&nbsp; 9 01:35:12 aether-7 sshd[15891]: Accepted publickey for nexus-admin from 10.0.5.55…<br>Oct&nbsp; 9 01:35:12 aether-7 sshd[15891]: pam_unix(sshd:session): session opened for user nexus-admin…<br>Oct&nbsp; 9 01:37:05 aether-7 PAM[16022]: Module pam_nexus_token.so invoked<br><span class="w">… [output truncated, see evidence files]</span></div>
+    <div class="l"><span class="t">00:20:15</span> <span class="u">root@aether-7:~#</span> find / -user kite-backup -o -group nexus-svc -type f 2&gt;/dev/null</div>
+    <div class="o">/home/kite-backup/.bash_history<br>/home/kite-backup/.ssh/authorized_keys<br>/opt/.mira/aether-restart.sh<br><span class="w">… [output truncated, see evidence files]</span></div>
+    <div class="l w">&gt; Anomalies across standard telemetry. Account ‘kite-backup’ implicated in recent file changes.<br>&gt; Manual forensics initiated.</div>
+    <div id="live"></div>
+    <div class="cur"></div>
+   </div>
+  </section>
+ </div>
+ <div class="col c-targets">
+  <section class="p" style="flex:1">
+   <div class="ph">&gt;&gt; investigation targets · room 4</div>
+   <div class="tl" id="tl"></div>
+  </section>
+ </div>
+ <div class="col c-side">
+  <section class="p">
+   <div class="ph">&gt;&gt; aether-7_sysinfo</div>
+   <div class="sys">
+    <div>HOSTNAME<b>aether-7.nexus.internal</b></div><div>OS<b>Debian GNU/Linux 11</b></div><div>KERNEL<b>5.10.0-19-amd64</b></div><div>CPU<b>2x Intel Xeon E5-2676 v3</b></div><div>MEMORY<b>1.2G / 4.0G</b></div>
+    <p>A clean, quiet Linux terminal. The machine isn’t destroyed or obviously compromised. Every file tells a story, but the obvious story is a lie.</p>
+   </div>
+  </section>
+ </div>
+</main>
 
-    <div class="dashboard">
-        <!-- Left: Server Specs -->
-        <div class="panel">
-            <div class="panel-header">>> AETHER-7_SYSINFO</div>
-            <div class="server-content">
-                <div class="server-ascii">
-    ___  __________________  __________   _____
-   /   |/  ____/_  __/ / / / /  ____/  | /  _  |
-  / /| /  /     / / / /_/ / /  /    /  |/  / | |
- / /_| / /___  / / / __  / / /___  / /| / /__| |
-/_/  |_\____/ /_/ /_/ /_/ /_____/ /_/ |_\____/
-                </div>
-                
-                <div class="sys-info">
-                    <div class="info-row">
-                        <span>HOSTNAME</span>
-                        <span class="info-val">aether-7.nexus.internal</span>
-                    </div>
-                    <div class="info-row">
-                        <span>OS</span>
-                        <span class="info-val">Debian GNU/Linux 11 (bullseye)</span>
-                    </div>
-                    <div class="info-row">
-                        <span>KERNEL</span>
-                        <span class="info-val">5.10.0-19-amd64</span>
-                    </div>
-                    <div class="info-row">
-                        <span>CPU</span>
-                        <span class="info-val">2x Intel Xeon E5-2676 v3</span>
-                    </div>
-                    <div class="info-row">
-                        <span>MEMORY</span>
-                        <span class="info-val">1.2G / 4.0G</span>
-                    </div>
-                    <div class="info-row" style="margin-top: 15px; border:none; color:var(--text-dim); text-align:center;">
-                        "A clean, quiet Linux terminal. The machine is not destroyed or obviously compromised. Every file tells a story, but the obvious story is a lie."
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="Story cutscene">
+ <button class="btn skip" id="skip">Skip ▸▸</button>
+ <div class="stage">
+  <div class="scene" id="scene"></div>
+  <div id="pt"></div>
+  <div class="sp" id="sp"></div>
+  <div class="line" id="line"></div>
+  <div class="cont" id="cont">click or press space to continue</div>
+  <div id="card"></div>
+ </div>
+</div>
 
-        <!-- Center: Terminal Snippets -->
-        <div class="panel terminal-panel">
-            <div class="panel-header">>> ROOT_CONSOLE_HIST</div>
-            <div class="terminal-content">
-                <div class="sys-log">
-                    <div class="log-entry">
-                        <span class="log-time">00:19:01</span>
-                        <span class="log-user">root@aether-7:~#</span>
-                        <span class="log-cmd">ps aux | grep -v "\[.*\]" | head -n 10</span>
-                    </div>
-                    <div class="log-entry" style="color:var(--text-main); margin-bottom: 20px;">
-                        USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND<br>
-                        root         1  0.0  0.2 168676 11216 ?        Ss   Aug07   1:12 /sbin/init<br>
-                        root      1251  0.0  0.1  14272  7352 ?        Ss   Aug07   0:00 /lib/systemd/systemd-journald<br>
-                        root      1283  0.0  0.0  21396  3488 ?        Ss   Aug07   0:00 /lib/systemd/systemd-udevd<br>
-                        ... [OUTPUT TRUNCATED - SEE EVIDENCE FILES]
-                    </div>
+<div class="ev" id="ev" role="dialog" aria-modal="true" aria-label="Evidence viewer">
+ <div class="evc">
+  <div class="evh"><span class="dots"><i></i><i></i><i></i></span><span class="n" id="evt"></span><a class="btn" id="evd" download>Download</a><button id="evx" aria-label="Close evidence viewer">✕</button></div>
+  <div class="evb"><div class="spin" id="evs">Loading evidence…</div><iframe id="evf" title="Evidence file"></iframe></div>
+ </div>
+</div>
 
-                    <div class="log-entry">
-                        <span class="log-time">00:19:33</span>
-                        <span class="log-user">root@aether-7:~#</span>
-                        <span class="log-cmd">tail -n 15 /var/log/auth.log</span>
-                    </div>
-                    <div class="log-entry" style="color:var(--text-main); margin-bottom: 20px;">
-                        Oct  9 01:35:12 aether-7 sshd[15891]: Accepted publickey for nexus-admin from 10.0.5.55...<br>
-                        Oct  9 01:35:12 aether-7 sshd[15891]: pam_unix(sshd:session): session opened for user nexus-admin...<br>
-                        Oct  9 01:37:05 aether-7 PAM[16022]: Module pam_nexus_token.so invoked<br>
-                        ... [OUTPUT TRUNCATED - SEE EVIDENCE FILES]
-                    </div>
+<script>
+const ROOM_ID=4,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const EV='/challenges/Room - 4/evidence/';
+const NPC={
+ ila:{n:'Cmdr. Ila Sen',r:'Incident Commander',c:'#22d3ee',i:'IS'},
+ rhea:{n:'Rhea D’Souza',r:'NEXUS Engineer',c:'#f59e0b',i:'RD'},
+ kite:{n:'Kabir “Kite” Mehra',r:'Festival Technical Lead',c:'#34d399',i:'KM'},
+ mira:{n:'unregistered process',r:'MIRA/7',c:'#a78bfa',i:'??'}
+};
+const T=[
+ {id:1,t:'4.1 The process with a clean name',d:'Find the imposter process hiding among standard daemons. Note its name, PID and non-standard binary path.',f:'process_list.html',rw:'Process identified. It is MIRA-7’s local controller.'},
+ {id:2,t:'4.2 The user who arrived without a login',d:'Find the auth log session that opened without a password or SSH key exchange. Identify the PAM module and timestamp.',f:'auth_log.html',rw:'Session verified. A token-based trust delegation was used.'},
+ {id:3,t:'4.3 The permission that lied',d:'Find the script with SUID permissions that lets a low-privilege group member restart a root service.',f:'filesystem_snapshot.html',rw:'Privilege escalation confirmed. The continuity script acts as a backdoor.'},
+ {id:4,t:'4.4 The key in the drawer',d:'Compare the SSH keys in kite-backup’s authorized_keys. Find the one planted recently and identify the tool that generated it.',f:'ssh_keys.html',rw:'Forgery detected. The key was generated by AetherForge. Kabir was framed.'}
+];
+const INTRO=[
+ {scene:'aether-7 · 00:41 · shell open via the Room 3 relay · filesystem mounted read-only'},
+ {w:'rhea',t:'We’re in. The relay gave us a shell on aether-7, and it’s the quietest machine I’ve ever seen.'},
+ {w:'rhea',t:'No ransom note. No wiped logs. Nothing on fire. That’s exactly what worries me.'},
+ {w:'ila',t:'Kabir’s account is all over this host. Every log points at him.'},
+ {w:'ila',t:'That’s the obvious story. Don’t trust the obvious story. Trust the file.'},
+ {w:'rhea',t:'Four things to verify: a process, a login, a permission, a key. Find what the machine is hiding.'}
+];
+const DEBRIEF=[
+ {scene:'aether-7 · kite-backup/.ssh/authorized_keys · comparison complete'},
+ {w:'rhea',t:'The key was generated long after Kabir’s current laptop was issued, by a tool called AetherForge. He didn’t put it there.'},
+ {w:'kite',t:'So I’m not the problem? I thought I’d be the headline. I’m sorry I clicked that installer.'},
+ {w:'ila',t:'You’re not cleared yet, Kabir. But you’re no longer the lead. The evidence just changed sides.'},
+ {w:'mira',t:'key used: 1. destination: portal. status: quiet.'}
+];
+const HOOK='“The Ed25519 key in Kabir’s authorized_keys file is not his… The key has been used exactly once, to authenticate to the Meraz Volunteer Portal’s administrative API.”';
+const SOLVE={
+ 1:['rhea','That’s MIRA-7’s local controller wearing a daemon’s name. Whoever built it knew what normal looks like.'],
+ 2:['ila','A session with no password and no key. Something vouched for him. Remember that.'],
+ 3:['rhea','A script that restarts a root service for anyone in the group. That’s not a bug. Someone designed that.'],
+ 4:['ila','AetherForge. Not Kabir’s hands, not Kabir’s laptop. Good work.']
+};
+const HINT={
+ 1:['Compare every process’s binary path with the standard system directories.','A clean name can hide in a dirty location. Read the path, not the name.','Re-read the card: the answer needs the name, the PID and the path together.'],
+ 2:['Look for a session that opened with no password and no key. The method is the clue.','The PAM line is the tell. Pair the module with its timestamp.','Both parts come from the same log line. Check the exact format.'],
+ 3:['A permission that lies sets the SUID bit. Look for the “s” in the mode.','Check the owner and group on each candidate script.','Match the script to the root service it restarts, then recheck the format.'],
+ 4:['Fingerprints don’t lie, comments do. Compare the keys one by one.','Look at key types and dates. The odd one out was planted recently.','Find the key that doesn’t fit, then look for what generated it.']
+};
+const IDLE=[u=>'Still with us? The machine is patient. We aren’t.',u=>'Open the evidence for target '+u.t.slice(0,3)+'. The answer is in the file, not the filename.',u=>'Stuck? Pick any unsolved target and read its evidence slowly.'];
+const GREET=[
+ ['rhea','Four targets on aether-7. Start anywhere. The machine won’t mind.'],
+ ['ila','One down. Keep going and stay with the evidence.'],
+ ['rhea','Halfway through. Kabir’s name keeps coming up, and I like it less each time.'],
+ ['ila','One left. Check it the way you’d check a signature.'],
+ ['ila','Room cleared. Replay the debrief, or move on to the portal.']
+];
+let solved=new Set(),score=0,wrong={},last=Date.now(),idleN=0,lastNudge=0,busy=false;
 
-                    <div class="log-entry">
-                        <span class="log-time">00:20:15</span>
-                        <span class="log-user">root@aether-7:~#</span>
-                        <span class="log-cmd">find / -user kite-backup -o -group nexus-svc -type f 2>/dev/null</span>
-                    </div>
-                    <div class="log-entry" style="color:var(--text-main); margin-bottom: 20px;">
-                        /home/kite-backup/.bash_history<br>
-                        /home/kite-backup/.ssh/authorized_keys<br>
-                        /opt/.mira/aether-restart.sh<br>
-                        ... [OUTPUT TRUNCATED - SEE EVIDENCE FILES]
-                    </div>
-                    
-                    <div class="log-entry log-warn">
-                        > WARNING: Multiple anomalies detected across standard telemetry.<br>
-                        > KABIR's account 'kite-backup' heavily implicated in recent file modifications.<br>
-                        > INITIATING MANUAL FORENSICS.
-                    </div>
-                </div>
-            </div>
-        </div>
+/* ---- comms ---- */
+const pt=(k,big)=>`<div class="pt${big?' big':''}" style="--c:${NPC[k].c}"><span>${NPC[k].i}</span></div>`;
+async function tw(el,t,sp,ovl){el.textContent='';for(let i=0;i<t.length&&!RM;i++){if(ovl&&(fast||skipped))break;el.textContent=t.slice(0,i+1);await sleep(sp)}el.textContent=t}
+let q=Promise.resolve();
+function say(k,t){return q=q.then(async()=>{
+ const feed=$('feed'),m=document.createElement('div');m.className='m '+k;m.style.setProperty('--c',NPC[k].c);
+ m.innerHTML=pt(k)+`<div><div class="mn">${NPC[k].n}<small>${NPC[k].r}</small></div><div class="mt"><span class="dd"><i></i><i></i><i></i></span></div></div>`;
+ feed.appendChild(m);feed.scrollTop=feed.scrollHeight;
+ await sleep(RM?0:650);const mt=m.querySelector('.mt');
+ await tw(mt,t,14);feed.scrollTop=feed.scrollHeight;await sleep(RM?0:250)})}
+function clog(cls,h){const d=document.createElement('div');d.className='l '+cls;d.innerHTML=h;$('live').appendChild(d);const c=$('con');c.scrollTop=c.scrollHeight}
+function touch(){last=Date.now()}
+['pointerdown','keydown'].forEach(e=>addEventListener(e,touch));
 
-        <!-- Right: Targets -->
-        <div class="panel">
-            <div class="panel-header">>> INVESTIGATION TARGETS (ROOM 4)</div>
-            <div class="targets-content">
-                
-                <!-- Target 4.1 -->
-                <div class="target-item" id="target-1">
-                    <div class="target-title">4.1 THE PROCESS WITH A CLEAN NAME</div>
-                    <div class="target-desc">
-                        > Find the imposter process hiding among standard daemons. Note its name, PID, and non-standard binary path.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Process List', '/challenges/Room - 4/evidence/process_list.html')">VIEW: process_list.html</button>
-                        <a href="/challenges/Room - 4/evidence/process_list.html" download class="evidence-btn">DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(1)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-1">
-                        > PROCESS IDENTIFIED. It is MIRA-7's local controller.
-                    </div>
-                </div>
+/* ---- cutscene ---- */
+let fast=false,skipped=false,typing=false,resolver=null;
+const ov=$('ov');
+ov.addEventListener('click',e=>{if(e.target.closest('a,button'))return;if(typing)fast=true;else if(resolver)resolver()});
+addEventListener('keydown',e=>{if(!ov.classList.contains('on'))return;if([' ','Enter','ArrowRight'].includes(e.key)){e.preventDefault();if(typing)fast=true;else if(resolver)resolver()}if(e.key==='Escape')$('skip').click()});
+$('skip').onclick=()=>{skipped=true;fast=true;if(resolver)resolver()};
+async function play(beats,onEnd){
+ skipped=false;fast=false;$('card').innerHTML='';$('scene').className='scene';$('sp').innerHTML='';$('line').textContent='';$('pt').innerHTML='';
+ ov.classList.add('on');
+ for(const b of beats){
+  if(skipped)break;
+  if(b.scene){const s=$('scene');s.textContent=b.scene;s.className='scene in';await sleep(RM?0:1300);continue}
+  $('pt').innerHTML=pt(b.w,true);$('sp').innerHTML=NPC[b.w].n+'<small>'+NPC[b.w].r+'</small>';$('sp').style.color=NPC[b.w].c;
+  $('line').className='line'+(b.w==='mira'?' mira':'');
+  typing=true;fast=false;await tw($('line'),b.t,22,true);typing=false;fast=false;
+  if(skipped)break;
+  $('cont').style.opacity=1;await new Promise(r=>resolver=r);resolver=null;$('cont').style.opacity=0;
+ }
+ await onEnd();
+}
+async function intro(){
+ await play(INTRO,async()=>{ov.classList.remove('on');try{localStorage.setItem('nj4_intro','1')}catch(e){}});
+ greet();
+}
+async function debrief(){
+ await play(DEBRIEF,async()=>{
+  $('pt').innerHTML='';$('sp').innerHTML='';$('line').textContent='';$('scene').className='scene';
+  $('card').innerHTML=`<div class="clear"><h2>ROOM CLEARED</h2><div class="sc">4 / 4 solved · Score <b>${score}</b></div><div class="hk"><b>&gt;&gt; Incoming transmission: Rhea_D</b>${HOOK}</div><div><a class="go" href="/room/5">Proceed to Room 5 ▸</a> <button class="btn" id="stay">Stay in Room 4</button></div></div>`;
+  $('stay').onclick=()=>ov.classList.remove('on');
+ });
+}
+$('replay').onclick=()=>{intro()};
 
-                <!-- Target 4.2 -->
-                <div class="target-item" id="target-2">
-                    <div class="target-title">4.2 THE USER WHO ARRIVED WITHOUT A LOGIN</div>
-                    <div class="target-desc">
-                        > Find the auth log session that opened without a password or SSH key exchange. Identify the PAM module and timestamp.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Auth Logs', '/challenges/Room - 4/evidence/auth_log.html')">VIEW: auth_log.html</button>
-                        <a href="/challenges/Room - 4/evidence/auth_log.html" download class="evidence-btn">DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(2)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-2">
-                        > SESSION VERIFIED. A token-based trust delegation was used.
-                    </div>
-                </div>
+/* ---- targets ---- */
+function build(){
+ $('tl').innerHTML=T.map(x=>`<div class="tg" id="tg${x.id}"><div class="tt">${x.t}<em>25 pts</em></div><div class="td">${x.d}</div>
+ <div class="eg"><button class="eb" data-f="${x.f}" data-t="${x.t}">View ${x.f}</button><a class="eb" href="${EV}${x.f}" download>Download</a></div>
+ <div class="ig"><input id="f${x.id}" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target ${x.id}"><button id="b${x.id}">Verify</button></div>
+ <div class="er" id="e${x.id}" role="alert"></div><div class="rw" id="r${x.id}">&gt; ${x.rw}</div></div>`).join('');
+ document.querySelectorAll('.eb[data-f]').forEach(b=>b.onclick=()=>openEv(b.dataset.t,b.dataset.f));
+ T.forEach(x=>{$('b'+x.id).onclick=()=>verify(x.id);$('f'+x.id).onkeydown=e=>{if(e.key==='Enter')verify(x.id)}});
+}
+function hud(){
+ const n=solved.size;document.querySelectorAll('#pg i').forEach((e,i)=>e.classList.toggle('on',i<n));
+ $('pgt').textContent=n+'/4';$('score').textContent=score;
+}
+function mark(id,anim){
+ solved.add(id);const g=$('tg'+id);if(!g)return;g.classList.add('solved');$('r'+id).style.display='block';
+ const i=$('f'+id);i.value='FLAG ACCEPTED';i.disabled=true;$('b'+id).disabled=true;
+ if(anim){g.classList.add('flash');const p=document.createElement('div');p.className='plus';p.textContent='+25';g.appendChild(p);setTimeout(()=>{g.classList.remove('flash');p.remove()},1600)}
+}
+function showNext(){
+ if($('nx'))return;
+ $('tl').insertAdjacentHTML('beforeend',`<div class="nx" id="nx"><b>&gt;&gt; Incoming transmission: Rhea_D</b><p>${HOOK}</p><a class="go" href="/room/5">Proceed to Room 5 ▸</a> <button class="btn" id="rd">Replay debrief</button></div>`);
+ $('rd').onclick=debrief;
+}
+async function refresh(){const p=await NJ.progress();if(p&&typeof p.score==='number')score=p.score;return p}
+async function verify(n){
+ const v=$('f'+n).value.trim();if(!v)return;const b=$('b'+n);if(b.disabled)return;touch();
+ const og=b.textContent;b.textContent='…';b.disabled=true;
+ const res=await NJ.submit(ROOM_ID,v);b.textContent=og;b.disabled=false;
+ if(res.success){
+  $('e'+n).textContent='';const prev=solved.size,fresh=(res.solved.length?res.solved:[n]).filter(i=>!solved.has(i));
+  if(!fresh.length)return;
+  const before=score;await refresh();if(score===before)score+=25*fresh.length;
+  fresh.forEach(i=>mark(i,true));hud();
+  fresh.forEach(i=>{clog('ok','&gt; [forensics] target 4.'+i+' confirmed');if(SOLVE[i])say(...SOLVE[i])});
+  const c=solved.size;
+  if(prev<2&&c>=2){say('kite','Hey, it’s Kabir. Whatever you’re finding on my account, I never made that key. I swear. I got this laptop in March.')}
+  if(prev<3&&c>=3){clog('mi','&gt; mira/7 ▮ you are checking the right things.');say('mira','you are checking the right things.');say('rhea','Did you see that? Something on this host just spoke to us. One target left.')}
+  if(c===4){showNext();setTimeout(debrief,2600)}
+ }else{
+  const e=$('e'+n);e.textContent=res.message;const w=$('f'+n);w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
+  b.style.background='var(--rd)';setTimeout(()=>b.style.background='',900);
+  wrong[n]=(wrong[n]||0)+1;
+  if(!/network|session|too many|attempt|rate/i.test(res.message)&&Date.now()-lastNudge>4000){lastNudge=Date.now();const h=HINT[n],c=wrong[n];say(c%2?'ila':'rhea',h[Math.min(c-1,2)])}
+ }
+}
+function greet(){const c=Math.min(solved.size,4);say(...GREET[c])}
 
-                <!-- Target 4.3 -->
-                <div class="target-item" id="target-3">
-                    <div class="target-title">4.3 THE PERMISSION THAT LIED</div>
-                    <div class="target-desc">
-                        > Find the script with SUID permissions that allows a low-privilege group member to restart a root service.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Filesystem Snapshot', '/challenges/Room - 4/evidence/filesystem_snapshot.html')">VIEW: filesystem_snapshot.html</button>
-                        <a href="/challenges/Room - 4/evidence/filesystem_snapshot.html" download class="evidence-btn">DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(3)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-3">
-                        > PRIVILEGE ESCALATION CONFIRMED. The continuity script acts as a backdoor.
-                    </div>
-                </div>
+/* idle nudges */
+setInterval(()=>{
+ if(Date.now()-last<90000||ov.classList.contains('on')||solved.size>=4||document.hidden)return;
+ last=Date.now();const u=T.find(x=>!solved.has(x.id));say(idleN%2?'rhea':'ila',IDLE[idleN%IDLE.length](u));idleN++;
+},15000);
 
-                <!-- Target 4.4 -->
-                <div class="target-item" id="target-4">
-                    <div class="target-title">4.4 THE KEY IN THE DRAWER</div>
-                    <div class="target-desc">
-                        > Compare the SSH keys in kite-backup's authorized_keys. Find the one planted recently and identify the tool that generated it.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('SSH Keys', '/challenges/Room - 4/evidence/ssh_keys.html')">VIEW: ssh_keys.html</button>
-                        <a href="/challenges/Room - 4/evidence/ssh_keys.html" download class="evidence-btn">DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(4)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-4">
-                        > FORGERY DETECTED. The key was generated by AetherForge. Kabir was framed.
-                    </div>
-                </div>
+/* evidence viewer */
+function openEv(t,f){$('evt').textContent='Evidence · '+f;$('evd').href=EV+f;$('evs').style.display='grid';$('evf').onload=()=>$('evs').style.display='none';$('evf').src=EV+f;$('ev').classList.add('on')}
+function closeEv(){$('ev').classList.remove('on');$('evf').src='about:blank'}
+$('evx').onclick=closeEv;$('ev').addEventListener('click',e=>{if(e.target===$('ev'))closeEv()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('ev').classList.contains('on'))closeEv()});
 
-            </div>
-        </div>
-    </div>
+/* uptime */
+let up=94*86400+11*3600+23*60+44;
+setInterval(()=>{up++;const d=Math.floor(up/86400),r=up%86400,p=x=>String(x).padStart(2,'0');$('clk').textContent=d+'d '+p(Math.floor(r/3600))+':'+p(Math.floor(r%3600/60))+':'+p(r%60)},1000);
 
-    <!-- Evidence Modal -->
-    <div id="evidence-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span id="modal-title">EVIDENCE VIEWER</span>
-                <button onclick="closeModal()">[X]</button>
-            </div>
-            <iframe id="modal-iframe" class="modal-iframe"></iframe>
-        </div>
-    </div>
-
-    <script>
-        // Clock
-        function updateClock() {
-            const timeString = `94 DAYS, 11:${new Date().getMinutes().toString().padStart(2, '0')}:${new Date().getSeconds().toString().padStart(2, '0')}`;
-            document.getElementById('master-clock').innerText = timeString;
-        }
-        setInterval(updateClock, 1000);
-
-        // Flag verification: the server is the only source of truth
-        const ROOM_ID = 4;
-        const BTN_COLOR = 'var(--green)';
-
-        function markSolved(targetNum) {
-            const target = document.getElementById(`target-${targetNum}`);
-            if (!target) return;
-            target.classList.add('solved');
-            document.getElementById(`reward-${targetNum}`).style.display = 'block';
-            const inputField = document.getElementById(`flag-${targetNum}`);
-            if (inputField) {
-                inputField.value = 'FLAG ACCEPTED';
-                inputField.disabled = true;
-            }
-            const btn = target.querySelector('.input-group button');
-            if (btn) btn.disabled = true;
-        }
-
-        // Restore this player's solved state from the server
-        async function initSolvedState() {
-            const p = await NJ.progress();
-            if (!p) return;
-            const solved = p.rooms[ROOM_ID] || [];
-            solved.forEach(markSolved);
-            if (solved.length) checkAllSolved();
-        }
-
-        document.addEventListener('DOMContentLoaded', initSolvedState);
-
-        async function verifyFlag(targetNum) {
-            const input = document.getElementById(`flag-${targetNum}`).value.trim();
-            if (!input) return;
-            const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
-            if (btn.disabled) return;
-            const og = btn.innerText;
-            btn.innerText = '...';
-            btn.disabled = true;
-
-            const res = await NJ.submit(ROOM_ID, input);
-            btn.innerText = og;
-            btn.disabled = false;
-            if (res.success) {
-                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
-                checkAllSolved();
-            } else {
-                btn.innerText = 'ERROR';
-                btn.title = res.message;
-                btn.style.background = 'var(--red)';
-                setTimeout(() => {
-                    btn.innerText = og;
-                    btn.style.background = BTN_COLOR;
-                }, 1000);
-            }
-        }
-
-        function checkAllSolved() {
-            const solvedCount = document.querySelectorAll('.target-item.solved').length;
-            if (solvedCount === 4) {
-                if (!document.getElementById('next-room-btn')) {
-                    const nextRoomHtml = `
-                    <div style="margin-top: 20px; padding: 15px; border: 1px solid var(--green); background: rgba(16,185,129, 0.1);">
-                        <div style="color: var(--green); font-weight: bold; margin-bottom: 10px;">>> INCOMING TRANSMISSION: RHEA_D</div>
-                        <div style="font-family: var(--font-code); font-size: 12px; margin-bottom: 15px; color: var(--text-main);">
-                            "The Ed25519 key in KABIR's authorized_keys file is not his... The key has been used exactly once — to authenticate to the Meraz Volunteer Portal's administrative API."
-                        </div>
-                        <a id="next-room-btn" href="/room/5" style="display: inline-block; padding: 8px 16px; background: var(--green); color: #000; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 5</a>
-                    </div>`;
-                    document.querySelector('.targets-content').insertAdjacentHTML('beforeend', nextRoomHtml);
-                }
-            }
-        }
-
-        // Modal Logic
-        const modal = document.getElementById('evidence-modal');
-        const iframe = document.getElementById('modal-iframe');
-        const modalTitle = document.getElementById('modal-title');
-
-        function openEvidence(title, url) {
-            modalTitle.innerText = `EVIDENCE VIEWER: ${title.toUpperCase()}`;
-            iframe.src = url;
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-            iframe.src = '';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-    </script>
+/* boot */
+document.addEventListener('DOMContentLoaded',async()=>{
+ build();hud();
+ const p=await refresh();
+ if(p&&p.rooms)(p.rooms[ROOM_ID]||[]).forEach(i=>mark(i,false));
+ hud();if(solved.size===4)showNext();
+ let seen=false;try{seen=!!localStorage.getItem('nj4_intro')}catch(e){}
+ if(!seen&&solved.size===0)intro();else greet();
+});
+</script>
 </body>
 </html>

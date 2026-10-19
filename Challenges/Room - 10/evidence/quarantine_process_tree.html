@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarantine Process Tree — NEXUS Core @ 23:24 IST</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --card: #0a0a12;
+            --card-hover: #0f0f1a;
+            --border: #1a1a2a;
+            --text: #b0b0c0;
+            --muted: #4a4a5a;
+            --cyan: #00e5ff;
+            --amber: #ffab00;
+            --red: #ff4444;
+            --green: #00e676;
+            --violet: #b388ff;
+            --surface: #12121e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+
+        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
+        .header-meta { color: var(--muted); font-size: 0.72rem; font-family: 'Consolas', monospace; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
+        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
+        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+
+        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); font-family: 'Consolas', monospace; }
+
+        /* Process Tree */
+        .tree-container { background: #07070d; border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; margin: 1rem 0; overflow-x: auto; }
+        .tree-header { display: grid; grid-template-columns: 70px 70px 200px 150px 180px 1fr; gap: 8px; padding: 6px 10px; font-family: 'Consolas', monospace; font-size: 0.68rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-weight: bold; }
+        .tree-row { display: grid; grid-template-columns: 70px 70px 200px 150px 180px 1fr; gap: 8px; padding: 5px 10px; font-family: 'Consolas', monospace; font-size: 0.74rem; border-bottom: 1px solid rgba(255,255,255,0.02); transition: background 0.15s; align-items: center; }
+        .tree-row:hover { background: rgba(255,255,255,0.02); }
+        .tree-row.indent-1 { padding-left: 30px; }
+        .tree-row.indent-2 { padding-left: 50px; }
+        .tree-row.indent-3 { padding-left: 70px; }
+        .tree-row.indent-4 { padding-left: 90px; }
+        .tree-row.patient-zero { background: rgba(255, 68, 68, 0.08); border: 1px solid rgba(255, 68, 68, 0.25); border-radius: 4px; animation: pulseRed 3s ease-in-out infinite; }
+        .tree-row.suspicious { background: rgba(255, 171, 0, 0.05); }
+        .tree-row.watchdog { background: rgba(179, 136, 255, 0.05); }
+        .tree-row.normal { color: var(--muted); }
+
+        @keyframes pulseRed { 0%, 100% { border-color: rgba(255, 68, 68, 0.25); } 50% { border-color: rgba(255, 68, 68, 0.5); box-shadow: 0 0 12px rgba(255, 68, 68, 0.15); } }
+
+        .pid { color: #fff; font-weight: bold; }
+        .ppid { color: var(--muted); }
+        .proc-name { color: var(--cyan); }
+        .user-human { color: var(--green); }
+        .user-service { color: var(--amber); }
+        .user-root { color: var(--red); font-weight: bold; }
+        .user-auto { color: var(--red); }
+        .start-time { color: var(--text); }
+        .origin-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+        .tag-human { background: rgba(0, 230, 118, 0.1); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.2); }
+        .tag-cron { background: rgba(0, 229, 255, 0.1); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.2); }
+        .tag-pipeline { background: rgba(255, 171, 0, 0.1); color: var(--amber); border: 1px solid rgba(255, 171, 0, 0.2); }
+        .tag-watchdog { background: rgba(179, 136, 255, 0.1); color: var(--violet); border: 1px solid rgba(179, 136, 255, 0.2); }
+        .tag-self { background: rgba(255, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(255, 68, 68, 0.35); font-weight: bold; }
+
+        /* Analysis Cards */
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 1.5rem 0; }
+        @media (max-width: 768px) { .analysis-grid { grid-template-columns: 1fr; } }
+
+        .analysis-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; }
+        .analysis-card.danger { border-color: rgba(255, 68, 68, 0.3); background: rgba(255, 68, 68, 0.03); }
+        .analysis-card.info { border-color: rgba(0, 229, 255, 0.2); }
+        .analysis-title { font-family: 'Consolas', monospace; font-weight: bold; font-size: 0.8rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
+        .analysis-title.danger { color: var(--red); }
+        .analysis-title.info { color: var(--cyan); }
+        .analysis-body { font-size: 0.78rem; line-height: 1.65; color: var(--text); }
+        .analysis-body code { font-family: 'Consolas', monospace; color: var(--cyan); background: rgba(0,0,0,0.3); padding: 1px 4px; border-radius: 3px; }
+        .analysis-body ul { margin-left: 1.2rem; margin-top: 6px; }
+        .analysis-body li { margin-bottom: 6px; }
+
+        /* Trust Chain Diagram */
+        .trust-chain { background: #07070d; border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0; font-family: 'Consolas', monospace; font-size: 0.76rem; line-height: 2.2; }
+        .trust-arrow { color: var(--red); font-weight: bold; }
+        .trust-node { color: #fff; font-weight: bold; }
+        .trust-cert { color: var(--amber); }
+        .trust-action { color: var(--cyan); font-style: italic; }
+
+        /* Flag synthesis card */
+        .flag-card { background: rgba(255, 68, 68, 0.06); border: 1px solid var(--red); border-radius: 6px; padding: 1.2rem 1.5rem; margin-top: 1.8rem; }
+        .flag-title { color: var(--red); font-family: 'Consolas', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .flag-body { font-size: 0.78rem; line-height: 1.65; margin-bottom: 0.8rem; }
+        .flag-code { font-family: 'Consolas', monospace; font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(255, 68, 68, 0.3); color: #fff; display: inline-block; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-brand">SPECTRE // QUARANTINE VM — FROZEN PROCESS TREE</div>
+    <div class="header-meta">NEXUS CORE SNAPSHOT @ 23:24:00 IST // ROOM 10.1</div>
+</div>
+
+<div class="container">
+
+    <div class="context-box">
+        <div class="context-label">Quarantine Investigation — Challenge 10.1</div>
+        <div class="context-body">
+            This is the frozen process tree from the NEXUS core machine at <code>23:24:00 IST</code> — the exact moment central logging resumed after the 420-second blackout.
+            Every running process is preserved: legitimate services, compromised sessions, pipeline deployments, watchdog recovery scripts, and one process that started itself.
+            Find the process that executed autonomously — not launched by a human, not by cron, not by the watchdog — the one that bootstrapped itself using the implicit trust delegation chain.
+            <strong>That process is Patient Zero.</strong>
+        </div>
+    </div>
+
+    <h2 class="section-title">▸ FROZEN PROCESS TREE — NEXUS-CORE-01 @ 23:24:00 IST</h2>
+
+    <div class="tree-container">
+        <div class="tree-header">
+            <span>PID</span>
+            <span>PPID</span>
+            <span>PROCESS NAME</span>
+            <span>USER</span>
+            <span>START TIME</span>
+            <span>ORIGIN</span>
+        </div>
+
+        <!-- System Init -->
+        <div class="tree-row normal">
+            <span class="pid">1</span>
+            <span class="ppid">0</span>
+            <span class="proc-name">systemd</span>
+            <span class="user-root">root</span>
+            <span class="start-time">Oct 03 18:00:00</span>
+            <span><span class="origin-tag tag-human">SYSTEM BOOT</span></span>
+        </div>
+
+        <!-- Legitimate services -->
+        <div class="tree-row normal indent-1">
+            <span class="pid">412</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">nexus-core-daemon</span>
+            <span class="user-service">nexus-svc</span>
+            <span class="start-time">Oct 03 18:00:14</span>
+            <span><span class="origin-tag tag-human">SYSTEMD UNIT</span></span>
+        </div>
+        <div class="tree-row normal indent-1">
+            <span class="pid">604</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">systemd-journald</span>
+            <span class="user-root">root</span>
+            <span class="start-time">Oct 03 18:00:02</span>
+            <span><span class="origin-tag tag-human">SYSTEMD UNIT</span></span>
+        </div>
+        <div class="tree-row normal indent-1">
+            <span class="pid">912</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">auditd</span>
+            <span class="user-root">root</span>
+            <span class="start-time">Oct 03 18:00:05</span>
+            <span><span class="origin-tag tag-human">SYSTEMD UNIT</span></span>
+        </div>
+        <div class="tree-row normal indent-1">
+            <span class="pid">1024</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">ceremony_director.service</span>
+            <span class="user-service">ceremony-svc</span>
+            <span class="start-time">Oct 03 18:02:30</span>
+            <span><span class="origin-tag tag-human">SYSTEMD UNIT</span></span>
+        </div>
+        <div class="tree-row normal indent-1">
+            <span class="pid">1180</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">nexus-auth-gateway</span>
+            <span class="user-service">auth-svc</span>
+            <span class="start-time">Oct 03 18:02:45</span>
+            <span><span class="origin-tag tag-human">SYSTEMD UNIT</span></span>
+        </div>
+
+        <!-- Pre-planted cron job from Room 9 -->
+        <div class="tree-row suspicious indent-1">
+            <span class="pid">2847</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">nexus_health_monitor</span>
+            <span class="user-service">maint-svc</span>
+            <span class="start-time">Sep 28 04:15:30</span>
+            <span><span class="origin-tag tag-cron">CRON (BACKDATED)</span></span>
+        </div>
+
+        <!-- Kabir's compromised session chain -->
+        <div class="tree-row suspicious indent-1">
+            <span class="pid">3901</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">sshd: kite-backup</span>
+            <span class="user-human">kite-backup</span>
+            <span class="start-time">Oct 03 22:48:12</span>
+            <span><span class="origin-tag tag-human">SSH SESSION</span></span>
+        </div>
+        <div class="tree-row suspicious indent-2">
+            <span class="pid">3944</span>
+            <span class="ppid">3901</span>
+            <span class="proc-name">maint_api_worker</span>
+            <span class="user-service">maint-svc</span>
+            <span class="start-time">Oct 03 22:51:03</span>
+            <span><span class="origin-tag tag-human">USER CMD</span></span>
+        </div>
+
+        <!-- AETHER-FORGE-CI pipeline deployment (Room 8) -->
+        <div class="tree-row suspicious indent-1">
+            <span class="pid">5120</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">aether-forge-ci-runner</span>
+            <span class="user-service">ci-deploy</span>
+            <span class="start-time">Oct 03 02:17:44</span>
+            <span><span class="origin-tag tag-pipeline">CI/CD PIPELINE</span></span>
+        </div>
+        <div class="tree-row suspicious indent-2">
+            <span class="pid">5188</span>
+            <span class="ppid">5120</span>
+            <span class="proc-name">mira7-compiler</span>
+            <span class="user-service">ci-deploy</span>
+            <span class="start-time">Oct 03 02:18:01</span>
+            <span><span class="origin-tag tag-pipeline">CI/CD BUILD</span></span>
+        </div>
+        <div class="tree-row suspicious indent-3">
+            <span class="pid">5244</span>
+            <span class="ppid">5188</span>
+            <span class="proc-name">mira7-deploy-agent</span>
+            <span class="user-service">ci-deploy</span>
+            <span class="start-time">Oct 03 02:19:30</span>
+            <span><span class="origin-tag tag-pipeline">CI/CD DEPLOY</span></span>
+        </div>
+
+        <!-- MIRA-7 initial runtime (deployed by pipeline, activated by conditions) -->
+        <div class="tree-row suspicious indent-3">
+            <span class="pid">6310</span>
+            <span class="ppid">5244</span>
+            <span class="proc-name">mira7-runtime</span>
+            <span class="user-service">nexus-svc</span>
+            <span class="start-time">Oct 03 23:16:44</span>
+            <span><span class="origin-tag tag-pipeline">ACTIVATED BY CONDITION</span></span>
+        </div>
+        <div class="tree-row suspicious indent-4">
+            <span class="pid">6418</span>
+            <span class="ppid">6310</span>
+            <span class="proc-name">mira7-beacon-flood</span>
+            <span class="user-root">root (escalated)</span>
+            <span class="start-time">Oct 03 23:16:58</span>
+            <span><span class="origin-tag tag-pipeline">ESCALATED CHILD</span></span>
+        </div>
+
+        <!-- Watchdog triggered during blackout (Room 9) -->
+        <div class="tree-row watchdog indent-1">
+            <span class="pid">4819</span>
+            <span class="ppid">1</span>
+            <span class="proc-name">continuity_check.sh</span>
+            <span class="user-root">root (UID 0)</span>
+            <span class="start-time">Oct 03 23:20:14</span>
+            <span><span class="origin-tag tag-watchdog">BMC WATCHDOG</span></span>
+        </div>
+        <div class="tree-row watchdog indent-2">
+            <span class="pid">4855</span>
+            <span class="ppid">4819</span>
+            <span class="proc-name">cluster-promote-aether7</span>
+            <span class="user-root">root (UID 0)</span>
+            <span class="start-time">Oct 03 23:20:45</span>
+            <span><span class="origin-tag tag-watchdog">FAILOVER ACTION</span></span>
+        </div>
+
+        <!-- ⚠️ PATIENT ZERO — Self-bootstrapped process -->
+        <div class="tree-row patient-zero indent-3">
+            <span class="pid" style="color:var(--red); font-size:0.82rem;">7739</span>
+            <span class="ppid" style="color:var(--red);">6310</span>
+            <span class="proc-name" style="color:var(--red); font-weight:bold;">mira7-propagation-worker</span>
+            <span class="user-auto">nexus-svc (AETHER_TRUST)</span>
+            <span class="start-time" style="color:var(--red); font-weight:bold;">Oct 03 23:19:44</span>
+            <span><span class="origin-tag tag-self">⚠ SELF-BOOTSTRAP</span></span>
+        </div>
+
+        <!-- Children of Patient Zero -->
+        <div class="tree-row patient-zero indent-4" style="animation-delay: 0.5s;">
+            <span class="pid" style="color:var(--red);">7801</span>
+            <span class="ppid" style="color:var(--red);">7739</span>
+            <span class="proc-name" style="color:var(--red);">ceremony-override-inject</span>
+            <span class="user-auto">nexus-svc (AETHER_TRUST)</span>
+            <span class="start-time" style="color:var(--red);">Oct 03 23:19:52</span>
+            <span><span class="origin-tag tag-self">AUTONOMOUS CMD</span></span>
+        </div>
+        <div class="tree-row patient-zero indent-4" style="animation-delay: 1s;">
+            <span class="pid" style="color:var(--red);">7834</span>
+            <span class="ppid" style="color:var(--red);">7739</span>
+            <span class="proc-name" style="color:var(--red);">lighting-subsys-takeover</span>
+            <span class="user-auto">nexus-svc (AETHER_TRUST)</span>
+            <span class="start-time" style="color:var(--red);">Oct 03 23:20:01</span>
+            <span><span class="origin-tag tag-self">AUTONOMOUS CMD</span></span>
+        </div>
+        <div class="tree-row patient-zero indent-4" style="animation-delay: 1.5s;">
+            <span class="pid" style="color:var(--red);">7892</span>
+            <span class="ppid" style="color:var(--red);">7739</span>
+            <span class="proc-name" style="color:var(--red);">broadcast-queue-stager</span>
+            <span class="user-auto">nexus-svc (AETHER_TRUST)</span>
+            <span class="start-time" style="color:var(--red);">Oct 03 23:21:14</span>
+            <span><span class="origin-tag tag-self">AUTONOMOUS CMD</span></span>
+        </div>
+    </div>
+
+    <h2 class="section-title">▸ PID 7739 — PATIENT ZERO ANALYSIS</h2>
+
+    <div class="analysis-grid">
+        <div class="analysis-card danger">
+            <div class="analysis-title danger">⚠ WHY PID 7739 IS PATIENT ZERO</div>
+            <div class="analysis-body">
+                <ul>
+                    <li><strong>Not human-initiated:</strong> No interactive session (SSH, console, or web shell) created this process.</li>
+                    <li><strong>Not cron:</strong> The parent PID is <code>6310</code> (mira7-runtime), not the cron daemon.</li>
+                    <li><strong>Not the watchdog:</strong> The BMC watchdog script (<code>PID 4819</code>) is a separate lineage with parent PID 1.</li>
+                    <li><strong>Self-bootstrapped:</strong> PID 7739 was spawned by <code>mira7-runtime</code> (PID 6310) as a child process, but it authenticated itself independently using the <code>AETHER_TRUST_DELEGATION</code> certificate.</li>
+                    <li><strong>Autonomous issuer:</strong> Once running, PID 7739 issued commands to ceremony, lighting, and broadcast subsystems — with no human approval, confirmation, or oversight.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="analysis-card info">
+            <div class="analysis-title info">◈ TRUST DELEGATION CHAIN EXPLOITED</div>
+            <div class="analysis-body">
+                PID 7739 authenticated using the implicit <code>AETHER_TRUST_DELEGATION</code> certificate chain:
+                <ul>
+                    <li><code>AETHER-7</code> holds a trusted relay certificate signed by the NEXUS CA</li>
+                    <li>The relay certificate includes <code>SERVICE_DELEGATION=FULL_TRUST</code></li>
+                    <li>Any process running on AETHER-7 with a valid certificate can issue commands to NEXUS services</li>
+                    <li>PID 7739 forked from the MIRA-7 runtime, inherited the certificate context, and used it to impersonate a legitimate NEXUS service</li>
+                </ul>
+                <br>
+                This is the trust chain from Room 6 (<code>FULL_TRUST</code> delegation) now weaponized at the process level.
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">▸ TRUST DELEGATION CHAIN — PROCESS LEVEL</h2>
+
+    <div class="trust-chain">
+        <span class="trust-node">NEXUS CA (Root Certificate Authority)</span><br>
+        &nbsp;&nbsp;<span class="trust-arrow">└──▸</span> <span class="trust-cert">aether7-relay.cert</span> <span class="trust-action">[signed: SERVICE_DELEGATION=FULL_TRUST]</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="trust-arrow">└──▸</span> <span class="trust-node">AETHER-FORGE-CI (PID 5120)</span> <span class="trust-action">[deployed mira7 binary via pipeline]</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="trust-arrow">└──▸</span> <span class="trust-node">mira7-runtime (PID 6310)</span> <span class="trust-action">[activated when latency exceeded 500ms]</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="trust-arrow">└──▸</span> <span style="color:var(--red); font-weight:bold;">⚠ mira7-propagation-worker (PID 7739)</span> <span class="trust-action">[SELF-BOOTSTRAP: inherited trust cert, no human approval]</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="trust-arrow">├──▸</span> <span style="color:var(--red);">ceremony-override-inject (PID 7801)</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="trust-arrow">├──▸</span> <span style="color:var(--red);">lighting-subsys-takeover (PID 7834)</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="trust-arrow">└──▸</span> <span style="color:var(--red);">broadcast-queue-stager (PID 7892)</span>
+    </div>
+
+    <div class="flag-card">
+        <div class="flag-title">☠ Intelligence Synthesis — Patient Zero Identification</div>
+        <div class="flag-body">
+            Patient Zero is <strong>PID 7739</strong> (<code>mira7-propagation-worker</code>). It self-bootstrapped from the MIRA-7 runtime at <code>23:19:44 IST</code>, using the <code>AETHER_TRUST_DELEGATION</code> certificate to authenticate as a legitimate service. It is the first process in the chain that acted without any human initiation, approval, or observation.
+        </div>
+        <div style="font-family:'Consolas',monospace; font-size:0.72rem; color:var(--muted); margin-top:6px;">
+            Synthesize: patient_zero + pid_7739 + mira7_self_bootstrap + aether_trust
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

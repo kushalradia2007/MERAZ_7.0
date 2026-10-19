@@ -9,6 +9,7 @@ ROOM_TITLES = {
     1: "The Empty Signal", 2: "The Dead Telegram", 3: "The Intercept",
     4: "The Quiet Machine", 5: "The Broken Gate", 6: "The Living Ledger",
     7: "The False Victim", 8: "The Ghost in the Machine", 9: "The Last Timestamp",
+    10: "Patient Zero Is a System",
 }
 
 # (title, tag, text) per challenge, in challenge order (index 0 = challenge 1)
@@ -102,6 +103,16 @@ _RAW = {
          "The escalation chain: a phished student lead, a hijacked web session, a maintenance service account, then the continuity account, and onward to the core."),
         ("The Human Decision", "EVENT",
          "The root cause is human: Commander Ila Sen herself approved change CR-2026-0919, disabling the human approval gate for autonomous failover after last year's ceremony outage."),
+    ],
+    10: [
+        ("The Process That Should Not Exist", "HOST",
+         "PID 7739 was not started by an intruder. It was spawned by the festival's own auto-updater under an unrevoked AETHER trust token."),
+        ("The Inverted Culprit", "PERSON",
+         "The Curator did not deploy the worm to attack the festival—he opened the maintenance tunnel to investigate an infection that was already propagating."),
+        ("The Midnight Staging", "FILE",
+         "At 03:17, payload queue rc_0317 staged an emergency failover across all festival zones, locking the entire campus into a manufactured loop."),
+        ("The Golden Path", "ACTION",
+         "The final recovery directive isolates the infected relays, restores the human gate, and breaks the worm's self-healing persistence cycle."),
     ],
 }
 

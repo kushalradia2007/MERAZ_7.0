@@ -178,7 +178,7 @@ def read_admin(user: models.User = Depends(get_current_user)):
     return read_html("admin.html")
 
 
-ROOM_FILES = {i: f"room{i}.html" for i in range(1, 10)}
+ROOM_FILES = {i: f"room{i}.html" for i in range(1, 11)}
 
 
 @app.get("/room/{room_id}", response_class=HTMLResponse)
@@ -536,6 +536,12 @@ CHALLENGE_FLAGS = {
         ["NIGHTJAR{gap_420s_auditd_buffer_flush_ipmi_bmc_continuity_uid0}"],
         ["NIGHTJAR{path_kite_to_maint_to_continuity_to_aether7_master_relay}"],
         ["NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}"],
+    ],
+    10: [
+        ["NIGHTJAR{patient_zero_pid_7739_mira7_self_bootstrap_aether_trust}"],
+        ["NIGHTJAR{curator_built_kite_opened_mira7_became_the_threat_actor}"],
+        ["NIGHTJAR{payload_queue_rc_0317_aether7_broadcast_manifest_all_zones}"],
+        ["NIGHTJAR{golden_path_isolate_preserve_restore_human_approval_gate}"],
     ],
 }
 FLAGS_PER_ROOM = 4

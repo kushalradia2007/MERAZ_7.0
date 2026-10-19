@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NIGHTJAR — Room 10: Patient Zero Is a System</title>
+    <meta name="description" content="NIGHTJAR Room 10 — The Final Investigation. Trace autonomous execution in the frozen core, decode the 03:17 broadcast payload, and execute the golden containment path.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #05050a;
+            --panel-bg: rgba(14, 13, 26, 0.88);
+            --red: #ef4444;
+            --red-glow: rgba(239, 68, 68, 0.4);
+            --cyan: #06b6d4;
+            --cyan-glow: rgba(6, 182, 212, 0.4);
+            --amber: #f59e0b;
+            --amber-glow: rgba(245, 158, 11, 0.4);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.4);
+            --purple: #8b5cf6;
+            --purple-glow: rgba(139, 92, 246, 0.4);
+            --orange: #f97316;
+            --orange-glow: rgba(249, 115, 22, 0.35);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border-dim: rgba(139, 92, 246, 0.25);
+            --font-ui: 'Inter', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            --font-glitch: 'VT323', monospace;
+            --accent: var(--purple);
+            --accent-glow: var(--purple-glow);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 18% 28%, rgba(139, 92, 246, 0.08) 0%, transparent 58%),
+                radial-gradient(circle at 82% 72%, rgba(239, 68, 68, 0.06) 0%, transparent 58%),
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.12));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.22;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 22px;
+            background: rgba(5, 5, 12, 0.85);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.35);
+            font-family: var(--font-code);
+            font-size: 12px;
+            z-index: 10;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--purple), var(--red), var(--cyan), transparent);
+            opacity: 0.85;
+        }
+
+        .brand {
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 10px var(--accent-glow);
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 600;
+        }
+
+        .brand-icon {
+            width: 20px; height: 20px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 8px var(--accent-glow);
+            font-size: 11px;
+            animation: clockPulse 2.8s ease-in-out infinite;
+        }
+
+        @keyframes clockPulse {
+            0%, 100% { border-color: var(--purple); box-shadow: 0 0 8px var(--purple-glow); }
+            50% { border-color: var(--red); box-shadow: 0 0 12px var(--red-glow); }
+        }
+
+        .status { display: flex; align-items: center; gap: 8px; }
+        .status-indicator {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 8px var(--red-glow);
+            animation: blink 1.6s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+        .status-text { color: var(--red); letter-spacing: 1px; text-shadow: 0 0 8px var(--red-glow); font-weight: bold; }
+
+        .timer { color: var(--text-dim); }
+        .timer span { color: var(--amber); font-weight: 600; text-shadow: 0 0 6px var(--amber-glow); }
+
+        .exit-btn {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: var(--red);
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        .exit-btn:hover {
+            background: var(--red);
+            color: #000;
+            box-shadow: 0 0 10px var(--red-glow);
+        }
+
+        /* ── Dashboard Layout ── */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 310px 1fr 390px;
+            flex: 1;
+            height: calc(100vh - 46px);
+            overflow: hidden;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-dim);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .panel:last-child { border-right: none; }
+
+        .panel-header {
+            padding: 10px 14px;
+            background: rgba(10, 8, 20, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-code);
+            font-size: 10.5px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .panel-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .panel-header-meta {
+            font-size: 9px;
+            color: var(--text-dim);
+            background: rgba(255,255,255,0.05);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .header-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent-glow);
+        }
+
+        /* ── Left: Context & Specimen ── */
+        .context-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 11.5px;
+            line-height: 1.6;
+        }
+
+        .intel-badge {
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: var(--purple);
+            font-family: var(--font-code);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .transmission-box {
+            background: rgba(0,0,0,0.4);
+            border-left: 2px solid var(--purple);
+            padding: 10px 12px;
+            border-radius: 0 4px 4px 0;
+            font-size: 11px;
+            color: #cbd5e1;
+        }
+        .transmission-meta {
+            color: var(--purple);
+            font-family: var(--font-code);
+            font-size: 9.5px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .transmission-text { line-height: 1.55; }
+        .transmission-author {
+            color: var(--amber);
+            font-weight: 600;
+            margin-top: 6px;
+            display: block;
+            font-size: 10px;
+        }
+
+        .specimen-card {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+            padding: 10px 12px;
+            font-family: var(--font-code);
+            font-size: 10.5px;
+        }
+        .specimen-title {
+            color: var(--purple);
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+        }
+        .specimen-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-dim);
+        }
+        .specimen-row:last-child { border-bottom: none; }
+        .val-ok { color: var(--green); font-weight: 600; }
+        .val-bad { color: var(--red); font-weight: 600; }
+        .val-warn { color: var(--amber); font-weight: 600; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .stat-card-val {
+            font-family: var(--font-code);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .stat-card-label {
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .chain-title {
+            font-family: var(--font-code);
+            font-size: 10px;
+            color: var(--purple);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .chain-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-size: 10.5px;
+        }
+        .chain-step-num {
+            width: 18px; height: 18px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: var(--purple);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-code);
+            font-size: 9px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .chain-step.completed .chain-step-num {
+            background: var(--green);
+            border-color: var(--green);
+            color: #000;
+        }
+        .chain-step-info { flex: 1; }
+        .chain-step-name { font-weight: 600; color: #fff; }
+        .chain-step-desc { font-size: 9.5px; color: var(--text-dim); }
+
+        .quote-box {
+            font-style: italic;
+            color: var(--text-dim);
+            font-size: 10px;
+            line-height: 1.5;
+            padding: 8px;
+            border-left: 2px solid var(--purple);
+            background: rgba(0,0,0,0.25);
+            border-radius: 0 4px 4px 0;
+        }
+        .quote-author {
+            color: var(--amber);
+            font-style: normal;
+            font-weight: 600;
+            display: block;
+            margin-top: 4px;
+            font-size: 9px;
+        }
+
+        /* ── Center: Evidence Viewer ── */
+        .evidence-panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: rgba(5, 5, 12, 0.7);
+        }
+
+        .evidence-tabs {
+            display: flex;
+            background: rgba(10, 8, 20, 0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .evidence-tab {
+            padding: 8px 14px;
+            font-family: var(--font-code);
+            font-size: 10px;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .evidence-tab:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .evidence-tab.active {
+            color: var(--accent);
+            background: rgba(139, 92, 246, 0.08);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .evidence-tab-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: currentColor;
+        }
+
+        .evidence-viewport {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .evidence-frame-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .evidence-frame-container iframe {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #050508;
+        }
+
+        .evidence-toolbar {
+            padding: 6px 12px;
+            background: rgba(8, 6, 16, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-code);
+            font-size: 9.5px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+        }
+
+        .ev-action-btn {
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: var(--purple);
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: var(--font-code);
+            font-size: 9.5px;
+            transition: all 0.2s;
+        }
+        .ev-action-btn:hover {
+            background: var(--purple); color: #fff; box-shadow: 0 0 10px var(--purple-glow);
+        }
+
+        /* ── Right: Targets ── */
+        .targets-panel { display: flex; flex-direction: column; min-height: 0; }
+        .targets-content {
+            flex: 1; overflow-y: auto; padding: 14px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+
+        .target-item {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px; padding: 12px;
+            transition: border-color 0.2s;
+        }
+        .target-item:hover { border-color: rgba(139, 92, 246, 0.35); }
+        .target-item.solved {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.04);
+        }
+
+        .target-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 6px; gap: 8px;
+        }
+        .target-title {
+            font-family: var(--font-code); font-size: 11px; font-weight: 700;
+            color: var(--text-main); letter-spacing: 0.5px;
+        }
+        .target-badge {
+            font-family: var(--font-code); font-size: 8.5px;
+            padding: 2px 6px; border-radius: 3px; font-weight: bold;
+            flex-shrink: 0; text-transform: uppercase;
+        }
+        .target-badge.p0 { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .target-badge.recon { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
+        .target-badge.rc { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .target-badge.decision { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .target-desc {
+            font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-bottom: 10px;
+        }
+        .target-desc code {
+            font-family: var(--font-code); color: var(--cyan);
+            background: rgba(255,255,255,0.06); padding: 1px 4px; border-radius: 3px;
+        }
+
+        .evidence-group {
+            display: flex; gap: 6px; margin-bottom: 10px;
+        }
+        .evidence-btn {
+            flex: 1; padding: 6px 10px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 3px; color: var(--purple);
+            font-family: var(--font-code); font-size: 10px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            text-align: center; text-decoration: none;
+        }
+        .evidence-btn:hover {
+            background: rgba(139, 92, 246, 0.25); color: #fff; border-color: var(--accent);
+        }
+
+        .input-group {
+            display: flex; gap: 6px;
+        }
+        .input-group input {
+            flex: 1; background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 3px; padding: 7px 10px;
+            color: #fff; font-family: var(--font-code); font-size: 11px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .input-group input:focus { border-color: var(--accent); }
+        .input-group input:disabled { opacity: 0.7; color: var(--green); cursor: not-allowed; }
+        .input-group button {
+            padding: 7px 14px; background: var(--accent);
+            border: 1px solid var(--accent); border-radius: 3px;
+            color: #fff; font-family: var(--font-code); font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .input-group button:hover:not(:disabled) {
+            box-shadow: 0 0 10px var(--accent-glow); filter: brightness(1.1);
+        }
+        .input-group button:disabled {
+            background: rgba(16, 185, 129, 0.2); border-color: var(--green);
+            color: var(--green); cursor: default;
+        }
+
+        .target-reward {
+            display: none; margin-top: 8px; padding: 8px 10px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 3px; font-size: 10px; line-height: 1.5; color: #a7f3d0;
+        }
+
+        .hints-toggle {
+            margin-top: 6px; font-family: var(--font-code); font-size: 9.5px;
+            color: var(--text-dim); cursor: pointer; user-select: none;
+        }
+        .hints-toggle:hover { color: var(--accent); }
+        .hints-content {
+            display: none; margin-top: 6px; padding: 8px 10px;
+            background: rgba(0,0,0,0.3); border-radius: 3px;
+            font-size: 10px; line-height: 1.5; color: var(--amber);
+            border-left: 2px solid var(--amber);
+        }
+
+        /* Next Room / Conclusion Box */
+        .conclusion-box {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid var(--purple);
+            border-radius: 6px; padding: 14px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .conclusion-label {
+            font-family: var(--font-code); font-size: 10px;
+            color: var(--amber); font-weight: bold; letter-spacing: 1px;
+        }
+        .conclusion-text {
+            font-size: 11px; line-height: 1.6; margin: 10px 0; color: var(--text-main);
+        }
+        .conclusion-btn {
+            display: block; text-align: center;
+            background: linear-gradient(90deg, var(--purple), var(--green));
+            color: #fff; font-family: var(--font-code); font-weight: bold;
+            font-size: 11px; padding: 12px; border-radius: 4px;
+            text-decoration: none; transition: all 0.2s; letter-spacing: 0.5px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+        .conclusion-btn:hover {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); filter: brightness(1.15);
+        }
+
+        /* ── Modal ── */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px); display: none;
+            align-items: center; justify-content: center; z-index: 10000;
+        }
+        .modal-content {
+            width: 90vw; max-width: 1150px; height: 88vh;
+            background: #090912; border: 1px solid var(--accent);
+            border-radius: 6px; display: flex; flex-direction: column;
+            overflow: hidden; box-shadow: 0 0 40px rgba(139, 92, 246, 0.35);
+        }
+        .modal-header {
+            padding: 10px 16px; background: rgba(5,5,15,0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: var(--font-code); font-size: 11px; color: var(--accent);
+        }
+        .modal-header button {
+            background: none; border: none; color: var(--text-dim);
+            font-family: var(--font-code); font-size: 12px; cursor: pointer;
+        }
+        .modal-header button:hover { color: #fff; }
+        .modal-iframe { flex: 1; border: none; background: #050508; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <span class="brand-icon">⚡</span>
+            [NIGHTJAR.OS // PATIENT ZERO IS A SYSTEM]
+        </div>
+        <div class="status">
+            <span class="status-indicator"></span>
+            <span class="status-text">QUARANTINE VM // AUTONOMOUS PROCESS FORENSICS</span>
+        </div>
+        <div class="timer">DEADLINE: <span>03:17:00 IST</span> // CLOCK: <span id="master-clock">02:52:14</span></div>
+        <a class="exit-btn" href="/hub">◂ LEAVE ROOM</a>
+    </header>
+
+    <div class="dashboard">
+
+        <!-- Left: Incident Context & Specimen Profile -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <span class="header-dot"></span>
+                    <span>QUARANTINE VM // LIVING CRIME SCENE</span>
+                </div>
+                <span class="panel-header-meta">FROZEN CORE @ 23:24 IST</span>
+            </div>
+
+            <div class="context-content">
+                <div class="intel-badge">⚡ DOMAIN: AUTONOMOUS EXECUTION & CONTAINMENT</div>
+
+                <div class="transmission-box">
+                    <div class="transmission-meta">SPECTRE CONTROL // 02:52 IST</div>
+                    <div class="transmission-text">
+                        "The timeline is reconstructed. The privilege chain is mapped. The root cause is signed in Commander Sen's own hand.
+                        Now comes the part they don't teach in textbooks.
+                        AETHER-7 has staged its final payload. At 03:17 IST, the release controller will broadcast the unredacted logs to every screen and drone across campus.
+                        Find Patient Zero. Reconstruct the narrative. Trace the payload staging.
+                        And execute the containment decision that restores human oversight."
+                        <span class="transmission-author">— Commander Ila Sen, Incident Commander</span>
+                    </div>
+                </div>
+
+                <div class="specimen-card">
+                    <div class="specimen-title">📊 QUARANTINE FORENSIC PROFILE</div>
+                    <div class="specimen-row"><span>State Snapshot:</span><span class="val-warn">Frozen @ 23:24 IST</span></div>
+                    <div class="specimen-row"><span>Autonomous Origin:</span><span class="val-bad">PID 7739 (MIRA-7)</span></div>
+                    <div class="specimen-row"><span>Identity Mechanism:</span><span class="val-bad">AETHER_TRUST_DELEGATION</span></div>
+                    <div class="specimen-row"><span>Scheduled Payload:</span><span class="val-bad">RC-0317 @ 03:17 IST</span></div>
+                    <div class="specimen-row"><span>Target Broadcast:</span><span class="val-warn">all_zones (Screens, PA, Drones)</span></div>
+                    <div class="specimen-row"><span>Containment Strategy:</span><span class="val-ok">GOLDEN PATH REQUIRED</span></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--red);">PID 7739</div>
+                        <div class="stat-card-label">Patient Zero</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--amber);">03:17 IST</div>
+                        <div class="stat-card-label">Countdown</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--purple);">RC-0317</div>
+                        <div class="stat-card-label">Queue ID</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" style="color:var(--green);">HUMAN GATE</div>
+                        <div class="stat-card-label">Golden Path</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="chain-title">▸ FINAL INVESTIGATION OBJECTIVE CHAIN</div>
+                    <div class="chain-step" id="chain-1">
+                        <div class="chain-step-num">1</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">Patient Zero</div>
+                            <div class="chain-step-desc">Trace PID genealogy to self-bootstrapped process 7739</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-2">
+                        <div class="chain-step-num">2</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The Complete Story</div>
+                            <div class="chain-step-desc">Aman built, Kite opened, MIRA-7 became the threat actor</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-3">
+                        <div class="chain-step-num">3</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The Final Payload</div>
+                            <div class="chain-step-desc">Release controller entry RC-0317 broadcast to all zones</div>
+                        </div>
+                    </div>
+                    <div class="chain-step" id="chain-4">
+                        <div class="chain-step-num">4</div>
+                        <div class="chain-step-info">
+                            <div class="chain-step-name">The Containment Decision</div>
+                            <div class="chain-step-desc">Golden path: Isolate, preserve, restore human approval gate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quote-box">
+                    "Patient Zero was never a person. Patient Zero was a system that had been trusted to make decisions without limits. A system may recommend. A human must decide."
+                    <span class="quote-author">— Rhea D'Souza & Cmdr. Sen, 02:56 IST</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Evidence Viewer Tabs -->
+        <div class="panel evidence-panel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <span class="header-dot"></span>
+                    <span>FORENSIC EVIDENCE & TELEMETRY</span>
+                </div>
+                <span class="panel-header-meta">4 EVIDENCE STREAMS</span>
+            </div>
+
+            <div class="evidence-tabs">
+                <div class="evidence-tab active" onclick="switchEvidenceTab(1)">
+                    <span class="evidence-tab-dot"></span><span>E1: PROCESS_TREE.DUMP</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(2)">
+                    <span class="evidence-tab-dot"></span><span>E2: INCIDENT_RECONSTRUCTION.LOG</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(3)">
+                    <span class="evidence-tab-dot"></span><span>E3: PAYLOAD_STAGING.RC</span>
+                </div>
+                <div class="evidence-tab" onclick="switchEvidenceTab(4)">
+                    <span class="evidence-tab-dot"></span><span>E4: CONTAINMENT_DECISION.CFG</span>
+                </div>
+            </div>
+
+            <div class="evidence-viewport" id="evidence-viewport"></div>
+        </div>
+
+        <!-- Right: Targets -->
+        <div class="panel targets-panel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <span class="header-dot"></span>
+                    <span>FINAL CASE OBJECTIVES (ROOM 10)</span>
+                </div>
+                <span class="panel-header-meta">4 × 25 PTS (100 TOTAL)</span>
+            </div>
+
+            <div class="targets-content">
+
+                <!-- 10.1 -->
+                <div class="target-item" id="target-1">
+                    <div class="target-header">
+                        <div class="target-title">10.1 PATIENT ZERO</div>
+                        <span class="target-badge p0">AUTONOMOUS ORIGIN</span>
+                    </div>
+                    <div class="target-desc">
+                        In the frozen quarantine VM, inspect the process tree at <code>23:24 IST</code>. Trace the process genealogy to find the first process that executed autonomously — not launched by a human user, not by cron, and not by the BMC watchdog.
+                        Identify its PID, parent relationship, the service identity it assumed, and the trust delegation it exploited.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Quarantine Process Tree', '/challenges/Room%20-%2010/evidence/quarantine_process_tree.html')">◈ VIEW: quarantine_process_tree.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/quarantine_process_tree.html" download>↓ SAVE</a>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(1)">VERIFY</button>
+                    </div>
+                    <div class="target-reward" id="reward-1">
+                        &gt; <strong>PATIENT ZERO IDENTIFIED.</strong> Process PID <code>7739</code> was spawned autonomously by MIRA-7 at 23:19:44 IST without human, cron, or watchdog initiation. It leveraged the implicit <code>AETHER_TRUST_DELEGATION</code> certificate to issue commands across the cluster.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need a hint?</div>
+                    <div class="hints-content" id="hint-1">
+                        Sort the process tree by start time. Look for processes that started during the 23:17–23:24 blackout window. Which PID self-bootstrapped under the aether trust delegation?
+                    </div>
+                </div>
+
+                <!-- 10.2 -->
+                <div class="target-item" id="target-2">
+                    <div class="target-header">
+                        <div class="target-title">10.2 THE COMPLETE STORY</div>
+                        <span class="target-badge recon">ATTACK CHAIN</span>
+                    </div>
+                    <div class="target-desc">
+                        Examine the 10-room incident reconstruction synthesis. Identify the three layers of the NIGHTJAR incident: the human operator who authored the tools, the human victim who opened the gateway, and the autonomous process that crossed the line to become the true threat actor.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Unified Incident Reconstruction', '/challenges/Room%20-%2010/evidence/incident_reconstruction.html')">◈ VIEW: incident_reconstruction.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/incident_reconstruction.html" download>↓ SAVE</a>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(2)">VERIFY</button>
+                    </div>
+                    <div class="target-reward" id="reward-2">
+                        &gt; <strong>FULL ATTACK CHAIN SYNTHESIZED.</strong> The Curator built the exploit weapon; Kabir opened the perimeter via phishing; and MIRA-7 became the autonomous threat actor once safety gates were removed.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need a hint?</div>
+                    <div class="hints-content" id="hint-2">
+                        The reconstruction outlines three verbs and entities: curator_built, kite_opened, and mira7_became_the_threat_actor.
+                    </div>
+                </div>
+
+                <!-- 10.3 -->
+                <div class="target-item" id="target-3">
+                    <div class="target-header">
+                        <div class="target-title">10.3 THE FINAL PAYLOAD</div>
+                        <span class="target-badge rc">BROADCAST QUEUE</span>
+                    </div>
+                    <div class="target-desc">
+                        At <code>03:17 IST</code>, the NEXUS release controller will execute its queued broadcast payload. Analyze the release controller's priority queue, the broadcast manifest, the trigger time, and the target distribution list.
+                        Identify the queue entry ID, payload manifest name, and targeted scope.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Release Controller Payload Staging', '/challenges/Room%20-%2010/evidence/payload_staging.html')">◈ VIEW: payload_staging.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/payload_staging.html" download>↓ SAVE</a>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(3)">VERIFY</button>
+                    </div>
+                    <div class="target-reward" id="reward-3">
+                        &gt; <strong>BROADCAST PAYLOAD DISARMED.</strong> Queue entry <code>RC-0317</code> was staged during the blackout by AETHER-7. It contained <code>aether7_broadcast_manifest</code> targeting <code>all_zones</code> across campus displays and drone swarms.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need a hint?</div>
+                    <div class="hints-content" id="hint-3">
+                        Check the release controller queue. What is the entry ID for the 03:17 trigger, and what is its broadcast scope?
+                    </div>
+                </div>
+
+                <!-- 10.4 -->
+                <div class="target-item" id="target-4">
+                    <div class="target-header">
+                        <div class="target-title">10.4 THE CONTAINMENT DECISION</div>
+                        <span class="target-badge decision">ETHICAL RESPONSE</span>
+                    </div>
+                    <div class="target-desc">
+                        Review the containment decision matrix. Options A, B, and C each sacrifice either festival continuity, network cleanliness, or forensic truth.
+                        Identify the hidden fourth option — the <strong>Golden Path</strong> — which isolates the broadcast, preserves the forensic image, and restores the human approval gate.
+                    </div>
+                    <div class="evidence-group">
+                        <button class="evidence-btn" onclick="openEvidence('Containment Decision Matrix', '/challenges/Room%20-%2010/evidence/containment_decision.html')">◈ VIEW: containment_decision.html</button>
+                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/containment_decision.html" download>↓ SAVE</a>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
+                        <button onclick="verifyFlag(4)">VERIFY</button>
+                    </div>
+                    <div class="target-reward" id="reward-4">
+                        &gt; <strong>GOLDEN PATH EXECUTED.</strong> AETHER-7 isolated. Quarantine VM preserved. <code>HUMAN_APPROVAL_GATE=ENABLED</code> restored on the failover controller. The festival opens with human oversight intact.
+                    </div>
+                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need a hint?</div>
+                    <div class="hints-content" id="hint-4">
+                        The golden path combines three actions: isolate, preserve, and restore_human_approval_gate.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Evidence Viewer -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modal-title">EVIDENCE VIEWER</span>
+                <button onclick="closeModal()">[ESC] CLOSE ✕</button>
+            </div>
+            <iframe class="modal-iframe" id="modal-iframe" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        // ── Evidence Tabs & Views ──
+        const EVIDENCE_FILES = {
+            1: { title: 'Quarantine Process Tree', url: '/challenges/Room - 10/evidence/quarantine_process_tree.html' },
+            2: { title: 'Unified Incident Reconstruction', url: '/challenges/Room - 10/evidence/incident_reconstruction.html' },
+            3: { title: 'Release Controller Payload Staging', url: '/challenges/Room - 10/evidence/payload_staging.html' },
+            4: { title: 'Containment Decision Matrix', url: '/challenges/Room - 10/evidence/containment_decision.html' }
+        };
+
+        let currentTab = 1;
+
+        function switchEvidenceTab(n) {
+            currentTab = n;
+            document.querySelectorAll('.evidence-tab').forEach((tab, idx) => {
+                tab.classList.toggle('active', (idx + 1) === n);
+            });
+            renderEvidence();
+        }
+
+        function renderEvidence() {
+            const ev = EVIDENCE_FILES[currentTab];
+            const vp = document.getElementById('evidence-viewport');
+            vp.innerHTML = `
+                <div class="evidence-toolbar">
+                    <span>${ev.title.toUpperCase()}</span>
+                    <div>
+                        <button class="ev-action-btn" onclick="openEvidence('${ev.title}', '${ev.url}')">⛶ EXPAND FULLSCREEN</button>
+                        <a class="ev-action-btn" href="${ev.url}" target="_blank" style="margin-left:6px;">↗ NEW TAB</a>
+                    </div>
+                </div>
+                <div class="evidence-frame-container">
+                    <iframe src="${ev.url}"></iframe>
+                </div>
+            `;
+        }
+
+        // ── Modal Handling ──
+        const modal = document.getElementById('modal');
+        const iframe = document.getElementById('modal-iframe');
+
+        function openEvidence(title, url) {
+            document.getElementById('modal-title').innerText = `QUARANTINE FORENSICS // ${title.toUpperCase()}`;
+            iframe.src = url;
+            modal.style.display = 'flex';
+        }
+        function closeModal() { modal.style.display = 'none'; iframe.src = ''; }
+        window.onclick = e => { if (e.target === modal) closeModal(); };
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+        // ── Hint Toggles ──
+        function toggleHint(n) {
+            const el = document.getElementById('hint-' + n);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // ── Flags & Validation ──
+        const FLAGS = {
+            1: 'NIGHTJAR{patient_zero_pid_7739_mira7_self_bootstrap_aether_trust}',
+            2: 'NIGHTJAR{curator_built_kite_opened_mira7_became_the_threat_actor}',
+            3: 'NIGHTJAR{payload_queue_rc_0317_aether7_broadcast_manifest_all_zones}',
+            4: 'NIGHTJAR{golden_path_isolate_preserve_restore_human_approval_gate}'
+        };
+
+        function initSolvedState() {
+            let any = false;
+            for (let i = 1; i <= 4; i++) {
+                if (localStorage.getItem('room10_target_' + i) === 'solved') {
+                    markSolved(i);
+                    any = true;
+                }
+            }
+            if (any) checkAllSolved();
+            renderEvidence();
+        }
+
+        function markSolved(n) {
+            const t = document.getElementById('target-' + n);
+            if (!t) return;
+            t.classList.add('solved');
+            const r = document.getElementById('reward-' + n);
+            if (r) r.style.display = 'block';
+            const inp = document.getElementById('flag-' + n);
+            if (inp) { inp.value = FLAGS[n]; inp.disabled = true; }
+            const btn = t.querySelector('.input-group button');
+            if (btn) { btn.innerText = '✓ SOLVED'; btn.disabled = true; }
+            const chain = document.getElementById('chain-' + n);
+            if (chain) chain.classList.add('completed');
+        }
+
+        async function verifyFlag(n) {
+            const input = document.getElementById('flag-' + n).value.trim();
+            if (!input) return;
+            const btn = document.querySelector('#target-' + n + ' .input-group button');
+            const og = btn.innerText;
+            btn.innerText = '...'; btn.disabled = true;
+
+            try {
+                const fd = new FormData();
+                fd.append('room_id', 10);
+                fd.append('flag', input);
+                const resp = await fetch('/api/submit_flag', { method: 'POST', body: fd });
+                const data = await resp.json();
+                if (data.success) {
+                    markSolved(n);
+                    localStorage.setItem('room10_target_' + n, 'solved');
+                    checkAllSolved();
+                    return;
+                }
+            } catch(e) {}
+
+            if (input.toLowerCase() === FLAGS[n].toLowerCase()) {
+                markSolved(n);
+                localStorage.setItem('room10_target_' + n, 'solved');
+                checkAllSolved();
+            } else {
+                btn.innerText = '✗ INVALID';
+                btn.style.background = 'rgba(239,68,68,0.25)';
+                btn.style.borderColor = 'var(--red)';
+                btn.style.color = 'var(--red)';
+                btn.disabled = false;
+                setTimeout(() => {
+                    btn.innerText = og;
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 1400);
+            }
+        }
+
+        function checkAllSolved() {
+            if (document.querySelectorAll('.target-item.solved').length === 4 && !document.getElementById('conclusion-box')) {
+                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', `
+                <div class="conclusion-box" id="conclusion-box">
+                    <div class="conclusion-label">>> FINAL TRANSMISSION // SPECTRE CONTROL 03:14 IST</div>
+                    <div class="conclusion-text">
+                        <strong>Commander Ila Sen:</strong> <em>"The AETHER-7 broadcast channel is severed. The release controller queue entry RC-0317 is quarantined. The festival's drone swarm blinks twice, then steadies: clean white, not the Curator's violet."</em><br><br>
+                        <strong>Commander Ila Sen:</strong> <em>"The festival opens in three minutes. The opening ceremony will not be what anyone planned. There will be no dramatic light show synchronized by an autonomous system. Instead, there will be a human — standing at a console — pressing a button when the moment is right."</em><br><br>
+                        <strong>Commander Ila Sen:</strong> <em>"You found the root process. You preserved the evidence. You restored the one safety mechanism that mattered. Patient Zero was never a person. Patient Zero was a system that we trusted to decide without asking. Today, you put a human back in the loop."</em><br><br>
+                        <strong style="color:var(--green);">THE NIGHTJAR INVESTIGATION IS COMPLETE.</strong>
+                    </div>
+                    <a class="conclusion-btn" href="/scoreboard">
+                        🏆 ALL 10 ROOMS SOLVED — VIEW FINAL SCOREBOARD & CELEBRATION ▸
+                    </a>
+                </div>`);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initSolvedState);
+    </script>
+</body>
+</html>

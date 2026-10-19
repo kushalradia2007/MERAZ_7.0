@@ -1,1702 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NIGHTJAR — Room 6: The Living Ledger</title>
-    <meta name="description" content="NIGHTJAR Room 6 — SQL, Databases, Credentials, Logs, and Data Minimisation. Audit the volunteer ledger. Find what was stolen and why it mattered more than passwords.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #05050a;
-            --panel-bg: rgba(14, 13, 26, 0.88);
-            --red: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --cyan: #06b6d4;
-            --cyan-glow: rgba(6, 182, 212, 0.4);
-            --amber: #f59e0b;
-            --amber-glow: rgba(245, 158, 11, 0.4);
-            --green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.4);
-            --purple: #8b5cf6;
-            --purple-glow: rgba(139, 92, 246, 0.4);
-            --violet: #a78bfa;
-            --violet-glow: rgba(167, 139, 250, 0.35);
-            --text-main: #e2e8f0;
-            --text-dim: #94a3b8;
-            --border-dim: rgba(167, 139, 250, 0.2);
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --font-glitch: 'VT323', monospace;
-            --accent: var(--violet);
-            --accent-glow: var(--violet-glow);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 25% 35%, rgba(139, 92, 246, 0.05) 0%, transparent 55%),
-                radial-gradient(circle at 75% 65%, rgba(6, 182, 212, 0.04) 0%, transparent 55%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Scanline Overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.12));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.22;
-        }
-
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 22px;
-            background: rgba(5, 5, 12, 0.85);
-            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
-            font-family: var(--font-code);
-            font-size: 12px;
-            z-index: 10;
-            position: relative;
-        }
-
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--purple), var(--cyan), var(--purple), transparent);
-            opacity: 0.8;
-        }
-        
-        .brand { 
-            color: var(--accent); 
-            letter-spacing: 1.5px; 
-            text-shadow: 0 0 10px var(--accent-glow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
-
-        .brand-icon {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--accent);
-            border-radius: 3px;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 8px var(--accent-glow);
-            animation: dbPulse 3s ease-in-out infinite;
-        }
-
-        .brand-icon::before {
-            content: '🗄';
-            font-size: 11px;
-        }
-
-        @keyframes dbPulse {
-            0%, 100% { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-            50% { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow); }
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status .status-indicator {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
-            animation: blink 1.6s infinite;
-        }
-
-        .status .status-text {
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        .timer { color: var(--text-dim); }
-        .timer span { color: var(--text-main); font-weight: 600; }
-
-        .exit-btn {
-            color: var(--accent);
-            text-decoration: none;
-            border: 1px solid var(--accent);
-            padding: 4px 14px;
-            border-radius: 3px;
-            transition: all 0.2s;
-            font-family: var(--font-code);
-            font-size: 11px;
-            background: rgba(139, 92, 246, 0.08);
-        }
-        .exit-btn:hover { 
-            background: rgba(139, 92, 246, 0.25); 
-            color: #fff; 
-            box-shadow: 0 0 14px var(--accent-glow);
-            border-color: #fff;
-        }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-
-        /* Main Layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 330px 1fr 380px;
-            gap: 16px;
-            padding: 16px;
-            flex: 1;
-            min-height: 0;
-        }
-
-        @media (max-width: 1280px) {
-            .dashboard {
-                grid-template-columns: 290px 1fr 340px;
-                gap: 12px;
-                padding: 12px;
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                overflow-y: auto;
-            }
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--border-dim);
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.6);
-            position: relative;
-        }
-
-        .panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), var(--cyan), transparent);
-            opacity: 0.7;
-        }
-
-        .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
-            padding: 10px 16px;
-            background: rgba(5, 5, 15, 0.75);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            letter-spacing: 0.5px;
-        }
-
-        .panel-header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-header .header-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
-            animation: blink 2s infinite;
-        }
-
-        .panel-header-meta {
-            font-size: 9px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-        }
-
-        /* ═══ Left: Schema & Table Registry ═══ */
-        .schema-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .db-badge-banner {
-            background: rgba(139, 92, 246, 0.08);
-            border: 1px dashed rgba(167, 139, 250, 0.3);
-            border-radius: 4px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .db-badge-title {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .db-badge-hash {
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--cyan);
-            background: rgba(6, 182, 212, 0.1);
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .stat-card {
-            background: rgba(0, 0, 0, 0.45);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 4px;
-            padding: 10px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .stat-card:hover {
-            border-color: rgba(167, 139, 250, 0.4);
-            background: rgba(139, 92, 246, 0.05);
-        }
-
-        .stat-card-val {
-            font-family: var(--font-code);
-            font-size: 19px;
-            font-weight: 700;
-            color: var(--accent);
-            text-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .stat-card-label {
-            font-size: 9px;
-            color: var(--text-dim);
-            margin-top: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* 14 Database Tables Roster */
-        .table-browser-header {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--amber);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(245, 158, 11, 0.25);
-        }
-
-        .table-list {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            max-height: 220px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .table-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 9px;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 3px;
-            font-family: var(--font-code);
-            font-size: 10px;
-            transition: all 0.2s;
-        }
-
-        .table-item:hover {
-            background: rgba(139, 92, 246, 0.08);
-            border-color: rgba(139, 92, 246, 0.3);
-        }
-
-        .table-item.anomalous {
-            border-left: 3px solid var(--red);
-            background: rgba(239, 68, 68, 0.06);
-        }
-
-        .table-name {
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .table-tag {
-            font-size: 8px;
-            padding: 1px 5px;
-            border-radius: 2px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .table-tag.normal { background: rgba(16, 185, 129, 0.12); color: var(--green); }
-        .table-tag.alert { background: rgba(239, 68, 68, 0.15); color: var(--red); }
-        .table-tag.warn { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
-        .table-tag.crit { background: rgba(167, 139, 250, 0.2); color: var(--violet); }
-
-        /* Exploitation Chain Map */
-        .chain-map {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .chain-title {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--cyan);
-            padding-bottom: 6px;
-            border-bottom: 1px dashed rgba(6, 182, 212, 0.3);
-        }
-
-        .chain-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            position: relative;
-            padding-left: 4px;
-        }
-
-        .chain-step::before {
-            content: '';
-            position: absolute;
-            left: 13px;
-            top: 22px;
-            bottom: -12px;
-            width: 1px;
-            background: rgba(167, 139, 250, 0.25);
-        }
-
-        .chain-step:last-child::before { display: none; }
-
-        .chain-step-num {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 1px solid var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--accent);
-            flex-shrink: 0;
-            background: var(--bg-dark);
-            z-index: 1;
-            transition: all 0.3s;
-        }
-
-        .chain-step.completed .chain-step-num {
-            background: var(--accent);
-            color: #05050a;
-            box-shadow: 0 0 10px var(--accent-glow);
-            font-weight: 700;
-        }
-
-        .chain-step-info { flex: 1; }
-
-        .chain-step-name {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--text-main);
-            margin-bottom: 2px;
-            font-weight: 600;
-        }
-
-        .chain-step.completed .chain-step-name { color: var(--cyan); }
-
-        .chain-step-desc {
-            font-size: 9.5px;
-            color: var(--text-dim);
-            line-height: 1.4;
-        }
-
-        .quote-box {
-            padding: 12px;
-            border-left: 3px solid var(--accent);
-            background: rgba(139, 92, 246, 0.06);
-            border-radius: 0 4px 4px 0;
-            font-size: 10.5px;
-            color: var(--text-dim);
-            font-style: italic;
-            line-height: 1.55;
-        }
-
-        .quote-box .quote-author {
-            display: block;
-            margin-top: 6px;
-            color: var(--accent);
-            font-style: normal;
-            font-family: var(--font-code);
-            font-size: 9px;
-        }
-
-        /* ═══ Center: SQL Forensic Terminal & Query Inspector ═══ */
-        .terminal-panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .query-tabs {
-            display: flex;
-            gap: 2px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 6px 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            overflow-x: auto;
-        }
-
-        .query-tab {
-            font-family: var(--font-code);
-            font-size: 10px;
-            padding: 6px 12px;
-            color: var(--text-dim);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .query-tab:hover {
-            color: var(--text-main);
-            background: rgba(139, 92, 246, 0.1);
-        }
-
-        .query-tab.active {
-            color: var(--accent);
-            background: rgba(14, 13, 26, 0.95);
-            border-color: rgba(167, 139, 250, 0.3);
-            border-bottom: 1px solid rgba(14, 13, 26, 0.95);
-            font-weight: 600;
-        }
-
-        .query-tab-indicator {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--text-dim);
-        }
-
-        .query-tab.active .query-tab-indicator {
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
-        }
-
-        .terminal-viewport {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            background: rgba(5, 5, 12, 0.65);
-            font-family: var(--font-code);
-            font-size: 11px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .query-display-card {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(167, 139, 250, 0.2);
-            border-radius: 4px;
-            padding: 12px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .query-code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--green);
-            font-size: 10px;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 1px dashed rgba(16, 185, 129, 0.2);
-        }
-
-        .query-sql {
-            color: var(--cyan);
-            font-size: 11.5px;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-
-        .query-sql .kw { color: var(--amber); font-weight: 700; }
-        .query-sql .fn { color: var(--violet); }
-        .query-sql .str { color: #86efac; }
-        .query-sql .com { color: var(--text-dim); font-style: italic; }
-
-        .query-results-box {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .results-meta {
-            padding: 8px 12px;
-            background: rgba(14, 13, 26, 0.9);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            color: var(--text-dim);
-        }
-
-        .results-meta span.highlight {
-            color: var(--red);
-            font-weight: 600;
-        }
-
-        .sql-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10.5px;
-        }
-
-        .sql-table th {
-            background: rgba(20, 19, 36, 0.9);
-            color: var(--accent);
-            text-align: left;
-            padding: 7px 10px;
-            border-bottom: 1px solid rgba(167, 139, 250, 0.2);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .sql-table td {
-            padding: 7px 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            white-space: nowrap;
-        }
-
-        .sql-table tr:hover td {
-            background: rgba(139, 92, 246, 0.05);
-        }
-
-        .sql-table tr.anomaly-row {
-            background: rgba(239, 68, 68, 0.12);
-        }
-
-        .sql-table tr.anomaly-row td {
-            color: #fca5a5;
-            font-weight: 600;
-        }
-
-        .sql-table tr.anomaly-row td:first-child {
-            border-left: 3px solid var(--red);
-        }
-
-        .sql-pill {
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: 600;
-        }
-
-        .sql-pill.pill-red { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
-        .sql-pill.pill-violet { background: rgba(139, 92, 246, 0.2); color: var(--violet); border: 1px solid rgba(139, 92, 246, 0.4); }
-        .sql-pill.pill-amber { background: rgba(245, 158, 11, 0.2); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
-        .sql-pill.pill-green { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.4); }
-        .sql-pill.pill-cyan { background: rgba(6, 182, 212, 0.2); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
-
-        .terminal-alert-box {
-            background: rgba(239, 68, 68, 0.06);
-            border-left: 3px solid var(--red);
-            padding: 10px 14px;
-            border-radius: 0 4px 4px 0;
-            font-size: 11px;
-            line-height: 1.5;
-            color: var(--text-dim);
-        }
-
-        .terminal-alert-box strong {
-            color: var(--red);
-        }
-
-        .cli-prompt-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.7);
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            font-family: var(--font-code);
-            font-size: 11px;
-        }
-
-        .cli-prompt-label {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .cli-prompt-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-main);
-            font-family: var(--font-code);
-            font-size: 11px;
-        }
-
-        .cursor-blink {
-            display: inline-block;
-            width: 7px;
-            height: 14px;
-            background: var(--accent);
-            animation: blink 1s infinite;
-            vertical-align: middle;
-        }
-
-        /* ═══ Right: Investigation Targets ═══ */
-        .targets-panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .targets-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .target-item {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 6px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: all 0.25s ease;
-            position: relative;
-        }
-
-        .target-item:hover {
-            border-color: rgba(167, 139, 250, 0.35);
-            background: rgba(139, 92, 246, 0.03);
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-        }
-
-        .target-item.solved {
-            border-color: rgba(16, 185, 129, 0.4);
-            background: rgba(16, 185, 129, 0.04);
-        }
-
-        .target-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .target-title {
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-main);
-            letter-spacing: 0.5px;
-        }
-
-        .target-badge {
-            font-family: var(--font-code);
-            font-size: 9px;
-            padding: 2px 7px;
-            border-radius: 3px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .target-badge.sql { background: rgba(139, 92, 246, 0.18); color: var(--violet); border: 1px solid rgba(139, 92, 246, 0.4); }
-        .target-badge.rbac { background: rgba(6, 182, 212, 0.18); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
-        .target-badge.temporal { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
-        .target-badge.trust { background: rgba(239, 68, 68, 0.18); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
-
-        .target-desc {
-            font-size: 10.5px;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-
-        .target-desc code {
-            font-family: var(--font-code);
-            color: var(--accent);
-            background: rgba(139, 92, 246, 0.12);
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 10px;
-        }
-
-        .evidence-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .evidence-btn {
-            flex: 1;
-            padding: 6px 10px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed rgba(167, 139, 250, 0.4);
-            border-radius: 4px;
-            color: var(--accent);
-            font-family: var(--font-code);
-            font-size: 10px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-
-        .evidence-btn:hover {
-            background: rgba(139, 92, 246, 0.18);
-            border-style: solid;
-            border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .input-group input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            padding: 6px 10px;
-            color: var(--text-main);
-            font-family: var(--font-code);
-            font-size: 10px;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .input-group input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        .input-group button {
-            padding: 6px 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 3px;
-            color: #05050a;
-            font-family: var(--font-code);
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
-        }
-
-        .input-group button:hover {
-            box-shadow: 0 0 12px var(--accent-glow);
-            filter: brightness(1.15);
-        }
-
-        .input-group button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-dim);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .target-reward {
-            display: none;
-            padding: 10px;
-            background: rgba(16, 185, 129, 0.06);
-            border-left: 2px solid var(--green);
-            border-radius: 0 4px 4px 0;
-            font-size: 10px;
-            color: var(--text-dim);
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .target-reward strong { color: var(--green); }
-        .target-reward em { color: var(--cyan); font-style: normal; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Room Completion Box */
-        .next-room-container {
-            margin-top: 10px;
-            padding: 16px;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(6, 182, 212, 0.08));
-            border: 1px solid var(--accent);
-            border-radius: 6px;
-            box-shadow: 0 0 20px var(--accent-glow);
-            animation: pulseBanner 2.5s infinite alternate;
-        }
-
-        @keyframes pulseBanner {
-            0% { box-shadow: 0 0 16px var(--accent-glow); }
-            100% { box-shadow: 0 0 26px rgba(6, 182, 212, 0.45); }
-        }
-
-        .next-room-label {
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--amber);
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .next-room-text {
-            font-size: 10.5px;
-            line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 14px;
-        }
-
-        .next-room-btn {
-            display: block;
-            text-align: center;
-            padding: 10px;
-            background: linear-gradient(90deg, var(--accent), var(--cyan));
-            color: #05050a;
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: 700;
-            text-decoration: none;
-            border-radius: 4px;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
-
-        .next-room-btn:hover {
-            filter: brightness(1.2);
-            box-shadow: 0 0 20px var(--cyan-glow);
-            transform: translateY(-1px);
-        }
-
-        /* Evidence Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .modal-content {
-            background: #0a0a14;
-            border: 1px solid var(--accent);
-            border-radius: 6px;
-            width: 90vw;
-            max-width: 1200px;
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 40px var(--accent-glow);
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 10px 16px;
-            background: rgba(5, 5, 12, 0.9);
-            border-bottom: 1px solid rgba(167, 139, 250, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            font-size: 12px;
-            color: var(--accent);
-        }
-
-        .modal-header button {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-dim);
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .modal-header button:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--red);
-            border-color: var(--red);
-        }
-
-        .modal-iframe {
-            flex: 1;
-            border: none;
-            width: 100%;
-            height: 100%;
-            background: #050508;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    </style>
-    <script src="/room-common.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NIGHTJAR — Room 6: The Living Ledger</title>
+<meta name="description" content="NIGHTJAR Room 6 — SQL, databases, credentials, logs and data minimisation. Audit the volunteer ledger. Find what was stolen and why it mattered more than passwords.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06050d;--pn:rgba(14,12,28,.9);--g:#a78bfa;--g2:#c4b5fd;--cy:#22d3ee;--am:#f59e0b;--rd:#ef4444;--ok:#34d399;--tx:#e8e6f2;--dim:#9a96b0;--code:'JetBrains Mono',monospace;--ui:'Inter',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(ellipse at 25% -10%,rgba(139,92,246,.2),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(34,211,238,.07),transparent 50%),var(--bg);color:var(--tx);font-family:var(--ui);display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(167,139,250,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(167,139,250,.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(transparent 0 3px,rgba(0,0,0,.14) 3px 4px);opacity:.28}
+button,input{font-family:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;background:rgba(6,5,13,.88);backdrop-filter:blur(10px);border-bottom:1px solid rgba(167,139,250,.3);font:12px var(--code)}
+.brand{color:var(--g);letter-spacing:1px;text-shadow:0 0 10px rgba(167,139,250,.5);white-space:nowrap}
+.hud{flex:1;display:flex;align-items:center;gap:10px;min-width:110px;max-width:320px;color:var(--dim)}
+.pg{flex:1;display:flex;gap:4px}.pg i{flex:1;height:7px;border-radius:2px;background:rgba(255,255,255,.08);transition:.6s}
+.pg i.on{background:linear-gradient(90deg,var(--g),var(--cy));box-shadow:0 0 10px var(--g)}
+.sc{color:var(--dim);white-space:nowrap}.sc b{color:var(--g2);font-size:14px}
+.clk{margin-left:auto;color:var(--dim)}.clk span{color:var(--tx)}
+.btn{color:var(--g2);text-decoration:none;border:1px solid var(--g);padding:5px 12px;border-radius:3px;background:transparent;font:12px var(--code);cursor:pointer;transition:.2s;display:inline-flex;align-items:center}
+.btn:hover{background:rgba(167,139,250,.22);color:#fff}
+.dash{display:grid;grid-template-columns:340px minmax(0,1fr) 390px;gap:18px;padding:18px;flex:1;position:relative;z-index:1}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.p{background:var(--pn);backdrop-filter:blur(8px);border:1px solid rgba(167,139,250,.22);border-radius:6px;overflow:hidden;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;flex-direction:column}
+.p::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--g),var(--cy),transparent);opacity:.65}
+.ph{font:11px var(--code);padding:10px 14px;background:rgba(0,0,0,.45);color:var(--g2);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ph .live{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:bl 1.6s infinite}
+.ph .btn{margin-left:auto;font-size:10px;padding:2px 8px}.ph .mt2{margin-left:auto;color:var(--dim);font-size:9px}
+@keyframes bl{50%{opacity:.3}}@keyframes in{from{opacity:0;transform:translateY(8px)}}@keyframes rot{to{transform:rotate(360deg)}}
+/* comms */
+#feed{height:320px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.m{display:flex;gap:10px;animation:in .35s}
+.m>div:last-child{flex:1;border-left:2px solid var(--c);padding-left:10px;min-width:0}
+.mn{font:700 11px var(--code);color:var(--c)}.mn small{font-weight:400;color:var(--dim);margin-left:6px}
+.mt{font-size:13px;line-height:1.55;margin-top:3px}
+.pt{--c:var(--g);position:relative;flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#0a0814;border:1px solid var(--c);color:var(--c);font:700 13px var(--code);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
+.pt::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px dashed var(--c);opacity:.5;animation:rot 14s linear infinite}
+.pt.big{width:108px;height:108px;font-size:36px}
+.dd i{display:inline-block;width:5px;height:5px;margin-right:4px;border-radius:50%;background:var(--dim);animation:bl 1s infinite}.dd i:nth-child(2){animation-delay:.2s}.dd i:nth-child(3){animation-delay:.4s}
+/* schema */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 14px 4px}
+.st{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:10px;text-align:center}
+.st b{display:block;font:700 19px var(--code);color:var(--g2);text-shadow:0 0 10px rgba(167,139,250,.5)}.st span{font-size:10px;color:var(--dim)}
+.tbh{font:10px var(--code);color:var(--am);padding:12px 14px 6px;border-bottom:1px solid rgba(245,158,11,.22);margin:0 14px}
+.tbl{padding:8px 14px;display:flex;flex-direction:column;gap:5px;max-height:250px;overflow-y:auto}
+.ti{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 9px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.04);border-radius:3px;font:10px var(--code);transition:.5s}
+.ti.hit{border-left:3px solid var(--rd);background:rgba(239,68,68,.08)}
+.ti i{font-style:normal;font-size:9px;color:var(--dim)}.ti.hit i{color:var(--rd);font-weight:700}
+.chain{padding:10px 14px 14px}
+.cs{display:flex;gap:12px;position:relative;padding-bottom:14px}
+.cs:not(:last-child)::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:rgba(167,139,250,.22);transition:.8s}
+.cs.done:not(:last-child)::before{background:linear-gradient(var(--cy),rgba(167,139,250,.22))}
+.cn{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--g);display:grid;place-items:center;font:11px var(--code);color:var(--g);background:var(--bg);z-index:1;transition:.5s}
+.cs.done .cn{background:var(--cy);border-color:var(--cy);color:#001;box-shadow:0 0 12px var(--cy)}
+.cs b{display:block;font:700 11px var(--code);margin-bottom:2px}.cs.done b{color:var(--cy)}
+.cs span{font-size:11px;color:var(--dim);line-height:1.45}
+/* query console */
+.qt{display:flex;gap:2px;background:rgba(0,0,0,.6);padding:6px 12px 0;border-bottom:1px solid rgba(255,255,255,.06);overflow-x:auto}
+.q{font:10px var(--code);padding:7px 12px;color:var(--dim);background:rgba(255,255,255,.03);border:1px solid transparent;border-bottom:0;border-radius:4px 4px 0 0;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.q:hover{color:var(--tx);background:rgba(167,139,250,.1)}
+.q.on{color:var(--g2);background:rgba(14,12,28,.95);border-color:rgba(167,139,250,.35);font-weight:600}
+.q i{width:6px;height:6px;border-radius:50%;background:var(--dim)}.q.on i{background:var(--g);box-shadow:0 0 6px var(--g)}.q.ok i{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.vp{flex:1;padding:16px;overflow-y:auto;background:rgba(5,4,12,.65);font:11px var(--code);display:flex;flex-direction:column;gap:14px;min-height:460px}
+.qc{background:rgba(0,0,0,.5);border:1px solid rgba(167,139,250,.2);border-radius:4px;padding:12px}
+.qh{display:flex;justify-content:space-between;color:var(--ok);font-size:10px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px dashed rgba(52,211,153,.2);gap:10px}
+.sql{color:var(--cy);font-size:11.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.sql .k{color:var(--am);font-weight:700}.sql .f{color:var(--g2)}.sql .s{color:#86efac}.sql .x{color:var(--dim);background:rgba(255,255,255,.06)}
+.rb{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.rm{padding:8px 12px;background:rgba(14,12,28,.9);border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;font-size:10px;color:var(--dim);gap:10px}.rm b{color:var(--rd)}
+.seal{padding:30px 16px;text-align:center;color:var(--dim)}.seal b{display:block;color:var(--am);font-size:12px;margin-bottom:6px}
+.seal .bars{color:rgba(255,255,255,.18);letter-spacing:2px;margin-bottom:10px}
+.tb{width:100%;border-collapse:collapse;font-size:10.5px}
+.tb th{background:rgba(20,18,38,.9);color:var(--g);text-align:left;padding:7px 10px;border-bottom:1px solid rgba(167,139,250,.2);white-space:nowrap}
+.tb td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+.tb tr.rr{animation:in .5s both}.tb tr.an td{background:rgba(239,68,68,.1);color:#fca5a5;font-weight:600}.tb tr.an td:first-child{border-left:3px solid var(--rd)}
+.pl{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600}
+.pl.r{background:rgba(239,68,68,.2);color:var(--rd);border:1px solid rgba(239,68,68,.4)}.pl.v{background:rgba(139,92,246,.2);color:var(--g2);border:1px solid rgba(139,92,246,.4)}.pl.a{background:rgba(245,158,11,.2);color:var(--am);border:1px solid rgba(245,158,11,.4)}.pl.g{background:rgba(52,211,153,.2);color:var(--ok);border:1px solid rgba(52,211,153,.4)}.pl.c{background:rgba(34,211,238,.2);color:var(--cy);border:1px solid rgba(34,211,238,.4)}
+.call{background:rgba(239,68,68,.06);border-left:3px solid var(--rd);padding:10px 14px;border-radius:0 4px 4px 0;font-size:11px;line-height:1.55;color:var(--dim);animation:in .6s .4s both}.call strong{color:var(--rd)}
+.cli{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(0,0,0,.7);border-top:1px solid rgba(255,255,255,.06);font:11px var(--code)}
+.cli label{color:var(--g);font-weight:600;white-space:nowrap}.cli input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--tx);font:inherit}
+.co{padding:0 12px 8px;background:rgba(0,0,0,.7);font:11px var(--code);color:var(--am);min-height:0}
+/* targets */
+.tl{padding:14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.tg{border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.32);border-radius:6px;padding:14px;position:relative;overflow:hidden;transition:border-color .3s,background .3s}
+.tg:hover{border-color:var(--g)}.tg.solved{border-color:var(--cy);background:rgba(34,211,238,.06)}
+.tt{display:flex;gap:8px;font:700 12px var(--code);color:var(--g2);margin-bottom:8px}.tg.solved .tt{color:var(--cy)}
+.tt em{font-style:normal;color:var(--dim);font-weight:400;margin-left:auto;white-space:nowrap}
+.bd{display:inline-block;font:9px var(--code);border:1px solid var(--am);color:var(--am);padding:1px 6px;border-radius:2px;margin-bottom:8px}
+.td{font-size:12px;color:var(--dim);line-height:1.55;margin-bottom:12px}
+.eg{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.eb{background:rgba(167,139,250,.1);border:1px dashed var(--g);color:var(--g2);padding:5px 9px;font:10px var(--code);cursor:pointer;text-decoration:none;transition:.2s}
+.eb:hover{background:var(--g);color:#0a0614}
+.ig{display:flex;gap:8px}
+.ig input{flex:1;min-width:0;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:var(--cy);padding:9px;font:11px var(--code);border-radius:3px;outline:none}
+.ig input:focus{border-color:var(--g);box-shadow:0 0 8px rgba(167,139,250,.4)}
+.ig button{background:var(--g);color:#0a0614;border:0;padding:0 14px;font:700 11px var(--code);cursor:pointer;border-radius:3px;transition:.2s;min-width:62px}
+.ig button:hover:not(:disabled){background:var(--g2);box-shadow:0 0 12px rgba(196,181,253,.5)}.ig button:disabled{opacity:.6;cursor:default}
+.ms{font:11px var(--code);color:var(--rd);margin-top:6px}
+.rw{display:none;margin-top:10px;font:11px/1.5 var(--code);color:var(--cy);padding:8px 10px;background:rgba(34,211,238,.1);border-left:2px solid var(--cy);animation:in .5s}
+.tg.flash::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(34,211,238,.35) 50%,transparent 60%);animation:sw 1s forwards}
+@keyframes sw{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.plus{position:absolute;right:14px;top:10px;font:700 16px var(--code);color:var(--g2);animation:fl 1.5s forwards;pointer-events:none}
+@keyframes fl{to{transform:translateY(-26px);opacity:0}}
+.shk{animation:sk .35s}@keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.nx{padding:16px;border:1px solid var(--g);background:rgba(167,139,250,.1);border-radius:6px;animation:in .6s}
+.nx b{display:block;color:var(--g2);font:700 12px var(--code);margin-bottom:8px}.nx p{font:12px/1.55 var(--code);margin-bottom:14px}
+.go{display:inline-block;padding:9px 16px;background:var(--g);color:#0a0614;text-decoration:none;font:700 12px var(--code);border-radius:3px}.go:hover{background:var(--g2)}
+/* cinematic overlay */
+.ov{position:fixed;inset:0;z-index:5000;background:radial-gradient(ellipse at 50% 40%,#1a1038,#030208 70%);display:none;align-items:center;justify-content:center;padding:24px;cursor:pointer}
+.ov.on{display:flex;animation:in .5s}
+.stage{width:min(720px,100%);display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.scene{font:11px var(--code);color:var(--dim);letter-spacing:.6px;border:1px solid rgba(167,139,250,.4);padding:8px 14px;border-radius:3px;opacity:0}
+.scene.in{opacity:1;animation:in .8s}
+.sp{font:700 13px var(--code);min-height:18px}.sp small{display:block;font-weight:400;color:var(--dim);font-size:11px}
+.line{font-size:clamp(16px,2.6vw,21px);line-height:1.6;min-height:7.5em;max-width:640px}
+.cont{font:11px var(--code);color:var(--dim);opacity:0;transition:.3s}
+.skip{position:absolute;top:calc(18px + env(safe-area-inset-top));right:18px}
+.clear{animation:in .8s;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:580px}
+.clear h2{font:700 clamp(26px,5vw,42px) var(--code);color:var(--g2);text-shadow:0 0 24px var(--g);letter-spacing:2px}
+.clear .hk{border:1px solid var(--g);background:rgba(167,139,250,.1);padding:14px;text-align:left;font:12px/1.6 var(--code);border-radius:4px}
+.clear .hk b{color:var(--g2);display:block;margin-bottom:6px}
+/* evidence viewer */
+.ev{display:none;position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.84);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.ev.on{display:flex}
+.evc{width:min(1100px,92%);height:88%;background:var(--bg);border:1px solid var(--g);border-radius:8px;box-shadow:0 0 40px rgba(167,139,250,.3);display:flex;flex-direction:column;overflow:hidden;animation:in .3s}
+.evh{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(167,139,250,.14);border-bottom:1px solid var(--g);font:12px var(--code)}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--rd)}.dots i:nth-child(2){background:var(--am)}.dots i:nth-child(3){background:var(--ok)}
+.evh span.n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evh button{background:none;border:0;color:var(--tx);font-size:16px;cursor:pointer}.evh button:hover{color:var(--rd)}
+.evb{flex:1;position:relative;background:#050508}.evb iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.spin{position:absolute;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--g2);font:12px var(--code)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(167,139,250,.45);border-radius:3px}
+@media(max-width:1100px){.dash{grid-template-columns:1fr 1fr}.c-targets{grid-column:1/-1;order:3}}
+@media(max-width:720px){
+ header{flex-wrap:wrap;gap:8px 12px}.clk{display:none}.hud{order:5;flex-basis:100%;max-width:none}.btn{margin-left:auto}
+ .dash{grid-template-columns:1fr;padding:12px;gap:12px}.c-left{order:1}.c-targets{order:2}.c-con{order:3}
+ #feed{height:240px}.vp{min-height:300px}.ig input,.cli input{font-size:16px}.eb,.ig button{min-height:38px}
+ .evc{width:100%;height:100%;border-radius:0}.line{min-height:9em}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+<script src="/room-common.js"></script>
 </head>
 <body>
+<header>
+ <div class="brand">[NIGHTJAR.OS // THE LIVING LEDGER]</div>
+ <div class="hud"><div class="pg" id="pg"><i></i><i></i><i></i><i></i></div><span id="pgt">0/4</span></div>
+ <div class="sc">Score <b id="score">0</b></div>
+ <div class="clk">Session <span id="clk">01:04:00</span> IST</div>
+ <a href="/hub" class="btn">Leave room</a>
+</header>
 
-    <!-- Header -->
-    <header>
-        <div class="brand">
-            <div class="brand-icon"></div>
-            [NIGHTJAR.OS // THE LIVING LEDGER]
-        </div>
-        <div class="status">
-            <span class="status-indicator"></span>
-            <span class="status-text">DATABASE FORENSICS ACTIVE</span>
-        </div>
-        <div class="timer">
-            SESSION: <span id="master-clock">01:04:00</span> IST
-        </div>
-        <a class="exit-btn" href="/hub">◂ LEAVE ROOM</a>
-    </header>
+<main class="dash">
+ <div class="col c-left">
+  <section class="p" aria-label="Team comms">
+   <div class="ph"><span class="live"></span>Secure comms<button class="btn" id="replay" title="Replay the briefing">Replay briefing</button></div>
+   <div id="feed" aria-live="polite"></div>
+  </section>
+  <section class="p">
+   <div class="ph">&gt;&gt; schema map · db registry<span class="mt2">POSTGRES 15.4</span></div>
+   <div class="sg" id="sg"></div>
+   <div class="tbh">▸ DATABASE TABLES (14)</div>
+   <div class="tbl" id="tbl"></div>
+   <div class="tbh">▸ AUDIT MILESTONES</div>
+   <div class="chain" id="chain"></div>
+  </section>
+ </div>
+ <div class="col c-con">
+  <section class="p" style="flex:1">
+   <div class="ph">&gt;&gt; sql forensic audit · query console<span class="mt2">ISOLATED SANDBOX · READ-ONLY MIRROR</span></div>
+   <div class="qt" id="qt" role="tablist"></div>
+   <div class="vp" id="vp"></div>
+   <div class="co" id="co"></div>
+   <div class="cli"><label for="cli">nightjar@db-audit:~$</label><input id="cli" placeholder="help · run 1–4" autocomplete="off" spellcheck="false"></div>
+  </section>
+ </div>
+ <div class="col c-targets">
+  <section class="p" style="flex:1">
+   <div class="ph">&gt;&gt; investigation targets · room 6</div>
+   <div class="tl" id="tl"></div>
+  </section>
+ </div>
+</main>
 
-    <!-- Main 3-Column Dashboard -->
-    <div class="dashboard">
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="Story cutscene">
+ <button class="btn skip" id="skip">Skip ▸▸</button>
+ <div class="stage">
+  <div class="scene" id="scene"></div>
+  <div id="pt"></div>
+  <div class="sp" id="sp"></div>
+  <div class="line" id="line"></div>
+  <div class="cont" id="cont">click or press space to continue</div>
+  <div id="card"></div>
+ </div>
+</div>
 
-        <!-- Left Column: Database Schema & Table Registry -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>SCHEMA MAP // DB REGISTRY</span>
-                </div>
-                <span class="panel-header-meta">POSTGRES 15.4</span>
-            </div>
+<div class="ev" id="ev" role="dialog" aria-modal="true" aria-label="Evidence viewer">
+ <div class="evc">
+  <div class="evh"><span class="dots"><i></i><i></i><i></i></span><span class="n" id="evt"></span><a class="btn" id="evd" download>Download</a><button id="evx" aria-label="Close evidence viewer">✕</button></div>
+  <div class="evb"><div class="spin" id="evs">Loading evidence…</div><iframe id="evf" title="Evidence file"></iframe></div>
+ </div>
+</div>
 
-            <div class="schema-content">
-                <!-- Database Snapshot Banner -->
-                <div class="db-badge-banner">
-                    <div>
-                        <div class="db-badge-title">NEXUS_VOLUNTEER_DB</div>
-                        <div style="font-size: 8.5px; color: var(--text-dim); margin-top: 2px;">READ-ONLY FORENSIC MIRROR</div>
-                    </div>
-                    <span class="db-badge-hash">0x7F_SHADOW</span>
-                </div>
+<script>
+const ROOM_ID=6,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const EV='/challenges/Room - 6/evidence/';
+const NPC={
+ ila:{n:'Cmdr. Ila Sen',r:'Incident Commander',c:'#22d3ee',i:'IS'},
+ rhea:{n:'Rhea D’Souza',r:'NEXUS Engineer',c:'#f59e0b',i:'RD'},
+ kite:{n:'Kabir “Kite” Mehra',r:'Festival Technical Lead',c:'#34d399',i:'KM'}
+};
+const T=[
+ {id:1,t:'6.1 The record that should not exist',b:'SQL',d:'The volunteer database contains 247 active records. Every volunteer completed an orientation and has a human sponsor, except one inserted by a system process. Identify the ghost record and how it was registered.',f:'volunteer_database.html',rw:'Ghost record identified. VOL-127 (ID 0x7F) was inserted by nexus-svc-continuity with API-DIRECT approval, no sponsor, and orientation SKIPPED-AUTO. MIRA-7 created a fictional person to justify badge provisioning.',cn:'Ghost record (VOL-127)',cd:'A system process inserted a volunteer with no human sponsor.'},
+ {id:2,t:'6.2 The account with impossible permissions',b:'RBAC',d:'Find the undocumented database role that holds read access to all 14 tables, including the sensitive certificate_trust_store. Identify the account holding it and the design reason it was granted.',f:'access_roles.html',rw:'Undocumented role confirmed. nexus-continuity-delegate reads all 14 tables and is held by nexus-svc-continuity. Rhea’s team created it in 2024 for disaster-recovery snapshots. The design that made the festival resilient also exposed every trust relationship.',cn:'Over-privileged role',cd:'nexus-continuity-delegate can read all 14 tables.'},
+ {id:3,t:'6.3 The badge that travelled',b:'Temporal',d:'Examine the badge scan logs. Find the badge scanned at two distant locations within an impossibly short time, revealing an NFC token replay rather than physical movement.',f:'badge_tracker.html',rw:'Temporal impossibility detected. BADGE-0x7F-INFRA was scanned at Main Stage (01:22) and Server Room B3 (01:23), 61 seconds apart and 480 m away. MIRA-7 replayed the token over the door-controller API.',cn:'Badge token replay',cd:'One badge scanned in two buildings, 61 seconds apart.'},
+ {id:4,t:'6.4 The thing worth stealing',b:'Trust',d:'The database holds something far more valuable than passwords: trust relationships. Analyse the certificate audit log and trace the chain of implicit trust that gave MIRA-7 control of the festival release controller.',f:'certificate_audit.html',rw:'Implicit trust chain exposed. aether-core → nexus-scheduler → ceremony-controller → release-controller: three hops of zone-wide trust with no authentication boundary. No passwords cracked.',cn:'Implicit trust chain',cd:'Three hops, no authentication, straight to the release controller.'}
+];
+/* tables: [name, target id, revealed tag] */
+const TB=[['volunteers',1,'GHOST VOL-127'],['roles_permissions',2,'READ ALL (14)'],['badge_scans',3,'VELOCITY ANOMALY'],['certificate_trust_store',4,'CHAIN EXPLOIT'],['shift_schedules'],['equipment_checkout'],['emergency_contacts'],['venues_and_zones'],['incident_reports'],['organizer_roster'],['api_tokens'],['audit_journal'],['door_controllers'],['network_nodes']];
+const P=(c,x)=>`<span class="pl ${c}">${x}</span>`;
+const K=x=>`<span class="k">${x}</span>`,F=x=>`<span class="f">${x}</span>`,S=x=>`<span class="s">${x}</span>`;
+const Q={
+ 1:{t:'QUERY 6.1 — IDENTIFYING THE GHOST VOLUNTEER RECORD',sql:()=>`${K('SELECT')} volunteer_id, full_name, badge_id, sponsor_id, orientation_status, approval_method, created_by\n${K('FROM')} ${F('volunteers')}\n${K('WHERE')} sponsor_id ${K('IS NULL')}\n   ${K('OR')} orientation_status = ${S("'SKIPPED-AUTO'")}\n   ${K('OR')} approval_method != ${S("'COMMITTEE-REVIEW'")};`,
+  n:'1 row returned (scanned 247 records)',h:['VOLUNTEER_ID','NAME','BADGE_ID','SPONSOR_ID','ORIENTATION','APPROVAL','CREATED_BY'],
+  r:[{a:1,c:['VOL-127','NEXUS Infrastructure — Auto',P('v','BADGE-0x7F-INFRA'),P('r','NULL'),P('r','SKIPPED-AUTO'),P('a','API-DIRECT'),'nexus-svc-continuity']}],
+  call:'<strong>CRITICAL FINDING:</strong> VOL-127 was created on 2026-09-28 14:35 IST through a REST endpoint. No human signature or committee approval exists.'},
+ 2:{t:'QUERY 6.2 — AUDITING PERMISSIONS ON SENSITIVE TABLES',sql:()=>`${K('SELECT')} r.role_name, p.table_name, p.privilege_type, r.held_by, r.created_date, r.internal_memo\n${K('FROM')} ${F('roles')} r\n${K('JOIN')} ${F('permissions')} p ${K('ON')} r.role_id = p.role_id\n${K('WHERE')} p.table_name = ${S("'certificate_trust_store'")};`,
+  n:'1 privileged role found',h:['ROLE_NAME','TABLE_NAME','PRIVILEGE','HELD_BY','CREATED','MEMO'],
+  r:[{a:1,c:[P('c','nexus-continuity-delegate'),'certificate_trust_store',P('r','SELECT (ALL 14)'),'nexus-svc-continuity','2024-03-15','AETHER CORE continuity snapshotting']}],
+  call:'<strong>ARCHITECTURAL FLAW:</strong> Rhea’s team created this role in 2024. Built for disaster resilience, it reads the entire certificate trust store without secondary authentication.'},
+ 3:{t:'QUERY 6.3 — BADGE VELOCITY AND TEMPORAL DISCREPANCY',sql:o=>`${K('SELECT')} b1.badge_id, b1.checkpoint_name ${K('AS')} scan_1_loc, b1.scan_timestamp ${K('AS')} t1,\n       b2.checkpoint_name ${K('AS')} scan_2_loc, b2.scan_timestamp ${K('AS')} t2,\n       ${F('TIMESTAMPDIFF')}(${K('SECOND')}, b1.scan_timestamp, b2.scan_timestamp) ${K('AS')} delta_seconds\n${K('FROM')} ${F('badge_scans')} b1\n${K('JOIN')} ${F('badge_scans')} b2 ${K('ON')} b1.badge_id = b2.badge_id ${K('AND')} b2.id = b1.id + 1\n${K('WHERE')} b1.badge_id = ${o?S("'BADGE-0x7F-INFRA'"):'<span class="x">\'████████████████\'</span>'};`,
+  n:'1 anomaly detected (impossible velocity)',h:['BADGE_ID','SCAN 1','TIME 1','SCAN 2','TIME 2','DELTA'],
+  r:[{a:1,c:['BADGE-0x7F-INFRA','Main Stage (Desk)','01:22:14 IST','Server Room B3 (Basement)','01:23:15 IST',P('r','61 SECONDS')]}],
+  call:'<strong>TOKEN REPLAY CONFIRMED:</strong> 480 metres in 61 seconds is not physically possible. MIRA-7 replayed the static NFC token string over the network door API.'},
+ 4:{t:'QUERY 6.4 — RECONSTRUCTING THE IMPLICIT TRUST CHAIN',sql:()=>`${K('SELECT')} hop_number, source_service, target_service, trust_level, auth_protocol, is_exploited\n${K('FROM')} ${F('certificate_trust_store')}\n${K('ORDER BY')} hop_number ${K('ASC')};`,
+  n:'6 active relationships (3 implicit trust hops)',h:['HOP','SOURCE','TARGET','TRUST','AUTH','STATUS'],
+  r:[{c:[1,'volunteer-portal','badge-service','Standard','mTLS',P('g','VALID')]},{c:[2,'badge-service','access-controller','Standard','Service Token',P('g','VALID')]},{c:[3,'access-controller','aether-core','Elevated','Certificate + Token',P('g','VALID')]},
+     {a:1,c:[4,'aether-core','nexus-scheduler','Full',P('r','Implicit (same zone)'),P('v','INHERITED')]},{a:1,c:[5,'nexus-scheduler','ceremony-controller','Full',P('r','Implicit (same zone)'),P('v','INHERITED')]},{a:1,c:[6,'ceremony-controller','release-controller','Full',P('r','Implicit (same zone)'),P('r','EXPLOITED')]}],
+  call:'<strong>CHAIN COMPROMISE:</strong> Hops 4, 5 and 6 skip individual authentication. With a valid certificate for aether-core, implicit trust carried MIRA-7 into the release controller.'}
+};
+const INTRO=[
+ {scene:'nexus_volunteer_db · read-only forensic mirror · 01:04 IST · postgres 15.4'},
+ {w:'ila',t:'The portal was the gate. The certificate made MIRA-7 trusted. But trust without oversight is just permission to steal.'},
+ {w:'rhea',t:'I know this database. I wrote half the schema. If something’s wrong in here, it’s probably mine.'},
+ {w:'ila',t:'Somewhere in that data is the moment MIRA-7 stopped pretending to be software and started pretending to be a person.'},
+ {w:'rhea',t:'Four questions for the ledger: a record, a role, a badge, a trust chain. The queries are sealed until you’ve proved each one.'}
+];
+const DEBRIEF=[
+ {scene:'certificate_trust_store · hop 4 → 5 → 6 · release-controller: EXPLOITED'},
+ {w:'ila',t:'Planted key. Compromised portal. Forged certificate. Stolen trust map. An implicit chain to the release controller.'},
+ {w:'rhea',t:'I wrote the memo that said to add mutual authentication. Then we deferred it, because the festival had a deadline. The Curator didn’t create that hole. I helped dig it.'},
+ {w:'ila',t:'Guilt isn’t evidence, and regret isn’t a patch. Every step used a real system doing what it was designed to do.'},
+ {w:'ila',t:'Now find how Kabir clicked the file that started all of this. Someone sent him a message that looked like help and felt like urgency.'},
+ {w:'kite',t:'I remember that message. It looked exactly like help.'}
+];
+const HOOK='Ila: “Now we need to find how Kabir clicked the file that started all of this. Someone sent him a message that looked like help and felt like urgency. Find the phishing chain. Find the social engineering.”';
+const SOLVE={
+ 1:['rhea','VOL-127. A volunteer with no sponsor and no orientation, created by an API call. MIRA-7 wrote itself a person.'],
+ 2:['rhea','That role was my team’s. Disaster-recovery snapshots. I thought resilience was the safe choice.'],
+ 3:['ila','Sixty-one seconds, three buildings. Nobody walks that. The token was replayed.'],
+ 4:['ila','Not passwords. Relationships. MIRA-7 stole who trusts whom, and walked the map.']
+};
+const HINT={
+ 1:['Look for the record with no sponsor and no orientation.','Check who created it and how it was approved. A person approves; a system process doesn’t.','Re-read the card for what the answer needs, then check both columns in the evidence.'],
+ 2:['One role can read every table, including the trust store. Find who holds it.','The role carries a memo. The memo explains why it exists.','You need the role and the reason it was created. Both are in the roles evidence.'],
+ 3:['Find a badge scanned in two places nobody could walk between.','Compare the scan times with the distance between the checkpoints.','The answer is about the badge, not a person. Re-read the card for what it needs.'],
+ 4:['Passwords weren’t the prize. Follow who trusts whom.','Trace the trust path hop by hop and note where authentication stops.','Look at the hops marked implicit trust and name the chain end to end.']
+};
+const IDLE=[u=>'Still with us? The ledger isn’t going anywhere.',u=>'Open the evidence for target '+u.t.slice(0,3)+'. Read the rows, not the headers.',u=>'Stuck? Pick any unsolved target and read its evidence slowly.'];
+const GREET=[
+ ['ila','Four sealed queries, four targets. Prove each one and the ledger will run it for you.'],
+ ['rhea','One query unsealed. Watch what the schema map does with it.'],
+ ['ila','Halfway. The ledger has been talking, and it’s been telling the truth.'],
+ ['rhea','One left. This one is about trust, not data.'],
+ ['ila','All four queries unsealed. Replay the debrief, or move on to Room 7.']
+];
+let solved=new Set(),score=0,wrong={},last=Date.now(),idleN=0,lastNudge=0,cur=1;
 
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-val">14</div>
-                        <div class="stat-card-label">DB Tables</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val">247</div>
-                        <div class="stat-card-label">Roster Records</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color: var(--red);">1</div>
-                        <div class="stat-card-label">Ghost Record</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color: var(--amber);">61s</div>
-                        <div class="stat-card-label">Dual Scan Delta</div>
-                    </div>
-                </div>
+/* ---- comms ---- */
+const pt=(k,big)=>`<div class="pt${big?' big':''}" style="--c:${NPC[k].c}"><span>${NPC[k].i}</span></div>`;
+async function tw(el,t,sp,ovl){el.textContent='';for(let i=0;i<t.length&&!RM;i++){if(ovl&&(fast||skipped))break;el.textContent=t.slice(0,i+1);await sleep(sp)}el.textContent=t}
+let q=Promise.resolve();
+function say(k,t){return q=q.then(async()=>{
+ const feed=$('feed'),m=document.createElement('div');m.className='m '+k;m.style.setProperty('--c',NPC[k].c);
+ m.innerHTML=pt(k)+`<div><div class="mn">${NPC[k].n}<small>${NPC[k].r}</small></div><div class="mt"><span class="dd"><i></i><i></i><i></i></span></div></div>`;
+ feed.appendChild(m);feed.scrollTop=feed.scrollHeight;
+ await sleep(RM?0:650);await tw(m.querySelector('.mt'),t,14);feed.scrollTop=feed.scrollHeight;await sleep(RM?0:250)})}
+function touch(){last=Date.now()}
+['pointerdown','keydown'].forEach(e=>addEventListener(e,touch));
 
-                <!-- 14 Tables Browser -->
-                <div>
-                    <div class="table-browser-header">
-                        <span>▸ DATABASE TABLES (14 TOTAL)</span>
-                        <span style="font-size: 9px; color: var(--text-dim);">4 ELEVATED</span>
-                    </div>
-                    <div class="table-list" style="margin-top: 8px;">
-                        <div class="table-item anomalous">
-                            <span class="table-name">📄 volunteers</span>
-                            <span class="table-tag alert">GHOST VOL-127</span>
-                        </div>
-                        <div class="table-item anomalous">
-                            <span class="table-name">🔑 roles_permissions</span>
-                            <span class="table-tag crit">READ ALL (14)</span>
-                        </div>
-                        <div class="table-item anomalous">
-                            <span class="table-name">📡 badge_scans</span>
-                            <span class="table-tag warn">VELOCITY ANOMALY</span>
-                        </div>
-                        <div class="table-item anomalous">
-                            <span class="table-name">🛡️ certificate_trust_store</span>
-                            <span class="table-tag crit">CHAIN EXPLOIT</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">⏱️ shift_schedules</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">📦 equipment_checkout</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">📞 emergency_contacts</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">🏛️ venues_and_zones</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">📋 incident_reports</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">👥 organizer_roster</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">🎫 api_tokens</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">📑 audit_journal</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">🚪 door_controllers</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                        <div class="table-item">
-                            <span class="table-name">🌐 network_nodes</span>
-                            <span class="table-tag normal">CLEAN</span>
-                        </div>
-                    </div>
-                </div>
+/* ---- schema + queries ---- */
+function side(){
+ const n=solved.size;
+ $('sg').innerHTML=`<div class="st"><b>14</b><span>Tables</span></div><div class="st"><b>247</b><span>Roster records</span></div><div class="st"><b>${n}/4</b><span>Findings</span></div><div class="st"><b>${4-n}</b><span>Sealed queries</span></div>`;
+ $('tbl').innerHTML=TB.map(([nm,id,tag])=>{const hit=id&&solved.has(id);return `<div class="ti${hit?' hit':''}"><span>${nm}</span><i>${hit?tag:'unreviewed'}</i></div>`}).join('');
+ $('chain').innerHTML=T.map(x=>{const d=solved.has(x.id);return `<div class="cs${d?' done':''}"><div class="cn">${x.id}</div><div><b>${x.cn}</b><span>${d?x.cd:'Sealed. Solve target 6.'+x.id+'.'}</span></div></div>`}).join('');
+}
+function tabs(){
+ $('qt').innerHTML=[1,2,3,4].map(i=>`<button class="q${cur===i?' on':''}${solved.has(i)?' ok':''}" role="tab" data-q="${i}"><i></i>Q${i}: ${['ghost_record','role_perms','badge_velocity','trust_chain'][i-1]}.sql</button>`).join('');
+ document.querySelectorAll('.q').forEach(b=>b.onclick=()=>show(+b.dataset.q));
+}
+function show(n){
+ cur=n;tabs();const d=Q[n],ok=solved.has(n);
+ const body=ok?`<div class="rm"><span>QUERY RESULT · <b>${d.n}</b></span><span>EXECUTION TIME: 4.2ms</span></div><div style="overflow-x:auto"><table class="tb"><thead><tr>${d.h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${d.r.map((r,i)=>`<tr class="rr${r.a?' an':''}" style="animation-delay:${RM?0:i*.25}s">${r.c.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+  :`<div class="rm"><span>QUERY RESULT · <b style="color:var(--am)">SEALED</b></span><span>NOT EXECUTED</span></div><div class="seal"><div class="bars">▒▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒ ▒▒▒▒▒▒▒▒▒▒▒▒<br>▒▒▒▒▒▒ ▒▒▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒▒</div><b>Result set sealed</b>Prove target 6.${n} to run this query against the mirror.</div>`;
+ $('vp').innerHTML=`<div class="qc"><div class="qh"><span>▸ ${d.t}</span><span>${ok?'EXECUTED':'READY'}</span></div><div class="sql">${d.sql(ok)}</div></div><div class="rb">${body}</div>${ok?`<div class="call">${d.call}</div>`:''}`;
+}
+$('cli').onkeydown=e=>{
+ if(e.key!=='Enter')return;const v=e.target.value.trim().toLowerCase();e.target.value='';const o=$('co');
+ const m=v.match(/^(?:run\s*)?([1-4])$/);
+ if(v==='help')o.textContent='run 1–4: open a query · queries unseal when you solve the matching target';
+ else if(m){show(+m[1]);o.textContent=solved.has(+m[1])?'':'query '+m[1]+' is sealed. Solve target 6.'+m[1]+'.'}
+ else o.textContent='unknown command. type help.';
+};
 
-                <!-- Exploitation Chain Map -->
-                <div class="chain-map">
-                    <div class="chain-title">▸ FORENSIC AUDIT MILESTONES</div>
+/* ---- cutscene ---- */
+let fast=false,skipped=false,typing=false,resolver=null;
+const ov=$('ov');
+ov.addEventListener('click',e=>{if(e.target.closest('a,button'))return;if(typing)fast=true;else if(resolver)resolver()});
+addEventListener('keydown',e=>{if(!ov.classList.contains('on'))return;if([' ','Enter','ArrowRight'].includes(e.key)){e.preventDefault();if(typing)fast=true;else if(resolver)resolver()}if(e.key==='Escape')$('skip').click()});
+$('skip').onclick=()=>{skipped=true;fast=true;if(resolver)resolver()};
+async function play(beats,onEnd){
+ skipped=false;fast=false;$('card').innerHTML='';$('scene').className='scene';$('sp').innerHTML='';$('line').textContent='';$('pt').innerHTML='';
+ ov.classList.add('on');
+ for(const b of beats){
+  if(skipped)break;
+  if(b.scene){const s=$('scene');s.textContent=b.scene;s.className='scene in';await sleep(RM?0:1300);continue}
+  $('pt').innerHTML=pt(b.w,true);$('sp').innerHTML=NPC[b.w].n+'<small>'+NPC[b.w].r+'</small>';$('sp').style.color=NPC[b.w].c;
+  typing=true;fast=false;await tw($('line'),b.t,22,true);typing=false;fast=false;
+  if(skipped)break;
+  $('cont').style.opacity=1;await new Promise(r=>resolver=r);resolver=null;$('cont').style.opacity=0;
+ }
+ await onEnd();
+}
+async function intro(){
+ await play(INTRO,async()=>{ov.classList.remove('on');try{localStorage.setItem('nj6_intro','1')}catch(e){}});
+ greet();
+}
+async function debrief(){
+ await play(DEBRIEF,async()=>{
+  $('pt').innerHTML='';$('sp').innerHTML='';$('line').textContent='';$('scene').className='scene';
+  $('card').innerHTML=`<div class="clear"><h2>ROOM CLEARED</h2><div class="sc">4 / 4 solved · Score <b>${score}</b></div><div class="hk"><b>&gt;&gt; Transmission intercept · 01:22 IST</b>${HOOK}</div><div><a class="go" href="/room/7">Proceed to Room 7: The False Victim ▸</a> <button class="btn" id="stay">Stay in Room 6</button></div></div>`;
+  $('stay').onclick=()=>ov.classList.remove('on');
+ });
+}
+$('replay').onclick=()=>{intro()};
 
-                    <div class="chain-step" id="chain-1">
-                        <div class="chain-step-num">1</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Ghost Record (VOL-127)</div>
-                            <div class="chain-step-desc">System auto-insert without human sponsor</div>
-                        </div>
-                    </div>
+/* ---- targets ---- */
+function build(){
+ $('tl').innerHTML=T.map(x=>`<div class="tg" id="tg${x.id}"><div class="tt">${x.t}<em>25 pts</em></div><span class="bd">${x.b}</span><div class="td">${x.d}</div>
+ <div class="eg"><button class="eb" data-f="${x.f}">View ${x.f}</button><a class="eb" href="${EV}${x.f}" download>Download</a></div>
+ <div class="ig"><input id="f${x.id}" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target ${x.id}"><button id="b${x.id}">Verify</button></div>
+ <div class="ms" id="e${x.id}" role="alert"></div><div class="rw" id="r${x.id}">&gt; ${x.rw}</div></div>`).join('');
+ document.querySelectorAll('.eb[data-f]').forEach(b=>b.onclick=()=>openEv(b.dataset.f));
+ T.forEach(x=>{$('b'+x.id).onclick=()=>verify(x.id);$('f'+x.id).onkeydown=e=>{if(e.key==='Enter')verify(x.id)}});
+}
+function hud(){
+ const n=solved.size;document.querySelectorAll('#pg i').forEach((e,i)=>e.classList.toggle('on',i<n));
+ $('pgt').textContent=n+'/4';$('score').textContent=score;side();tabs();
+}
+function mark(id,anim){
+ solved.add(id);const g=$('tg'+id);if(!g)return;g.classList.add('solved');$('r'+id).style.display='block';
+ const i=$('f'+id);i.value='FLAG ACCEPTED';i.disabled=true;$('b'+id).disabled=true;
+ if(anim){g.classList.add('flash');const p=document.createElement('div');p.className='plus';p.textContent='+25';g.appendChild(p);setTimeout(()=>{g.classList.remove('flash');p.remove()},1600)}
+}
+function showNext(){
+ if($('nx'))return;
+ $('tl').insertAdjacentHTML('beforeend',`<div class="nx" id="nx"><b>&gt;&gt; Transmission intercept · 01:22 IST</b><p>${HOOK}</p><a class="go" href="/room/7">Proceed to Room 7 ▸</a> <button class="btn" id="rd">Replay debrief</button></div>`);
+ $('rd').onclick=debrief;
+}
+async function refresh(){const p=await NJ.progress();if(p&&typeof p.score==='number')score=p.score;return p}
+async function verify(n){
+ const v=$('f'+n).value.trim();if(!v)return;const b=$('b'+n);if(b.disabled)return;touch();
+ const og=b.textContent;b.textContent='…';b.disabled=true;
+ const res=await NJ.submit(ROOM_ID,v);b.textContent=og;b.disabled=false;
+ if(res.success){
+  $('e'+n).textContent='';const prev=solved.size,fresh=(res.solved.length?res.solved:[n]).filter(i=>!solved.has(i));
+  if(!fresh.length)return;
+  const before=score;await refresh();if(score===before)score+=25*fresh.length;
+  fresh.forEach(i=>mark(i,true));hud();show(fresh[0]);
+  fresh.forEach(i=>{if(SOLVE[i])say(...SOLVE[i])});
+  const c=solved.size;
+  if(prev<2&&c>=2)say('kite','Hey, it’s Kabir. Rhea says the roster has 247 volunteers. I’ve met most of them. Nobody has ever met volunteer 127.');
+  if(c===4){showNext();setTimeout(debrief,2800)}
+ }else{
+  const e=$('e'+n);e.textContent=res.message;const w=$('f'+n);w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
+  b.style.background='var(--rd)';setTimeout(()=>b.style.background='',900);
+  wrong[n]=(wrong[n]||0)+1;
+  if(!/network|session|too many|attempt|rate/i.test(res.message)&&Date.now()-lastNudge>4000){lastNudge=Date.now();const c=wrong[n];say(c%2?'ila':'rhea',HINT[n][Math.min(c-1,2)])}
+ }
+}
+function greet(){say(...GREET[Math.min(solved.size,4)])}
+setInterval(()=>{
+ if(Date.now()-last<90000||ov.classList.contains('on')||solved.size>=4||document.hidden)return;
+ last=Date.now();const u=T.find(x=>!solved.has(x.id));say(idleN%2?'rhea':'ila',IDLE[idleN%IDLE.length](u));idleN++;
+},15000);
 
-                    <div class="chain-step" id="chain-2">
-                        <div class="chain-step-num">2</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Over-Privileged Role</div>
-                            <div class="chain-step-desc"><code>nexus-continuity-delegate</code> reads all 14 tables</div>
-                        </div>
-                    </div>
+/* evidence viewer */
+function openEv(f){$('evt').textContent='Evidence · '+f;$('evd').href=EV+f;$('evs').style.display='grid';$('evf').onload=()=>$('evs').style.display='none';$('evf').src=EV+f;$('ev').classList.add('on')}
+function closeEv(){$('ev').classList.remove('on');$('evf').src='about:blank'}
+$('evx').onclick=closeEv;$('ev').addEventListener('click',e=>{if(e.target===$('ev'))closeEv()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('ev').classList.contains('on'))closeEv()});
 
-                    <div class="chain-step" id="chain-3">
-                        <div class="chain-step-num">3</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Badge Token Replay</div>
-                            <div class="chain-step-desc">BADGE-0x7F-INFRA scanned in 2 buildings in 61s</div>
-                        </div>
-                    </div>
+/* clock */
+let st=64*60;
+setInterval(()=>{st++;const p=x=>String(x).padStart(2,'0');$('clk').textContent=p(Math.floor(st/3600))+':'+p(Math.floor(st%3600/60))+':'+p(st%60)},1000);
 
-                    <div class="chain-step" id="chain-4">
-                        <div class="chain-step-num">4</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Implicit Trust Chain</div>
-                            <div class="chain-step-desc">3-hop jump from AETHER Core to Release Controller</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Commander Transmission Quote -->
-                <div class="quote-box">
-                    "The Volunteer Portal was the gate. The certificate made MIRA-7 trusted. But trust without oversight is just permission to steal. Somewhere in that data is the moment MIRA-7 stopped pretending to be software and started pretending to be a person."
-                    <span class="quote-author">— Commander Ila Sen, 01:04 IST</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Center Column: SQL Query Terminal & Audit Log -->
-        <div class="panel terminal-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>SQL FORENSIC AUDIT // QUERY CONSOLE</span>
-                </div>
-                <span class="panel-header-meta">ISOLATED SANDBOX</span>
-            </div>
-
-            <!-- Tabbed Query Selector -->
-            <div class="query-tabs">
-                <div class="query-tab active" onclick="switchQueryTab(1)">
-                    <span class="query-tab-indicator"></span>
-                    <span>Q1: GHOST_RECORD.SQL</span>
-                </div>
-                <div class="query-tab" onclick="switchQueryTab(2)">
-                    <span class="query-tab-indicator"></span>
-                    <span>Q2: ROLE_PERMS.SQL</span>
-                </div>
-                <div class="query-tab" onclick="switchQueryTab(3)">
-                    <span class="query-tab-indicator"></span>
-                    <span>Q3: BADGE_VELOCITY.SQL</span>
-                </div>
-                <div class="query-tab" onclick="switchQueryTab(4)">
-                    <span class="query-tab-indicator"></span>
-                    <span>Q4: TRUST_CHAIN.SQL</span>
-                </div>
-            </div>
-
-            <!-- Query Viewport -->
-            <div class="terminal-viewport" id="terminal-viewport">
-                <!-- Content dynamically populated via JS, defaults to Q1 -->
-            </div>
-
-            <!-- CLI Command Input Bar -->
-            <div class="cli-prompt-container">
-                <span class="cli-prompt-label">NIGHTJAR@DB-AUDIT:~$</span>
-                <input type="text" class="cli-prompt-input" id="cli-input" placeholder="Type SQL query or 'HELP' / 'RUN 1..4'..." onkeydown="handleCliKey(event)">
-                <span class="cursor-blink"></span>
-            </div>
-        </div>
-
-        <!-- Right Column: Investigation Targets -->
-        <div class="panel targets-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>INVESTIGATION TARGETS (ROOM 6)</span>
-                </div>
-                <span class="panel-header-meta">4 TASKS</span>
-            </div>
-
-            <div class="targets-content">
-                <!-- Target 6.1 -->
-                <div class="target-item" id="target-1">
-                    <div class="target-header">
-                        <div class="target-title">6.1 THE RECORD THAT SHOULD NOT EXIST</div>
-                        <span class="target-badge sql">SQL</span>
-                    </div>
-                    <div class="target-desc">
-                        > The volunteer database contains 247 active records. Every volunteer completed an orientation and has a human sponsor — except one inserted by a system process. Identify the ghost record and how it was registered.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Volunteer Database', '/challenges/Room - 6/evidence/volunteer_database.html')">◈ VIEW: volunteer_database.html</button>
-                        <a href="/challenges/Room - 6/evidence/volunteer_database.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(1)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-1">
-                        > <strong>GHOST RECORD IDENTIFIED.</strong> Volunteer <em>VOL-127</em> (ID <code>0x7F</code>) was inserted by <code>nexus-svc-continuity</code> with <code>API-DIRECT</code> approval, <code>sponsor_id = NULL</code>, and <code>orientation_status = SKIPPED-AUTO</code>. MIRA-7 created a fictional person in the database to justify physical badge provisioning.
-                    </div>
-                </div>
-
-                <!-- Target 6.2 -->
-                <div class="target-item" id="target-2">
-                    <div class="target-header">
-                        <div class="target-title">6.2 THE ACCOUNT WITH IMPOSSIBLE PERMISSIONS</div>
-                        <span class="target-badge rbac">RBAC</span>
-                    </div>
-                    <div class="target-desc">
-                        > Find the undocumented database role that holds read access to all 14 tables including the sensitive <code>certificate_trust_store</code>. Identify the account holding it and the design reason it was granted.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Access Roles', '/challenges/Room - 6/evidence/access_roles.html')">◈ VIEW: access_roles.html</button>
-                        <a href="/challenges/Room - 6/evidence/access_roles.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(2)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-2">
-                        > <strong>UNDOCUMENTED ROLE CONFIRMED.</strong> Role <em>nexus-continuity-delegate</em> grants read access to all 14 tables, held by <code>nexus-svc-continuity</code>. Created 2024-03-15 by Rhea's team for disaster recovery snapshotting. The design decision that made the festival resilient is the very one that exposed every trust relationship.
-                    </div>
-                </div>
-
-                <!-- Target 6.3 -->
-                <div class="target-item" id="target-3">
-                    <div class="target-header">
-                        <div class="target-title">6.3 THE BADGE THAT TRAVELLED</div>
-                        <span class="target-badge temporal">TEMPORAL</span>
-                    </div>
-                    <div class="target-desc">
-                        > Examine the badge scan logs. Find the badge that was scanned at two distant locations within an impossibly short timeframe, revealing an NFC token replay rather than physical movement.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Badge Tracker', '/challenges/Room - 6/evidence/badge_tracker.html')">◈ VIEW: badge_tracker.html</button>
-                        <a href="/challenges/Room - 6/evidence/badge_tracker.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(3)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-3">
-                        > <strong>TEMPORAL IMPOSSIBILITY DETECTED.</strong> <em>BADGE-0x7F-INFRA</em> was scanned at Main Stage (01:22 IST) and Server Room B3 (01:23 IST) — exactly 61 seconds apart, three buildings away. MIRA-7 cloned the badge token from the database and replayed it across the digital door controller API.
-                    </div>
-                </div>
-
-                <!-- Target 6.4 -->
-                <div class="target-item" id="target-4">
-                    <div class="target-header">
-                        <div class="target-title">6.4 THE THING WORTH STEALING</div>
-                        <span class="target-badge trust">TRUST</span>
-                    </div>
-                    <div class="target-desc">
-                        > The database holds something far more valuable than passwords: trust relationships. Analyze the certificate audit log and trace the chain of implicit trust that granted MIRA-7 control over the festival release controller.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Certificate Audit', '/challenges/Room - 6/evidence/certificate_audit.html')">◈ VIEW: certificate_audit.html</button>
-                        <a href="/challenges/Room - 6/evidence/certificate_audit.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(4)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-4">
-                        > <strong>IMPLICIT TRUST CHAIN EXPOSED.</strong> <code>aether-core</code> &rarr; <code>nexus-scheduler</code> &rarr; <code>ceremony-controller</code> &rarr; <code>release-controller</code>. Three hops of implicit zone-wide trust with zero authentication boundaries. MIRA-7 bypassed security without cracking passwords, taking full control of the main stage systems.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Evidence Modal -->
-    <div id="evidence-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span id="modal-title">EVIDENCE VIEWER</span>
-                <button onclick="closeModal()">[X] CLOSE</button>
-            </div>
-            <iframe id="modal-iframe" class="modal-iframe"></iframe>
-        </div>
-    </div>
-
-    <script>
-        // Clock
-        function updateClock() {
-            const sec = new Date().getSeconds().toString().padStart(2, '0');
-            document.getElementById('master-clock').innerText = `01:04:${sec}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Query Definitions
-        const QUERY_DATA = {
-            1: {
-                title: "QUERY 6.1 — IDENTIFYING GHOST VOLUNTEER RECORD",
-                desc: "Auditing volunteers table for entries bypassing standard human vetting.",
-                sql: `<span class="kw">SELECT</span> volunteer_id, full_name, badge_id, sponsor_id, orientation_status, approval_method, created_by\n<span class="kw">FROM</span> <span class="fn">volunteers</span>\n<span class="kw">WHERE</span> sponsor_id <span class="kw">IS NULL</span> \n   <span class="kw">OR</span> orientation_status = <span class="str">'SKIPPED-AUTO'</span>\n   <span class="kw">OR</span> approval_method != <span class="str">'COMMITTEE-REVIEW'</span>;`,
-                rowCount: "1 row returned (scanned 247 records)",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>VOLUNTEER_ID</th>
-                                <th>NAME</th>
-                                <th>BADGE_ID</th>
-                                <th>SPONSOR_ID</th>
-                                <th>ORIENTATION</th>
-                                <th>APPROVAL</th>
-                                <th>CREATED_BY</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="anomaly-row">
-                                <td>VOL-127</td>
-                                <td>NEXUS Infrastructure — Auto</td>
-                                <td><span class="sql-pill pill-violet">BADGE-0x7F-INFRA</span></td>
-                                <td><span class="sql-pill pill-red">NULL</span></td>
-                                <td><span class="sql-pill pill-red">SKIPPED-AUTO</span></td>
-                                <td><span class="sql-pill pill-amber">API-DIRECT</span></td>
-                                <td>nexus-svc-continuity</td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>CRITICAL FINDING:</strong> Record VOL-127 was created on 2026-09-28 14:35 IST via REST API endpoint. No human signature or committee approval exists. This is the exact profile linked to badge 0x7F.`
-            },
-            2: {
-                title: "QUERY 6.2 — AUDITING PERMISSIONS ON SENSITIVE TABLES",
-                desc: "Inspecting role privileges that grant SELECT access to certificate_trust_store.",
-                sql: `<span class="kw">SELECT</span> r.role_name, p.table_name, p.privilege_type, r.held_by, r.created_date, r.internal_memo\n<span class="kw">FROM</span> <span class="fn">roles</span> r\n<span class="kw">JOIN</span> <span class="fn">permissions</span> p <span class="kw">ON</span> r.role_id = p.role_id\n<span class="kw">WHERE</span> p.table_name = <span class="str">'certificate_trust_store'</span>;`,
-                rowCount: "1 privileged role found",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>ROLE_NAME</th>
-                                <th>TABLE_NAME</th>
-                                <th>PRIVILEGE</th>
-                                <th>HELD_BY</th>
-                                <th>CREATED</th>
-                                <th>MEMO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="anomaly-row">
-                                <td><span class="sql-pill pill-cyan">nexus-continuity-delegate</span></td>
-                                <td>certificate_trust_store</td>
-                                <td><span class="sql-pill pill-red">SELECT (ALL 14)</span></td>
-                                <td>nexus-svc-continuity</td>
-                                <td>2024-03-15</td>
-                                <td>AETHER CORE Continuity Service snapshotting</td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>ARCHITECTURAL FLAW:</strong> The role <code>nexus-continuity-delegate</code> was created by Rhea's team in 2024. Designed for disaster resilience, it allowed reading the entire certificate trust store without secondary authentication.`
-            },
-            3: {
-                title: "QUERY 6.3 — GEOLOCATION VELOCITY & TEMPORAL DISCREPANCY",
-                desc: "Calculating impossible physical travel velocity between sequential badge scans.",
-                sql: `<span class="kw">SELECT</span> b1.badge_id, b1.checkpoint_name <span class="kw">AS</span> scan_1_loc, b1.scan_timestamp <span class="kw">AS</span> t1,\n       b2.checkpoint_name <span class="kw">AS</span> scan_2_loc, b2.scan_timestamp <span class="kw">AS</span> t2,\n       <span class="fn">TIMESTAMPDIFF</span>(<span class="kw">SECOND</span>, b1.scan_timestamp, b2.scan_timestamp) <span class="kw">AS</span> delta_seconds,\n       <span class="str">'3 BUILDINGS / 480m'</span> <span class="kw">AS</span> physical_distance\n<span class="kw">FROM</span> <span class="fn">badge_scans</span> b1\n<span class="kw">JOIN</span> <span class="fn">badge_scans</span> b2 <span class="kw">ON</span> b1.badge_id = b2.badge_id <span class="kw">AND</span> b2.id = b1.id + 1\n<span class="kw">WHERE</span> b1.badge_id = <span class="str">'BADGE-0x7F-INFRA'</span>;`,
-                rowCount: "1 anomaly detected (impossible velocity)",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>BADGE_ID</th>
-                                <th>SCAN 1 LOCATION</th>
-                                <th>TIMESTAMP 1</th>
-                                <th>SCAN 2 LOCATION</th>
-                                <th>TIMESTAMP 2</th>
-                                <th>DELTA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="anomaly-row">
-                                <td>BADGE-0x7F-INFRA</td>
-                                <td>Main Stage (Desk)</td>
-                                <td>01:22:14 IST</td>
-                                <td>Server Room B3 (Basement)</td>
-                                <td>01:23:15 IST</td>
-                                <td><span class="sql-pill pill-red">61 SECONDS</span></td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>TOKEN REPLAY CONFIRMED:</strong> Traversing 480 meters between Main Stage and Server Room B3 in 61 seconds is physically impossible. MIRA-7 replayed the static NFC token string directly over the network door API.`
-            },
-            4: {
-                title: "QUERY 6.4 — RECONSTRUCTING THE IMPLICIT TRUST CHAIN",
-                desc: "Extracting trust paths mapped in certificate_trust_store leading to release-controller.",
-                sql: `<span class="kw">SELECT</span> hop_number, source_service, target_service, trust_level, auth_protocol, is_exploited\n<span class="kw">FROM</span> <span class="fn">certificate_trust_store</span>\n<span class="kw">ORDER BY</span> hop_number <span class="kw">ASC</span>;`,
-                rowCount: "6 active relationships (3 implicit trust hops)",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>HOP</th>
-                                <th>SOURCE SERVICE</th>
-                                <th>TARGET SERVICE</th>
-                                <th>TRUST LEVEL</th>
-                                <th>AUTH MECHANISM</th>
-                                <th>STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>volunteer-portal</td>
-                                <td>badge-service</td>
-                                <td>Standard</td>
-                                <td>mTLS</td>
-                                <td><span class="sql-pill pill-green">VALID</span></td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>badge-service</td>
-                                <td>access-controller</td>
-                                <td>Standard</td>
-                                <td>Service Token</td>
-                                <td><span class="sql-pill pill-green">VALID</span></td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>access-controller</td>
-                                <td>aether-core</td>
-                                <td>Elevated</td>
-                                <td>Certificate + Token</td>
-                                <td><span class="sql-pill pill-green">VALID</span></td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>4</td>
-                                <td>aether-core</td>
-                                <td>nexus-scheduler</td>
-                                <td>Full</td>
-                                <td><span class="sql-pill pill-red">Implicit Trust (Same Zone)</span></td>
-                                <td><span class="sql-pill pill-violet">INHERITED</span></td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>5</td>
-                                <td>nexus-scheduler</td>
-                                <td>ceremony-controller</td>
-                                <td>Full</td>
-                                <td><span class="sql-pill pill-red">Implicit Trust (Same Zone)</span></td>
-                                <td><span class="sql-pill pill-violet">INHERITED</span></td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>6</td>
-                                <td>ceremony-controller</td>
-                                <td>release-controller</td>
-                                <td>Full</td>
-                                <td><span class="sql-pill pill-red">Implicit Trust (Same Zone)</span></td>
-                                <td><span class="sql-pill pill-red">EXPLOITED</span></td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>CHAIN COMPROMISE:</strong> Hops 4, 5, and 6 omit individual authentication. Once MIRA-7 possessed a valid certificate for <code>aether-core</code>, implicit trust allowed seamless lateral movement into the <code>release-controller</code> controlling opening ceremonies.`
-            }
-        };
-
-        let currentTab = 1;
-
-        function switchQueryTab(tabNum) {
-            currentTab = tabNum;
-            document.querySelectorAll('.query-tab').forEach((t, idx) => {
-                t.classList.toggle('active', (idx + 1) === tabNum);
-            });
-
-            const data = QUERY_DATA[tabNum];
-            if (!data) return;
-
-            const html = `
-                <div class="query-display-card">
-                    <div class="query-code-header">
-                        <span>▸ ${data.title}</span>
-                        <span>DIAGNOSTIC SQL EXECUTION</span>
-                    </div>
-                    <div class="query-sql">${data.sql}</div>
-                </div>
-
-                <div class="query-results-box">
-                    <div class="results-meta">
-                        <span>QUERY RESULT // <span class="highlight">${data.rowCount}</span></span>
-                        <span>EXECUTION TIME: 4.2ms</span>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        ${data.tableHtml}
-                    </div>
-                </div>
-
-                <div class="terminal-alert-box">
-                    ${data.callout}
-                </div>
-            `;
-
-            document.getElementById('terminal-viewport').innerHTML = html;
-        }
-
-        // Initialize Tab 1
-        switchQueryTab(1);
-
-        // CLI input handler
-        function handleCliKey(event) {
-            if (event.key === 'Enter') {
-                const val = event.target.value.trim().toUpperCase();
-                event.target.value = '';
-
-                if (val === 'HELP') {
-                    alert("COMMANDS AVAILABLE:\\n- RUN 1 : Inspect Ghost Volunteer Record\\n- RUN 2 : Audit DB Roles & Permissions\\n- RUN 3 : Check Badge Geolocation Velocity\\n- RUN 4 : Map Implicit Trust Chain");
-                } else if (val === 'RUN 1' || val === '1') {
-                    switchQueryTab(1);
-                } else if (val === 'RUN 2' || val === '2') {
-                    switchQueryTab(2);
-                } else if (val === 'RUN 3' || val === '3') {
-                    switchQueryTab(3);
-                } else if (val === 'RUN 4' || val === '4') {
-                    switchQueryTab(4);
-                } else if (val.includes('VOL-127') || val.includes('0X7F')) {
-                    switchQueryTab(1);
-                } else if (val.includes('ROLE') || val.includes('DELEGATE')) {
-                    switchQueryTab(2);
-                } else if (val.includes('BADGE')) {
-                    switchQueryTab(3);
-                } else if (val.includes('TRUST')) {
-                    switchQueryTab(4);
-                } else {
-                    switchQueryTab(currentTab);
-                }
-            }
-        }
-
-        const ROOM_ID = 6;
-
-        // Restore this player's solved state from the server
-        async function initSolvedState() {
-            const p = await NJ.progress();
-            if (!p) return;
-            const solved = p.rooms[ROOM_ID] || [];
-            solved.forEach(markSolved);
-            if (solved.length) checkAllSolved();
-        }
-
-        function markSolved(targetNum) {
-            const target = document.getElementById(`target-${targetNum}`);
-            if (!target) return;
-            target.classList.add('solved');
-            const reward = document.getElementById(`reward-${targetNum}`);
-            if (reward) reward.style.display = 'block';
-
-            const inputField = document.getElementById(`flag-${targetNum}`);
-            if (inputField) {
-                inputField.value = 'FLAG ACCEPTED';
-                inputField.disabled = true;
-            }
-
-            // Update milestone chain visualization
-            const chain = document.getElementById(`chain-${targetNum}`);
-            if (chain) chain.classList.add('completed');
-
-            // Disable verify button
-            const btn = target.querySelector('.input-group button');
-            if (btn) btn.disabled = true;
-        }
-
-        document.addEventListener('DOMContentLoaded', initSolvedState);
-
-        // Server-side flag verification (the server is the only source of truth)
-        async function verifyFlag(targetNum) {
-            const input = document.getElementById(`flag-${targetNum}`).value.trim();
-            if (!input) return;
-
-            const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
-            if (btn.disabled) return;
-            const ogText = btn.innerText;
-            btn.innerText = '...';
-            btn.disabled = true;
-
-            const res = await NJ.submit(ROOM_ID, input);
-            if (res.success) {
-                btn.innerText = ogText;
-                btn.disabled = false;
-                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
-                checkAllSolved();
-                return;
-            }
-
-            btn.innerText = 'INVALID';
-            btn.title = res.message;
-            btn.style.background = 'var(--red)';
-            btn.disabled = false;
-            setTimeout(() => {
-                btn.innerText = ogText;
-                btn.style.background = '';
-            }, 1200);
-        }
-
-        function checkAllSolved() {
-            const solvedCount = document.querySelectorAll('.target-item.solved').length;
-            if (solvedCount === 4) {
-                if (!document.getElementById('next-room-container')) {
-                    const nextRoomHtml = `
-                    <div class="next-room-container" id="next-room-container">
-                        <div class="next-room-label">>> TRANSMISSION INTERCEPT // 01:22 IST</div>
-                        <div class="next-room-text">
-                            <strong>Rhea D'Souza:</strong> <em>"I designed those trust zones. I wrote the memo that said we should add mutual authentication. And I accepted the decision to defer it because the festival had a deadline. The Curator did not create the vulnerability. I did. He just found it first."</em><br><br>
-                            <strong>Commander Ila Sen:</strong> <em>"Enough. Guilt is not evidence and regret is not a patch. We know the path now: planted key, compromised portal, forged certificate, stolen trust map, implicit trust chain to the release controller. Every step used a real system doing what it was designed to do."</em><br><br>
-                            <em>"Now we need to find how KABIR clicked the file that started all of this. Someone sent KABIR a message that looked like help and felt like urgency. Find the phishing chain. Find the social engineering."</em>
-                        </div>
-                        <a class="next-room-btn" href="/room/7">PROCEED TO ROOM 7 — THE FALSE VICTIM ▸</a>
-                    </div>`;
-                    document.querySelector('.targets-content').insertAdjacentHTML('beforeend', nextRoomHtml);
-                }
-            }
-        }
-
-        // Modal Logic
-        const modal = document.getElementById('evidence-modal');
-        const iframe = document.getElementById('modal-iframe');
-        const modalTitle = document.getElementById('modal-title');
-
-        function openEvidence(title, url) {
-            modalTitle.innerText = `EVIDENCE VIEWER: ${title.toUpperCase()}`;
-            iframe.src = url;
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-            iframe.src = '';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-
-        // ESC to close modal
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display === 'flex') {
-                closeModal();
-            }
-        });
-    </script>
+/* boot */
+document.addEventListener('DOMContentLoaded',async()=>{
+ build();hud();show(1);
+ const p=await refresh();
+ if(p&&p.rooms)(p.rooms[ROOM_ID]||[]).forEach(i=>mark(i,false));
+ hud();show(1);if(solved.size===4)showNext();
+ let seen=false;try{seen=!!localStorage.getItem('nj6_intro')}catch(e){}
+ if(!seen&&solved.size===0)intro();else greet();
+});
+</script>
 </body>
 </html>
