@@ -85,6 +85,12 @@ SESSION_HOURS = 24
 CODE_TTL_MINUTES = 15
 CODE_RESEND_SECONDS = 30
 MIN_PASSWORD_LEN = 8
+# A room's door opens once the player has captured this many of the previous
+# room's 4 flags (room 1 is always open; admins bypass). 0 = every room open.
+try:
+    UNLOCK_MIN_FLAGS = max(0, min(4, int(os.getenv("ROOM_UNLOCK_MIN_FLAGS", "3"))))
+except ValueError:
+    UNLOCK_MIN_FLAGS = 3
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -182,9 +188,15 @@ ROOM_FILES = {i: f"room{i}.html" for i in range(1, 11)}
 
 
 @app.get("/room/{room_id}", response_class=HTMLResponse)
-def read_room(room_id: int, user: models.User = Depends(get_current_user)):
+def read_room(
+    room_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
     if not user:
         return RedirectResponse(url="/")
+    if not room_is_unlocked(user, room_id, solved_challenges(db, user.id)):
+        return RedirectResponse(url="/hub")
     filename = ROOM_FILES.get(room_id)
     if filename and (BASE_DIR / filename).is_file():
         return read_html(filename)
@@ -212,6 +224,14 @@ def tour_js():
     return FileResponse(path, media_type="application/javascript", headers={"Cache-Control": "no-cache"})
 
 
+@app.get("/audio.js")
+def audio_js():
+    path = BASE_DIR / "audio.js"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(path, media_type="application/javascript", headers={"Cache-Control": "no-cache"})
+
+
 @app.get("/room-common.js")
 def room_common_js():
     path = BASE_DIR / "room-common.js"
@@ -226,12 +246,18 @@ EVIDENCE_PATH_RE = re.compile(r"^(Room - [1-9])/evidence/.+$")
 
 
 @app.get("/challenges/{asset_path:path}")
-def serve_evidence(asset_path: str, user: models.User = Depends(get_current_user)):
+def serve_evidence(
+    asset_path: str,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
     if not user:
         raise HTTPException(status_code=401, detail="Login required")
     m = EVIDENCE_PATH_RE.match(asset_path)
     if not m:
         raise HTTPException(status_code=404, detail="Not found")
+    if not room_is_unlocked(user, int(m.group(1)[-1]), solved_challenges(db, user.id)):
+        raise HTTPException(status_code=403, detail=LOCKED_MSG)
     evidence_root = (CHALLENGES_DIR / m.group(1) / "evidence").resolve()
     target = (CHALLENGES_DIR / asset_path).resolve()
     try:
@@ -575,6 +601,18 @@ def solved_challenges(db: Session, user_id: int, room_id: Optional[int] = None) 
     return result
 
 
+def room_is_unlocked(user: models.User, room_id: int, solved: dict) -> bool:
+    """`solved` is solved_challenges(db, user.id) (all rooms)."""
+    if room_id <= 1 or UNLOCK_MIN_FLAGS <= 0 or user.is_admin:
+        return True
+    if (user.current_room or 1) >= room_id:  # progress carried over / set by an admin
+        return True
+    return len(solved.get(room_id - 1, ())) >= UNLOCK_MIN_FLAGS
+
+
+LOCKED_MSG = "This room is locked. Capture more flags in the previous room first."
+
+
 @app.post("/api/submit_flag")
 def submit_flag(
     room_id: int = Form(...),
@@ -586,6 +624,8 @@ def submit_flag(
         raise HTTPException(status_code=401, detail="Unauthorized")
     if room_id not in CHALLENGE_FLAGS:
         raise HTTPException(status_code=400, detail="Unknown room")
+    if not room_is_unlocked(user, room_id, solved_challenges(db, user.id)):
+        raise HTTPException(status_code=403, detail=LOCKED_MSG)
 
     flag = (flag or "").strip()[:300]
 
@@ -635,7 +675,16 @@ def get_progress(user: models.User = Depends(get_current_user), db: Session = De
     rooms = {str(r): [] for r in CHALLENGE_FLAGS}
     for rid, idxs in solved_challenges(db, user.id).items():
         rooms[str(rid)] = sorted(i + 1 for i in idxs)
-    return {"score": user.score or 0, "current_room": user.current_room or 1, "rooms": rooms}
+    solved_all = solved_challenges(db, user.id)
+    unlocked = [r for r in CHALLENGE_FLAGS if room_is_unlocked(user, r, solved_all)]
+    return {
+        "score": user.score or 0,
+        "current_room": user.current_room or 1,
+        "rooms": rooms,
+        "unlocked": unlocked,
+        "unlock_min": UNLOCK_MIN_FLAGS,
+        "flags_per_room": FLAGS_PER_ROOM,
+    }
 
 
 @app.get("/api/me")

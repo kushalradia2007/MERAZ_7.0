@@ -19,6 +19,13 @@ The event is individual: there are no teams. Every participant registers on thei
 
 Existing databases from the team-based version are upgraded automatically on startup (`database.migrate_to_individual`): each member inherits their old team's score and room, and old submissions are credited to the team leader. The legacy `teams` table and `users.team_id` column are left in place, unused. For a fresh event, use **RESET ALL** in the admin console.
 
+## Hub world
+
+- Fixed layout (rooms 1-5 along the top, then the trail drops down the right edge and rooms 6-10 run along the bottom), so the minimap and the objective arrow always mean the same thing.
+- Door states come from `/api/progress`: **locked** (padlock), **open**, **in progress** (amber, flag pips), **cleared** (green) and **sealed** (Room 10). Returning to the hub after unlocking or clearing a room plays a banner, a burst and a sound.
+- The **objective bar** above the hub and a bouncing arrow (edge-of-screen arrow when the target is off screen) point at the next thing to do; the **minimap** (bottom-right) shows every door, the allies, your viewport and the objective.
+- **Sound** (`audio.js`) is synthesised in the browser (no audio files): a quiet drone with sparse pings plus footstep/door/unlock sounds. It starts after the first key press or click, is toggled with the ♪ button or the `M` key, and the choice is remembered. `NJAudio.sfx('success')` etc. can be reused on other pages.
+
 ## Case Board and first-login guide
 
 - **Case Board** (`/board`, `board.html`): every solved challenge pins an evidence card, so the board is a personal, spoiler-safe view of what a player has uncovered. Players drag cards, tie red string between them (drag from a card's pin onto another card, or tap one pin then another card) and add sticky notes. The layout autosaves per player (`users.board_data`). Locked challenges show as classified placeholders that link to their room.
@@ -31,6 +38,7 @@ Existing databases from the team-based version are upgraded automatically on sta
 |----------|----------|---------|
 | `DATABASE_URL` | production | Postgres/Supabase connection string (falls back to SQLite locally) |
 | `SECRET_KEY` | **yes, in production** | Signs login cookies. Use a long random string (e.g. `python -c "import secrets;print(secrets.token_hex(32))"`). If unset, a key is derived from `DATABASE_URL` (or random locally) and a warning is logged |
+| `ROOM_UNLOCK_MIN_FLAGS` | no (default `3`) | A room's door opens once the player has captured this many of the previous room's 4 flags. `0` opens every room from the start; admins always bypass. Enforced on the room page, flag submission and evidence files |
 | `GOOGLE_CLIENT_ID` | for Google sign-in | Google sign-in is disabled when unset |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | for email sign-up | Sends verification codes. If `SMTP_HOST` is unset, codes are printed to the server console (dev mode only) |
 

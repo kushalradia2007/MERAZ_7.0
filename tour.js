@@ -30,8 +30,16 @@
             sel: '#room-list',
             alt: '#stage',
             title: '9 ROOMS · 4 FLAGS EACH',
-            body: 'Every glowing door in the hub is a <b>room</b> with its own investigation. Walk up to a door and press <kbd>E</kbd>, or click a room in this list. ' +
-                  'Each room hides <b>4 flags</b> worth <b>25 points</b> each. Clearing a room unlocks the next story beat.'
+            body: 'Every door in the hub is a <b>room</b> with its own investigation. Walk up to a door and press <kbd>E</kbd>, or click a room in this list. ' +
+                  'Each room hides <b>4 flags</b> worth <b>25 points</b> each. Rooms are <b>locked</b> (padlock) until you capture most of the flags in the room before it, so the story unfolds in order.'
+        },
+        {
+            sel: '#objbar',
+            alt: '#stage',
+            title: 'YOUR NEXT OBJECTIVE',
+            body: 'This bar always says what to do next, and a glowing <b>arrow</b> in the hub points the way. ' +
+                  'The <b>minimap</b> (bottom-right of the hub) shows every door: <b>green</b> cleared, <b>amber</b> in progress, <b>red</b> open, <b>grey</b> locked. ' +
+                  'Sound can be muted with the <b>♪</b> button or the <kbd>M</kbd> key.'
         },
         {
             sel: '#npc-tracker',
