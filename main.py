@@ -240,6 +240,23 @@ def room_common_js():
     return FileResponse(path, media_type="application/javascript", headers={"Cache-Control": "no-cache"})
 
 
+# Shared front-end assets for the room pages (story engine + UI kit). An explicit
+# allowlist, so nothing else in the repo root can ever be served from here.
+ROOM_ASSETS = {
+    "story.js": "application/javascript",
+    "room-ui.css": "text/css",
+}
+
+
+@app.get("/assets/{name}")
+def room_asset(name: str):
+    media_type = ROOM_ASSETS.get(name)
+    path = BASE_DIR / name
+    if not media_type or not path.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(path, media_type=media_type, headers={"Cache-Control": "no-cache"})
+
+
 # Only the evidence files are served, and only to logged-in players. The
 # Challenges/*/README.md files contain the answer keys and must never be public.
 EVIDENCE_PATH_RE = re.compile(r"^(Room - (?:[1-9]|10))/evidence/.+$")
@@ -571,6 +588,30 @@ CHALLENGE_FLAGS = {
     ],
 }
 FLAGS_PER_ROOM = 4
+
+# Story text revealed when a challenge is solved (room -> challenge number -> text).
+# It lives on the server so a room page never ships it before it is earned; some of
+# it spells out the answer. Rooms without an entry here keep their own in-page text.
+CHALLENGE_REWARDS = {
+    1: {
+        1: 'PAGE "AETHER/07" RECOVERED. Fragment reads: "Nothing stays local."',
+        2: "AUTHOR IDENTIFIED: Aman V. // Parallax Systems.",
+        3: "DOMAIN LOGGED: nexus-meraz.festival.in.net (Registered by Parallax CA).",
+        4: "PROFILE SECURED: curator_404. Operator has been watching since day one.",
+    },
+    2: {
+        1: 'DECRYPTED: "THE HOST WITH THE BLUE NAME IS LYING."',
+        2: "VERIFIED: The file contains a note stating the blue name is not a person but a host alias.",
+        3: 'EXTRACTED: "ASK THE PERSON WHO NEVER SIGNS IN."',
+        4: "FORGERY DETECTED. Next Relay identified: AETHER-7.",
+    },
+    3: {
+        1: "BEACON VERIFIED. Interval confirmed.",
+        2: "DECODED. Maintenance window logged.",
+        3: "STREAM ANALYZED. Next stage revealed.",
+        4: "MIRA-7 IDENTIFIED. Root vector compromised.",
+    },
+}
 MAX_ROOM = 11  # a player who clears room 10 sits at "room 11" (finished)
 
 # room -> {lowercased accepted flag -> challenge index}. Matching is
@@ -647,6 +688,7 @@ def submit_flag(
             "message": "Already submitted! Flag was correct.",
             "challenge": idx + 1,
             "solved": sorted(i + 1 for i in solved),
+            "reward": CHALLENGE_REWARDS.get(room_id, {}).get(idx + 1),
         }
 
     db.add(models.FlagSubmission(
@@ -664,6 +706,7 @@ def submit_flag(
         "challenge": idx + 1,
         "solved": sorted(i + 1 for i in solved),
         "clue": {"id": clue["id"], "title": clue["title"]} if clue else None,
+        "reward": CHALLENGE_REWARDS.get(room_id, {}).get(idx + 1),
     }
 
 
@@ -677,10 +720,20 @@ def get_progress(user: models.User = Depends(get_current_user), db: Session = De
         rooms[str(rid)] = sorted(i + 1 for i in idxs)
     solved_all = solved_challenges(db, user.id)
     unlocked = [r for r in CHALLENGE_FLAGS if room_is_unlocked(user, r, solved_all)]
+    rewards: dict = {}
+    for rid, idxs in solved_all.items():
+        texts = {
+            str(i + 1): CHALLENGE_REWARDS[rid][i + 1]
+            for i in idxs
+            if i + 1 in CHALLENGE_REWARDS.get(rid, {})
+        }
+        if texts:
+            rewards[str(rid)] = texts
     return {
         "score": user.score or 0,
         "current_room": user.current_room or 1,
         "rooms": rooms,
+        "rewards": rewards,
         "unlocked": unlocked,
         "unlock_min": UNLOCK_MIN_FLAGS,
         "flags_per_room": FLAGS_PER_ROOM,

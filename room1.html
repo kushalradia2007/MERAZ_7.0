@@ -2,726 +2,367 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>NIGHTJAR — Room 1: The Empty Signal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/room-ui.css">
     <style>
-        :root {
-            --bg-dark: #0a0f1d;
-            --panel-bg: rgba(15, 23, 42, 0.75);
-            --red: #DC2626;
-            --red-glow: rgba(220, 38, 38, 0.4);
-            --cyan: #06B6D4;
-            --cyan-glow: rgba(6, 182, 212, 0.3);
-            --amber: #F59E0B;
-            --green: #10B981;
-            --text-main: #e2e8f0;
-            --text-dim: #94a3b8;
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --font-glitch: 'VT323', monospace;
-        }
+        :root { --accent: #22d3ee; --accent-rgb: 34, 211, 238; --wash-rgb: 244, 63, 94; --comms-h: 210px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        .r1-main { grid-template-columns: minmax(300px, .82fr) minmax(0, 1.4fr); }
+        .r1-left { position: sticky; top: calc(var(--hud-h) + 18px); }
+        .r1-hijack { min-height: calc(100vh - var(--hud-h) - 56px); }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%),
-                linear-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.3) 1px, transparent 1px);
-            background-size: 100% 100%, 20px 20px, 20px 20px;
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+        /* The hijacked public display */
+        .r1-screen {
+            flex: 1; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            padding: 36px 24px;
+            background: radial-gradient(circle at 50% 38%, #2b0812 0%, #0b0207 58%, #000 100%);
         }
+        .r1-screen::before {
+            content: ""; position: absolute; left: 0; right: 0; top: -100px; height: 100px; pointer-events: none;
+            background: linear-gradient(180deg, transparent, rgba(244, 63, 94, .12), transparent);
+            animation: r1-scan 6.5s linear infinite;
+        }
+        @keyframes r1-scan { to { transform: translateY(calc(100vh + 100px)); } }
+        .r1-glitch {
+            position: relative; margin: 0; line-height: 1.02;
+            font-family: var(--font-glitch); font-size: clamp(2.3rem, 4.4vw, 3.8rem);
+            color: #fff; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .r1-glitch::before, .r1-glitch::after { content: attr(data-text); position: absolute; inset: 0; overflow: hidden; }
+        .r1-glitch::before { color: var(--red); clip-path: inset(0 0 100% 0); animation: r1-g1 3.4s infinite steps(1); }
+        .r1-glitch::after  { color: var(--cyan); clip-path: inset(100% 0 0 0); animation: r1-g2 2.9s infinite steps(1); }
+        @keyframes r1-g1 { 0%, 86%, 100% { clip-path: inset(0 0 100% 0); } 88% { clip-path: inset(12% 0 55% 0); transform: translate(5px, 0); } 93% { clip-path: inset(48% 0 22% 0); transform: translate(-4px, 0); } }
+        @keyframes r1-g2 { 0%, 70%, 100% { clip-path: inset(100% 0 0 0); } 72% { clip-path: inset(60% 0 8% 0); transform: translate(-5px, 0); } 77% { clip-path: inset(20% 0 52% 0); transform: translate(4px, 0); } }
+        .r1-halt { margin: 12px 0 0; font-family: var(--font-code); font-size: 12px; letter-spacing: .5em; color: var(--red); text-shadow: 0 0 12px rgba(244, 63, 94, .6); }
+        .r1-threat { margin: 40px 0 34px; font-weight: 700; font-size: clamp(1.05rem, 1.9vw, 1.5rem); letter-spacing: .14em; color: #fff; text-shadow: 0 0 14px rgba(255, 255, 255, .45); line-height: 1.6; }
+        .r1-count { font-family: var(--font-glitch); font-size: clamp(3rem, 6vw, 5rem); line-height: 1; color: var(--red); text-shadow: 0 0 26px rgba(244, 63, 94, .7); animation: r1-flick 5s infinite; }
+        @keyframes r1-flick { 0%, 94%, 100% { opacity: 1; } 95% { opacity: .55; } 97% { opacity: .9; } }
+        .r1-sub { margin-top: 8px; font-family: var(--font-code); font-size: 11px; letter-spacing: .3em; color: var(--ink-dim); }
+        .r1-actions { padding: 14px 16px; background: #000; border-top: 1px solid rgba(244, 63, 94, .3); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-        /* Scanline Overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.3;
-        }
-
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: var(--font-code);
-            font-size: 12px;
-            z-index: 10;
-        }
-        
-        .brand { color: var(--cyan); letter-spacing: 1px; }
-        .status .blink-red { color: var(--red); animation: blink 1s infinite; text-shadow: 0 0 8px var(--red-glow); }
-        .timer { color: var(--text-dim); }
-        .timer span { color: var(--text-main); }
-        .exit-btn {
-            color: var(--red);
-            text-decoration: none;
-            border: 1px solid var(--red);
-            padding: 4px 12px;
-            border-radius: 2px;
-            transition: all 0.2s;
-        }
-        .exit-btn:hover { background: var(--red-glow); color: #fff; }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* Main Layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 20px;
-            padding: 20px;
-            flex: 1;
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
-            padding: 8px 15px;
-            background: rgba(0, 0, 0, 0.4);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: var(--text-dim);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-header.alert {
-            background: rgba(220, 38, 38, 0.1);
-            color: var(--red);
-            border-bottom-color: rgba(220, 38, 38, 0.3);
-        }
-
-        /* Left Panel - Hijacked View */
-        .hijacked-panel {
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            position: relative;
-        }
-
-        .hijacked-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: radial-gradient(circle at center, #1a0505 0%, #000 100%);
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glitch-text {
-            font-family: var(--font-glitch);
-            font-size: 3rem;
-            color: #fff;
-            text-transform: uppercase;
-            position: relative;
-            animation: glitch-anim 3s infinite;
-        }
-
-        @keyframes glitch-anim {
-            0% { text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); }
-            5% { text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); }
-            10% { text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); }
-            15% { text-shadow: none; }
-            100% { text-shadow: none; }
-        }
-
-        .sys-halt {
-            font-family: var(--font-code);
-            color: var(--red);
-            margin-top: 10px;
-            letter-spacing: 4px;
-        }
-
-        .threat-msg {
-            margin: 40px 0;
-            font-family: var(--font-ui);
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: #fff;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .countdown-large {
-            font-family: var(--font-glitch);
-            font-size: 4rem;
-            color: var(--red);
-            text-shadow: 0 0 20px var(--red-glow);
-        }
-
-        .sub-text {
-            font-family: var(--font-code);
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-top: 10px;
-        }
-
-        .hijacked-actions {
-            padding: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            background: #000;
-            border-top: 1px solid rgba(220, 38, 38, 0.3);
-        }
-
-        .action-btn {
-            background: transparent;
-            border: 1px solid var(--text-dim);
-            color: var(--text-dim);
-            padding: 8px 16px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-radius: 2px;
-        }
-        .action-btn:hover {
-            border-color: #fff;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Right Column */
-        .right-col {
-            display: grid;
-            grid-template-rows: auto auto auto;
-            gap: 20px;
-            height: 100%;
-        }
-
-        /* Comms Panel */
-        .comms-content {
-            padding: 15px;
-            font-family: var(--font-code);
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .conn-status {
-            color: var(--green);
-            margin-bottom: 10px;
-            font-size: 11px;
-        }
-        .sender { color: var(--cyan); margin-right: 8px; }
-        
-        /* Targets Panel */
-        .targets-content {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .target-item {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 4px;
-            transition: border-color 0.3s;
-        }
-
-        .target-item.solved {
-            border-color: var(--green);
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        .target-item:hover {
-            border-color: var(--cyan);
-        }
-
-        .target-title {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--amber);
-            margin-bottom: 8px;
-            font-family: var(--font-code);
-        }
-
-        .target-item.solved .target-title { color: var(--green); }
-
-        .target-desc {
-            font-size: 13px;
-            color: var(--text-dim);
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-group input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--cyan);
-            padding: 8px 12px;
-            font-family: var(--font-code);
-            font-size: 12px;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        .input-group input:focus { border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
-
-        .input-group button {
-            background: var(--cyan);
-            color: #000;
-            border: none;
-            padding: 0 16px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 2px;
-            transition: all 0.2s;
-        }
-
-        .input-group button:hover {
-            background: #fff;
-            box-shadow: 0 0 10px var(--cyan-glow);
-        }
-
-        .target-reward {
-            margin-top: 10px;
-            font-size: 12px;
-            color: var(--green);
-            display: none;
-            padding: 10px;
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 2px solid var(--green);
-        }
-        
-        .evidence-links {
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .evidence-links button, .evidence-links a {
-            background: transparent;
-            border: 1px dashed var(--text-dim);
-            color: var(--text-dim);
-            padding: 4px 8px;
-            font-size: 10px;
-            font-family: var(--font-code);
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-        .evidence-links button:hover, .evidence-links a:hover { border-color: var(--cyan); color: var(--cyan); }
-
-        /* Log Panel */
-        .log-panel {
-            height: 150px;
-        }
-        .log-content {
-            padding: 10px 15px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            color: var(--text-dim);
-            overflow-y: auto;
-            flex: 1;
-            background: #000;
-        }
-        
-        .log-entry { margin-bottom: 4px; }
-        .log-entry.success { color: var(--green); }
-        .log-entry.error { color: var(--red); }
-        .log-entry.info { color: var(--cyan); }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            width: 80%;
-            height: 80%;
-            background: var(--bg-dark);
-            border: 1px solid var(--cyan);
-            box-shadow: 0 0 30px var(--cyan-glow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Forces iframe to scroll its own contents */
-        }
-
-        .modal-header {
-            padding: 10px 15px;
-            background: rgba(6, 182, 212, 0.1);
-            border-bottom: 1px solid var(--cyan);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            color: var(--cyan);
-            flex-shrink: 0;
-        }
-
-        .modal-header button {
-            background: transparent;
-            border: none;
-            color: var(--cyan);
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .modal-iframe {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #fff;
-        }
-        
-        /* Cursor */
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 15px;
-            background-color: var(--cyan);
-            vertical-align: middle;
-            animation: blink 1s step-end infinite;
+        @media (max-width: 1100px) {
+            .r1-main { grid-template-columns: 1fr; }
+            .r1-left { position: static; }
+            .r1-hijack { min-height: 0; }
+            .r1-screen { padding: 28px 18px; }
         }
     </style>
     <script src="/room-common.js"></script>
+    <script src="/assets/story.js"></script>
 </head>
-<body>
+<body class="nj-room">
 
-    <header>
-        <div class="brand">[NIGHTJAR.OS // RESPONSE CELL]</div>
-        <div class="status">STATUS: <span class="blink-red">NEXUS OFFLINE</span></div>
-        <div class="timer">T-MINUS: <span id="master-clock">00:43:12</span></div>
-        <a href="/hub" class="exit-btn">LEAVE ROOM</a>
+    <header class="nj-hud">
+        <div class="nj-hud-l">
+            <span class="nj-logo" aria-hidden="true">◈</span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>RESPONSE CELL</span></div>
+            <span class="nj-status"><i class="dot bad"></i>NEXUS <b>OFFLINE</b></span>
+        </div>
+        <div class="nj-hud-c">
+            <span class="nj-act">ACT I · THE SIGNAL</span>
+            <span class="nj-roomno">ROOM <b>1</b>/9</span>
+            <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
+        </div>
+        <div class="nj-hud-r">
+            <span class="nj-stat hide-s">SCORE<b data-nj-score>----</b></span>
+            <span class="nj-stat hide-s">T-MINUS<b id="master-clock">00:43:12</b></span>
+            <a href="/hub" class="nj-leave">LEAVE ROOM</a>
+        </div>
     </header>
 
-    <div class="dashboard">
-        <!-- Left Panel: Hijacked View -->
-        <div class="panel hijacked-panel">
-            <div class="panel-header alert">
-                <span>[!]</span> PUBLIC DISPLAY OVERRIDE DETECTED
-            </div>
-            <div class="hijacked-content">
-                <h2 class="glitch-text">NEXUS SMART FESTIVAL</h2>
-                <p class="sys-halt">&lt;SYSTEM HALTED&gt;</p>
-                
-                <div class="threat-msg">
-                    <div>THE SHOW MUST NOT CONTINUE</div>
-                    <div>WE ARE NOT THE FIRST</div>
+    <main class="nj-main r1-main">
+        <!-- Left: the hijacked display -->
+        <div class="nj-col r1-left">
+            <section class="nj-panel r1-hijack nj-rise" style="--i:0">
+                <div class="nj-panel-h alert"><i class="dot"></i>Public display override detected<span class="meta">CH-01 · MAIN LOBBY</span></div>
+                <div class="r1-screen">
+                    <h2 class="r1-glitch" data-text="NEXUS SMART FESTIVAL">NEXUS SMART FESTIVAL</h2>
+                    <p class="r1-halt">&lt;SYSTEM HALTED&gt;</p>
+                    <div class="r1-threat">
+                        <div>THE SHOW MUST NOT CONTINUE</div>
+                        <div>WE ARE NOT THE FIRST</div>
+                    </div>
+                    <div class="r1-count" id="main-countdown">00:43:12</div>
+                    <div class="r1-sub">UNTIL INITIALIZATION</div>
                 </div>
-                
-                <div class="countdown-large" id="main-countdown">00:43:12</div>
-                <div class="sub-text">UNTIL INITIALIZATION</div>
-            </div>
-            <div class="hijacked-actions" style="flex-direction: column; align-items: center; gap: 10px;">
-                <div style="display: flex; gap: 5px;">
-                    <button class="action-btn" onclick="openEvidence('hub', '/challenges/Room - 1/evidence/meraz_festival_hub.html')">VIEW SITE MIRROR</button>
-                    <a href="/challenges/Room - 1/evidence/meraz_festival_hub.html" download class="action-btn" style="text-decoration: none; display: flex; align-items: center;">DL</a>
+                <div class="r1-actions">
+                    <span class="nj-file">
+                        <button type="button" onclick="openEvidence('hub', '/challenges/Room - 1/evidence/meraz_festival_hub.html')">▣ VIEW SITE MIRROR</button>
+                        <a href="/challenges/Room - 1/evidence/meraz_festival_hub.html" download>DL</a>
+                    </span>
+                    <span class="nj-file">
+                        <button type="button" onclick="openEvidence('hub-source', '/challenges/Room - 1/evidence/aether_07.html')">▣ VIEW HIDDEN CACHE</button>
+                        <a href="/challenges/Room - 1/evidence/aether_07.html" download>DL</a>
+                    </span>
                 </div>
-                <div style="display: flex; gap: 5px;">
-                    <button class="action-btn" onclick="openEvidence('hub-source', '/challenges/Room - 1/evidence/aether_07.html')">VIEW HIDDEN CACHE</button>
-                    <a href="/challenges/Room - 1/evidence/aether_07.html" download class="action-btn" style="text-decoration: none; display: flex; align-items: center;">DL</a>
-                </div>
-            </div>
+            </section>
         </div>
 
-        <!-- Right Column -->
-        <div class="right-col">
-            <!-- Top Right: Comms -->
-            <div class="panel">
-                <div class="panel-header">>> SECURE COMMS_</div>
-                <div class="comms-content">
-                    <div class="conn-status">[ENCRYPTED CONNECTION: CMD_ILA_SEN]</div>
-                    <div class="msg">
-                        <span class="sender">> ILA SEN:</span>
-                        <span id="typewriter-text"></span><span class="cursor"></span>
-                    </div>
+        <!-- Right: comms, targets, log -->
+        <div class="nj-col">
+            <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
+
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Investigation targets · Room 1<span class="meta" id="solved-count">0/4</span></div>
+                <div class="nj-panel-b">
+
+                    <article class="nj-card" id="target-1">
+                        <div class="nj-card-top"><span class="nj-badge">1.1</span><span class="nj-title">THE HIDDEN PAGE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Locate the unlisted teaser ID in the site mirror.<br>
+                            <em>[HINT: The evidence viewer uses an iframe. You might need to inspect the frame source directly, not just the main page.]</em></p>
+                        <div class="nj-files">
+                            <span class="nj-file"><button type="button" onclick="openEvidence('hub', '/challenges/Room - 1/evidence/meraz_festival_hub.html')">site_mirror.html</button><a href="/challenges/Room - 1/evidence/meraz_festival_hub.html" download>DL</a></span>
+                            <span class="nj-file"><button type="button" onclick="openEvidence('hub-source', '/challenges/Room - 1/evidence/aether_07.html')">hidden_cache.html</button><a href="/challenges/Room - 1/evidence/aether_07.html" download>DL</a></span>
+                        </div>
+                        <div class="nj-form"><span class="pre">ID ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-1"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-2">
+                        <div class="nj-card-top"><span class="nj-badge">1.2</span><span class="nj-title">THE METADATA LEAK</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Identify the hidden creator from the schedule or banner.</p>
+                        <div class="nj-files">
+                            <span class="nj-file"><button type="button" onclick="openEvidence('schedule', '/challenges/Room - 1/evidence/meraz_schedule_2026.pdf')">PDF: meraz_schedule</button><a href="/challenges/Room - 1/evidence/meraz_schedule_2026.pdf" download>DL</a></span>
+                            <span class="nj-file"><button type="button" onclick="openEvidence('banner', '/challenges/Room - 1/evidence/nexus_banner_final.png')">IMG: nexus_banner</button><a href="/challenges/Room - 1/evidence/nexus_banner_final.png" download>DL</a></span>
+                        </div>
+                        <div class="nj-form"><span class="pre">NAME ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-2"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-3">
+                        <div class="nj-card-top"><span class="nj-badge">1.3</span><span class="nj-title">THE FALSE MIRROR</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Compare official NEXUS with the mirror. Find the fake domain.</p>
+                        <div class="nj-files">
+                            <span class="nj-file"><button type="button" onclick="openEvidence('official', '/challenges/Room - 1/evidence/nexus_official_page.html')">nexus_official.html</button><a href="/challenges/Room - 1/evidence/nexus_official_page.html" download>DL</a></span>
+                            <span class="nj-file"><button type="button" onclick="openEvidence('mirror', '/challenges/Room - 1/evidence/nexus_mirror_page.html')">nexus_mirror.html</button><a href="/challenges/Room - 1/evidence/nexus_mirror_page.html" download>DL</a></span>
+                        </div>
+                        <div class="nj-form"><span class="pre">URL ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-3"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-4">
+                        <div class="nj-card-top"><span class="nj-badge">1.4</span><span class="nj-title">THE QUIET PROFILE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Search OSINT archives for the operator's handle.</p>
+                        <div class="nj-files">
+                            <span class="nj-file"><button type="button" onclick="openEvidence('forum', '/challenges/Room - 1/evidence/osint_archive/forum_members.html')">forum_archive.html</button><a href="/challenges/Room - 1/evidence/osint_archive/forum_members.html" download>DL</a></span>
+                            <span class="nj-file"><button type="button" onclick="openEvidence('blog', '/challenges/Room - 1/evidence/osint_archive/tech_blog.html')">tech_blog.html</button><a href="/challenges/Room - 1/evidence/osint_archive/tech_blog.html" download>DL</a></span>
+                        </div>
+                        <div class="nj-form"><span class="pre">HANDLE ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-4"></div>
+                    </article>
+
+                    <div id="nj-next-slot"></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Bottom Right: Targets -->
-            <div class="panel">
-                <div class="panel-header">>> INVESTIGATION TARGETS (ROOM 1)</div>
-                <div class="targets-content">
-                    
-                    <!-- Target 1.1 -->
-                    <div class="target-item" id="target-1">
-                        <div class="target-title">1.1 THE HIDDEN PAGE</div>
-                        <div class="target-desc">
-                            > Locate the unlisted teaser ID in the site mirror.<br>
-                            > <span style="color: var(--text-dim); font-size: 11px;">[HINT: The evidence viewer uses an iframe. You might need to inspect the frame source directly, not just the main page.]</span>
-                        </div>
-                        <div class="input-group">
-                            <input type="text" id="flag-1" placeholder="INPUT_ID: NIGHTJAR{...}">
-                            <button onclick="verifyFlag(1)">VERIFY</button>
-                        </div>
-                        <div class="target-reward" id="reward-1">
-                            > PAGE "AETHER/07" RECOVERED. Fragment reads: "Nothing stays local."
-                        </div>
-                    </div>
-
-                    <!-- Target 1.2 -->
-                    <div class="target-item" id="target-2">
-                        <div class="target-title">1.2 THE METADATA LEAK</div>
-                        <div class="target-desc">> Identify the hidden creator from the schedule or banner.</div>
-                        <div class="evidence-links">
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="openEvidence('schedule', '/challenges/Room - 1/evidence/meraz_schedule_2026.pdf')">PDF: meraz_schedule</button>
-                                <a href="/challenges/Room - 1/evidence/meraz_schedule_2026.pdf" download>DL</a>
-                            </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="openEvidence('banner', '/challenges/Room - 1/evidence/nexus_banner_final.png')">IMG: nexus_banner</button>
-                                <a href="/challenges/Room - 1/evidence/nexus_banner_final.png" download>DL</a>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-top:10px;">
-                            <input type="text" id="flag-2" placeholder="INPUT_NAME: NIGHTJAR{...}">
-                            <button onclick="verifyFlag(2)">VERIFY</button>
-                        </div>
-                        <div class="target-reward" id="reward-2">
-                            > AUTHOR IDENTIFIED: Aman V. // Parallax Systems.
-                        </div>
-                    </div>
-
-                    <!-- Target 1.3 -->
-                    <div class="target-item" id="target-3">
-                        <div class="target-title">1.3 THE FALSE MIRROR</div>
-                        <div class="target-desc">> Compare official NEXUS with the mirror. Find the fake domain.</div>
-                        <div class="evidence-links">
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="openEvidence('official', '/challenges/Room - 1/evidence/nexus_official_page.html')">nexus_official.html</button>
-                                <a href="/challenges/Room - 1/evidence/nexus_official_page.html" download>DL</a>
-                            </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="openEvidence('mirror', '/challenges/Room - 1/evidence/nexus_mirror_page.html')">nexus_mirror.html</button>
-                                <a href="/challenges/Room - 1/evidence/nexus_mirror_page.html" download>DL</a>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-top:10px;">
-                            <input type="text" id="flag-3" placeholder="INPUT_URL: NIGHTJAR{...}">
-                            <button onclick="verifyFlag(3)">VERIFY</button>
-                        </div>
-                        <div class="target-reward" id="reward-3">
-                            > DOMAIN LOGGED: nexus-meraz.festival.in.net (Registered by Parallax CA).
-                        </div>
-                    </div>
-
-                    <!-- Target 1.4 -->
-                    <div class="target-item" id="target-4">
-                        <div class="target-title">1.4 THE QUIET PROFILE</div>
-                        <div class="target-desc">> Search OSINT archives for the operator's handle.</div>
-                        <div class="evidence-links">
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="openEvidence('forum', '/challenges/Room - 1/evidence/osint_archive/forum_members.html')">forum_archive.html</button>
-                                <a href="/challenges/Room - 1/evidence/osint_archive/forum_members.html" download>DL</a>
-                            </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="openEvidence('blog', '/challenges/Room - 1/evidence/osint_archive/tech_blog.html')">tech_blog.html</button>
-                                <a href="/challenges/Room - 1/evidence/osint_archive/tech_blog.html" download>DL</a>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-top:10px;">
-                            <input type="text" id="flag-4" placeholder="INPUT_HANDLE: NIGHTJAR{...}">
-                            <button onclick="verifyFlag(4)">VERIFY</button>
-                        </div>
-                        <div class="target-reward" id="reward-4">
-                            > PROFILE SECURED: curator_404. Operator has been watching since day one.
-                        </div>
-                    </div>
-
+            <section class="nj-panel nj-rise" style="--i:3">
+                <div class="nj-panel-h"><i class="dot"></i>System log</div>
+                <div class="nj-log" id="sys-log" style="height:150px" role="log" aria-live="polite">
+                    <div class="l">Initialization complete.</div>
+                    <div class="l">Awaiting analyst input...</div>
                 </div>
-            </div>
-
-            <!-- Log Panel -->
-            <div class="panel log-panel">
-                <div class="panel-header">>> SYSTEM LOG_</div>
-                <div class="log-content" id="sys-log">
-                    <div class="log-entry">> Initialization complete.</div>
-                    <div class="log-entry">> Awaiting analyst input...</div>
-                </div>
-            </div>
+            </section>
         </div>
-    </div>
+    </main>
 
-    <!-- Evidence Modal -->
-    <div id="evidence-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <!-- Evidence viewer -->
+    <div id="evidence-modal" class="nj-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="nj-win">
+            <div class="nj-win-bar">
+                <span class="nj-win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 <span id="modal-title">EVIDENCE VIEWER</span>
-                <button onclick="closeModal()">[X]</button>
+                <button type="button" class="x" id="modal-close" onclick="closeModal()">CLOSE ✕</button>
             </div>
-            <iframe id="modal-iframe" class="modal-iframe"></iframe>
+            <iframe id="modal-iframe" title="Evidence file"></iframe>
         </div>
     </div>
 
     <script>
-        // Typing Effect for Comms
-        const commsText = "NEXUS is offline. We have no breach, no attacker, and no reason for this message. Find the first person who knew it was coming.";
-        const typeWriterElement = document.getElementById('typewriter-text');
-        let i = 0;
-        
-        function typeWriter() {
-            if (i < commsText.length) {
-                typeWriterElement.innerHTML += commsText.charAt(i);
-                i++;
-                setTimeout(typeWriter, 30);
-            }
-        }
-        
-        setTimeout(typeWriter, 1000); // Start typing after 1s
+        const ROOM_ID = 1;
 
-        // Countdown Timer
+        /* ───────── Story: Room 1 (Ila Sen) ─────────
+         * Player-visible text. Keep it free of answers, handles, names or domains
+         * from the challenges. Post-solve facts come from the server (rewards). */
+        const story = NJStory.create({
+            room: 1,
+            title: 'THE EMPTY SIGNAL',
+            lead: 'ila',
+            nextMount: '#nj-next-slot',
+            objective: 'Four leads. Open them in any order. Verify everything, and trust nothing just because it looks official.',
+            complete: 'Room clear. The capsule is waiting in Room 2 whenever you are ready.',
+
+            briefing: [
+                { scene: 'Every screen in the building is showing the same two sentences.', stamp: '23:37 · NEXUS CONTROL · MERAZ FESTIVAL GROUNDS' },
+                { npc: 'ila', text: 'Response Cell. Thank you for coming in. I will keep this short, because we do not have long.' },
+                { npc: 'ila', text: 'At 23:17 NEXUS stopped answering. Badges are dead. The stage lights are changing colour on their own. Every display on campus is showing the message you can see on the main screen.' },
+                { npc: 'ila', text: 'The official line is a student prank. I do not believe it. A prank does not take months of preparation.' },
+                { npc: 'ila', text: 'No breach. No attacker. No reason. So we begin with the one thing we are sure of: someone knew this was coming.' },
+                { npc: 'ila', text: 'Find the first person who knew. Four leads, in any order. Verify everything. Trust nothing just because it looks official.' },
+                { npc: 'system', text: 'SECURE LINK ESTABLISHED. INVESTIGATION TARGETS UNLOCKED. T-MINUS RUNNING.' }
+            ],
+
+            greet: {
+                0: ['Back at it. Nothing confirmed yet. Start with the site mirror and read what the page does not show you.'],
+                1: ['One lead confirmed. Keep pulling the thread.'],
+                2: ['Two down. The picture is forming, and I do not like it.'],
+                3: ['One lead left. Whoever this is, they were careful. Be more careful.']
+            },
+
+            onSolve: {
+                1: ['A page nobody was supposed to find. Someone built a hidden door into our own festival site.'],
+                2: ['A fingerprint inside the file itself. People forget what their tools write down about them.'],
+                3: ['A lookalike, good enough to fool a volunteer at two in the morning. Someone planned that far ahead.'],
+                4: ['So there is an operator, and they have been reading our posts for a long time.']
+            },
+
+            milestone: {
+                1: ['First lead confirmed. That is more than the official investigation has.'],
+                2: [
+                    { npc: 'kite', text: 'Ila, Kite here. My account keeps throwing odd login alerts. Probably nothing. Shout if the cell finds anything that touches me.' },
+                    { npc: 'ila', text: 'Noted, Kabir. Stay reachable.' }
+                ],
+                3: ['Three. One more and we know who has been watching.']
+            },
+
+            wrong: [
+                'That does not match what the evidence shows. Check it again.',
+                'No. Slow down and compare the details.',
+                'Negative. Details matter in this one.'
+            ],
+            hints: {
+                1: 'Remember: the evidence viewer is a frame inside a page. Look at the frame itself, not only at what it displays.',
+                2: 'Files remember who made them. Look at what the schedule and the banner say about themselves.',
+                3: 'Put the official page next to the mirror. The difference is small. Domains lie in small ways.',
+                4: 'Two sources in the archive. Cross-reference names, times and handles until one profile does not fit.'
+            },
+
+            debrief: [
+                { scene: 'The countdown on the main display has not changed. Nobody in the room has moved.', stamp: '00:02 · NEXUS CONTROL' },
+                { npc: 'ila', text: 'Four leads, one picture. Somebody planned this before the festival schedule was even public.' },
+                { npc: 'ila', text: 'A hidden page. A forged mirror. A file that signs its own work. And an operator who has been reading over our shoulder the whole time.' },
+                { npc: 'ila', text: 'The official story is a student prank. Pranksters do not leave this much homework.' },
+                { npc: 'kite', text: 'Ila, this just landed in my inbox. It says: "Kite, restore the old route. The one Rhea disabled. You know which one." I do not. I swear I do not.' },
+                { npc: 'ila', text: 'I believe you, Kabir. Forward everything to the cell and touch nothing else.' },
+                { npc: 'rhea', text: 'I disabled exactly one route this year. If they are asking for it back, they know precisely what it used to do.' },
+                { npc: 'system', text: 'ENCRYPTED CAPSULE RECEIVED. CHAT EXPORT QUEUED FOR ANALYSIS. ROOM 2 UNLOCKED.' }
+            ],
+            next: {
+                room: 2, href: '/room/2', label: 'PROCEED TO ROOM 2', from: 'kite',
+                teaser: 'Forwarded message: "Kite, restore the old route. The one Rhea disabled. You know which one."'
+            }
+        });
+        story.mount(document.getElementById('npc-comms'));
+
+        /* ───────── Clock (cosmetic, as before) ───────── */
         function updateClock() {
-            const now = new Date();
-            // Mock a countdown to some future time for aesthetic
-            let h = 0, m = 43, s = 12; // Static for demo, but can be dynamic
-            const timeString = `00:43:${new Date().getSeconds().toString().padStart(2, '0')}`;
-            document.getElementById('master-clock').innerText = timeString;
-            document.getElementById('main-countdown').innerText = timeString;
+            const t = '00:43:' + String(new Date().getSeconds()).padStart(2, '0');
+            document.getElementById('master-clock').textContent = t;
+            document.getElementById('main-countdown').textContent = t;
         }
         setInterval(updateClock, 1000);
+        updateClock();
 
-        // System Log Logger
+        /* ───────── System log ───────── */
         const logBox = document.getElementById('sys-log');
-        function addLog(message, type = 'info') {
-            const div = document.createElement('div');
-            div.className = `log-entry ${type}`;
-            div.innerText = `> ${message}`;
-            logBox.appendChild(div);
+        function addLog(message, type) {
+            const d = document.createElement('div');
+            d.className = 'l ' + (type || 'info');
+            const t = document.createElement('span');
+            t.className = 't';
+            t.textContent = new Date().toLocaleTimeString('en-GB');
+            d.appendChild(t);
+            d.appendChild(document.createTextNode(message));
+            logBox.appendChild(d);
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // Flag verification: the server is the only source of truth
-        const ROOM_ID = 1;
-
-        function markSolved(targetNum) {
-            const target = document.getElementById(`target-${targetNum}`);
-            if (!target) return;
-            target.classList.add('solved');
-            document.getElementById(`reward-${targetNum}`).style.display = 'block';
-            const inputField = document.getElementById(`flag-${targetNum}`);
-            if (inputField) {
-                inputField.value = 'FLAG ACCEPTED';
-                inputField.disabled = true;
-            }
-            const btn = target.querySelector('.input-group button');
-            if (btn) btn.disabled = true;
+        /* ───────── Flags: the server is the only source of truth ───────── */
+        function updateCount() {
+            document.getElementById('solved-count').textContent = document.querySelectorAll('.nj-card.solved').length + '/4';
         }
 
-        // Restore this player's solved state from the server
+        function markSolved(n, reward, fresh) {
+            const card = document.getElementById('target-' + n);
+            if (!card) return;
+            const was = card.classList.contains('solved');
+            card.classList.add('solved');
+            if (fresh && !was) {
+                card.classList.add('stamp');
+                setTimeout(function () { card.classList.remove('stamp'); }, 800);
+            }
+            const rw = document.getElementById('reward-' + n);
+            if (rw && (reward || !rw.textContent)) rw.textContent = reward || 'Evidence verified.';
+            const input = document.getElementById('flag-' + n);
+            if (input) { input.value = 'FLAG ACCEPTED'; input.disabled = true; }
+            const form = card.querySelector('.nj-form');
+            if (form) { form.classList.remove('bad'); form.classList.add('ok'); }
+            const btn = card.querySelector('.nj-form button');
+            if (btn) btn.disabled = true;
+            updateCount();
+        }
+
         async function initSolvedState() {
             const p = await NJ.progress();
-            if (!p) return;
-            const solved = p.rooms[ROOM_ID] || [];
-            solved.forEach(markSolved);
-            if (solved.length) checkAllSolved(true);
+            const solved = p ? (p.rooms[ROOM_ID] || []) : [];
+            const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
+            solved.forEach(function (n) { markSolved(n, rewards[n], false); });
+            story.boot(solved, p ? p.score : undefined);
         }
-
-        // Run initialization
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        async function verifyFlag(targetNum) {
-            const input = document.getElementById(`flag-${targetNum}`).value.trim();
-            if (!input) return;
-            const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
+        async function verifyFlag(n) {
+            const input = document.getElementById('flag-' + n);
+            const val = input.value.trim();
+            if (!val) return;
+            const form = input.closest('.nj-form');
+            const btn = form.querySelector('button');
             if (btn.disabled) return;
             btn.disabled = true;
-            addLog(`Verifying target ${targetNum}...`, 'info');
+            btn.classList.add('busy');
+            addLog('Verifying target ' + n + '...', 'info');
 
-            const res = await NJ.submit(ROOM_ID, input);
+            const res = await NJ.submit(ROOM_ID, val);
+            btn.classList.remove('busy');
             btn.disabled = false;
             if (res.success) {
-                addLog(`Target ${targetNum} VERIFIED. Decrypting reward...`, 'success');
-                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
-                checkAllSolved();
+                const hit = res.challenge || n;
+                const solved = res.solved.length ? res.solved : [n];
+                addLog('Target ' + hit + ' VERIFIED. Decrypting reward...', 'ok');
+                solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
+                story.onSolved(hit, solved);
             } else {
-                addLog(`Target ${targetNum} FAILED. ${res.message}`, 'error');
+                addLog('Target ' + n + ' FAILED. ' + res.message, 'err');
+                form.classList.remove('bad');
+                void form.offsetWidth;
+                form.classList.add('bad');
+                story.onWrong(n);
             }
         }
+        document.querySelectorAll('.nj-form input').forEach(function (inp) {
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') verifyFlag(Number(inp.id.replace('flag-', '')));
+            });
+        });
 
-        function checkAllSolved(isInit = false) {
-            const solvedCount = document.querySelectorAll('.target-item.solved').length;
-            if (solvedCount === 4 && !document.getElementById('next-room-panel')) {
-                addLog('ALL TARGETS SECURED. NEW COMMS LINK ESTABLISHED.', 'success');
-                setTimeout(() => {
-                    const nextRoomHtml = `
-                    <div id="next-room-panel" style="margin-top: 20px; padding: 15px; border: 1px solid var(--cyan); background: rgba(6, 182, 212, 0.1);">
-                        <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">>> INCOMING TRANSMISSION: curator_404</div>
-                        <div style="font-family: var(--font-code); font-size: 12px; margin-bottom: 15px;">
-                            "Kite — restore the old route. The one Rhea disabled. You know which one."
-                        </div>
-                        <a href="/room/2" style="display: inline-block; padding: 8px 16px; background: var(--cyan); color: #000; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 2</a>
-                    </div>`;
-                    document.querySelector('.targets-content').insertAdjacentHTML('beforeend', nextRoomHtml);
-                }, 1000);
-            }
-        }
-
-        // Modal Logic
+        /* ───────── Evidence viewer ───────── */
         const modal = document.getElementById('evidence-modal');
-        const iframe = document.getElementById('modal-iframe');
-        const modalTitle = document.getElementById('modal-title');
-
+        const frame = document.getElementById('modal-iframe');
         function openEvidence(title, url) {
-            addLog(`Accessing encrypted file: ${title}...`, 'info');
-            modalTitle.innerText = `EVIDENCE VIEWER: ${title.toUpperCase()}`;
-            iframe.src = url;
-            modal.style.display = 'flex';
+            addLog('Accessing encrypted file: ' + title + '...', 'info');
+            document.getElementById('modal-title').textContent = 'EVIDENCE VIEWER // ' + title.toUpperCase();
+            frame.src = url;
+            modal.classList.add('open');
+            document.getElementById('modal-close').focus();
         }
-
         function closeModal() {
-            modal.style.display = 'none';
-            iframe.src = '';
+            modal.classList.remove('open');
+            frame.src = 'about:blank';
         }
-        
-        // Close modal on click outside
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     </script>
 </body>
 </html>
