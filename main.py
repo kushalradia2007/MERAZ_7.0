@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session, selectinload
 
 load_dotenv()
 
-import database, models  # noqa: E402
+import case_clues, database, models  # noqa: E402
 
 models.Base.metadata.create_all(bind=database.engine)
 database.migrate_to_individual(database.engine)
@@ -195,6 +195,21 @@ def read_room(room_id: int, user: models.User = Depends(get_current_user)):
 @app.get("/scoreboard", response_class=HTMLResponse)
 def read_scoreboard():
     return read_html("scoreboard.html")
+
+
+@app.get("/board", response_class=HTMLResponse)
+def read_board(user: models.User = Depends(get_current_user)):
+    if not user:
+        return RedirectResponse(url="/")
+    return read_html("board.html")
+
+
+@app.get("/tour.js")
+def tour_js():
+    path = BASE_DIR / "tour.js"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(path, media_type="application/javascript", headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/room-common.js")
@@ -596,11 +611,13 @@ def submit_flag(
     if len(solved) >= FLAGS_PER_ROOM and (player.current_room or 1) <= room_id:
         player.current_room = room_id + 1
     db.commit()
+    clue = case_clues.CLUES.get(case_clues.clue_id(room_id, idx))
     return {
         "success": True,
-        "message": "Correct! Flag accepted.",
+        "message": "Correct! Flag accepted." + (" New evidence pinned to your Case Board." if clue else ""),
         "challenge": idx + 1,
         "solved": sorted(i + 1 for i in solved),
+        "clue": {"id": clue["id"], "title": clue["title"]} if clue else None,
     }
 
 
@@ -619,7 +636,136 @@ def get_progress(user: models.User = Depends(get_current_user), db: Session = De
 def get_me(user: models.User = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    return {"username": user.username, "is_admin": user.is_admin}
+    return {
+        "username": user.username,
+        "is_admin": user.is_admin,
+        "has_seen_tour": bool(user.has_seen_tour),
+    }
+
+
+@app.post("/api/tour/complete")
+def tour_complete(user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not user.has_seen_tour:
+        user.has_seen_tour = True
+        db.commit()
+    return {"ok": True}
+
+
+# ─── Case Board ────────────────────────────────────────────────
+# Evidence cards appear only for challenges the player has solved. The player's
+# arrangement (card positions, red-string links, sticky notes) is saved as one
+# small JSON document on their user row.
+
+BOARD_MAX_BYTES = 60_000
+BOARD_MAX_NOTES = 60
+BOARD_MAX_LINKS = 300
+BOARD_NOTE_CHARS = 280
+BOARD_COORD_MIN, BOARD_COORD_MAX = -2000, 8000
+NOTE_ID_RE = re.compile(r"^n[a-z0-9]{1,14}$")
+
+
+def solved_clue_ids(db: Session, user_id: int) -> list:
+    ids = []
+    for rid, idxs in solved_challenges(db, user_id).items():
+        for i in idxs:
+            cid = case_clues.clue_id(rid, i)
+            if cid in case_clues.CLUES:
+                ids.append(cid)
+    return sorted(ids, key=lambda c: (case_clues.CLUES[c]["room"], case_clues.CLUES[c]["challenge"]))
+
+
+def _num(v):
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v:
+        return None
+    return round(max(BOARD_COORD_MIN, min(BOARD_COORD_MAX, float(v))), 1)
+
+
+def clean_board(raw, valid_clue_ids: set) -> dict:
+    """Whitelist-validate a client-supplied board document."""
+    raw = raw if isinstance(raw, dict) else {}
+    notes = []
+    for n in (raw.get("notes") if isinstance(raw.get("notes"), list) else [])[:BOARD_MAX_NOTES]:
+        if not isinstance(n, dict):
+            continue
+        nid, x, y = n.get("id"), _num(n.get("x")), _num(n.get("y"))
+        if not (isinstance(nid, str) and NOTE_ID_RE.match(nid)) or x is None or y is None:
+            continue
+        text = n.get("text") if isinstance(n.get("text"), str) else ""
+        notes.append({"id": nid, "x": x, "y": y, "text": text[:BOARD_NOTE_CHARS]})
+    node_ids = set(valid_clue_ids) | {n["id"] for n in notes}
+
+    pos = {}
+    src = raw.get("pos") if isinstance(raw.get("pos"), dict) else {}
+    for k, v in src.items():
+        if k in node_ids and isinstance(v, dict):
+            x, y = _num(v.get("x")), _num(v.get("y"))
+            if x is not None and y is not None:
+                pos[k] = {"x": x, "y": y}
+
+    links, seen_pairs = [], set()
+    for pair in (raw.get("links") if isinstance(raw.get("links"), list) else [])[:BOARD_MAX_LINKS * 2]:
+        if not (isinstance(pair, (list, tuple)) and len(pair) == 2):
+            continue
+        a, b = pair
+        if not (isinstance(a, str) and isinstance(b, str)) or a == b or a not in node_ids or b not in node_ids:
+            continue
+        key = tuple(sorted((a, b)))
+        if key in seen_pairs:
+            continue
+        seen_pairs.add(key)
+        links.append(list(key))
+        if len(links) >= BOARD_MAX_LINKS:
+            break
+
+    seen = [c for c in (raw.get("seen") if isinstance(raw.get("seen"), list) else []) if isinstance(c, str) and c in valid_clue_ids]
+    return {"pos": pos, "links": links, "notes": notes, "seen": sorted(set(seen))}
+
+
+@app.get("/api/board")
+def get_board(user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    solved = solved_clue_ids(db, user.id)
+    try:
+        saved = json.loads(user.board_data) if user.board_data else {}
+    except ValueError:
+        saved = {}
+    layout = clean_board(saved, set(solved))
+    reached = min(user.current_room or 1, max(case_clues.ROOM_TITLES))
+    locked = {}
+    for room in range(1, reached + 1):
+        total = sum(1 for c in case_clues.CLUES.values() if c["room"] == room)
+        got = sum(1 for c in solved if case_clues.CLUES[c]["room"] == room)
+        if total - got > 0:
+            locked[str(room)] = [c["challenge"] for c in case_clues.CLUES.values()
+                                 if c["room"] == room and c["id"] not in solved]
+    return {
+        "clues": [case_clues.CLUES[c] for c in solved],
+        "total": len(case_clues.CLUES),
+        "locked": locked,
+        "rooms": {str(k): v for k, v in case_clues.ROOM_TITLES.items()},
+        "layout": layout,
+        "unseen": sum(1 for c in solved if c not in set(layout["seen"])),
+    }
+
+
+@app.post("/api/board")
+def save_board(
+    payload: dict = Body(...),
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    layout = clean_board(payload, set(solved_clue_ids(db, user.id)))
+    blob = json.dumps(layout, separators=(",", ":"))
+    if len(blob.encode("utf-8")) > BOARD_MAX_BYTES:
+        raise HTTPException(status_code=400, detail="Board is too large")
+    user.board_data = blob
+    db.commit()
+    return {"ok": True}
 
 
 # ─── Scoreboard API (public) ──────────────────────────────────
@@ -748,7 +894,7 @@ def admin_reset_scores(
     admin: models.User = Depends(require_admin),
     db: Session = Depends(database.get_db),
 ):
-    db.query(models.User).update({models.User.score: 0, models.User.current_room: 1})
+    db.query(models.User).update({models.User.score: 0, models.User.current_room: 1, models.User.board_data: None})
     db.query(models.FlagSubmission).delete()
     db.commit()
     return {"message": "All scores and progress reset"}

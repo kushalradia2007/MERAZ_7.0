@@ -19,6 +19,12 @@ The event is individual: there are no teams. Every participant registers on thei
 
 Existing databases from the team-based version are upgraded automatically on startup (`database.migrate_to_individual`): each member inherits their old team's score and room, and old submissions are credited to the team leader. The legacy `teams` table and `users.team_id` column are left in place, unused. For a fresh event, use **RESET ALL** in the admin console.
 
+## Case Board and first-login guide
+
+- **Case Board** (`/board`, `board.html`): every solved challenge pins an evidence card, so the board is a personal, spoiler-safe view of what a player has uncovered. Players drag cards, tie red string between them (drag from a card's pin onto another card, or tap one pin then another card) and add sticky notes. The layout autosaves per player (`users.board_data`). Locked challenges show as classified placeholders that link to their room.
+- Card text lives in `case_clues.py` and is sent to the player only **after** they solve that challenge. Never put a flag, or another challenge's answer, in a card.
+- **First-login guide** (`tour.js`): an interactive spotlight tour on the hub, shown once per account (`users.has_seen_tour`) and replayable from the **? GUIDE** button. Steps that point at an element which isn't on screen fall back to a centred card, so it works on phones.
+
 ## Environment variables
 
 | Variable | Required | Purpose |

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
 from database import Base
 import datetime
 
@@ -18,6 +18,8 @@ class User(Base):
     score = Column(Integer, default=0)
     current_room = Column(Integer, default=1)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    has_seen_tour = Column(Boolean, default=False)
+    board_data = Column(Text, nullable=True)  # JSON: case-board layout (positions, links, notes)
 
 
 class FlagSubmission(Base):

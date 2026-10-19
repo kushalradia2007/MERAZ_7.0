@@ -59,6 +59,11 @@ def migrate_to_individual(engine):
             conn.execute(text("ALTER TABLE users ADD COLUMN created_at TIMESTAMP"))
         conn.execute(text("UPDATE users SET score = 0 WHERE score IS NULL"))
         conn.execute(text("UPDATE users SET current_room = 1 WHERE current_room IS NULL"))
+        if "has_seen_tour" not in user_cols:
+            conn.execute(text("ALTER TABLE users ADD COLUMN has_seen_tour BOOLEAN DEFAULT FALSE"))
+        if "board_data" not in user_cols:
+            conn.execute(text("ALTER TABLE users ADD COLUMN board_data TEXT"))
+        conn.execute(text("UPDATE users SET has_seen_tour = FALSE WHERE has_seen_tour IS NULL"))
         if fresh_score and has_teams:
             conn.execute(text(
                 "UPDATE users SET "

@@ -36,6 +36,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .nav-link.active{border-color:var(--red);color:var(--red);background:rgba(255,26,26,.08)}
 .nav-link.admin-link{border-color:var(--yel-dim);color:var(--yel)}
 .nav-link.admin-link:hover{border-color:var(--yel);background:rgba(255,230,0,.06);box-shadow:0 0 12px rgba(255,230,0,.1)}
+.nav-badge{background:var(--yel);color:#000;font-family:"Press Start 2P",monospace;font-size:7px;padding:2px 4px;border-radius:3px;margin-left:2px;animation:badgeBlink 1s steps(2) infinite}
+@keyframes badgeBlink{50%{opacity:.4}}
 .nav-spacer{flex:1}
 .nav-user{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--ink-dim)}
 .nav-user-name{color:var(--yel);font-weight:700}
@@ -173,7 +175,9 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 .controls-bar{padding:6px 8px}
 }
 @media(max-width:500px){
-.nav-links{display:none}
+.nav-brand,.nav-timer{display:none}
+.nav-links .lbl{display:none}
+.nav-links .nav-link{padding:6px 9px;font-size:12px}
 .nav-timer small{display:none}
 .k{width:28px;height:28px;font-size:9px}
 }
@@ -216,9 +220,11 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
     </div>
     <div class="nav-sep"></div>
     <div class="nav-links">
-        <a href="/hub" class="nav-link active">◈ HUB</a>
-        <a href="/scoreboard" class="nav-link">◉ SCOREBOARD</a>
-        <a href="/admin" class="nav-link admin-link" id="admin-nav-link" style="display:none">★ ADMIN</a>
+        <a href="/hub" class="nav-link active">◈ <span class="lbl">HUB</span></a>
+        <a href="/board" class="nav-link" id="board-nav-link">▦ <span class="lbl">CASE BOARD</span><span class="nav-badge" id="board-badge" hidden>0</span></a>
+        <a href="/scoreboard" class="nav-link">◉ <span class="lbl">SCOREBOARD</span></a>
+        <a href="/admin" class="nav-link admin-link" id="admin-nav-link" style="display:none">★ <span class="lbl">ADMIN</span></a>
+        <button type="button" class="nav-link" id="tour-replay" title="Replay the interactive guide" style="border-color:var(--cyan-dim);color:var(--cyan)">? <span class="lbl">GUIDE</span></button>
     </div>
     <div class="nav-spacer"></div>
     <div class="nav-timer" id="nav-timer">23:17:00<small>NEXUS OFFLINE</small></div>
@@ -345,8 +351,21 @@ canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
         document.getElementById('player-display').textContent=u.username.toUpperCase();
         if(u.is_admin) document.getElementById('admin-nav-link').style.display='';
         loadProgress();
+        loadBoardBadge();
     }catch(e){}
 })();
+
+// "NEW" badge on the Case Board link: evidence pinned since the player last opened the board.
+async function loadBoardBadge(){
+    try{
+        const r=await fetch('/api/board');
+        if(!r.ok)return;
+        const d=await r.json();
+        const b=document.getElementById('board-badge');
+        b.textContent=d.unseen>9?'9+':String(d.unseen);
+        b.hidden=!(d.unseen>0);
+    }catch(e){}
+}
 
 // Progress comes from the server (rooms are separate pages, so nothing
 // client-side can know which rooms the player has actually cleared).
@@ -582,6 +601,7 @@ async function submitFlag() {
             resEl.textContent = data.message;
             resEl.className = 'flag-result-success';
             addIntel('SYSTEM', 'Valid flag submitted for Room '+(ri+1));
+            loadBoardBadge();
         } else {
             resEl.textContent = data.message;
             resEl.className = 'flag-result-error';
@@ -675,4 +695,5 @@ requestAnimationFrame(loop)}
 addEventListener('resize',()=>mode=='boot'&&sizeMx());
 (document.fonts&&document.fonts.load?document.fonts.load('8px "Press Start 2P"'):Promise.resolve()).finally(()=>{if(mode==='boot')bootRun();requestAnimationFrame(loop)});
 </script>
+<script src="/tour.js" defer></script>
 </body></html>
