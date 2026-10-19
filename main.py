@@ -242,7 +242,7 @@ def room_common_js():
 
 # Only the evidence files are served, and only to logged-in players. The
 # Challenges/*/README.md files contain the answer keys and must never be public.
-EVIDENCE_PATH_RE = re.compile(r"^(Room - [1-9])/evidence/.+$")
+EVIDENCE_PATH_RE = re.compile(r"^(Room - (?:[1-9]|10))/evidence/.+$")
 
 
 @app.get("/challenges/{asset_path:path}")
@@ -256,7 +256,7 @@ def serve_evidence(
     m = EVIDENCE_PATH_RE.match(asset_path)
     if not m:
         raise HTTPException(status_code=404, detail="Not found")
-    if not room_is_unlocked(user, int(m.group(1)[-1]), solved_challenges(db, user.id)):
+    if not room_is_unlocked(user, int(m.group(1).rsplit(" ", 1)[-1]), solved_challenges(db, user.id)):
         raise HTTPException(status_code=403, detail=LOCKED_MSG)
     evidence_root = (CHALLENGES_DIR / m.group(1) / "evidence").resolve()
     target = (CHALLENGES_DIR / asset_path).resolve()

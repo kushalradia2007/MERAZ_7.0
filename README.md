@@ -22,7 +22,7 @@ Existing databases from the team-based version are upgraded automatically on sta
 ## Hub world
 
 - Fixed layout (rooms 1-5 along the top, then the trail drops down the right edge and rooms 6-10 run along the bottom), so the minimap and the objective arrow always mean the same thing.
-- Door states come from `/api/progress`: **locked** (padlock), **open**, **in progress** (amber, flag pips), **cleared** (green) and **sealed** (Room 10). Returning to the hub after unlocking or clearing a room plays a banner, a burst and a sound.
+- Door states come from `/api/progress`: **locked** (padlock), **open**, **in progress** (amber, flag pips), **cleared** (green) and **sealed** (any room at or beyond `PLAYABLE_ROOMS` in `index.html`; currently none, all 10 rooms are playable). Returning to the hub after unlocking or clearing a room plays a banner, a burst and a sound.
 - The **objective bar** above the hub and a bouncing arrow (edge-of-screen arrow when the target is off screen) point at the next thing to do; the **minimap** (bottom-right) shows every door, the allies, your viewport and the objective.
 - **Sound** (`audio.js`) is synthesised in the browser (no audio files): a quiet drone with sparse pings plus footstep/door/unlock sounds. It starts after the first key press or click, is toggled with the ♪ button or the `M` key, and the choice is remembered. `NJAudio.sfx('success')` etc. can be reused on other pages.
 

@@ -807,7 +807,7 @@ const any=RS.some(r=>r.solved>0);
 if(!any&&!NT[0])return{key:'npc0',kind:'npc',i:0,text:'Report to <b>Cmdr. Ila Sen</b> for your briefing',sub:'walk up to her and press E'};
 for(let i=0;i<PLAYABLE_ROOMS;i++){const r=RS[i];if(!r.cleared&&r.unlocked){const left=4-r.solved;
  return{key:'d'+i+':'+r.solved,kind:'door',i,text:(r.solved?'Continue':'Enter')+' <b>Room '+(i+1)+': '+R[i][0]+'</b>',sub:r.solved?left+' flag'+(left>1?'s':'')+' left':'0 / 4 flags'}}}
-return{key:'done',kind:'done',text:'<b>All rooms cleared.</b> Room 10 stays sealed until it is declassified.',sub:''}}
+return{key:'done',kind:'done',text:'<b>All rooms cleared.</b> The incident is contained. Check the scoreboard!',sub:'investigation complete'}}
 function updObjective(){const o=calcObjective();if(OBJ&&OBJ.key===o.key)return;OBJ=o;$('ob-text').innerHTML=o.text;$('ob-sub').textContent=o.sub;$('objbar').classList.toggle('done',o.kind=='done')}
 const MM=$('mini'),MG=MM.getContext('2d'),MW=MM.width,MH=MM.height,MSX=MW/WW,MSY=MH/WH;
 const MMC={cleared:'#00ff6a',active:'#ffae00',open:'#ff3a3a',locked:'#4a3a40',sealed:'#7a6a00'};

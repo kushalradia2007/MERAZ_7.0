@@ -29,7 +29,7 @@
         {
             sel: '#room-list',
             alt: '#stage',
-            title: '9 ROOMS · 4 FLAGS EACH',
+            title: '10 ROOMS · 4 FLAGS EACH',
             body: 'Every door in the hub is a <b>room</b> with its own investigation. Walk up to a door and press <kbd>E</kbd>, or click a room in this list. ' +
                   'Each room hides <b>4 flags</b> worth <b>25 points</b> each. Rooms are <b>locked</b> (padlock) until you capture most of the flags in the room before it, so the story unfolds in order.'
         },
