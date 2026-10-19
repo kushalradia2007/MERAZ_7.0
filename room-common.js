@@ -1,8 +1,8 @@
 /* Shared helper for the room pages (served at /room-common.js).
  *
  * The server is the single source of truth for flags and progress:
- *   NJ.submit(roomId, flag) -> {success, message, challenge, solved[]}
- *   NJ.progress()           -> {score, current_room, rooms:{"1":[1,3],...}} | null
+ *   NJ.submit(roomId, flag) -> {success, message, challenge, solved[], reward}
+ *   NJ.progress()           -> {score, current_room, rooms:{"1":[1,3],...}, rewards:{"1":{"1":"..."}}} | null
  * A 401 (expired session) sends the player back to the login page.
  */
 (function () {
@@ -38,7 +38,8 @@
                 success: !!(r.ok && d.success),
                 message: d.message || detail || 'Request failed. Please try again.',
                 challenge: d.challenge || null,
-                solved: d.solved || []
+                solved: d.solved || [],
+                reward: d.reward || ''     // story text for the solved challenge (server-side, rooms 1-3)
             };
         }
     };

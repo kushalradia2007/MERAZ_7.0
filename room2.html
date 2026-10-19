@@ -2,811 +2,439 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>NIGHTJAR — Room 2: The Dead Telegram</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/room-ui.css">
     <style>
-        :root {
-            --bg-dark: #050505;
-            --panel-bg: rgba(10, 15, 25, 0.85);
-            --red: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --cyan: #06B6D4;
-            --cyan-glow: rgba(6, 182, 212, 0.4);
-            --amber: #F59E0B;
-            --amber-glow: rgba(245, 158, 11, 0.3);
-            --green: #10B981;
-            --text-main: #e2e8f0;
-            --text-dim: #64748b;
-            --text-ghost: #334155;
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --font-glitch: 'VT323', monospace;
-        }
+        :root { --accent: #fbbf24; --accent-rgb: 251, 191, 36; --wash-rgb: 34, 211, 238; --comms-h: 300px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        .r2-main { grid-template-columns: 300px minmax(0, 1fr) 320px; }
+        .r2-main > .nj-col { animation: r2-flick 6s infinite; }
+        @keyframes r2-flick { 0%, 92%, 100% { opacity: 1; } 93% { opacity: .93; } 95% { opacity: 1; } 97% { opacity: .96; } }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.03) 0%, transparent 70%),
-                linear-gradient(rgba(0, 0, 0, 0.5) 2px, transparent 2px);
-            background-size: 100% 100%, 100% 4px;
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Network topology */
+        .r2-nodes { padding: 14px; display: flex; flex-direction: column; gap: 9px; font-family: var(--font-code); font-size: 12px; }
+        .r2-node { display: flex; align-items: center; gap: 10px; padding: 9px 10px; color: var(--ink-faint); border: 1px dashed rgba(255, 255, 255, .12); border-radius: 6px; }
+        .r2-node .sd { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+        .r2-node.offline { opacity: .55; }
+        .r2-node.active { color: var(--cyan); border: 1px solid rgba(34, 211, 238, .35); background: rgba(34, 211, 238, .06); }
+        .r2-node.active .sd { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+        .r2-node.anomaly { color: var(--amber); border-color: rgba(251, 191, 36, .45); animation: r2-pulse 2s infinite; }
+        .r2-node.anomaly .sd { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+        .r2-node .tag { margin-left: auto; font-size: 10px; }
+        @keyframes r2-pulse { 50% { box-shadow: inset 0 0 14px rgba(251, 191, 36, .22); } }
 
-        /* Scanline and CRT Flicker */
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
+        /* Chat */
+        .r2-chat { flex: 1; }
+        .r2-history {
+            height: 330px; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(10, 15, 25, .55));
+            scrollbar-width: thin; scrollbar-color: rgba(251, 191, 36, .4) transparent;
         }
-        
-        @keyframes crt-flicker {
-            0% { opacity: 0.95; }
-            5% { opacity: 0.85; }
-            10% { opacity: 0.95; }
-            15% { opacity: 1; }
-            100% { opacity: 1; }
-        }
-        
-        .crt-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            animation: crt-flicker 4s infinite;
-        }
-
-        /* Header (Consistent with Room 1) */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: var(--font-code);
-            font-size: 12px;
-            z-index: 10;
-        }
-        
-        .brand { color: var(--cyan); letter-spacing: 1px; }
-        .status .blink-red { color: var(--red); animation: blink 1s infinite; text-shadow: 0 0 8px var(--red-glow); }
-        .timer { color: var(--text-dim); }
-        .timer span { color: var(--text-main); }
-        .exit-btn {
-            color: var(--cyan);
-            text-decoration: none;
-            border: 1px solid var(--cyan);
-            padding: 4px 12px;
-            border-radius: 2px;
-            transition: all 0.2s;
-        }
-        .exit-btn:hover { background: var(--cyan-glow); color: #fff; }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* Dashboard Grid */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 250px 1fr 300px;
-            gap: 20px;
-            padding: 20px;
-            flex: 1;
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-
-        .panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-            opacity: 0.5;
-        }
-
-        .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.6);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: var(--cyan);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Left Column: Network Nodes */
-        .node-list {
-            padding: 15px;
-            font-family: var(--font-code);
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .node {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-dim);
-            padding: 8px;
-            border: 1px dashed rgba(255,255,255,0.1);
-        }
-        
-        .node.active { color: var(--cyan); border-style: solid; border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.05); }
-        .node.anomaly { color: var(--amber); border-color: var(--amber-glow); animation: anomaly-pulse 2s infinite; }
-        .node.offline { opacity: 0.5; }
-        
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
-        .active .status-dot { background: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
-        .anomaly .status-dot { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); }
-        .offline .status-dot { background: var(--red); }
-        
-        @keyframes anomaly-pulse {
-            0% { box-shadow: inset 0 0 0 rgba(245, 158, 11, 0); }
-            50% { box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.2); }
-            100% { box-shadow: inset 0 0 0 rgba(245, 158, 11, 0); }
-        }
-
-        /* Center Column: The Chat & Challenges */
-        .center-col {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .chat-history {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(10,15,25,0.8) 100%);
-        }
-        
-        .message {
-            font-family: var(--font-code);
-            font-size: 13px;
-            max-width: 85%;
-            position: relative;
-        }
-
-        .message-header {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-bottom: 4px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .msg-time.future {
-            color: var(--amber);
-            font-style: italic;
-        }
-        
-        .message-body {
-            padding: 12px 15px;
-            border-radius: 4px;
-            line-height: 1.5;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid transparent;
-        }
-
-        .msg-sys .message-body {
-            background: rgba(6, 182, 212, 0.1);
-            border-color: rgba(6, 182, 212, 0.3);
-            color: var(--cyan);
-        }
-
-        .msg-curator {
-            align-self: flex-start;
-        }
-        
-        .msg-curator .message-header {
-            color: var(--amber);
-        }
-
-        .msg-curator .message-body {
-            background: rgba(245, 158, 11, 0.05);
-            border-color: rgba(245, 158, 11, 0.2);
-            color: var(--amber);
-            text-shadow: 0 0 2px rgba(245, 158, 11, 0.5);
-            font-family: var(--font-glitch);
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .msg-curator .message-body:hover {
-            background: rgba(245, 158, 11, 0.15);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
-        }
-
-        .scrambled {
-            letter-spacing: 2px;
-        }
-
-        /* Burn Animation */
-        @keyframes burn-away {
-            0% { opacity: 1; filter: brightness(1) contrast(1); transform: scale(1); }
+        .r2-msg { font-family: var(--font-code); font-size: 13px; max-width: 88%; animation: nj-rise .4s both; }
+        .r2-msg .mh { display: flex; gap: 10px; font-size: 10px; color: var(--ink-faint); margin-bottom: 4px; }
+        .r2-msg .mh .future { color: var(--amber); font-style: italic; }
+        .r2-msg .mb { padding: 12px 15px; border-radius: 6px; line-height: 1.55; border: 1px solid transparent; overflow-wrap: anywhere; }
+        .r2-sys .mb { background: rgba(34, 211, 238, .09); border-color: rgba(34, 211, 238, .3); color: var(--cyan); }
+        .r2-cur { align-self: flex-start; }
+        .r2-cur .mh { color: var(--amber); }
+        .r2-cur .mb { background: rgba(251, 191, 36, .05); border-color: rgba(251, 191, 36, .22); color: var(--amber); text-shadow: 0 0 3px rgba(251, 191, 36, .5); }
+        .r2-cur .mb.scrambled { font-family: var(--font-glitch); font-size: 18px; letter-spacing: 2px; cursor: pointer; transition: background .3s, box-shadow .3s; }
+        .r2-cur .mb.scrambled:hover { background: rgba(251, 191, 36, .15); box-shadow: 0 0 16px rgba(251, 191, 36, .22); }
+        .r2-cur .mb.plain { font-family: var(--font-ui); font-size: 14px; }
+        .burning { animation: r2-burn 2.5s forwards ease-in; pointer-events: none; }
+        @keyframes r2-burn {
+            0% { opacity: 1; filter: brightness(1); transform: scale(1); }
             20% { filter: brightness(2) contrast(1.5) hue-rotate(-20deg); transform: scale(1.02); }
-            50% { opacity: 0.8; filter: blur(2px) contrast(2); color: #ef4444; background: rgba(239,68,68,0.2); }
-            80% { opacity: 0.3; filter: blur(4px); transform: translateY(-10px) scale(0.95); letter-spacing: 10px; }
-            100% { opacity: 0; filter: blur(10px); transform: translateY(-20px); display: none; }
+            50% { opacity: .8; filter: blur(2px) contrast(2); color: #ef4444; background: rgba(239, 68, 68, .2); }
+            80% { opacity: .3; filter: blur(4px); transform: translateY(-10px) scale(.95); letter-spacing: 10px; }
+            100% { opacity: 0; filter: blur(10px); transform: translateY(-20px); }
         }
+        .r2-remnant { align-self: flex-start; font-family: var(--font-code); font-size: 10px; color: #475569; border: 1px dashed #334155; padding: 8px 10px; background: rgba(0, 0, 0, .5); border-radius: 4px; }
+        .r2-enc { font-family: var(--font-code); font-size: 10px; letter-spacing: .12em; color: var(--amber); animation: nj-blink 2s infinite; }
 
-        .burning {
-            animation: burn-away 2.5s forwards ease-in;
-            pointer-events: none;
+        /* Challenge deck */
+        .r2-tabs { display: flex; background: rgba(0, 0, 0, .4); border-bottom: 1px solid var(--line); overflow-x: auto; }
+        .r2-tab {
+            all: unset; box-sizing: border-box; cursor: pointer; white-space: nowrap;
+            padding: 12px 18px; font-family: var(--font-code); font-size: 11px; letter-spacing: .12em; color: var(--ink-faint);
+            border-bottom: 2px solid transparent; transition: color .2s, background .2s, border-color .2s;
         }
+        .r2-tab:hover { color: var(--ink); background: rgba(255, 255, 255, .03); }
+        .r2-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .r2-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); background: rgba(var(--accent-rgb), .07); }
+        .r2-tab.done::after { content: " ✔"; color: var(--green); }
+        .r2-pane { display: none; padding: 16px; }
+        .r2-pane.active { display: block; animation: nj-rise .35s both; }
+        .r2-desc code { font-family: var(--font-code); color: var(--amber); background: rgba(251, 191, 36, .08); padding: 1px 5px; border-radius: 3px; word-break: break-all; }
 
-        .burned-remnant {
-            font-size: 10px;
-            color: var(--text-ghost);
-            font-family: var(--font-code);
-            border: 1px dashed var(--text-ghost);
-            padding: 8px;
-            background: rgba(0,0,0,0.5);
-            align-self: flex-start;
+        @media (max-width: 1250px) {
+            .r2-main { grid-template-columns: 280px minmax(0, 1fr); }
+            .r2-right { grid-column: 1 / -1; }
         }
-
-        /* Challenge Inputs */
-        .challenge-deck {
-            height: 280px;
-            display: flex;
-            flex-direction: column;
+        @media (max-width: 860px) {
+            .r2-main { grid-template-columns: 1fr; }
+            .r2-history { height: 260px; }
         }
-        
-        .challenge-tabs {
-            display: flex;
-            border-bottom: 1px solid rgba(6, 182, 212, 0.2);
-            background: rgba(0,0,0,0.4);
-        }
-        
-        .tab {
-            padding: 10px 15px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            color: var(--text-dim);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        
-        .tab:hover { color: var(--cyan); }
-        .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); background: rgba(6, 182, 212, 0.1); }
-        
-        .challenge-content {
-            padding: 15px;
-            flex: 1;
-            overflow-y: auto;
-            display: none;
-        }
-        .challenge-content.active { display: block; }
-        
-        .ch-title { font-weight: bold; color: var(--cyan); margin-bottom: 10px; font-size: 14px; font-family: var(--font-code); }
-        .ch-desc { color: var(--text-main); font-size: 13px; margin-bottom: 15px; line-height: 1.5; }
-        
-        .terminal-input-group {
-            display: flex;
-            background: #000;
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            border-radius: 2px;
-            padding: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .terminal-prompt {
-            color: var(--cyan);
-            padding: 8px;
-            font-family: var(--font-code);
-            font-size: 13px;
-        }
-        
-        .terminal-input-group input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-family: var(--font-code);
-            font-size: 13px;
-            outline: none;
-        }
-        
-        .terminal-input-group button {
-            background: rgba(6, 182, 212, 0.2);
-            color: var(--cyan);
-            border: 1px solid rgba(6, 182, 212, 0.5);
-            padding: 0 15px;
-            font-family: var(--font-code);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .terminal-input-group button:hover {
-            background: var(--cyan);
-            color: #000;
-        }
-        
-        .evidence-btn, .evidence-btn-dl {
-            background: transparent;
-            border: 1px dashed var(--text-dim);
-            color: var(--text-dim);
-            padding: 6px 12px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .evidence-btn:hover, .evidence-btn-dl:hover { border-color: var(--amber); color: var(--amber); }
-        
-        .evidence-group {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .ch-reward {
-            padding: 10px;
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 2px solid var(--green);
-            color: var(--green);
-            font-family: var(--font-code);
-            font-size: 12px;
-            display: none;
-        }
-
-        /* Right Column: System Logs */
-        .logs-panel {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .logs-content {
-            padding: 15px;
-            overflow-y: auto;
-            flex: 1;
-            background: #000;
-            font-family: var(--font-code);
-            font-size: 11px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .log-line { color: var(--text-dim); word-break: break-all; line-height: 1.4; }
-        .log-line .time { color: var(--text-ghost); margin-right: 5px; }
-        .log-error { color: var(--red); }
-        .log-warn { color: var(--amber); }
-        .log-info { color: var(--cyan); }
-        
-        .glitch-text {
-            animation: text-glitch 2s linear infinite;
-        }
-        
-        @keyframes text-glitch {
-            0% { transform: translate(0); text-shadow: none; }
-            20% { transform: translate(-1px, 1px); text-shadow: 1px 0 var(--red), -1px 0 var(--cyan); }
-            40% { transform: translate(1px, -1px); text-shadow: none; }
-            60% { transform: translate(0); text-shadow: -1px 0 var(--red), 1px 0 var(--cyan); }
-            80% { transform: translate(-1px, -1px); text-shadow: none; }
-            100% { transform: translate(0); }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
-        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.6); }
-
     </style>
     <script src="/room-common.js"></script>
+    <script src="/assets/story.js"></script>
 </head>
-<body>
-    <div class="crt-container">
-        <header>
-            <div class="brand">[NIGHTJAR.OS // RESPONSE CELL]</div>
-            <div class="status">STATUS: <span style="color: var(--amber);">COMMS_INTERCEPTED</span></div>
-            <div class="timer">T-MINUS: <span id="master-clock">00:39:45</span></div>
-            <a href="/hub" class="exit-btn">LEAVE ROOM</a>
-        </header>
+<body class="nj-room">
 
-        <div class="dashboard">
-            <!-- Left: Nodes -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span>>> NETWORK_TOPOLOGY</span>
-                    <span>[SYS_V.2.4]</span>
-                </div>
-                <div class="node-list">
-                    <div class="node active">
-                        <div class="status-dot"></div>
-                        <span>NEXUS_CORE_01</span>
-                        <span style="margin-left:auto; color:var(--cyan); font-size:10px;">[LOCAL]</span>
-                    </div>
-                    <div class="node offline">
-                        <div class="status-dot"></div>
-                        <span>FEST_DB_SYNC</span>
-                    </div>
-                    <div class="node offline">
-                        <div class="status-dot"></div>
-                        <span>AUTH_GATEWAY_A</span>
-                    </div>
-                    <div class="node anomaly" id="curator-node">
-                        <div class="status-dot"></div>
-                        <span>UNKNOWN_PEER_404</span>
-                        <span style="margin-left:auto; color:var(--amber); font-size:10px;">[GHOST]</span>
-                    </div>
-                    <div class="node offline">
-                        <div class="status-dot"></div>
-                        <span>RELAY_TANGO</span>
-                    </div>
-                </div>
-                
-                <div style="margin-top:auto; padding:15px; border-top:1px solid rgba(255,255,255,0.05); font-family:var(--font-code); font-size:10px; color:var(--text-dim);">
-                    > INCOMING TRANSMISSION:<br>
-                    <span style="color:var(--cyan);">"The page is not the attack. It is a doorbell. Decode what came with it. — Rhea"</span>
-                </div>
-            </div>
-
-            <!-- Center: Chat & Challenges -->
-            <div class="center-col">
-                <!-- Chat -->
-                <div class="panel chat-container">
-                    <div class="panel-header">
-                        <span>>> DEAD_TELEGRAM_CLIENT [DEPRECATED]</span>
-                        <span style="color:var(--amber);" class="glitch-text">ENC_MODE: BROKEN</span>
-                    </div>
-                    <div class="chat-history" id="chat-box">
-                        <div class="message msg-sys">
-                            <div class="message-header">
-                                <span class="msg-time">23:24:01</span>
-                                <span class="msg-sender">SYSTEM</span>
-                            </div>
-                            <div class="message-body">
-                                WARNING: Connected to legacy chat relay. Encryption keys are malformed. Messages may exhibit temporal instability.
-                            </div>
-                        </div>
-                        
-                        <!-- Messages will be injected here via JS -->
-                    </div>
-                </div>
-
-                <!-- Challenges -->
-                <div class="panel challenge-deck">
-                    <div class="challenge-tabs">
-                        <div class="tab active" onclick="switchTab(1)">2.1 NOISE</div>
-                        <div class="tab" onclick="switchTab(2)">2.2 HASH</div>
-                        <div class="tab" onclick="switchTab(3)">2.3 STEGO</div>
-                        <div class="tab" onclick="switchTab(4)">2.4 SIGNATURE</div>
-                    </div>
-                    
-                    <!-- Ch 1 -->
-                    <div class="challenge-content active" id="ch-1">
-                        <div class="ch-title">2.1 THE MESSAGE THAT LOOKS LIKE NOISE</div>
-                        <div class="ch-desc">
-                            > The Curator sent a message encoded to bypass basic filters. Export the chat dump and identify the hidden string.
-                        </div>
-                        <div class="evidence-group">
-                            <button class="evidence-btn" onclick="window.open('/challenges/Room - 2/evidence/chat_export_2317.log', '_blank')">⬇ chat_export.log</button>
-                            <a href="/challenges/Room - 2/evidence/chat_export_2317.log" download class="evidence-btn-dl">DL</a>
-                        </div>
-                        <div class="terminal-input-group">
-                            <span class="terminal-prompt">DECRYPT >></span>
-                            <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
-                            <button onclick="verifyFlag(1)">SUBMIT</button>
-                        </div>
-                        <div class="ch-reward" id="reward-1">
-                            > DECRYPTED: "THE HOST WITH THE BLUE NAME IS LYING."
-                        </div>
-                    </div>
-
-                    <!-- Ch 2 -->
-                    <div class="challenge-content" id="ch-2">
-                        <div class="ch-title">2.2 THE HASH THAT IS A DOOR</div>
-                        <div class="ch-desc">
-                            > A file was dropped on the server, but only its MD5 signature was recorded in the logs: <code>5d41402abc4b2a76b9719d911017c592</code>. Which of these recovered cache files matches the hash?
-                        </div>
-                        <div class="evidence-group">
-                            <button class="evidence-btn" onclick="window.open('/challenges/Room - 2/evidence/cache_files.zip', '_blank')">⬇ cache_files.zip</button>
-                            <a href="/challenges/Room - 2/evidence/cache_files.zip" download class="evidence-btn-dl">DL</a>
-                        </div>
-                        <div class="terminal-input-group">
-                            <span class="terminal-prompt">MATCH >></span>
-                            <input type="text" id="flag-2" placeholder="NIGHTJAR{filename.ext}">
-                            <button onclick="verifyFlag(2)">SUBMIT</button>
-                        </div>
-                        <div class="ch-reward" id="reward-2">
-                            > VERIFIED: The file contains a note stating the blue name is not a person but a host alias.
-                        </div>
-                    </div>
-
-                    <!-- Ch 3 -->
-                    <div class="challenge-content" id="ch-3">
-                        <div class="ch-title">2.3 THE IMAGE THAT WHISPERS</div>
-                        <div class="ch-desc">
-                            > The Curator's avatar image has an anomalous file size. Perform a steganographic analysis on the asset to find the concealed directive.
-                        </div>
-                        <div class="evidence-group">
-                            <button class="evidence-btn" onclick="window.open('/challenges/Room - 2/evidence/curator_avatar.jpg', '_blank')">👁 curator_avatar.jpg</button>
-                            <a href="/challenges/Room - 2/evidence/curator_avatar.jpg" download class="evidence-btn-dl">DL</a>
-                        </div>
-                        <div class="terminal-input-group">
-                            <span class="terminal-prompt">EXTRACT >></span>
-                            <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
-                            <button onclick="verifyFlag(3)">SUBMIT</button>
-                        </div>
-                        <div class="ch-reward" id="reward-3">
-                            > EXTRACTED: "ASK THE PERSON WHO NEVER SIGNS IN."
-                        </div>
-                    </div>
-
-                    <!-- Ch 4 -->
-                    <div class="challenge-content" id="ch-4">
-                        <div class="ch-title">2.4 THE DEAD MESSAGE</div>
-                        <div class="ch-desc">
-                            > Multiple messages were signed, but one signature is invalid, injected by an imposter. Identify the altered message block to find the next relay target.
-                        </div>
-                        <div class="evidence-group">
-                            <button class="evidence-btn" onclick="window.open('/challenges/Room - 2/evidence/signed_blocks.asc', '_blank')">⬇ signed_blocks.asc</button>
-                            <a href="/challenges/Room - 2/evidence/signed_blocks.asc" download class="evidence-btn-dl">DL</a>
-                        </div>
-                        <div class="terminal-input-group">
-                            <span class="terminal-prompt">VERIFY >></span>
-                            <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
-                            <button onclick="verifyFlag(4)">SUBMIT</button>
-                        </div>
-                        <div class="ch-reward" id="reward-4">
-                            > FORGERY DETECTED. Next Relay identified: AETHER-7.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Logs -->
-            <div class="panel logs-panel">
-                <div class="panel-header">
-                    <span>>> INTEGRITY_MONITOR</span>
-                </div>
-                <div class="logs-content" id="sys-logs">
-                    <!-- Logs injected via JS -->
-                </div>
-            </div>
+    <header class="nj-hud">
+        <div class="nj-hud-l">
+            <span class="nj-logo" aria-hidden="true">◈</span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>RESPONSE CELL</span></div>
+            <span class="nj-status"><i class="dot warn"></i><b>COMMS INTERCEPTED</b></span>
         </div>
-    </div>
+        <div class="nj-hud-c">
+            <span class="nj-act">ACT I · THE SIGNAL</span>
+            <span class="nj-roomno">ROOM <b>2</b>/9</span>
+            <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
+        </div>
+        <div class="nj-hud-r">
+            <span class="nj-stat hide-s">SCORE<b data-nj-score>----</b></span>
+            <span class="nj-stat hide-s">T-MINUS<b id="master-clock">00:45:00</b></span>
+            <a href="/hub" class="nj-leave">LEAVE ROOM</a>
+        </div>
+    </header>
+
+    <main class="nj-main r2-main">
+        <!-- Left: topology + Rhea -->
+        <div class="nj-col">
+            <section class="nj-panel nj-rise" style="--i:0">
+                <div class="nj-panel-h"><i class="dot"></i>Network topology<span class="meta">SYS_V.2.4</span></div>
+                <div class="r2-nodes">
+                    <div class="r2-node active"><span class="sd"></span><span>NEXUS_CORE_01</span><span class="tag">[LOCAL]</span></div>
+                    <div class="r2-node offline"><span class="sd"></span><span>FEST_DB_SYNC</span></div>
+                    <div class="r2-node offline"><span class="sd"></span><span>AUTH_GATEWAY_A</span></div>
+                    <div class="r2-node anomaly"><span class="sd"></span><span>UNKNOWN_PEER_404</span><span class="tag">[GHOST]</span></div>
+                    <div class="r2-node offline"><span class="sd"></span><span>RELAY_TANGO</span></div>
+                </div>
+            </section>
+            <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
+        </div>
+
+        <!-- Center: chat + challenges -->
+        <div class="nj-col">
+            <section class="nj-panel r2-chat nj-rise" style="--i:1">
+                <div class="nj-panel-h"><i class="dot"></i>Dead telegram client [deprecated]<span class="meta r2-enc">ENC_MODE: BROKEN</span></div>
+                <div class="r2-history" id="chat-box" role="log" aria-live="polite">
+                    <div class="r2-msg r2-sys">
+                        <div class="mh"><span>23:24:01</span><span>SYSTEM</span></div>
+                        <div class="mb">WARNING: Connected to legacy chat relay. Encryption keys are malformed. Messages may exhibit temporal instability.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="r2-tabs" role="tablist" aria-label="Challenges">
+                    <button type="button" class="r2-tab" role="tab" id="tab-1" aria-selected="true" aria-controls="ch-1" onclick="switchTab(1)">2.1 NOISE</button>
+                    <button type="button" class="r2-tab" role="tab" id="tab-2" aria-selected="false" aria-controls="ch-2" onclick="switchTab(2)">2.2 HASH</button>
+                    <button type="button" class="r2-tab" role="tab" id="tab-3" aria-selected="false" aria-controls="ch-3" onclick="switchTab(3)">2.3 STEGO</button>
+                    <button type="button" class="r2-tab" role="tab" id="tab-4" aria-selected="false" aria-controls="ch-4" onclick="switchTab(4)">2.4 SIGNATURE</button>
+                </div>
+
+                <div class="r2-pane active" id="ch-1" role="tabpanel" aria-labelledby="tab-1">
+                    <article class="nj-card" id="target-1">
+                        <div class="nj-card-top"><span class="nj-badge">2.1</span><span class="nj-title">THE MESSAGE THAT LOOKS LIKE NOISE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">The Curator sent a message encoded to bypass basic filters. Export the chat dump and identify the hidden string.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/chat_export_2317.log', '_blank')">⬇ chat_export.log</button><a href="/challenges/Room - 2/evidence/chat_export_2317.log" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">DECRYPT ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.1"><button type="button" onclick="verifyFlag(1)">SUBMIT</button></div>
+                        <div class="nj-reward" id="reward-1"></div>
+                    </article>
+                </div>
+
+                <div class="r2-pane" id="ch-2" role="tabpanel" aria-labelledby="tab-2">
+                    <article class="nj-card" id="target-2">
+                        <div class="nj-card-top"><span class="nj-badge">2.2</span><span class="nj-title">THE HASH THAT IS A DOOR</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc r2-desc">A file was dropped on the server, but only its MD5 signature was recorded in the logs: <code>5d41402abc4b2a76b9719d911017c592</code>. Which of these recovered cache files matches the hash?</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/cache_files.zip', '_blank')">⬇ cache_files.zip</button><a href="/challenges/Room - 2/evidence/cache_files.zip" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">MATCH ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{filename.ext}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.2"><button type="button" onclick="verifyFlag(2)">SUBMIT</button></div>
+                        <div class="nj-reward" id="reward-2"></div>
+                    </article>
+                </div>
+
+                <div class="r2-pane" id="ch-3" role="tabpanel" aria-labelledby="tab-3">
+                    <article class="nj-card" id="target-3">
+                        <div class="nj-card-top"><span class="nj-badge">2.3</span><span class="nj-title">THE IMAGE THAT WHISPERS</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">The Curator's avatar image has an anomalous file size. Perform a steganographic analysis on the asset to find the concealed directive.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/curator_avatar.jpg', '_blank')">▣ curator_avatar.jpg</button><a href="/challenges/Room - 2/evidence/curator_avatar.jpg" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">EXTRACT ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.3"><button type="button" onclick="verifyFlag(3)">SUBMIT</button></div>
+                        <div class="nj-reward" id="reward-3"></div>
+                    </article>
+                </div>
+
+                <div class="r2-pane" id="ch-4" role="tabpanel" aria-labelledby="tab-4">
+                    <article class="nj-card" id="target-4">
+                        <div class="nj-card-top"><span class="nj-badge">2.4</span><span class="nj-title">THE DEAD MESSAGE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Multiple messages were signed, but one signature is invalid, injected by an imposter. Identify the altered message block to find the next relay target.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/signed_blocks.asc', '_blank')">⬇ signed_blocks.asc</button><a href="/challenges/Room - 2/evidence/signed_blocks.asc" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">VERIFY ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.4"><button type="button" onclick="verifyFlag(4)">SUBMIT</button></div>
+                        <div class="nj-reward" id="reward-4"></div>
+                    </article>
+                </div>
+                <div class="nj-panel-b" style="padding-top:0"><div id="nj-next-slot"></div></div>
+            </section>
+        </div>
+
+        <!-- Right: integrity monitor -->
+        <div class="nj-col r2-right">
+            <section class="nj-panel nj-rise" style="--i:3">
+                <div class="nj-panel-h"><i class="dot"></i>Integrity monitor<span class="meta" id="solved-count">0/4</span></div>
+                <div class="nj-log" id="sys-logs" style="height:560px" role="log" aria-live="off"></div>
+            </section>
+        </div>
+    </main>
 
     <script>
-        // Clock
-        function updateClock() {
-            let s = 39, m = 45; 
-            const timeString = `00:${m}:${new Date().getSeconds().toString().padStart(2, '0')}`;
-            document.getElementById('master-clock').innerText = timeString;
-        }
-        setInterval(updateClock, 1000);
+        const ROOM_ID = 2;
 
-        // System Logs Generator
-        const sysLogs = document.getElementById('sys-logs');
-        const logMessages = [
-            { text: "Legacy Chat Daemon started on port 6667.", type: "log-info" },
-            { text: "WARN: Unhackable.js module is using Math.random() for key generation.", type: "log-warn" },
-            { text: "Connection received from unknown peer.", type: "log-info" },
-            { text: "SSL Handshake failed: Certificate from 2028 is invalid.", type: "log-error" },
-            { text: "Peer forcing fallback to plaintext routing.", type: "log-warn" },
-            { text: "Metadata leak: Peer IP masked, but timezone offset suggests local proximity.", type: "log-warn" },
-            { text: "ERROR: Incoming message timestamp violates causality.", type: "log-error" },
-            { text: "Scrubbing memory buffers to prevent overflow...", type: "log-info" }
-        ];
+        /* ───────── Story: Room 2 (Rhea D'Souza) ─────────
+         * Player-visible text. No answers, no decoded messages, no relay names. */
+        const story = NJStory.create({
+            room: 2,
+            title: 'THE DEAD TELEGRAM',
+            lead: 'rhea',
+            nextMount: '#nj-next-slot',
+            objective: 'Four things to analyse: noise, a hash, an image and a signature. Start anywhere.',
+            complete: 'Room clear. The relay capture is waiting in Room 3 whenever you are ready.',
 
-        function addLog() {
-            const log = logMessages[Math.floor(Math.random() * logMessages.length)];
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            
-            const div = document.createElement('div');
-            div.className = `log-line ${log.type}`;
-            div.innerHTML = `<span class="time">[${time}]</span> ${log.text}`;
-            
-            sysLogs.appendChild(div);
-            sysLogs.scrollTop = sysLogs.scrollHeight;
-            
-            setTimeout(addLog, Math.random() * 4000 + 1000);
-        }
-        setTimeout(addLog, 1000);
+            briefing: [
+                { scene: 'A chat terminal nobody has used in years is receiving messages stamped with dates that have not happened yet.', stamp: '00:19 · LEGACY COMMS ANNEX' },
+                { npc: 'rhea', text: 'Ila patched me in from the NEXUS annex. I am Rhea. I built most of what is on fire right now, and I would rather you heard that from me.' },
+                { npc: 'rhea', text: 'The page you found is not the attack. It is a doorbell. Somebody rang it, and this is what answered.' },
+                { npc: 'rhea', text: 'That chat client is dead. Deprecated, badly configured, sealed. And something is talking through it anyway. Look at the timestamps. They are from the future.' },
+                { npc: 'rhea', text: 'Everything that came with the doorbell is encoded, hashed, hidden or signed. The Curator wants it read. Otherwise, why send it? Decode what came with it.' },
+                { npc: 'rhea', text: 'One warning. Messages in that client burn after you open them, so do not lean on the chat. The evidence files will still be there.' },
+                { npc: 'rhea', text: 'I cannot hand you answers. I do not have them. I can only tell you where I would look.' },
+                { npc: 'system', text: 'LINK: RHEA_D // ENCRYPTION: MALFORMED // TARGETS UNLOCKED' }
+            ],
 
-        // Curator Messages Logic
-        const chatBox = document.getElementById('chat-box');
-        const curatorMessages = [
-            { id: 'm1', text: "596f7520617265206c6f6f6b696e6720696e207468652077726f6e6720706c6163652e", realText: "You are looking in the wrong place." },
-            { id: 'm2', text: "VEhFIEhPU1QgV0lUSCBUSEUgQkxVRSBOQU1FIElTIExZSU5HLg==", realText: "THE HOST WITH THE BLUE NAME IS LYING." },
-            { id: 'm3', text: "01000001 01000101 01010100 01001000 01000101 01010010", realText: "A E T H E R" }
-        ];
+            greet: {
+                0: ['Start with the chat export. If it looks like noise, it is usually a wrapper, not a secret.'],
+                1: ['One block open. The rest follow if you stay methodical.'],
+                2: ['Halfway. The Curator is changing tone. Less theatre, more nerves.'],
+                3: ['One left. Verify every signature. One of them will not hold.']
+            },
 
-        let msgIndex = 0;
+            onSolve: {
+                1: ['You read it. That was never encryption. It was costume.'],
+                2: ['A hash identifies data, not intent. Hold on to that. It matters more than you think.'],
+                3: ['Pictures carry more than pictures. Good eye.'],
+                4: ['Altered after signing. Someone wanted that message to look like it came from me.']
+            },
 
-        function injectCuratorMessage() {
-            if(msgIndex >= curatorMessages.length) return;
-            
-            const msg = curatorMessages[msgIndex];
-            const futureTime = "2028.11.14 " + new Date().toLocaleTimeString('en-US', { hour12: false });
-            
-            const div = document.createElement('div');
-            div.className = 'message msg-curator';
-            div.innerHTML = `
-                <div class="message-header">
-                    <span class="msg-time future">${futureTime}</span>
-                    <span class="msg-sender">curator_404</span>
-                </div>
-                <div class="message-body scrambled" id="body-${msg.id}" onclick="decryptMessage('${msg.id}')">
-                    [ENCRYPTED_BLOCK] :: ${msg.text}
-                </div>
-            `;
-            
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            msgIndex++;
-            
-            if(msgIndex < curatorMessages.length) {
-                setTimeout(injectCuratorMessage, 15000); // Next message in 15s
+            milestone: {
+                1: ['One down. The Curator will have noticed.'],
+                2: [
+                    { npc: 'ila', text: 'Rhea, status. Are they getting anywhere?' },
+                    { npc: 'rhea', text: 'More than I managed in a week.' }
+                ],
+                3: ['Last one. Slow is fine. Wrong is not.']
+            },
+
+            wrong: [
+                'That is not it. Check the exact wording against the evidence.',
+                'Not quite. Re-read what the file actually contains.',
+                'No match. Look again, and look slower.'
+            ],
+            hints: {
+                1: 'Strip the wrapper first, then ask what is inside. It may be wrapped more than once.',
+                2: 'Compute the digest of every file in the archive. Do not eyeball it.',
+                3: 'The avatar is heavier than it should be. Something rides along after the picture ends.',
+                4: 'Verify each signature in turn. One of them will refuse to verify.'
+            },
+
+            debrief: [
+                { scene: 'The chat client shuts itself down. The last line it prints is not an error.', stamp: '00:41 · LEGACY COMMS ANNEX' },
+                { npc: 'curator', text: 'Your festival is not the target. It is the test.' },
+                { npc: 'rhea', text: 'Same voice. Same theatre. But that last message was not theatrical. It was frightened.' },
+                { npc: 'ila', text: 'Rhea. The final message carries your signature.' },
+                { npc: 'rhea', text: 'I know. The timestamp is older than my first day on NEXUS. I did not write it, and I cannot tell you who did.' },
+                { npc: 'ila', text: 'Then nobody trusts that signature yet. Not yours, not anyone\u2019s. Context first.' },
+                { npc: 'rhea', text: 'The forged block points somewhere. A relay that was decommissioned months ago and should not be talking to anyone. It has been recording.' },
+                { npc: 'system', text: 'PACKET CAPTURE RECEIVED FROM RELAY. NETWORK OPERATIONS CENTRE ONLINE. ROOM 3 UNLOCKED.' }
+            ],
+            next: {
+                room: 3, href: '/room/3', label: 'PROCEED TO ROOM 3', from: 'rhea',
+                teaser: 'The relay is still sending. A small packet, on a schedule. Come and look at the capture with me.'
             }
-        }
-        
-        setTimeout(injectCuratorMessage, 3000);
+        });
+        story.mount(document.getElementById('npc-comms'));
 
-        // Decrypt and Burn
-        window.decryptMessage = function(id) {
-            const body = document.getElementById(`body-${id}`);
-            if(!body || body.classList.contains('burning')) return;
-            
-            const msgObj = curatorMessages.find(m => m.id === id);
-            
-            // Decrypt effect
-            body.classList.remove('scrambled');
-            body.innerText = msgObj.realText;
-            body.style.fontFamily = "var(--font-ui)";
-            body.style.fontSize = "14px";
-            
-            // Log the action
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            const logDiv = document.createElement('div');
-            logDiv.className = `log-line log-warn`;
-            logDiv.innerHTML = `<span class="time">[${time}]</span> WARN: User forced decryption of block ${id}. Initiating burn protocol.`;
-            sysLogs.appendChild(logDiv);
+        /* ───────── Clock (cosmetic, as before) ───────── */
+        setInterval(function () {
+            document.getElementById('master-clock').textContent = '00:45:' + String(new Date().getSeconds()).padStart(2, '0');
+        }, 1000);
+
+        /* ───────── Integrity monitor ───────── */
+        const sysLogs = document.getElementById('sys-logs');
+        function addLog(text, type) {
+            const d = document.createElement('div');
+            d.className = 'l ' + (type || 'info');
+            const t = document.createElement('span');
+            t.className = 't';
+            t.textContent = '[' + new Date().toLocaleTimeString('en-GB') + ']';
+            d.appendChild(t);
+            d.appendChild(document.createTextNode(text));
+            sysLogs.appendChild(d);
+            while (sysLogs.children.length > 120) sysLogs.removeChild(sysLogs.firstChild);
             sysLogs.scrollTop = sysLogs.scrollHeight;
+        }
+        const ambient = [
+            ['Legacy Chat Daemon started on port 6667.', 'info'],
+            ['WARN: Unhackable.js module is using Math.random() for key generation.', 'warn'],
+            ['Connection received from unknown peer.', 'info'],
+            ['SSL Handshake failed: Certificate from 2028 is invalid.', 'err'],
+            ['Peer forcing fallback to plaintext routing.', 'warn'],
+            ['Metadata leak: Peer IP masked, but timezone offset suggests local proximity.', 'warn'],
+            ['ERROR: Incoming message timestamp violates causality.', 'err'],
+            ['Scrubbing memory buffers to prevent overflow...', 'info']
+        ];
+        (function ambientLoop() {
+            const a = ambient[Math.floor(Math.random() * ambient.length)];
+            addLog(a[0], a[1]);
+            setTimeout(ambientLoop, Math.random() * 4000 + 1500);
+        })();
 
-            // Burn after delay
-            setTimeout(() => {
+        /* ───────── Chat: the Curator ───────── */
+        const chatBox = document.getElementById('chat-box');
+        const curatorBlocks = [
+            { id: 'm1', text: '596f7520617265206c6f6f6b696e6720696e207468652077726f6e6720706c6163652e', realText: 'You are looking in the wrong place.' },
+            { id: 'm2', text: 'VEhFIEhPU1QgV0lUSCBUSEUgQkxVRSBOQU1FIElTIExZSU5HLg==', realText: 'THE HOST WITH THE BLUE NAME IS LYING.' },
+            { id: 'm3', text: '01000001 01000101 01010100 01001000 01000101 01010010', realText: 'A E T H E R' }
+        ];
+        let blockIdx = 0;
+        function futureStamp() { return '2028.11.14 ' + new Date().toLocaleTimeString('en-GB'); }
+
+        function injectBlock() {
+            if (blockIdx >= curatorBlocks.length) return;
+            const m = curatorBlocks[blockIdx++];
+            const wrap = document.createElement('div');
+            wrap.className = 'r2-msg r2-cur';
+            wrap.innerHTML = '<div class="mh"><span class="future"></span><span>THE CURATOR</span></div><div class="mb scrambled" role="button" tabindex="0"></div>';
+            wrap.querySelector('.future').textContent = futureStamp();
+            const body = wrap.querySelector('.mb');
+            body.id = 'body-' + m.id;
+            body.textContent = '[ENCRYPTED_BLOCK] :: ' + m.text;
+            body.addEventListener('click', function () { decryptBlock(m, wrap, body); });
+            body.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); decryptBlock(m, wrap, body); } });
+            chatBox.appendChild(wrap);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            if (blockIdx < curatorBlocks.length) setTimeout(injectBlock, 15000);
+        }
+        setTimeout(injectBlock, 3000);
+
+        function decryptBlock(m, wrap, body) {
+            if (body.classList.contains('burning') || !body.classList.contains('scrambled')) return;
+            body.classList.remove('scrambled');
+            body.classList.add('plain');
+            body.textContent = m.realText;
+            addLog('WARN: User forced decryption of block ' + m.id + '. Initiating burn protocol.', 'warn');
+            setTimeout(function () {
                 body.classList.add('burning');
-                setTimeout(() => {
-                    // Replace with remnant
-                    const parent = body.parentElement;
-                    parent.innerHTML = `
-                        <div class="message-header">
-                            <span class="msg-time">--:--:--</span>
-                            <span class="msg-sender">curator_404</span>
-                        </div>
-                        <div class="burned-remnant">[MESSAGE EXPUNGED FROM MEMORY]</div>
-                    `;
-                }, 2400); // matches animation length roughly
+                setTimeout(function () {
+                    wrap.innerHTML = '<div class="mh"><span>--:--:--</span><span>THE CURATOR</span></div><div class="r2-remnant">[MESSAGE EXPUNGED FROM MEMORY]</div>';
+                }, 2400);
             }, 3000);
         }
 
-        // Tabs Logic
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.challenge-content').forEach(c => c.classList.remove('active'));
-            
-            document.querySelectorAll('.tab')[tabId-1].classList.add('active');
-            document.getElementById(`ch-${tabId}`).classList.add('active');
+        /* The Curator reacts to the player's progress, in the chat itself. */
+        const curatorReplies = {
+            1: 'You read me. Good. Few people do.',
+            2: 'Hashes do not lie. People do. Keep that in mind.',
+            3: 'You are looking in all the right places. That worries me.',
+            4: 'The route is open now. I did not open it.'
+        };
+        function curatorSays(text) {
+            const wrap = document.createElement('div');
+            wrap.className = 'r2-msg r2-cur';
+            wrap.innerHTML = '<div class="mh"><span class="future"></span><span>THE CURATOR</span></div><div class="mb plain"></div>';
+            wrap.querySelector('.future').textContent = futureStamp();
+            wrap.querySelector('.mb').textContent = text;
+            chatBox.appendChild(wrap);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Flag logic: the server is the only source of truth
-        const ROOM_ID = 2;
-        const solvedTargets = new Set();
-
-        function escapeHtml(t) {
-            return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        }
-
-        function markSolved(targetNum) {
-            const reward = document.getElementById(`reward-${targetNum}`);
-            if (reward) reward.style.display = 'block';
-            const inputField = document.getElementById(`flag-${targetNum}`);
-            if (inputField) {
-                inputField.value = 'FLAG ACCEPTED';
-                inputField.disabled = true;
+        /* ───────── Tabs ───────── */
+        function switchTab(n) {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('tab-' + i).setAttribute('aria-selected', i === n ? 'true' : 'false');
+                document.getElementById('ch-' + i).classList.toggle('active', i === n);
             }
-            const btn = document.querySelector('#ch-' + targetNum + ' .terminal-input-group button');
+        }
+        window.switchTab = switchTab;
+
+        /* ───────── Flags: the server is the only source of truth ───────── */
+        function markSolved(n, reward, fresh) {
+            const card = document.getElementById('target-' + n);
+            if (!card) return;
+            const was = card.classList.contains('solved');
+            card.classList.add('solved');
+            if (fresh && !was) {
+                card.classList.add('stamp');
+                setTimeout(function () { card.classList.remove('stamp'); }, 800);
+            }
+            document.getElementById('tab-' + n).classList.add('done');
+            const rw = document.getElementById('reward-' + n);
+            if (rw && (reward || !rw.textContent)) rw.textContent = reward || 'Evidence verified.';
+            const input = document.getElementById('flag-' + n);
+            if (input) { input.value = 'FLAG ACCEPTED'; input.disabled = true; }
+            const form = card.querySelector('.nj-form');
+            if (form) { form.classList.remove('bad'); form.classList.add('ok'); }
+            const btn = card.querySelector('.nj-form button');
             if (btn) btn.disabled = true;
-            solvedTargets.add(targetNum);
+            document.getElementById('solved-count').textContent = document.querySelectorAll('.nj-card.solved').length + '/4';
         }
 
-        // Restore this player's solved state from the server
         async function initSolvedState() {
             const p = await NJ.progress();
-            if (!p) return;
-            const solved = p.rooms[ROOM_ID] || [];
-            solved.forEach(markSolved);
-            if (solved.length) checkAllSolved();
+            const solved = p ? (p.rooms[ROOM_ID] || []) : [];
+            const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
+            solved.forEach(function (n) { markSolved(n, rewards[n], false); });
+            story.boot(solved, p ? p.score : undefined);
         }
-
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        window.verifyFlag = async function(targetNum) {
-            const input = document.getElementById(`flag-${targetNum}`).value.trim();
-            if (!input) return;
-            const btn = document.querySelector('#ch-' + targetNum + ' .terminal-input-group button');
-            if (btn && btn.disabled) return;
-            if (btn) btn.disabled = true;
+        async function verifyFlag(n) {
+            const input = document.getElementById('flag-' + n);
+            const val = input.value.trim();
+            if (!val) return;
+            const form = input.closest('.nj-form');
+            const btn = form.querySelector('button');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.classList.add('busy');
+            addLog('Submitting flag for challenge 2.' + n + '...', 'info');
 
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-            sysLogs.innerHTML += `<div class="log-line log-info"><span class="time">[${time}]</span> Submitting flag for challenge 2.${targetNum}...</div>`;
-            sysLogs.scrollTop = sysLogs.scrollHeight;
-
-            const res = await NJ.submit(ROOM_ID, input);
-            if (btn) btn.disabled = false;
+            const res = await NJ.submit(ROOM_ID, val);
+            btn.classList.remove('busy');
+            btn.disabled = false;
             if (res.success) {
-                sysLogs.innerHTML += `<div class="log-line log-info" style="color:var(--green);"><span class="time">[${time}]</span> Flag 2.${res.challenge || targetNum} accepted. Block decrypted.</div>`;
-                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
-                checkAllSolved();
+                const hit = res.challenge || n;
+                const solved = res.solved.length ? res.solved : [n];
+                addLog('Flag 2.' + hit + ' accepted. Block decrypted.', 'ok');
+                const fresh = !document.getElementById('target-' + hit).classList.contains('solved');
+                solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
+                story.onSolved(hit, solved);
+                if (fresh && curatorReplies[hit]) setTimeout(function () { curatorSays(curatorReplies[hit]); }, 1800);
             } else {
-                sysLogs.innerHTML += `<div class="log-line log-error"><span class="time">[${time}]</span> ERROR: ${escapeHtml(res.message)}</div>`;
-            }
-            sysLogs.scrollTop = sysLogs.scrollHeight;
-        }
-
-        function checkAllSolved() {
-            if (solvedTargets.size === 4 && !document.getElementById('proceed-btn')) {
-                const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-                sysLogs.innerHTML += `<div class="log-line log-info" style="color:var(--green); font-weight:bold;"><span class="time">[${time}]</span> ALL RELAYS MAPPED. NEW ROUTE OPEN.</div>`;
-                
-                const nextRoomHtml = `
-                <div style="margin-top: 20px; padding: 15px; border: 1px solid var(--cyan); background: rgba(6, 182, 212, 0.1);">
-                    <div style="color: var(--cyan); font-weight: bold; margin-bottom: 10px;">>> TRACE COMPLETE</div>
-                    <div style="font-family: var(--font-code); font-size: 12px; margin-bottom: 15px;">
-                        The relay AETHER-7 is capturing packets. Proceed to the intercept terminal.
-                    </div>
-                    <a id="proceed-btn" href="/room/3" style="display: inline-block; padding: 8px 16px; background: var(--cyan); color: #000; text-decoration: none; font-weight: bold; border-radius: 2px;">PROCEED TO ROOM 3</a>
-                </div>`;
-                
-                // Add to the bottom of the challenge deck (outside tabs)
-                document.querySelector('.challenge-deck').insertAdjacentHTML('beforeend', nextRoomHtml);
+                addLog('ERROR: ' + res.message, 'err');
+                form.classList.remove('bad');
+                void form.offsetWidth;
+                form.classList.add('bad');
+                story.onWrong(n);
             }
         }
+        window.verifyFlag = verifyFlag;
+        document.querySelectorAll('.nj-form input').forEach(function (inp) {
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') verifyFlag(Number(inp.id.replace('flag-', '')));
+            });
+        });
     </script>
 </body>
 </html>
