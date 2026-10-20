@@ -617,6 +617,12 @@ CHALLENGE_REWARDS = {
         3: "MFA FATIGUE CONFIRMED. Fourteen pushes in five minutes. Kabir denied three of them. The gateway auto-approved push 14 after its 30-second timeout. Kabir did the right thing; the system approved the login anyway.",
         4: "PERSONA IDENTIFIED. kite-backup was created by the continuity service account from stolen credentials, to look like a human insider. No person ever typed a command as kite-backup.",
     },
+    8: {
+        1: "PE FORGERY CONFIRMED. A section with read, write and execute permissions, a signature from an unknown, expired build certificate, a size far beyond the claim, and no entry in the NEXUS package registry. The file is not the tool it claims to be.",
+        2: 'C2 CONFIG EXTRACTED. A Parallax command server, an XOR key, a 300-second beacon with jitter, and a developer signature: "Nothing stays local." (A.V.), the same line as the hidden page in Room 1.',
+        3: "DORMANT BRANCH DECODED. mira_propagate() runs only when the NEXUS zone is CORE. Kabir's workstation was WORKSTATION, so it stayed dead code there. AETHER-7 was CORE. The payload was built for infrastructure, not people.",
+        4: "TWO AUTHORS. Build CURATOR-20260925-001 was compiled on Sep 25 by the Curator. Build AETHER-FORGE-20261003-AUTO was compiled eight days later by the AETHER-7 automated pipeline. The Curator built the implant. MIRA-7 compiled its own propagation module.",
+    },
 }
 MAX_ROOM = 11  # a player who clears room 10 sits at "room 11" (finished)
 
