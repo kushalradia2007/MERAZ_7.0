@@ -1,256 +1,227 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meraz 7.0 — Festival Schedule 2026</title>
+%PDF-1.4
+%���� ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
 
-    <!-- ============================================================
-         DOCUMENT METADATA — EMBEDDED PDF PROPERTIES
-         
-         This file simulates a PDF with extractable metadata.
-         In a real CTF, this would be an actual PDF file.
-         The metadata below is what participants need to extract.
-         
-         PDF Properties:
-           Title:        Meraz 7.0 — Official Festival Schedule
-           Author:       Aman V. // Parallax Systems
-           Creator:      AetherForge v2.1
-           Producer:     Parallax Document Engine 4.0.3
-           Created:      2026-05-20T03:42:17+05:30
-           Modified:     2026-09-25T11:15:44+05:30
-           Subject:      Festival schedule and venue assignments
-           Keywords:     meraz, festival, nexus, schedule, 2026
-           
-         Custom Metadata:
-           x-project:    NIGHTJAR
-           x-build:      prlx-deng-403-sched-v7
-           x-org:        Parallax Systems — Research Division
-           x-contact:    aman.v@parallax-sys.net
-           
-         EXIF-equivalent (if converted from image):
-           GPS Lat:      21.1833° N (fictional lab location)
-           GPS Lon:      81.3939° E (fictional lab location)
-    ============================================================ -->
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (Aman V. // Parallax Systems) /CreationDate (D:20260520034217+00'00') /Creator (AetherForge v2.1) /Keywords (meraz, festival, nexus, schedule, 2026, x-project=NIGHTJAR, x-build=prlx-deng-403-sched-v7, x-org=Parallax Systems - Research Division, x-contact=aman.v@parallax-sys.net) /ModDate (D:20260925111544+00'00') /Producer (Parallax Document Engine 4.0.3) 
+  /Subject (Festival schedule and venue assignments) /Title (Meraz 7.0 - Official Festival Schedule) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 5745
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+.043137 .062745 .12549 rg
+n 0 751.8898 595.2756 90 re f*
+.133333 .827451 .933333 rg
+BT /F2 24 Tf 28.8 TL ET
+BT 1 0 0 1 40 789.8898 Tm (MERAZ 7.0) Tj T* ET
+1 1 1 rg
+BT /F1 11 Tf 13.2 TL ET
+BT 1 0 0 1 40 769.8898 Tm (Official Festival Schedule  |  NEXUS Platform  |  October 2026) Tj T* ET
+.043137 .062745 .12549 rg
+BT /F2 13 Tf 15.6 TL ET
+BT 1 0 0 1 40 716.8898 Tm (Day 1 - Friday, 2 October 2026) Tj T* ET
+.133333 .827451 .933333 RG
+n 40 708.8898 m 555.2756 708.8898 l S
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 690.8898 Tm (09:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 690.8898 Tm (Opening Ceremony) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 690.8898 Tm (Main Auditorium) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 671.8898 Tm (10:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 671.8898 Tm (SPECTRE Kickoff: NIGHTJAR Response Briefing) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 671.8898 Tm (Lab Complex B) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 652.8898 Tm (11:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 652.8898 Tm (RoboWars Qualifier) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 652.8898 Tm (Ground Floor Arena) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 633.8898 Tm (13:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 633.8898 Tm (Workshop: Cloud Architecture 101) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 633.8898 Tm (Seminar Hall 2) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 614.8898 Tm (14:30) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 614.8898 Tm (CodeSprint, Round 1) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 614.8898 Tm (Computer Lab A) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 595.8898 Tm (16:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 595.8898 Tm (Panel: Future of AI in Education) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 595.8898 Tm (Conference Room 1) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 576.8898 Tm (18:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 576.8898 Tm (Cultural Night: Battle of Bands) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 576.8898 Tm (Open Air Theatre) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 557.8898 Tm (21:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 557.8898 Tm (NEXUS Systems Maintenance Window) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 557.8898 Tm (Server Room \(Restricted\)) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 538.8898 Tm (23:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 538.8898 Tm (SPECTRE // NIGHTJAR: Live Incident Begins) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 538.8898 Tm (Lab Complex B + Online) Tj T* ET
+.043137 .062745 .12549 rg
+BT /F2 13 Tf 15.6 TL ET
+BT 1 0 0 1 40 509.8898 Tm (Day 2 - Saturday, 3 October 2026) Tj T* ET
+.133333 .827451 .933333 RG
+n 40 501.8898 m 555.2756 501.8898 l S
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 483.8898 Tm (04:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 483.8898 Tm (SPECTRE // NIGHTJAR: Incident Concludes) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 483.8898 Tm (Lab Complex B) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 464.8898 Tm (09:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 464.8898 Tm (RoboWars Finals) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 464.8898 Tm (Ground Floor Arena) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 445.8898 Tm (10:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 445.8898 Tm (Hackathon: 24hr Sprint Begins) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 445.8898 Tm (Innovation Hub) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 426.8898 Tm (14:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 426.8898 Tm (Workshop: Ethical Hacking Fundamentals) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 426.8898 Tm (Seminar Hall 1) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 407.8898 Tm (17:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 407.8898 Tm (Prize Distribution: Day 1 Events) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 407.8898 Tm (Main Auditorium) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+.054902 .454902 .564706 rg
+BT 1 0 0 1 40 388.8898 Tm (19:00) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 95 388.8898 Tm (DJ Night: Closing Celebration) Tj T* ET
+.333333 .333333 .333333 rg
+BT 1 0 0 1 400 388.8898 Tm (Open Air Theatre) Tj T* ET
+BT /F2 10 Tf 12 TL ET
+0 0 0 rg
+BT 1 0 0 1 40 359.8898 Tm (NEXUS System Notes) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+.2 .2 .2 rg
+BT 1 0 0 1 40 344.8898 Tm (All events are managed through the NEXUS Festival Platform v3.2.1. Venue assignments are subject to change) Tj T* ET
+BT 1 0 0 1 40 331.8898 Tm (based on real-time capacity monitoring. For live updates, check the NEXUS Festival Hub or contact a) Tj T* ET
+BT 1 0 0 1 40 318.8898 Tm (volunteer with a blue lanyard.) Tj T* ET
+BT 1 0 0 1 40 305.8898 Tm (The NEXUS maintenance window at 21:00 on Day 1 is a routine scheduled operation \(about 15 minutes\). Badge) Tj T* ET
+BT 1 0 0 1 40 292.8898 Tm (validation, lighting control and media display continue via the AETHER continuity protocol during downtime.) Tj T* ET
+BT /F1 8 Tf 9.6 TL ET
+.533333 .533333 .533333 rg
+BT 1 0 0 1 40 30 Tm (MERAZ 7.0 Official Festival Schedule  |  \(c\) 2026 IIT Bhilai Meraz Organising Committee \(fictional event\)) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000524 00000 n 
+0000000592 00000 n 
+0000001097 00000 n 
+0000001156 00000 n 
+trailer
+<<
+/ID 
+[<abffcf152a49efd3f49316c790f7f5cf><abffcf152a49efd3f49316c790f7f5cf>]
+% ReportLab generated PDF document -- digest (opensource)
 
-    <meta name="author" content="Aman V. // Parallax Systems">
-    <meta name="generator" content="AetherForge v2.1">
-    <meta name="description" content="Meraz 7.0 Official Festival Schedule — NEXUS Platform">
-    <meta name="x-parallax-project" content="NIGHTJAR">
-    <meta name="x-parallax-build" content="prlx-deng-403-sched-v7">
-    <meta name="x-parallax-org" content="Parallax Systems — Research Division">
-    <meta name="x-contact" content="aman.v@parallax-sys.net">
-    <meta name="date-created" content="2026-05-20T03:42:17+05:30">
-    <meta name="date-modified" content="2026-09-25T11:15:44+05:30">
-
-    <style>
-        :root {
-            --bg: #0a0a0f;
-            --card: #111118;
-            --border: #1e1e2e;
-            --text: #c8c8d8;
-            --muted: #5a5a6a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        .doc-header {
-            background: linear-gradient(135deg, #0d0d1a, #1a0d2e);
-            border-bottom: 2px solid var(--cyan);
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        .doc-header h1 {
-            font-size: 2rem;
-            color: var(--cyan);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .doc-header .sub {
-            color: var(--muted);
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            letter-spacing: 1px;
-        }
-
-        .content {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .section {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .section h2 {
-            color: var(--amber);
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 0.6rem 0.8rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-
-        th {
-            color: var(--cyan);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.7rem;
-        }
-
-        td { color: var(--text); }
-
-        .event-name { color: #e0e0f0; font-weight: 500; }
-        .venue { color: var(--muted); }
-        .time { color: var(--amber); font-family: 'Consolas', monospace; font-size: 0.8rem; }
-
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            font-size: 0.7rem;
-            color: var(--muted);
-            border-top: 1px solid var(--border);
-        }
-
-        .metadata-block {
-            background: #080810;
-            border: 1px solid #1a1a25;
-            border-radius: 4px;
-            padding: 1rem;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 0.7rem;
-            color: #3a3a4a;
-            margin-top: 1rem;
-            line-height: 1.8;
-        }
-    </style>
-</head>
-<body>
-
-<div class="doc-header">
-    <h1>Meraz 7.0 — Festival Schedule</h1>
-    <div class="sub">Official Schedule — NEXUS Platform — October 2026</div>
-</div>
-
-<div class="content">
-
-    <div class="section">
-        <h2>Day 1 — Friday, 2 October 2026</h2>
-        <table>
-            <thead>
-                <tr><th>Time</th><th>Event</th><th>Venue</th><th>Category</th></tr>
-            </thead>
-            <tbody>
-                <tr><td class="time">09:00</td><td class="event-name">Opening Ceremony</td><td class="venue">Main Auditorium</td><td>Ceremony</td></tr>
-                <tr><td class="time">10:00</td><td class="event-name">SPECTRE Kickoff — NIGHTJAR Response Briefing</td><td class="venue">Lab Complex B</td><td>Cybersecurity</td></tr>
-                <tr><td class="time">11:00</td><td class="event-name">RoboWars Qualifier</td><td class="venue">Ground Floor Arena</td><td>Robotics</td></tr>
-                <tr><td class="time">13:00</td><td class="event-name">Workshop: Cloud Architecture 101</td><td class="venue">Seminar Hall 2</td><td>Workshop</td></tr>
-                <tr><td class="time">14:30</td><td class="event-name">CodeSprint — Round 1</td><td class="venue">Computer Lab A</td><td>Coding</td></tr>
-                <tr><td class="time">16:00</td><td class="event-name">Panel: Future of AI in Education</td><td class="venue">Conference Room 1</td><td>Talk</td></tr>
-                <tr><td class="time">18:00</td><td class="event-name">Cultural Night — Battle of Bands</td><td class="venue">Open Air Theatre</td><td>Cultural</td></tr>
-                <tr><td class="time">21:00</td><td class="event-name">NEXUS Systems Maintenance Window</td><td class="venue">Server Room (Restricted)</td><td>Internal</td></tr>
-                <tr><td class="time">23:00</td><td class="event-name">SPECTRE // NIGHTJAR — Live Incident Begins</td><td class="venue">Lab Complex B + Online</td><td>Cybersecurity</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h2>Day 2 — Saturday, 3 October 2026</h2>
-        <table>
-            <thead>
-                <tr><th>Time</th><th>Event</th><th>Venue</th><th>Category</th></tr>
-            </thead>
-            <tbody>
-                <tr><td class="time">04:00</td><td class="event-name">SPECTRE // NIGHTJAR — Incident Concludes</td><td class="venue">Lab Complex B</td><td>Cybersecurity</td></tr>
-                <tr><td class="time">09:00</td><td class="event-name">RoboWars Finals</td><td class="venue">Ground Floor Arena</td><td>Robotics</td></tr>
-                <tr><td class="time">10:00</td><td class="event-name">Hackathon — 24hr Sprint Begins</td><td class="venue">Innovation Hub</td><td>Coding</td></tr>
-                <tr><td class="time">14:00</td><td class="event-name">Workshop: Ethical Hacking Fundamentals</td><td class="venue">Seminar Hall 1</td><td>Workshop</td></tr>
-                <tr><td class="time">17:00</td><td class="event-name">Prize Distribution — Day 1 Events</td><td class="venue">Main Auditorium</td><td>Ceremony</td></tr>
-                <tr><td class="time">19:00</td><td class="event-name">DJ Night — Closing Celebration</td><td class="venue">Open Air Theatre</td><td>Cultural</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h2>NEXUS System Notes</h2>
-        <p style="font-size: 0.85rem; color: var(--muted);">
-            All events are managed through the NEXUS Festival Platform v3.2.1. Venue assignments 
-            are subject to change based on real-time capacity monitoring. For live updates, check 
-            the NEXUS Festival Hub or contact a volunteer with a blue lanyard.
-        </p>
-        <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">
-            Note: The NEXUS maintenance window at 21:00 on Day 1 is a routine scheduled operation. 
-            The system will be unavailable for approximately 15 minutes. All automated services 
-            — including badge validation, lighting control, and media display — will continue via 
-            the AETHER continuity protocol during downtime.
-        </p>
-    </div>
-
-    <!-- 
-        DOCUMENT PROPERTIES (hidden metadata — extractable via PDF tools):
-        
-        Title:      Meraz 7.0 — Official Festival Schedule
-        Author:     Aman V. // Parallax Systems
-        Creator:    AetherForge v2.1
-        Producer:   Parallax Document Engine 4.0.3
-        Created:    2026-05-20T03:42:17+05:30
-        Modified:   2026-09-25T11:15:44+05:30
-        
-        This document was generated 4 months before the festival.
-        The author is not a member of the Meraz Organising Committee.
-        
-        Parallax Systems is not a registered vendor or sponsor.
-    -->
-
-    <div class="metadata-block">
-        <!-- Document metadata for inspection -->
-        Document-ID: MERAZ-SCHED-2026-v7-FINAL<br>
-        Generator: AetherForge v2.1 / Parallax Document Engine 4.0.3<br>
-        Author: Aman V. // Parallax Systems<br>
-        Organisation: Parallax Systems — Research Division<br>
-        Created: 2026-05-20T03:42:17+05:30<br>
-        Modified: 2026-09-25T11:15:44+05:30<br>
-        Build-ID: prlx-deng-403-sched-v7<br>
-        Contact: aman.v@parallax-sys.net<br>
-        Project: NIGHTJAR<br>
-    </div>
-
-</div>
-
-<div class="footer">
-    <p>MERAZ 7.0 — Official Festival Schedule — NEXUS Platform v3.2.1</p>
-    <p>© 2026 IIT Bhilai Meraz Organising Committee (Fictional Event)</p>
-</div>
-
-</body>
-</html>
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+6952
+%%EOF
