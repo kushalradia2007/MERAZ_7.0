@@ -40,7 +40,7 @@ Sign-in is Google only (no passwords or email codes). Existing accounts keep wor
 | `SECRET_KEY` | **yes, in production** | Signs login cookies. Use a long random string (e.g. `python -c "import secrets;print(secrets.token_hex(32))"`). If unset, a key is derived from `DATABASE_URL` (or random locally) and a warning is logged |
 | `ROOM_UNLOCK_MIN_FLAGS` | no (default `3`) | A room's door opens once the player has captured this many of the previous room's 4 flags. `0` opens every room from the start; admins always bypass. Enforced on the room page, flag submission and evidence files |
 | `GOOGLE_CLIENT_ID` | **yes** | OAuth client ID for Google sign-in, the only way to log in. Without it the login page shows a setup notice |
-| `ADMIN_EMAILS` | no | Comma-separated Google emails that are admins. Applied at every sign-in |
+| `ADMIN_EMAILS` | no | Extra comma-separated Google emails that are admins. `kushalradia2007@gmail.com` is always an admin (built in). Applied at every sign-in |
 
 ## Notes for challenge authors
 

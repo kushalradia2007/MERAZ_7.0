@@ -85,7 +85,8 @@ except ValueError:
 
 # Comma-separated Google account emails that are admins. Applied at every Google
 # sign-in, so an admin is promoted the moment they log in.
-ADMIN_EMAILS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()}
+DEFAULT_ADMIN_EMAILS = {"kushalradia2007@gmail.com"}  # always admin; ADMIN_EMAILS adds more
+ADMIN_EMAILS = DEFAULT_ADMIN_EMAILS | {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()}
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
