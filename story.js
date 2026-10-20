@@ -638,11 +638,127 @@
         slot.appendChild(card);
     };
 
+    /* ───────────── page wiring shared by every room ─────────────
+     * NJStory.room({ id, story, log?, onMarked?, onResult? })
+     *
+     * Expects the standard room markup: cards #target-N holding .nj-form (input #flag-N +
+     * button), .nj-reward #reward-N, an optional #solved-count, and the evidence modal
+     * (#evidence-modal, #modal-iframe, #modal-title, #modal-close). It restores solved state
+     * from the server, verifies flags through NJ.submit, feeds the story, and defines the
+     * globals the inline onclick handlers use: verifyFlag(n), openEvidence(title, url),
+     * closeModal().
+     *   log(message, type)         optional: write to the page's own log panel
+     *   onMarked(n, fresh)         a card was marked solved (restore or live)
+     *   onResult(ok, n, solvedNow) after every verify attempt
+     */
+    function wireRoom(opts) {
+        var ROOM = opts.id, story = opts.story;
+        function $(id) { return document.getElementById(id); }
+        function log(m, t) { if (opts.log) opts.log(m, t); }
+
+        function markSolved(n, reward, fresh) {
+            var card = $('target-' + n);
+            if (!card) return;
+            var was = card.classList.contains('solved');
+            card.classList.add('solved');
+            if (fresh && !was) {
+                card.classList.add('stamp');
+                setTimeout(function () { card.classList.remove('stamp'); }, 800);
+            }
+            var rw = $('reward-' + n);
+            if (rw && (reward || !rw.textContent)) rw.textContent = reward || 'Evidence verified.';
+            var input = $('flag-' + n);
+            if (input) { input.value = 'FLAG ACCEPTED'; input.disabled = true; }
+            var form = card.querySelector('.nj-form');
+            if (form) { form.classList.remove('bad'); form.classList.add('ok'); }
+            var btn = card.querySelector('.nj-form button');
+            if (btn) btn.disabled = true;
+            var c = $('solved-count');
+            if (c) c.textContent = document.querySelectorAll('.nj-card.solved').length + '/4';
+            if (opts.onMarked) opts.onMarked(n, !!(fresh && !was));
+        }
+
+        function init() {
+            NJ.progress().then(function (p) {
+                var solved = p ? ((p.rooms || {})[ROOM] || []) : [];
+                var rewards = (p && p.rewards && p.rewards[ROOM]) || {};
+                solved.forEach(function (n) { markSolved(n, rewards[n], false); });
+                story.boot(solved, p ? p.score : undefined);
+            });
+        }
+
+        function verify(n) {
+            var input = $('flag-' + n);
+            if (!input) return;
+            var val = input.value.trim();
+            if (!val) return;
+            var form = input.closest('.nj-form');
+            var btn = form.querySelector('button');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.classList.add('busy');
+            log('Verifying target ' + ROOM + '.' + n + '...', 'info');
+            NJ.submit(ROOM, val).then(function (res) {
+                btn.classList.remove('busy');
+                btn.disabled = false;
+                if (res.success) {
+                    var hit = res.challenge || n;
+                    var solved = (res.solved && res.solved.length) ? res.solved : [n];
+                    log('Target ' + ROOM + '.' + hit + ' VERIFIED.', 'ok');
+                    solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
+                    story.onSolved(hit, solved);
+                    if (opts.onResult) opts.onResult(true, hit, solved);
+                } else {
+                    log('Target ' + ROOM + '.' + n + ' FAILED. ' + res.message, 'err');
+                    form.classList.remove('bad');
+                    void form.offsetWidth;
+                    form.classList.add('bad');
+                    btn.title = res.message || '';
+                    story.onWrong(n);
+                    if (opts.onResult) opts.onResult(false, n, []);
+                }
+            });
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll('.nj-form input'), function (inp) {
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') verify(Number(inp.id.replace('flag-', '')));
+            });
+        });
+
+        var modal = $('evidence-modal'), frame = $('modal-iframe');
+        window.verifyFlag = verify;
+        window.openEvidence = function (title, url) {
+            if (!modal) return;
+            log('Accessing evidence file: ' + title + '...', 'info');
+            $('modal-title').textContent = 'EVIDENCE VIEWER // ' + String(title).toUpperCase();
+            frame.src = url;
+            modal.classList.add('open');
+            var x = $('modal-close');
+            if (x) x.focus();
+        };
+        window.closeModal = function () {
+            if (!modal) return;
+            modal.classList.remove('open');
+            frame.src = 'about:blank';
+        };
+        if (modal) {
+            modal.addEventListener('click', function (e) { if (e.target === modal) window.closeModal(); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.classList.contains('open')) window.closeModal();
+            });
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+        return { markSolved: markSolved, verify: verify };
+    }
+
     window.NJStory = {
         create: function (cfg) {
             cfg.lead = cfg.lead || 'ila';
             return new Story(cfg);
         },
+        room: wireRoom,
         npcs: NPCS
     };
 })();
