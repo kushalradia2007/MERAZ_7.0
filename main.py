@@ -4,12 +4,8 @@ import json
 import os
 import re
 import secrets
-import smtplib
-import ssl
-import string
 import urllib.parse
 import urllib.request
-from email.message import EmailMessage
 from pathlib import Path
 from typing import Optional
 
@@ -17,7 +13,6 @@ import jwt
 from dotenv import load_dotenv
 from fastapi import Body, Depends, FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
-from passlib.context import CryptContext
 from sqlalchemy import case, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
@@ -58,7 +53,6 @@ class StripVercelPathMiddleware:
 
 app.add_middleware(StripVercelPathMiddleware)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ─── Config / helpers ──────────────────────────────────────────
@@ -82,15 +76,16 @@ def _load_secret_key() -> str:
 
 SECRET_KEY = _load_secret_key()
 SESSION_HOURS = 24
-CODE_TTL_MINUTES = 15
-CODE_RESEND_SECONDS = 30
-MIN_PASSWORD_LEN = 8
 # A room's door opens once the player has captured this many of the previous
 # room's 4 flags (room 1 is always open; admins bypass). 0 = every room open.
 try:
     UNLOCK_MIN_FLAGS = max(0, min(4, int(os.getenv("ROOM_UNLOCK_MIN_FLAGS", "3"))))
 except ValueError:
     UNLOCK_MIN_FLAGS = 3
+
+# Comma-separated Google account emails that are admins. Applied at every Google
+# sign-in, so an admin is promoted the moment they log in.
+ADMIN_EMAILS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()}
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -288,122 +283,6 @@ def serve_evidence(
 
 # ─── Auth API ──────────────────────────────────────────────────
 
-def deliver_verification_code(email: str, code: str) -> str:
-    """Send via SMTP when SMTP_HOST is configured; otherwise log to the console
-    (dev mode). Returns the delivery channel: 'email' or 'console'."""
-    host = os.getenv("SMTP_HOST", "").strip()
-    if not host:
-        print(f"\n[MOCK EMAIL] Verification code for {email} is: {code}\n")
-        return "console"
-
-    port = int(os.getenv("SMTP_PORT", "587") or 587)
-    smtp_user = os.getenv("SMTP_USER", "").strip()
-    smtp_pass = os.getenv("SMTP_PASSWORD", "")
-    sender = os.getenv("SMTP_FROM", "").strip() or smtp_user
-
-    msg = EmailMessage()
-    msg["Subject"] = "Your MERAZ NIGHTJAR verification code"
-    msg["From"] = sender
-    msg["To"] = email
-    msg.set_content(
-        f"Your verification code is: {code}\n\n"
-        f"It expires in {CODE_TTL_MINUTES} minutes. If you didn't request it, ignore this email."
-    )
-    try:
-        ctx = ssl.create_default_context()
-        if port == 465:
-            with smtplib.SMTP_SSL(host, port, timeout=15, context=ctx) as s:
-                if smtp_user:
-                    s.login(smtp_user, smtp_pass)
-                s.send_message(msg)
-        else:
-            with smtplib.SMTP(host, port, timeout=15) as s:
-                s.starttls(context=ctx)
-                if smtp_user:
-                    s.login(smtp_user, smtp_pass)
-                s.send_message(msg)
-    except Exception as e:  # noqa: BLE001
-        print(f"[ERROR] Could not send verification email: {e}")
-        raise HTTPException(status_code=502, detail="Could not send the verification email. Try again shortly.")
-    return "email"
-
-
-@app.post("/api/send-code")
-def send_verification_code(email: str = Form(...), db: Session = Depends(database.get_db)):
-    email = normalize_email(email)
-
-    if db.query(models.User).filter(func.lower(models.User.email) == email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    now = utcnow()
-    vc = db.query(models.VerificationCode).filter(func.lower(models.VerificationCode.email) == email).first()
-    if vc and vc.expires_at:
-        issued_at = vc.expires_at - datetime.timedelta(minutes=CODE_TTL_MINUTES)
-        if (now - issued_at).total_seconds() < CODE_RESEND_SECONDS:
-            raise HTTPException(status_code=429, detail="Please wait a few seconds before requesting another code")
-
-    code = "".join(secrets.choice(string.digits) for _ in range(6))
-    expire = now + datetime.timedelta(minutes=CODE_TTL_MINUTES)
-    if vc:
-        vc.email = email
-        vc.code = code
-        vc.expires_at = expire
-    else:
-        db.add(models.VerificationCode(email=email, code=code, expires_at=expire))
-    db.commit()
-
-    channel = deliver_verification_code(email, code)
-    return {"message": "Verification code sent to email", "delivery": channel}
-
-
-@app.post("/api/register")
-def register(
-    request: Request,
-    response: Response,
-    email: str = Form(...),
-    verification_code: str = Form(...),
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(database.get_db),
-):
-    email = normalize_email(email)
-    username = clean_username(username)
-    if len(password) < MIN_PASSWORD_LEN:
-        raise HTTPException(status_code=400, detail=f"Password must be at least {MIN_PASSWORD_LEN} characters")
-    if len(password) > 128:
-        raise HTTPException(status_code=400, detail="Password is too long")
-
-    vc = db.query(models.VerificationCode).filter(func.lower(models.VerificationCode.email) == email).first()
-    if (
-        not vc
-        or not secrets.compare_digest(vc.code or "", (verification_code or "").strip())
-        or vc.expires_at < utcnow()
-    ):
-        raise HTTPException(status_code=400, detail="Invalid or expired verification code")
-
-    if db.query(models.User).filter(models.User.username == username).first():
-        raise HTTPException(status_code=400, detail="Username already registered")
-    if db.query(models.User).filter(func.lower(models.User.email) == email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    try:
-        user = models.User(
-            username=username,
-            email=email,
-            is_email_verified=True,
-            hashed_password=pwd_context.hash(password),
-        )
-        db.add(user)
-        db.delete(vc)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Username or email already taken")
-
-    issue_session(response, request, username)
-    return {"message": "Registered successfully"}
-
-
 def verify_google_id_token(token: str):
     """Verify a Google ID token via Google's tokeninfo endpoint. The token MUST
     have been issued for THIS app's client id (GOOGLE_CLIENT_ID), otherwise a
@@ -453,8 +332,12 @@ def google_auth(
 
     email = payload.get("email").strip().lower()
 
+    is_admin_email = email in ADMIN_EMAILS
     user = db.query(models.User).filter(func.lower(models.User.email) == email).first()
     if user:
+        if is_admin_email and not user.is_admin:
+            user.is_admin = True
+            db.commit()
         issue_session(response, request, user.username)
         return {"status": "authenticated", "message": "Login successful", "is_admin": user.is_admin}
 
@@ -479,7 +362,7 @@ def google_auth(
             email=email,
             is_email_verified=True,
             hashed_password=None,
-            is_admin=False,
+            is_admin=is_admin_email,
         )
         db.add(new_user)
         db.commit()
@@ -489,25 +372,6 @@ def google_auth(
 
     issue_session(response, request, username)
     return {"status": "authenticated", "message": "Registered and logged in"}
-
-
-@app.post("/api/login")
-def login(
-    request: Request,
-    response: Response,
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(database.get_db),
-):
-    username = username.strip()
-    user = db.query(models.User).filter(models.User.username == username).first()
-    if not user or not user.hashed_password or not pwd_context.verify(password, user.hashed_password):
-        raise HTTPException(
-            status_code=400,
-            detail="Incorrect username or password. (If registered via Google, please sign in with Google.)",
-        )
-    issue_session(response, request, user.username)
-    return {"message": "Login successful", "is_admin": user.is_admin}
 
 
 @app.post("/api/logout")

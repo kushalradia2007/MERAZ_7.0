@@ -10,14 +10,14 @@ uvicorn main:app --reload
 Without `DATABASE_URL` the app uses a local SQLite file (`nightjar.db`). Create the first admin with:
 
 ```
-ADMIN_PASSWORD='choose-a-strong-one' python create_admin.py
+ADMIN_EMAIL='you@gmail.com' python create_admin.py
 ```
 
 ## Individual play
 
-The event is individual: there are no teams. Every participant registers on their own, and score and room progress are stored on the user. Admins don't appear on the public scoreboard.
+The event is individual: there are no teams. Every participant signs in with Google on their own, and score and room progress are stored on the user. Admins don't appear on the public scoreboard.
 
-Existing databases from the team-based version are upgraded automatically on startup (`database.migrate_to_individual`): each member inherits their old team's score and room, and old submissions are credited to the team leader. The legacy `teams` table and `users.team_id` column are left in place, unused. For a fresh event, use **RESET ALL** in the admin console.
+Sign-in is Google only (no passwords or email codes). Existing accounts keep working when they sign in with the Google account that matches their saved email. Existing databases from the team-based version are upgraded automatically on startup (`database.migrate_to_individual`): each member inherits their old team's score and room, and old submissions are credited to the team leader. The legacy `teams` table and `users.team_id` column are left in place, unused. For a fresh event, use **RESET ALL** in the admin console.
 
 ## Hub world
 
@@ -39,8 +39,8 @@ Existing databases from the team-based version are upgraded automatically on sta
 | `DATABASE_URL` | production | Postgres/Supabase connection string (falls back to SQLite locally) |
 | `SECRET_KEY` | **yes, in production** | Signs login cookies. Use a long random string (e.g. `python -c "import secrets;print(secrets.token_hex(32))"`). If unset, a key is derived from `DATABASE_URL` (or random locally) and a warning is logged |
 | `ROOM_UNLOCK_MIN_FLAGS` | no (default `3`) | A room's door opens once the player has captured this many of the previous room's 4 flags. `0` opens every room from the start; admins always bypass. Enforced on the room page, flag submission and evidence files |
-| `GOOGLE_CLIENT_ID` | for Google sign-in | Google sign-in is disabled when unset |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | for email sign-up | Sends verification codes. If `SMTP_HOST` is unset, codes are printed to the server console (dev mode only) |
+| `GOOGLE_CLIENT_ID` | **yes** | OAuth client ID for Google sign-in, the only way to log in. Without it the login page shows a setup notice |
+| `ADMIN_EMAILS` | no | Comma-separated Google emails that are admins. Applied at every sign-in |
 
 ## Notes for challenge authors
 

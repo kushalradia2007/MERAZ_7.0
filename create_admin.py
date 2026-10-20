@@ -1,44 +1,44 @@
-"""Create/promote an admin user. Run once to seed the first admin.
+"""Create/promote an admin by Google account email. Run once to seed the first admin.
 
-    ADMIN_PASSWORD='choose-a-strong-one' python create_admin.py
+    ADMIN_EMAIL='you@gmail.com' python create_admin.py
 
-If ADMIN_PASSWORD is not set you'll be prompted for one (input hidden).
-If an 'admin' user already exists it is simply promoted; its password is
-left untouched.
+Sign-in is Google only, so an admin is simply a user whose Google email is
+marked as admin. If that email has already signed in, the existing player is
+promoted. Otherwise a placeholder account (username 'admin') is created and
+claimed automatically the first time that Google account signs in.
+
+You can also set ADMIN_EMAILS (comma separated) in the environment: any listed
+email is promoted at sign-in, with no script needed.
 """
-import getpass
 import os
 import sys
 
 sys.path.insert(0, ".")
 import database, models
-from passlib.context import CryptContext
-
-MIN_PASSWORD_LEN = 8
+from sqlalchemy import func
 
 models.Base.metadata.create_all(bind=database.engine)
 database.migrate_to_individual(database.engine)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+email = (os.getenv("ADMIN_EMAIL") or (sys.argv[1] if len(sys.argv) > 1 else "")).strip().lower()
+if "@" not in email:
+    sys.exit("Set ADMIN_EMAIL (or pass the email as an argument). Nothing was changed.")
 
 db = database.SessionLocal()
 try:
-    admin = db.query(models.User).filter(models.User.username == "admin").first()
-    if admin:
-        admin.is_admin = True
+    user = db.query(models.User).filter(func.lower(models.User.email) == email).first()
+    if user:
+        user.is_admin = True
         db.commit()
-        print("User 'admin' promoted to admin")
+        print(f"Player '{user.username}' ({email}) promoted to admin")
     else:
-        password = os.getenv("ADMIN_PASSWORD") or getpass.getpass("Password for new 'admin' user: ")
-        if len(password) < MIN_PASSWORD_LEN:
-            sys.exit(f"Password must be at least {MIN_PASSWORD_LEN} characters. Nothing was created.")
-
-        user = models.User(
-            username="admin",
-            hashed_password=pwd_context.hash(password),
-            is_admin=True,
-        )
-        db.add(user)
+        name = "admin"
+        n = 1
+        while db.query(models.User).filter(models.User.username == name).first():
+            n += 1
+            name = f"admin{n}"
+        db.add(models.User(username=name, email=email, is_email_verified=True, is_admin=True))
         db.commit()
-        print("Created admin user 'admin'")
+        print(f"Admin '{name}' created for {email}. Sign in with that Google account.")
 finally:
     db.close()
