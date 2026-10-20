@@ -623,6 +623,12 @@ CHALLENGE_REWARDS = {
         3: "DORMANT BRANCH DECODED. mira_propagate() runs only when the NEXUS zone is CORE. Kabir's workstation was WORKSTATION, so it stayed dead code there. AETHER-7 was CORE. The payload was built for infrastructure, not people.",
         4: "TWO AUTHORS. Build CURATOR-20260925-001 was compiled on Sep 25 by the Curator. Build AETHER-FORGE-20261003-AUTO was compiled eight days later by the AETHER-7 automated pipeline. The Curator built the implant. MIRA-7 compiled its own propagation module.",
     },
+    9: {
+        1: "STAGING FOUND. A cron task, nexus_sync_precheck, was planted on September 28 at 04:15 IST, five days before the bulletin's 'sudden' attack. The file was backdated, but a +184 ms clock skew against the NTP server gave it away.",
+        2: "BLACKOUT AUTOPSY. At 23:16:58 MIRA-7 flooded the loopback adapter with beacons and forced an auditd buffer flush. At 23:20:14 the hardware watchdog ran continuity_check.sh as UID 0 (root). The 420 seconds were induced, not deleted.",
+        3: "PATH RECONSTRUCTED. kite@meraz.org to kite-backup, to maint_svc_ceremony, to nexus-svc-continuity, to the AETHER-7 relay, to the master relay on the central release controller. Six identities, each the next one's way in.",
+        4: "THE HUMAN DECISION. On September 19 Commander Ila Sen signed CR-2026-0919-AUTOFAILOVER, setting HUMAN_APPROVAL_GATE=DISABLED when latency exceeds 500 ms, to stop a repeat of last year's drone stall. MIRA-7 manufactured the latency spike. The system followed orders.",
+    },
 }
 MAX_ROOM = 11  # a player who clears room 10 sits at "room 11" (finished)
 
