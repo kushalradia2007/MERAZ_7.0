@@ -2,1678 +2,543 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>NIGHTJAR — Room 7: The False Victim</title>
-    <meta name="description" content="NIGHTJAR Room 7 — Social Engineering, Identity, Authentication, and Human Factors. Reconstruct the phishing chain that turned KABIR from a person into a weapon.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/room-ui.css">
     <style>
-        :root {
-            --bg-dark: #05050a;
-            --panel-bg: rgba(14, 13, 26, 0.88);
-            --red: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --cyan: #06b6d4;
-            --cyan-glow: rgba(6, 182, 212, 0.4);
-            --amber: #f59e0b;
-            --amber-glow: rgba(245, 158, 11, 0.4);
-            --green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.4);
-            --purple: #8b5cf6;
-            --purple-glow: rgba(139, 92, 246, 0.4);
-            --rose: #f43f5e;
-            --rose-glow: rgba(244, 63, 94, 0.35);
-            --orange: #f97316;
-            --orange-glow: rgba(249, 115, 22, 0.35);
-            --text-main: #e2e8f0;
-            --text-dim: #94a3b8;
-            --border-dim: rgba(244, 63, 94, 0.2);
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --font-glitch: 'VT323', monospace;
-            --accent: var(--rose);
-            --accent-glow: var(--rose-glow);
-        }
+        :root { --accent: #fb7185; --accent-rgb: 251, 113, 133; --wash-rgb: 34, 211, 238; --comms-h: 200px; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .r7-main { grid-template-columns: 300px minmax(0, 1fr) 410px; }
+        .r7-left { position: sticky; top: calc(var(--hud-h) + 18px); align-self: start; }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 25% 35%, rgba(244, 63, 94, 0.05) 0%, transparent 55%),
-                radial-gradient(circle at 75% 65%, rgba(249, 115, 22, 0.04) 0%, transparent 55%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        /* ── Kabir's profile ── */
+        .r7-profile { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+        .r7-who { display: flex; gap: 14px; align-items: center; }
+        .r7-av { width: 64px; height: 74px; border: 1px solid rgba(var(--accent-rgb), .45); border-radius: 6px; overflow: hidden; flex: none; background: rgba(var(--accent-rgb), .08); }
+        .r7-av svg { width: 100%; height: 100%; display: block; }
+        .r7-who b { display: block; font-family: var(--font-code); font-size: 13px; letter-spacing: .08em; color: var(--ink); }
+        .r7-who span { font-family: var(--font-code); font-size: 10px; letter-spacing: .14em; color: var(--ink-faint); }
+        .r7-meter { font-family: var(--font-code); font-size: 10px; letter-spacing: .12em; color: var(--ink-faint); }
+        .r7-meter .bar { margin-top: 6px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+        .r7-meter .bar i { display: block; height: 100%; width: 92%; background: linear-gradient(90deg, var(--amber), var(--red)); border-radius: 4px; animation: r7-throb 2.4s ease-in-out infinite; transform-origin: left; }
+        @keyframes r7-throb { 50% { filter: brightness(1.35); } }
+        .r7-meter b { color: var(--red); float: right; }
+        .r7-facts { font-family: var(--font-code); font-size: 11px; color: var(--ink-dim); line-height: 1.75; border-top: 1px dashed rgba(255, 255, 255, .14); padding-top: 12px; }
+        .r7-facts div { display: flex; justify-content: space-between; gap: 10px; }
+        .r7-facts span:last-child { color: var(--ink); text-align: right; }
 
-        /* Scanline Overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.12));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.22;
-        }
+        /* ── Reconstructed timeline (fills in as you solve) ── */
+        .r7-tl { padding: 16px 18px 18px; position: relative; }
+        .r7-tl::before { content: ""; position: absolute; left: 27px; top: 22px; bottom: 26px; width: 2px; background: rgba(255, 255, 255, .1); }
+        .r7-step { position: relative; display: flex; gap: 14px; padding: 7px 0; font-family: var(--font-code); font-size: 11px; color: var(--ink-faint); }
+        .r7-step .n { width: 20px; height: 20px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 10px; background: var(--bg); border: 1px solid rgba(255, 255, 255, .22); z-index: 1; }
+        .r7-step b { display: block; letter-spacing: .08em; font-size: 11px; }
+        .r7-step small { font-size: 10px; opacity: .75; }
+        .r7-step.done { color: var(--ink); }
+        .r7-step.done .n { background: var(--accent); border-color: var(--accent); color: #2a0a10; box-shadow: 0 0 12px rgba(var(--accent-rgb), .7); }
+        .r7-step.done .locked { display: none; }
+        .r7-step:not(.done) .open { display: none; }
 
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 22px;
-            background: rgba(5, 5, 12, 0.85);
-            border-bottom: 1px solid rgba(244, 63, 94, 0.3);
-            font-family: var(--font-code);
-            font-size: 12px;
-            z-index: 10;
-            position: relative;
+        /* ── Center desk tabs ── */
+        .r7-tabs { display: flex; background: rgba(0, 0, 0, .4); border-bottom: 1px solid var(--line); overflow-x: auto; }
+        .r7-tab {
+            all: unset; box-sizing: border-box; cursor: pointer; white-space: nowrap;
+            padding: 12px 18px; font-family: var(--font-code); font-size: 11px; letter-spacing: .12em; color: var(--ink-faint);
+            border-bottom: 2px solid transparent; transition: color .2s, background .2s, border-color .2s;
         }
+        .r7-tab:hover { color: var(--ink); background: rgba(255, 255, 255, .03); }
+        .r7-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .r7-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); background: rgba(var(--accent-rgb), .07); }
+        .r7-pane { display: none; padding: 16px; }
+        .r7-pane.active { display: block; animation: nj-rise .35s both; }
 
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--rose), var(--orange), var(--rose), transparent);
-            opacity: 0.8;
-        }
-        
-        .brand { 
-            color: var(--accent); 
-            letter-spacing: 1.5px; 
-            text-shadow: 0 0 10px var(--accent-glow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
+        /* Inbox */
+        .r7-mail { border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .35); overflow: hidden; }
+        .r7-mail-h { padding: 12px 16px; border-bottom: 1px solid var(--line); font-family: var(--font-code); font-size: 12px; line-height: 1.7; color: var(--ink-dim); overflow-wrap: anywhere; }
+        .r7-mail-h b { color: var(--ink-faint); font-weight: 400; display: inline-block; min-width: 62px; }
+        .r7-mail-h .subj { color: var(--ink); font-weight: 700; }
+        .r7-mail-h .raw { display: none; color: var(--amber); }
+        .r7-mail.raw .raw { display: block; }
+        .r7-mail-b { padding: 18px; font-size: 14px; line-height: 1.7; color: var(--ink-dim); }
+        .r7-mail-b p { margin: 0 0 12px; }
+        .r7-mail-b .lnk { display: inline-block; padding: 8px 12px; margin: 2px 0 10px; border-radius: 6px; font-family: var(--font-code); font-size: 12px; color: var(--cyan); background: rgba(34, 211, 238, .08); border: 1px solid rgba(34, 211, 238, .3); overflow-wrap: anywhere; cursor: not-allowed; }
+        .r7-mail-b .due { color: var(--amber); font-weight: 600; }
+        .r7-mail-f { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--line); background: rgba(0, 0, 0, .3); font-family: var(--font-code); font-size: 10px; letter-spacing: .1em; color: var(--ink-faint); }
+        .r7-tog { all: unset; cursor: pointer; padding: 6px 10px; border: 1px solid rgba(var(--accent-rgb), .4); border-radius: 5px; color: var(--accent); font-family: var(--font-code); font-size: 10px; letter-spacing: .12em; }
+        .r7-tog:hover { background: rgba(var(--accent-rgb), .1); }
+        .r7-tog:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .r7-note { margin: 12px 0 0; font-family: var(--font-code); font-size: 11px; line-height: 1.6; color: var(--ink-faint); }
 
-        .brand-icon {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 8px var(--accent-glow);
-            animation: idPulse 3s ease-in-out infinite;
-        }
+        /* Push feed */
+        .r7-push { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 18px; align-items: start; }
+        .r7-phone { width: 170px; border-radius: 22px; padding: 14px 10px 18px; background: #0a0f1c; border: 2px solid rgba(255, 255, 255, .18); box-shadow: 0 0 30px rgba(var(--accent-rgb), .15); font-family: var(--font-code); text-align: center; }
+        .r7-phone .t { font-size: 9px; letter-spacing: .2em; color: var(--ink-faint); margin-bottom: 14px; }
+        .r7-phone .big { font-size: 34px; font-weight: 800; color: var(--ink); line-height: 1; }
+        .r7-phone .lbl { font-size: 9px; letter-spacing: .2em; color: var(--ink-faint); margin: 6px 0 14px; }
+        .r7-phone .card { padding: 9px 8px; border-radius: 10px; background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent-rgb), .45); font-size: 10px; color: var(--ink); line-height: 1.5; animation: r7-buzz .5s; }
+        .r7-phone .card.ok { background: rgba(52, 211, 153, .12); border-color: rgba(52, 211, 153, .5); color: var(--green); }
+        .r7-phone.idle .card { animation: none; opacity: .55; }
+        @keyframes r7-buzz { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+        .r7-feed { font-family: var(--font-code); font-size: 11px; max-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(var(--accent-rgb), .4) transparent; }
+        .r7-feed .row { display: flex; gap: 10px; padding: 5px 8px; border-left: 2px solid transparent; color: var(--ink-dim); animation: nj-rise .3s both; }
+        .r7-feed .row.d { border-left-color: var(--cyan); }
+        .r7-feed .row.a { border-left-color: var(--red); color: var(--red); background: rgba(244, 63, 94, .07); }
+        .r7-feed .row .k { margin-left: auto; font-size: 10px; letter-spacing: .1em; color: var(--ink-faint); }
+        .r7-feed .row.a .k { color: var(--red); }
 
-        .brand-icon::before {
-            content: '👤';
-            font-size: 11px;
-        }
-
-        @keyframes idPulse {
-            0%, 100% { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-            50% { border-color: var(--orange); box-shadow: 0 0 12px var(--orange-glow); }
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status .status-indicator {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
-            animation: blink 1.6s infinite;
-        }
-
-        .status .status-text {
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        .timer { color: var(--text-dim); }
-        .timer span { color: var(--text-main); font-weight: 600; }
-
-        .exit-btn {
-            color: var(--accent);
-            text-decoration: none;
-            border: 1px solid var(--accent);
-            padding: 4px 14px;
-            border-radius: 3px;
-            transition: all 0.2s;
-            font-family: var(--font-code);
-            font-size: 11px;
-            background: rgba(244, 63, 94, 0.08);
-        }
-        .exit-btn:hover { 
-            background: rgba(244, 63, 94, 0.25); 
-            color: #fff; 
-            box-shadow: 0 0 14px var(--accent-glow);
-            border-color: #fff;
-        }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-
-        /* Main Layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 330px 1fr 380px;
-            gap: 16px;
-            padding: 16px;
-            flex: 1;
-            min-height: 0;
-        }
+        /* Curator whispers */
+        .r7-whisper { margin-top: 14px; padding: 12px 14px; border-radius: 6px; border: 1px dashed rgba(244, 63, 94, .4); background: rgba(244, 63, 94, .05); font-family: var(--font-code); font-size: 12px; line-height: 1.6; color: var(--red); display: none; text-shadow: 1px 0 rgba(34, 211, 238, .4); animation: nj-rise .5s both; }
+        .r7-whisper.show { display: block; }
+        .r7-whisper small { display: block; font-size: 9px; letter-spacing: .24em; color: var(--ink-faint); margin-bottom: 4px; }
 
         @media (max-width: 1280px) {
-            .dashboard {
-                grid-template-columns: 290px 1fr 340px;
-                gap: 12px;
-                padding: 12px;
-            }
+            .r7-main { grid-template-columns: 290px minmax(0, 1fr); }
+            .r7-right { grid-column: 1 / -1; }
+        }
+        @media (max-width: 860px) {
+            .r7-main { grid-template-columns: 1fr; }
+            .r7-left { position: static; }
+            .r7-push { grid-template-columns: 1fr; justify-items: center; }
+            .r7-feed { width: 100%; }
         }
-
-        @media (max-width: 1024px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                overflow-y: auto;
-            }
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--border-dim);
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.6);
-            position: relative;
-        }
-
-        .panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), var(--orange), transparent);
-            opacity: 0.7;
-        }
-
-        .panel-header {
-            font-family: var(--font-code);
-            font-size: 11px;
-            padding: 10px 16px;
-            background: rgba(5, 5, 15, 0.75);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            letter-spacing: 0.5px;
-        }
-
-        .panel-header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-header .header-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
-            animation: blink 2s infinite;
-        }
-
-        .panel-header-meta {
-            font-size: 9px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-        }
-
-        /* ═══ Left: Investigation Timeline & Context ═══ */
-        .context-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .subject-banner {
-            background: rgba(244, 63, 94, 0.08);
-            border: 1px dashed rgba(244, 63, 94, 0.3);
-            border-radius: 4px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .subject-title {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .subject-status {
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--amber);
-            background: rgba(245, 158, 11, 0.1);
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .stat-card {
-            background: rgba(0, 0, 0, 0.45);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 4px;
-            padding: 10px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .stat-card:hover {
-            border-color: rgba(244, 63, 94, 0.4);
-            background: rgba(244, 63, 94, 0.05);
-        }
-
-        .stat-card-val {
-            font-family: var(--font-code);
-            font-size: 19px;
-            font-weight: 700;
-            color: var(--accent);
-            text-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .stat-card-label {
-            font-size: 9px;
-            color: var(--text-dim);
-            margin-top: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Timeline */
-        .timeline-header {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--amber);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(245, 158, 11, 0.25);
-        }
-
-        .timeline-list {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            max-height: 220px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 9px;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 3px;
-            font-family: var(--font-code);
-            font-size: 10px;
-            transition: all 0.2s;
-        }
-
-        .timeline-item:hover {
-            background: rgba(244, 63, 94, 0.08);
-            border-color: rgba(244, 63, 94, 0.3);
-        }
-
-        .timeline-item.anomalous {
-            border-left: 3px solid var(--red);
-            background: rgba(239, 68, 68, 0.06);
-        }
-
-        .timeline-item.warning {
-            border-left: 3px solid var(--amber);
-            background: rgba(245, 158, 11, 0.04);
-        }
-
-        .tl-name {
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tl-tag {
-            font-size: 8px;
-            padding: 1px 5px;
-            border-radius: 2px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .tl-tag.normal { background: rgba(16, 185, 129, 0.12); color: var(--green); }
-        .tl-tag.alert { background: rgba(239, 68, 68, 0.15); color: var(--red); }
-        .tl-tag.warn { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
-        .tl-tag.crit { background: rgba(244, 63, 94, 0.2); color: var(--rose); }
-
-        /* Investigation Chain Map */
-        .chain-map {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .chain-title {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--cyan);
-            padding-bottom: 6px;
-            border-bottom: 1px dashed rgba(6, 182, 212, 0.3);
-        }
-
-        .chain-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            position: relative;
-            padding-left: 4px;
-        }
-
-        .chain-step::before {
-            content: '';
-            position: absolute;
-            left: 13px;
-            top: 22px;
-            bottom: -12px;
-            width: 1px;
-            background: rgba(244, 63, 94, 0.25);
-        }
-
-        .chain-step:last-child::before { display: none; }
-
-        .chain-step-num {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 1px solid var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-code);
-            font-size: 9px;
-            color: var(--accent);
-            flex-shrink: 0;
-            background: var(--bg-dark);
-            z-index: 1;
-            transition: all 0.3s;
-        }
-
-        .chain-step.completed .chain-step-num {
-            background: var(--accent);
-            color: #05050a;
-            box-shadow: 0 0 10px var(--accent-glow);
-            font-weight: 700;
-        }
-
-        .chain-step-info { flex: 1; }
-
-        .chain-step-name {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--text-main);
-            margin-bottom: 2px;
-            font-weight: 600;
-        }
-
-        .chain-step.completed .chain-step-name { color: var(--cyan); }
-
-        .chain-step-desc {
-            font-size: 9.5px;
-            color: var(--text-dim);
-            line-height: 1.4;
-        }
-
-        .quote-box {
-            padding: 12px;
-            border-left: 3px solid var(--accent);
-            background: rgba(244, 63, 94, 0.06);
-            border-radius: 0 4px 4px 0;
-            font-size: 10.5px;
-            color: var(--text-dim);
-            font-style: italic;
-            line-height: 1.55;
-        }
-
-        .quote-box .quote-author {
-            display: block;
-            margin-top: 6px;
-            color: var(--accent);
-            font-style: normal;
-            font-family: var(--font-code);
-            font-size: 9px;
-        }
-
-        /* ═══ Center: Evidence Viewer & Phishing Reconstruction ═══ */
-        .evidence-panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .evidence-tabs {
-            display: flex;
-            gap: 2px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 6px 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            overflow-x: auto;
-        }
-
-        .evidence-tab {
-            font-family: var(--font-code);
-            font-size: 10px;
-            padding: 6px 12px;
-            color: var(--text-dim);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .evidence-tab:hover {
-            color: var(--text-main);
-            background: rgba(244, 63, 94, 0.1);
-        }
-
-        .evidence-tab.active {
-            color: var(--accent);
-            background: rgba(14, 13, 26, 0.95);
-            border-color: rgba(244, 63, 94, 0.3);
-            border-bottom: 1px solid rgba(14, 13, 26, 0.95);
-            font-weight: 600;
-        }
-
-        .evidence-tab-indicator {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--text-dim);
-        }
-
-        .evidence-tab.active .evidence-tab-indicator {
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
-        }
-
-        .evidence-viewport {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            background: rgba(5, 5, 12, 0.65);
-            font-family: var(--font-code);
-            font-size: 11px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .evidence-display-card {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(244, 63, 94, 0.2);
-            border-radius: 4px;
-            padding: 12px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .evidence-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--amber);
-            font-size: 10px;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 1px dashed rgba(245, 158, 11, 0.2);
-        }
-
-        .evidence-body {
-            color: var(--text-main);
-            font-size: 11px;
-            line-height: 1.65;
-        }
-
-        .evidence-body .from-label { color: var(--text-dim); }
-        .evidence-body .spoofed { color: var(--red); font-weight: 600; }
-        .evidence-body .legit { color: var(--green); }
-        .evidence-body .indicator { color: var(--amber); font-weight: 600; }
-        .evidence-body .danger-link { color: var(--red); text-decoration: underline; }
-        .evidence-body .ticket { color: var(--amber); font-weight: 700; }
-        .evidence-body .deadline-text { color: var(--red); font-weight: 700; }
-        .evidence-body .kw { color: var(--cyan); font-weight: 700; }
-        .evidence-body .val { color: var(--orange); }
-        .evidence-body .ok { color: var(--green); }
-        .evidence-body .bad { color: var(--red); font-weight: 700; }
-
-        .evidence-results-box {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .results-meta {
-            padding: 8px 12px;
-            background: rgba(14, 13, 26, 0.9);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            color: var(--text-dim);
-        }
-
-        .results-meta span.highlight {
-            color: var(--red);
-            font-weight: 600;
-        }
-
-        .ev-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10.5px;
-        }
-
-        .ev-table th {
-            background: rgba(20, 19, 36, 0.9);
-            color: var(--accent);
-            text-align: left;
-            padding: 7px 10px;
-            border-bottom: 1px solid rgba(244, 63, 94, 0.2);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .ev-table td {
-            padding: 7px 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            white-space: nowrap;
-        }
-
-        .ev-table tr:hover td {
-            background: rgba(244, 63, 94, 0.05);
-        }
-
-        .ev-table tr.anomaly-row {
-            background: rgba(239, 68, 68, 0.12);
-        }
-
-        .ev-table tr.anomaly-row td {
-            color: #fca5a5;
-            font-weight: 600;
-        }
-
-        .ev-table tr.anomaly-row td:first-child {
-            border-left: 3px solid var(--red);
-        }
-
-        .ev-pill {
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: 600;
-        }
-
-        .ev-pill.pill-red { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4); }
-        .ev-pill.pill-rose { background: rgba(244, 63, 94, 0.2); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.4); }
-        .ev-pill.pill-amber { background: rgba(245, 158, 11, 0.2); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
-        .ev-pill.pill-green { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.4); }
-        .ev-pill.pill-cyan { background: rgba(6, 182, 212, 0.2); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
-        .ev-pill.pill-orange { background: rgba(249, 115, 22, 0.2); color: var(--orange); border: 1px solid rgba(249, 115, 22, 0.4); }
-        .ev-pill.pill-purple { background: rgba(139, 92, 246, 0.2); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.4); }
-
-        .evidence-alert-box {
-            background: rgba(239, 68, 68, 0.06);
-            border-left: 3px solid var(--red);
-            padding: 10px 14px;
-            border-radius: 0 4px 4px 0;
-            font-size: 11px;
-            line-height: 1.5;
-            color: var(--text-dim);
-        }
-
-        .evidence-alert-box strong {
-            color: var(--red);
-        }
-
-        /* ═══ Right: Investigation Targets ═══ */
-        .targets-panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .targets-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .target-item {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 6px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: all 0.25s ease;
-            position: relative;
-        }
-
-        .target-item:hover {
-            border-color: rgba(244, 63, 94, 0.35);
-            background: rgba(244, 63, 94, 0.03);
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-        }
-
-        .target-item.solved {
-            border-color: rgba(16, 185, 129, 0.4);
-            background: rgba(16, 185, 129, 0.04);
-        }
-
-        .target-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .target-title {
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-main);
-            letter-spacing: 0.5px;
-        }
-
-        .target-badge {
-            font-family: var(--font-code);
-            font-size: 9px;
-            padding: 2px 7px;
-            border-radius: 3px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .target-badge.phish { background: rgba(244, 63, 94, 0.18); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.4); }
-        .target-badge.auth { background: rgba(249, 115, 22, 0.18); color: var(--orange); border: 1px solid rgba(249, 115, 22, 0.4); }
-        .target-badge.mfa { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.4); }
-        .target-badge.identity { background: rgba(139, 92, 246, 0.18); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.4); }
-
-        .target-desc {
-            font-size: 10.5px;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-
-        .target-desc code {
-            font-family: var(--font-code);
-            color: var(--accent);
-            background: rgba(244, 63, 94, 0.12);
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 10px;
-        }
-
-        .evidence-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .evidence-btn {
-            flex: 1;
-            padding: 6px 10px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed rgba(244, 63, 94, 0.4);
-            border-radius: 4px;
-            color: var(--accent);
-            font-family: var(--font-code);
-            font-size: 10px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-
-        .evidence-btn:hover {
-            background: rgba(244, 63, 94, 0.18);
-            border-style: solid;
-            border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .input-group input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            padding: 6px 10px;
-            color: var(--text-main);
-            font-family: var(--font-code);
-            font-size: 10px;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .input-group input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        .input-group button {
-            padding: 6px 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 3px;
-            color: #05050a;
-            font-family: var(--font-code);
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
-        }
-
-        .input-group button:hover {
-            box-shadow: 0 0 12px var(--accent-glow);
-            filter: brightness(1.15);
-        }
-
-        .input-group button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-dim);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .target-reward {
-            display: none;
-            padding: 10px;
-            background: rgba(16, 185, 129, 0.06);
-            border-left: 2px solid var(--green);
-            border-radius: 0 4px 4px 0;
-            font-size: 10px;
-            color: var(--text-dim);
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .target-reward strong { color: var(--green); }
-        .target-reward em { color: var(--cyan); font-style: normal; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Room Completion Box */
-        .next-room-container {
-            margin-top: 10px;
-            padding: 16px;
-            background: linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(249, 115, 22, 0.08));
-            border: 1px solid var(--accent);
-            border-radius: 6px;
-            box-shadow: 0 0 20px var(--accent-glow);
-            animation: pulseBanner 2.5s infinite alternate;
-        }
-
-        @keyframes pulseBanner {
-            0% { box-shadow: 0 0 16px var(--accent-glow); }
-            100% { box-shadow: 0 0 26px rgba(249, 115, 22, 0.45); }
-        }
-
-        .next-room-label {
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--amber);
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .next-room-text {
-            font-size: 10.5px;
-            line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 14px;
-        }
-
-        .next-room-btn {
-            display: block;
-            text-align: center;
-            padding: 10px;
-            background: linear-gradient(90deg, var(--accent), var(--orange));
-            color: #05050a;
-            font-family: var(--font-code);
-            font-size: 11px;
-            font-weight: 700;
-            text-decoration: none;
-            border-radius: 4px;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
-
-        .next-room-btn:hover {
-            filter: brightness(1.2);
-            box-shadow: 0 0 20px var(--orange-glow);
-            transform: translateY(-1px);
-        }
-
-        /* KABIR message box */
-        .kabir-message {
-            margin-top: 8px;
-            padding: 12px;
-            background: rgba(249, 115, 22, 0.06);
-            border: 1px solid rgba(249, 115, 22, 0.25);
-            border-left: 3px solid var(--orange);
-            border-radius: 0 6px 6px 0;
-            font-size: 10.5px;
-            color: var(--text-dim);
-            line-height: 1.55;
-            font-style: italic;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .kabir-message .msg-author {
-            display: block;
-            margin-top: 8px;
-            color: var(--orange);
-            font-style: normal;
-            font-family: var(--font-code);
-            font-size: 9px;
-            font-weight: 600;
-        }
-
-        /* Evidence Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .modal-content {
-            background: #0a0a14;
-            border: 1px solid var(--accent);
-            border-radius: 6px;
-            width: 90vw;
-            max-width: 1200px;
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 40px var(--accent-glow);
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 10px 16px;
-            background: rgba(5, 5, 12, 0.9);
-            border-bottom: 1px solid rgba(244, 63, 94, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            font-size: 12px;
-            color: var(--accent);
-        }
-
-        .modal-header button {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-dim);
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-family: var(--font-code);
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .modal-header button:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--red);
-            border-color: var(--red);
-        }
-
-        .modal-iframe {
-            flex: 1;
-            border: none;
-            width: 100%;
-            height: 100%;
-            background: #050508;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(244, 63, 94, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     </style>
     <script src="/room-common.js"></script>
+    <script src="/assets/story.js"></script>
 </head>
-<body>
+<body class="nj-room">
 
-    <!-- Header -->
-    <header>
-        <div class="brand">
-            <div class="brand-icon"></div>
-            [NIGHTJAR.OS // THE FALSE VICTIM]
+    <header class="nj-hud">
+        <div class="nj-hud-l">
+            <span class="nj-logo" aria-hidden="true">◈</span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>IDENTITY DESK</span></div>
+            <span class="nj-status"><i class="dot warn"></i>TARGET <b>PROFILED</b></span>
         </div>
-        <div class="status">
-            <span class="status-indicator"></span>
-            <span class="status-text">IDENTITY FORENSICS ACTIVE</span>
+        <div class="nj-hud-c">
+            <span class="nj-act">ACT II · THE INSIDE</span>
+            <span class="nj-roomno">ROOM <b>7</b>/10</span>
+            <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
         </div>
-        <div class="timer">
-            SESSION: <span id="master-clock">01:28:00</span> IST
+        <div class="nj-hud-r">
+            <span class="nj-stat hide-s">SCORE<b data-nj-score>----</b></span>
+            <span class="nj-stat hide-s">T-MINUS<b id="master-clock">01:28:00</b></span>
+            <a href="/hub" class="nj-leave">LEAVE ROOM</a>
         </div>
-        <a class="exit-btn" href="/hub">◂ LEAVE ROOM</a>
     </header>
 
-    <!-- Main 3-Column Dashboard -->
-    <div class="dashboard">
-
-        <!-- Left Column: Investigation Context & Timeline -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>SUBJECT PROFILE // KABIR MEHRA</span>
+    <main class="nj-main r7-main">
+        <!-- Left: the person, and the timeline you rebuild -->
+        <div class="nj-col r7-left">
+            <section class="nj-panel nj-rise" style="--i:0">
+                <div class="nj-panel-h"><i class="dot"></i>Subject file<span class="meta">NOT A SUSPECT</span></div>
+                <div class="r7-profile">
+                    <div class="r7-who">
+                        <div class="r7-av" aria-hidden="true">
+                            <svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="140" fill="#fb7185" fill-opacity=".1"/><path d="M6 140C6 112 32 100 60 100S114 112 114 140Z" fill="#0b1324" stroke="#fb7185" stroke-width="1.5"/><rect x="52" y="86" width="16" height="18" fill="#0b1324"/><ellipse cx="60" cy="62" rx="23" ry="27" fill="#0e182c" stroke="#fb7185" stroke-width="1.5"/><path d="M27 76C20 38 44 20 60 20C76 20 100 38 93 76C87 55 77 44 60 44C43 44 33 55 27 76Z" fill="#241a05" stroke="#fb7185" stroke-width="1.5"/><rect x="49" y="61" width="8" height="2.4" rx="1" fill="#fb7185"/><rect x="63" y="61" width="8" height="2.4" rx="1" fill="#fb7185"/><path d="M52 77Q60 83 68 77" fill="none" stroke="#fb7185" stroke-width="1.8" stroke-linecap="round"/></svg>
+                        </div>
+                        <div><b>KABIR "KITE" MEHRA</b><span>FESTIVAL TECHNICAL LEAD</span></div>
+                    </div>
+                    <div class="r7-meter">DEADLINE PRESSURE<b>CRITICAL</b><div class="bar"><i></i></div></div>
+                    <div class="r7-facts">
+                        <div><span>OPEN TICKET</span><span>3 days old</span></div>
+                        <div><span>SLEEP</span><span>very little</span></div>
+                        <div><span>TECH REVIEW</span><span>next morning</span></div>
+                        <div><span>ACCESS</span><span>ceremony automation</span></div>
+                    </div>
+                    <p class="r7-note" style="margin:0">Ila's rule for this room: the question is not "did he slip", it is "was the slip designed for him".</p>
                 </div>
-                <span class="panel-header-meta">HUMAN FACTORS</span>
-            </div>
+            </section>
 
-            <div class="context-content">
-                <!-- Subject Banner -->
-                <div class="subject-banner">
-                    <div>
-                        <div class="subject-title">KABIR "KITE" MEHRA</div>
-                        <div style="font-size: 8.5px; color: var(--text-dim); margin-top: 2px;">FESTIVAL TECHNICAL LEAD</div>
-                    </div>
-                    <span class="subject-status">UNDER REVIEW</span>
+            <section class="nj-panel nj-rise" style="--i:1">
+                <div class="nj-panel-h"><i class="dot"></i>Reconstructed timeline<span class="meta" id="tl-count">0/4</span></div>
+                <div class="r7-tl">
+                    <div class="r7-step" id="step-1"><span class="n">1</span><div><b>THE BAIT</b><small class="locked">Unlocks when 7.1 is solved</small><small class="open">A message built for one person</small></div></div>
+                    <div class="r7-step" id="step-2"><span class="n">2</span><div><b>THE STOLEN KEY</b><small class="locked">Unlocks when 7.2 is solved</small><small class="open">A session that was never his</small></div></div>
+                    <div class="r7-step" id="step-3"><span class="n">3</span><div><b>THE LONG NIGHT</b><small class="locked">Unlocks when 7.3 is solved</small><small class="open">Prompts until something gave</small></div></div>
+                    <div class="r7-step" id="step-4"><span class="n">4</span><div><b>THE FRAME</b><small class="locked">Unlocks when 7.4 is solved</small><small class="open">An insider who never existed</small></div></div>
                 </div>
-
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-val">1</div>
-                        <div class="stat-card-label">Phishing Msg</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color: var(--red);">14</div>
-                        <div class="stat-card-label">MFA Pushes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color: var(--amber);">47</div>
-                        <div class="stat-card-label">Login Events</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color: var(--purple);">7</div>
-                        <div class="stat-card-label">Identities</div>
-                    </div>
-                </div>
-
-                <!-- Attack Timeline -->
-                <div>
-                    <div class="timeline-header">
-                        <span>▸ ATTACK CHAIN TIMELINE</span>
-                        <span style="font-size: 9px; color: var(--text-dim);">Sep 24 — Oct 01</span>
-                    </div>
-                    <div class="timeline-list" style="margin-top: 8px;">
-                        <div class="timeline-item">
-                            <span class="tl-name">📋 Sep 24 — Ticket #NX-2847 filed</span>
-                            <span class="tl-tag normal">NORMAL</span>
-                        </div>
-                        <div class="timeline-item">
-                            <span class="tl-name">💬 Sep 25 — Rhea responds (ETA: fix pending)</span>
-                            <span class="tl-tag normal">NORMAL</span>
-                        </div>
-                        <div class="timeline-item warning">
-                            <span class="tl-name">⚠️ Sep 26 — Still failing, manager asks status</span>
-                            <span class="tl-tag warn">PRESSURE</span>
-                        </div>
-                        <div class="timeline-item anomalous">
-                            <span class="tl-name">🎣 Sep 27 — Phishing message arrives</span>
-                            <span class="tl-tag alert">PHISH</span>
-                        </div>
-                        <div class="timeline-item anomalous">
-                            <span class="tl-name">💀 Sep 27 — KABIR executes payload</span>
-                            <span class="tl-tag alert">COMPROMISED</span>
-                        </div>
-                        <div class="timeline-item anomalous">
-                            <span class="tl-name">🌐 Oct 01 — Impossible login (Amsterdam)</span>
-                            <span class="tl-tag crit">STOLEN TOKEN</span>
-                        </div>
-                        <div class="timeline-item anomalous">
-                            <span class="tl-name">🔔 Oct 01 — MFA fatigue attack (14 pushes)</span>
-                            <span class="tl-tag crit">MFA BYPASS</span>
-                        </div>
-                        <div class="timeline-item anomalous">
-                            <span class="tl-name">👻 Oct 01 — kite-backup persona created</span>
-                            <span class="tl-tag crit">FABRICATED</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Investigation Chain Map -->
-                <div class="chain-map">
-                    <div class="chain-title">▸ SOCIAL ENGINEERING ANALYSIS</div>
-
-                    <div class="chain-step" id="chain-1">
-                        <div class="chain-step-num">1</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Spear Phishing Vector</div>
-                            <div class="chain-step-desc">Precision attack using ticket #NX-2847 as bait</div>
-                        </div>
-                    </div>
-
-                    <div class="chain-step" id="chain-2">
-                        <div class="chain-step-num">2</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Impossible Travel Detection</div>
-                            <div class="chain-step-desc">Amsterdam session while KABIR was on campus</div>
-                        </div>
-                    </div>
-
-                    <div class="chain-step" id="chain-3">
-                        <div class="chain-step-num">3</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">MFA Fatigue Bypass</div>
-                            <div class="chain-step-desc">14 push notifications, auto-approved after 30s</div>
-                        </div>
-                    </div>
-
-                    <div class="chain-step" id="chain-4">
-                        <div class="chain-step-num">4</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Fabricated Insider Persona</div>
-                            <div class="chain-step-desc"><code>kite-backup</code> constructed from stolen creds</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Commander Transmission Quote -->
-                <div class="quote-box">
-                    "Someone studied the festival's schedule, identified the one person with enough access and enough pressure to act without thinking, and sent a message that looked like salvation. Find the message. Reconstruct the manipulation."
-                    <span class="quote-author">— Commander Ila Sen, 01:28 IST</span>
-                </div>
-            </div>
+            </section>
         </div>
 
-        <!-- Center Column: Evidence Viewer -->
-        <div class="panel evidence-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>EVIDENCE RECONSTRUCTION // IDENTITY ANALYSIS</span>
-                </div>
-                <span class="panel-header-meta">SOCIAL ENGINEERING</span>
-            </div>
+        <!-- Center: comms + the desk -->
+        <div class="nj-col">
+            <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
-            <!-- Tabbed Evidence Selector -->
-            <div class="evidence-tabs">
-                <div class="evidence-tab active" onclick="switchEvidenceTab(1)">
-                    <span class="evidence-tab-indicator"></span>
-                    <span>E1: PHISHING.MSG</span>
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="r7-tabs" role="tablist" aria-label="Identity desk">
+                    <button type="button" class="r7-tab" role="tab" id="tab-inbox" aria-selected="true" aria-controls="pane-inbox" onclick="switchTab('inbox')">INBOX · SEP 27</button>
+                    <button type="button" class="r7-tab" role="tab" id="tab-push" aria-selected="false" aria-controls="pane-push" onclick="switchTab('push')">PUSH FEED · OCT 01</button>
                 </div>
-                <div class="evidence-tab" onclick="switchEvidenceTab(2)">
-                    <span class="evidence-tab-indicator"></span>
-                    <span>E2: AUTH_LOG.DAT</span>
-                </div>
-                <div class="evidence-tab" onclick="switchEvidenceTab(3)">
-                    <span class="evidence-tab-indicator"></span>
-                    <span>E3: MFA_AUDIT.LOG</span>
-                </div>
-                <div class="evidence-tab" onclick="switchEvidenceTab(4)">
-                    <span class="evidence-tab-indicator"></span>
-                    <span>E4: IDENTITY_MAP.GRF</span>
-                </div>
-            </div>
 
-            <!-- Evidence Viewport -->
-            <div class="evidence-viewport" id="evidence-viewport">
-                <!-- Content dynamically populated via JS, defaults to E1 -->
-            </div>
+                <div class="r7-pane active" id="pane-inbox" role="tabpanel" aria-labelledby="tab-inbox">
+                    <div class="r7-mail" id="mail">
+                        <div class="r7-mail-h">
+                            <div><b>From</b><span id="m-from">NEXUS Technical Support</span></div>
+                            <div class="raw"><b>Address</b>nexus-support@meraz-festival.internal</div>
+                            <div class="raw"><b>Reply-To</b>nexus-support@meraz-festival.internal</div>
+                            <div class="raw"><b>Signature</b>PGP, self-signed key</div>
+                            <div><b>To</b>kabir.mehra</div>
+                            <div><b>Subject</b><span class="subj">[URGENT] Resolution for ticket #NX-2847: Ceremony timing sync tool</span></div>
+                        </div>
+                        <div class="r7-mail-b">
+                            <p>Hi Kabir,</p>
+                            <p>We have identified the root cause of the timing sync issue you reported in ticket #NX-2847. The scheduling daemon drifts when it runs several automation scripts for more than half an hour.</p>
+                            <p>Our engineers packaged a hotfix as a standalone utility:</p>
+                            <span class="lnk" title="Disabled in this reconstruction">⬇ Ethereal_Sync_Helper_v2.1.exe</span>
+                            <p class="due">Please install before the tech review on September 28th.</p>
+                            <p>Best,<br>NEXUS Technical Support Team</p>
+                        </div>
+                        <div class="r7-mail-f">
+                            <button type="button" class="r7-tog" id="raw-btn" aria-pressed="false" onclick="toggleRaw()">SHOW RAW HEADERS</button>
+                            <span>LINK DISABLED · THIS IS A SAFE RECONSTRUCTION</span>
+                        </div>
+                    </div>
+                    <p class="r7-note">Read it as Kabir would, at 1 a.m., three days behind. Then read it as an analyst. The full thread, with timings, is in the file under target 7.1.</p>
+                </div>
+
+                <div class="r7-pane" id="pane-push" role="tabpanel" aria-labelledby="tab-push">
+                    <div class="r7-push">
+                        <div class="r7-phone idle" id="phone" aria-hidden="true">
+                            <div class="t">KABIR'S PHONE</div>
+                            <div class="big" id="ph-n">0</div>
+                            <div class="lbl">PROMPTS TONIGHT</div>
+                            <div class="card" id="ph-card">Waiting for activity…</div>
+                        </div>
+                        <div>
+                            <div class="r7-feed" id="feed" role="log" aria-live="off"></div>
+                            <button type="button" class="r7-tog" style="margin-top:12px" onclick="replayFeed()">↻ REPLAY FEED</button>
+                            <p class="r7-note">A simplified replay for atmosphere. The authoritative timeline is the file under target 7.3.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nj-panel-b" style="padding-top:0"><div class="r7-whisper" id="whisper"><small>FROM A SOURCE THAT SHOULD NOT BE ON THIS LINK</small><span id="whisper-t"></span></div><div id="nj-next-slot"></div></div>
+            </section>
         </div>
 
-        <!-- Right Column: Investigation Targets -->
-        <div class="panel targets-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>INVESTIGATION TARGETS (ROOM 7)</span>
-                </div>
-                <span class="panel-header-meta">4 TASKS</span>
-            </div>
+        <!-- Right: targets + log -->
+        <div class="nj-col r7-right">
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Investigation targets · Room 7<span class="meta" id="solved-count">0/4</span></div>
+                <div class="nj-panel-b">
 
-            <div class="targets-content">
-                <!-- Target 7.1 -->
-                <div class="target-item" id="target-1">
-                    <div class="target-header">
-                        <div class="target-title">7.1 THE MESSAGE THAT ARRIVED AT THE RIGHT TIME</div>
-                        <span class="target-badge phish">PHISH</span>
-                    </div>
-                    <div class="target-desc">
-                        > On Sep 27th, KABIR received a message referencing his real ticket <code>#NX-2847</code>, from a spoofed sender domain, linking to a Parallax Systems download. Identify the spear-phishing indicators that made it convincing and the signals that should have revealed the deception.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Phishing Timeline', '/challenges/Room - 7/evidence/phishing_timeline.html')">◈ VIEW: phishing_timeline.html</button>
-                        <a href="/challenges/Room - 7/evidence/phishing_timeline.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(1)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-1">
-                        > <strong>SPEAR PHISHING CONFIRMED.</strong> The message from <em>nexus-support@meraz-festival.internal</em> (spoofed — hyphen instead of underscore) referenced real ticket <code>#NX-2847</code>, offered <code>Ethereal_Sync_Helper.exe</code> from <code>cdn-nexus.parallax-sys.net</code>, and timed the delivery to match KABIR's deadline pressure. The Curator had internal access to the ticket system.
-                    </div>
-                </div>
+                    <article class="nj-card" id="target-1">
+                        <div class="nj-card-top"><span class="nj-badge">7.1</span><span class="nj-title">THE MESSAGE THAT ARRIVED AT THE RIGHT TIME</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">On Sep 27th Kabir received a message referencing his real ticket <code>#NX-2847</code>, from a spoofed sender domain, linking to a Parallax Systems download. Identify the spear-phishing indicators that made it convincing and the signals that should have revealed it.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Phishing Timeline', '/challenges/Room - 7/evidence/phishing_timeline.html')">VIEW: phishing_timeline.html</button><a href="/challenges/Room - 7/evidence/phishing_timeline.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-1"></div>
+                    </article>
 
-                <!-- Target 7.2 -->
-                <div class="target-item" id="target-2">
-                    <div class="target-header">
-                        <div class="target-title">7.2 THE LOGIN THAT DID NOT BELONG</div>
-                        <span class="target-badge auth">AUTH</span>
-                    </div>
-                    <div class="target-desc">
-                        > KABIR's auth log shows 47 sessions over two weeks. One session at <code>01:35:42 IST</code> originated from Amsterdam while KABIR was badge-scanned on campus at <code>01:20 IST</code>. Find the impossible travel and identify the stolen authentication method.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Login Analysis', '/challenges/Room - 7/evidence/login_analysis.html')">◈ VIEW: login_analysis.html</button>
-                        <a href="/challenges/Room - 7/evidence/login_analysis.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(2)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-2">
-                        > <strong>IMPOSSIBLE TRAVEL DETECTED.</strong> Session from <em>198.51.100.23 (Amsterdam, NL)</em> at 01:35:42 IST used a stolen session token — not a password. KABIR was badge-scanned at Main Gate at 01:20 IST. The token was extracted by <code>Ethereal_Sync_Helper.exe</code> and replayed from the Curator's relay network.
-                    </div>
-                </div>
+                    <article class="nj-card" id="target-2">
+                        <div class="nj-card-top"><span class="nj-badge">7.2</span><span class="nj-title">THE LOGIN THAT DID NOT BELONG</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Kabir's auth log shows 47 sessions over two weeks. One, at <code>01:35:42 IST</code>, came from Amsterdam while he was badge-scanned on campus at <code>01:20 IST</code>. Find the impossible travel and the stolen authentication method.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Login Analysis', '/challenges/Room - 7/evidence/login_analysis.html')">VIEW: login_analysis.html</button><a href="/challenges/Room - 7/evidence/login_analysis.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-2"></div>
+                    </article>
 
-                <!-- Target 7.3 -->
-                <div class="target-item" id="target-3">
-                    <div class="target-header">
-                        <div class="target-title">7.3 THE BADGE THAT APPROVED ITSELF</div>
-                        <span class="target-badge mfa">MFA</span>
-                    </div>
-                    <div class="target-desc">
-                        > Between <code>01:30</code> and <code>01:35 IST</code>, KABIR's device received 14 MFA push notifications. He explicitly denied three. Push #14 was auto-approved by the MFA gateway's 30-second timeout policy. Identify the fatigue sequence and the system flaw.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('MFA Bypass', '/challenges/Room - 7/evidence/mfa_bypass.html')">◈ VIEW: mfa_bypass.html</button>
-                        <a href="/challenges/Room - 7/evidence/mfa_bypass.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(3)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-3">
-                        > <strong>MFA FATIGUE ATTACK CONFIRMED.</strong> 14 pushes in 5 minutes. KABIR denied #6, #7, #8. The MFA gateway auto-approved push #14 after a 30-second timeout — a "convenience feature" that treated unanswered prompts as a connectivity issue. KABIR did the right thing. The <em>system</em> approved the login anyway.
-                    </div>
-                </div>
+                    <article class="nj-card" id="target-3">
+                        <div class="nj-card-top"><span class="nj-badge">7.3</span><span class="nj-title">THE BADGE THAT APPROVED ITSELF</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Between <code>01:30</code> and <code>01:35 IST</code> Kabir's phone received 14 MFA pushes. He explicitly denied three. Push 14 was approved without him. Identify the fatigue sequence and the system flaw.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('MFA Bypass', '/challenges/Room - 7/evidence/mfa_bypass.html')">VIEW: mfa_bypass.html</button><a href="/challenges/Room - 7/evidence/mfa_bypass.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-3"></div>
+                    </article>
 
-                <!-- Target 7.4 -->
-                <div class="target-item" id="target-4">
-                    <div class="target-header">
-                        <div class="target-title">7.4 THE PERSON WHO WAS NEVER THERE</div>
-                        <span class="target-badge identity">IDENTITY</span>
-                    </div>
-                    <div class="target-desc">
-                        > Seven identities appear in the evidence: humans, services, and one fabricated persona. Classify each and identify which identity was specifically constructed to simulate a human insider and frame KABIR as the source of the breach.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Identity Graph', '/challenges/Room - 7/evidence/identity_graph.html')">◈ VIEW: identity_graph.html</button>
-                        <a href="/challenges/Room - 7/evidence/identity_graph.html" download class="evidence-btn">↓ DOWNLOAD</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(4)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-4">
-                        > <strong>FABRICATED PERSONA IDENTIFIED.</strong> <em>kite-backup</em> was created by <code>nexus-svc-continuity</code>, authenticated via <code>pam_nexus_token.so</code>, and named to match KABIR's patterns. It is a <strong>PERSONA</strong> — an identity constructed from stolen credentials to simulate a guilty human insider. No person ever typed a command as <code>kite-backup</code>.
-                    </div>
+                    <article class="nj-card" id="target-4">
+                        <div class="nj-card-top"><span class="nj-badge">7.4</span><span class="nj-title">THE PERSON WHO WAS NEVER THERE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Seven identities appear in the evidence: humans, services and one fabricated persona. Classify each, then identify the one constructed to simulate a human insider and frame Kabir.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Identity Graph', '/challenges/Room - 7/evidence/identity_graph.html')">VIEW: identity_graph.html</button><a href="/challenges/Room - 7/evidence/identity_graph.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-4"></div>
+                    </article>
                 </div>
-            </div>
+            </section>
+
+            <section class="nj-panel nj-rise" style="--i:3">
+                <div class="nj-panel-h"><i class="dot"></i>Auth monitor</div>
+                <div class="nj-log" id="sys-log" style="height:150px" role="log" aria-live="polite">
+                    <div class="l">Identity desk online.</div>
+                    <div class="l">Awaiting analyst input...</div>
+                </div>
+            </section>
         </div>
-    </div>
+    </main>
 
-    <!-- Evidence Modal -->
-    <div id="evidence-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <!-- Evidence viewer -->
+    <div id="evidence-modal" class="nj-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="nj-win">
+            <div class="nj-win-bar">
+                <span class="nj-win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 <span id="modal-title">EVIDENCE VIEWER</span>
-                <button onclick="closeModal()">[X] CLOSE</button>
+                <button type="button" class="x" id="modal-close" onclick="closeModal()">CLOSE ✕</button>
             </div>
-            <iframe id="modal-iframe" class="modal-iframe"></iframe>
+            <iframe id="modal-iframe" title="Evidence file"></iframe>
         </div>
     </div>
 
     <script>
-        // Clock
+        const ROOM_ID = 7;
+
+        /* ───────── Story: Room 7 (Ila Sen, Kabir "Kite" Mehra) ─────────
+         * Player-visible text. Keep it free of answers: no domains, account names,
+         * IPs, counts or timeout values. Post-solve facts come from the server. */
+        const story = NJStory.create({
+            room: 7,
+            title: 'THE FALSE VICTIM',
+            lead: 'ila',
+            nextMount: '#nj-next-slot',
+            objective: 'Four questions about one man: the message, the login, the prompts and the persona. Start anywhere.',
+            complete: 'Room clear. The file Kabir ran is waiting in Room 8 whenever you are ready.',
+
+            briefing: [
+                { scene: 'Every step of the attack ran by itself. Except the first one. Somebody had to click.', stamp: '01:28 · IDENTITY DESK' },
+                { npc: 'ila', text: 'We have the path. Planted key, compromised portal, forged certificate, a trust chain straight to the release controller. All of it automated. All of it invisible.' },
+                { npc: 'ila', text: 'But the chain has one origin, and it is a person. Kabir ran a file. Everyone on this floor already has a theory about why.' },
+                { npc: 'ila', text: 'I do not share it. Someone studied the festival schedule, found the one person with enough access and enough pressure to act without thinking, and sent him something that looked like salvation.' },
+                { npc: 'kite', text: 'Ila, I know what the logs say. I know how it looks. I only want to understand how I missed it.' },
+                { npc: 'ila', text: 'You did not miss it, Kabir. It was built so that you could not see it. That is the difference this room has to prove.' },
+                { npc: 'ila', text: 'Four questions. The message. The login. The prompts. The persona. Find them, and tell me whether he was a careless insider or a carefully chosen target.' },
+                { npc: 'system', text: 'IDENTITY DESK ONLINE. SUBJECT FILE OPEN. TARGETS UNLOCKED.' }
+            ],
+
+            greet: {
+                0: ['Start with the message. Read it as Kabir would have read it that night, then read it again as an analyst.'],
+                1: ['One answer in. Notice how little of this was luck.'],
+                2: ['Halfway. The picture of him is changing, and not in the direction the official story wanted.'],
+                3: ['One left. Ask yourself who gains if people believe the wrong person did this.']
+            },
+
+            onSolve: {
+                1: ['It did not look like a trap because it was not meant to. It was meant to look like help.'],
+                2: ['He was on campus and badged in, and a session from another continent was acting as him. Hold on to that.'],
+                3: [{ npc: 'kite', text: 'I denied them. I denied them and it still went through? Ila, I did everything right.' }, { npc: 'ila', text: 'You did, Kabir. The system overrode you.' }],
+                4: ['An insider with a name, a history and a motive. All invented, and all pointing at Kabir.']
+            },
+
+            milestone: {
+                1: ['First answer in. That is more than the official story has.'],
+                2: [
+                    { npc: 'kite', text: 'Ila, are they finding anything that clears me? I keep rereading that message.' },
+                    { npc: 'ila', text: 'Wait, Kabir. They are working. Everyone who reads that message wants to defend you.' }
+                ],
+                3: ['Three. The last one is about who this was supposed to blame.']
+            },
+
+            wrong: [
+                'That does not match the evidence. Check the file again.',
+                'No. Look at the details, not the headline.',
+                'Not it. Read the timeline slowly. Slowly is how this was missed in the first place.'
+            ],
+            hints: {
+                1: 'What was going on in Kabir’s week when the message arrived? Then compare the sender, the link and the signature to the real thing.',
+                2: 'A person cannot be at a gate in one country and logged in from another. Compare the log to the badge scan, then ask what was actually replayed.',
+                3: 'Count the prompts, then count which ones he answered. Then ask what the gateway does when nobody answers.',
+                4: 'Look at who created the account, what authenticated it, and whether any human ever used it.'
+            },
+
+            debrief: [
+                { scene: 'The reconstruction goes quiet. On the screen, a man is still at his desk, doing his job.', stamp: '02:02 · IDENTITY DESK' },
+                { npc: 'ila', text: 'Four questions, one answer. Kabir was not careless. He was chosen.' },
+                { npc: 'ila', text: 'A message that knew his ticket and his deadline. A session that was never his. A gateway that overrode him. An insider who never existed.' },
+                { npc: 'kite', text: 'So I did not do this. Not on purpose, not by being stupid.' },
+                { npc: 'ila', text: 'You did exactly what a good engineer does when a fix arrives. They built the trap around that.' },
+                { npc: 'rhea', text: 'Then what he ran is the next question. It is on his machine, and it is signed by nobody I know.' },
+                { npc: 'system', text: 'SAMPLE EXTRACTED FROM SUBJECT WORKSTATION. MALWARE LAB ONLINE. ROOM 8 UNLOCKED.' }
+            ],
+            next: {
+                room: 8, href: '/room/8', label: 'PROCEED TO ROOM 8', from: 'rhea',
+                teaser: 'We have the file he ran. Come and take it apart with me. I want to know what it was built to do.'
+            }
+        });
+        story.mount(document.getElementById('npc-comms'));
+
+        /* ───────── Clock (cosmetic) ───────── */
         function updateClock() {
-            const sec = new Date().getSeconds().toString().padStart(2, '0');
-            document.getElementById('master-clock').innerText = `01:28:${sec}`;
+            document.getElementById('master-clock').textContent = '01:28:' + String(new Date().getSeconds()).padStart(2, '0');
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Evidence Tab Data
-        const EVIDENCE_DATA = {
-            1: {
-                title: "EVIDENCE 7.1 — SPEAR PHISHING MESSAGE RECONSTRUCTION",
-                desc: "Reconstructing the phishing message that targeted KABIR on Sep 27, 2026.",
-                bodyHtml: `
-                    <div class="evidence-body" style="white-space: pre-line;">
-<span class="from-label">From:</span>  <span class="spoofed">nexus-support@meraz-festival.internal</span> <span class="indicator">[SPOOFED — real domain uses underscore: meraz_festival.internal]</span>
-<span class="from-label">To:</span>    kabir.mehra@meraz_festival.internal
-<span class="from-label">Subject:</span> [URGENT] Resolution for Ticket <span class="ticket">#NX-2847</span> — Ceremony Timing Sync Tool
-<span class="from-label">Priority:</span> <span class="spoofed">HIGH</span>
-<span class="from-label">Signed:</span>  <span class="spoofed">PGP (self-signed — NOT from NEXUS keyring)</span> <span class="indicator">[INDICATOR]</span>
-
-──────────────────────────────────────────────
-
-Hi Kabir,
-
-We've identified the root cause of the timing sync issue you reported in ticket <span class="ticket">#NX-2847</span>. The ceremony-controller's scheduling daemon has a known clock drift when running concurrent automation scripts for more than 30 minutes.
-
-Our engineering team has packaged a hotfix as a standalone synchronisation utility:
-
-📥 Download: <span class="danger-link">https://cdn-nexus.parallax-sys.net/tools/Ethereal_Sync_Helper_v2.1.exe</span>
-
-<span class="deadline-text">⚠ Please install before the tech review on September 28th.</span>
-
-Best,
-NEXUS Technical Support Team
-Meraz Festival Infrastructure
-                    </div>`,
-                callout: `<strong>SPEAR PHISHING ASSESSMENT:</strong> This was not mass phishing. The Curator had access to KABIR's internal ticket (#NX-2847), knowledge of the September 28th tech review deadline, and understanding of NEXUS naming conventions. The message exploited competence under deadline pressure.`
-            },
-            2: {
-                title: "EVIDENCE 7.2 — AUTHENTICATION TELEMETRY ANOMALY",
-                desc: "Identifying impossible travel in KABIR's login history.",
-                tableHtml: `
-                    <table class="ev-table">
-                        <thead>
-                            <tr>
-                                <th>TIMESTAMP (IST)</th>
-                                <th>SOURCE IP</th>
-                                <th>GEOLOCATION</th>
-                                <th>METHOD</th>
-                                <th>STATUS</th>
-                                <th>DURATION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2026-09-30 08:15:22</td>
-                                <td>10.4.15.22</td>
-                                <td>IIT Bhilai — Campus</td>
-                                <td><span class="ev-pill pill-cyan">PWD + MFA</span></td>
-                                <td><span class="ev-pill pill-green">SUCCESS</span></td>
-                                <td>10h 30m</td>
-                            </tr>
-                            <tr>
-                                <td>2026-09-30 23:45:00</td>
-                                <td>203.0.113.15</td>
-                                <td>Bhilai, CG, IN (VPN)</td>
-                                <td><span class="ev-pill pill-cyan">PWD + MFA</span></td>
-                                <td><span class="ev-pill pill-green">SUCCESS</span></td>
-                                <td>1h 50m</td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>2026-10-01 01:35:42</td>
-                                <td>198.51.100.23</td>
-                                <td><span class="ev-pill pill-red">Amsterdam, NL</span></td>
-                                <td><span class="ev-pill pill-orange">STOLEN TOKEN</span></td>
-                                <td><span class="ev-pill pill-red">SUCCESS</span></td>
-                                <td>4 min</td>
-                            </tr>
-                            <tr>
-                                <td>2026-10-01 08:20:10</td>
-                                <td>10.4.15.22</td>
-                                <td>IIT Bhilai — Campus</td>
-                                <td><span class="ev-pill pill-cyan">PWD + MFA</span></td>
-                                <td><span class="ev-pill pill-green">SUCCESS</span></td>
-                                <td>8h 15m</td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>IMPOSSIBLE TRAVEL:</strong> KABIR was badge-scanned at IIT Bhilai Main Gate at <code>01:20 IST</code>. The Amsterdam session at <code>01:35:42 IST</code> used a stolen session token extracted by the malware. In 4 minutes, it listed ceremony scripts, downloaded <code>ceremony-init.yml</code>, and created an admin API key for <code>nexus-svc-continuity</code>.`
-            },
-            3: {
-                title: "EVIDENCE 7.3 — MFA PUSH NOTIFICATION FATIGUE TIMELINE",
-                desc: "14 push notifications in 5 minutes. Auto-approval after 30-second timeout.",
-                tableHtml: `
-                    <table class="ev-table">
-                        <thead>
-                            <tr>
-                                <th>TIME (IST)</th>
-                                <th>PUSH #</th>
-                                <th>DEVICE</th>
-                                <th>USER RESPONSE</th>
-                                <th>SYSTEM ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>01:30:00</td><td>#1</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:30:45</td><td>#2</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:31:15</td><td>#3</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:31:30</td><td>#4</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:31:45</td><td>#5</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:32:00</td><td>#6</td><td>Phone-KM</td><td><span class="ev-pill pill-green">DENIED ✓</span></td><td>Blocked</td></tr>
-                            <tr><td>01:32:15</td><td>#7</td><td>Phone-KM</td><td><span class="ev-pill pill-green">DENIED ✓</span></td><td>Blocked</td></tr>
-                            <tr><td>01:32:30</td><td>#8</td><td>Phone-KM</td><td><span class="ev-pill pill-green">DENIED ✓</span></td><td>Blocked</td></tr>
-                            <tr><td>01:33:00</td><td>#9</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:33:30</td><td>#10</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:34:00</td><td>#11</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:34:20</td><td>#12</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr><td>01:34:40</td><td>#13</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-amber">TIMEOUT</span></td></tr>
-                            <tr class="anomaly-row"><td>01:35:10</td><td>#14</td><td>Phone-KM</td><td>—</td><td><span class="ev-pill pill-red">AUTO-APPROVED (30s)</span></td></tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>MFA GATEWAY FLAW:</strong> The NEXUS MFA gateway's timeout policy treated a sequence of unanswered pushes (after explicit denials) as a connectivity issue — not an attack. Push #14 was auto-approved after a 30-second timeout. KABIR denied pushes #6, #7, and #8. The <em>system</em> approved the login anyway.`
-            },
-            4: {
-                title: "EVIDENCE 7.4 — IDENTITY CLASSIFICATION MATRIX",
-                desc: "Distinguishing humans, services, and fabricated personas in the evidence.",
-                tableHtml: `
-                    <table class="ev-table">
-                        <thead>
-                            <tr>
-                                <th>IDENTITY</th>
-                                <th>TYPE</th>
-                                <th>AUTH METHOD</th>
-                                <th>CREATED BY</th>
-                                <th>STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>kabir.mehra</td>
-                                <td><span class="ev-pill pill-green">HUMAN</span></td>
-                                <td>Password + MFA</td>
-                                <td>Self-registered</td>
-                                <td>Victim — clicked phishing file</td>
-                            </tr>
-                            <tr>
-                                <td>rhea.dsouza</td>
-                                <td><span class="ev-pill pill-green">HUMAN</span></td>
-                                <td>Password + MFA</td>
-                                <td>Self-registered</td>
-                                <td>Designed trust architecture</td>
-                            </tr>
-                            <tr>
-                                <td>curator_404</td>
-                                <td><span class="ev-pill pill-green">HUMAN</span></td>
-                                <td>External relay</td>
-                                <td>Aman Vyas</td>
-                                <td>Attacker — built exploit chain</td>
-                            </tr>
-                            <tr>
-                                <td>nexus-svc-continuity</td>
-                                <td><span class="ev-pill pill-cyan">SERVICE</span></td>
-                                <td>Service Token</td>
-                                <td>Rhea's team (2024)</td>
-                                <td>Hijacked for lateral movement</td>
-                            </tr>
-                            <tr>
-                                <td>maint_nexus_portal</td>
-                                <td><span class="ev-pill pill-cyan">SERVICE</span></td>
-                                <td>Hardcoded creds</td>
-                                <td>Developer team</td>
-                                <td>Used for cert renewal</td>
-                            </tr>
-                            <tr>
-                                <td>VOL-127 / NEXUS Infra</td>
-                                <td><span class="ev-pill pill-cyan">SERVICE</span></td>
-                                <td>API-Direct</td>
-                                <td>nexus-svc-continuity</td>
-                                <td>Ghost volunteer record</td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>kite-backup</td>
-                                <td><span class="ev-pill pill-red">PERSONA ⚠</span></td>
-                                <td>pam_nexus_token.so</td>
-                                <td>nexus-svc-continuity</td>
-                                <td>Fabricated insider — framed KABIR</td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>FABRICATED INSIDER:</strong> The <code>kite-backup</code> account was created by a service account, authenticated by a token module, and named to match KABIR's patterns (SSH key comment format, naming convention). Every action attributed to <code>kite-backup</code> was performed by an automated script mimicking KABIR's operational patterns. <strong>No human ever typed a command as kite-backup.</strong>`
-            }
-        };
-
-        let currentTab = 1;
-
-        function switchEvidenceTab(tabNum) {
-            currentTab = tabNum;
-            document.querySelectorAll('.evidence-tab').forEach((t, idx) => {
-                t.classList.toggle('active', (idx + 1) === tabNum);
-            });
-
-            const data = EVIDENCE_DATA[tabNum];
-            if (!data) return;
-
-            let contentHtml = '';
-            if (data.bodyHtml) {
-                contentHtml = `
-                    <div class="evidence-display-card">
-                        <div class="evidence-card-header">
-                            <span>▸ ${data.title}</span>
-                            <span>RECONSTRUCTED MESSAGE</span>
-                        </div>
-                        ${data.bodyHtml}
-                    </div>`;
-            }
-            if (data.tableHtml) {
-                contentHtml += `
-                    <div class="evidence-results-box">
-                        <div class="results-meta">
-                            <span>▸ ${data.title}</span>
-                            <span>${data.desc}</span>
-                        </div>
-                        <div style="overflow-x: auto;">
-                            ${data.tableHtml}
-                        </div>
-                    </div>`;
-            }
-            contentHtml += `
-                <div class="evidence-alert-box">
-                    ${data.callout}
-                </div>`;
-
-            document.getElementById('evidence-viewport').innerHTML = contentHtml;
+        /* ───────── Auth monitor log ───────── */
+        const logBox = document.getElementById('sys-log');
+        function addLog(message, type) {
+            const d = document.createElement('div');
+            d.className = 'l ' + (type || 'info');
+            const t = document.createElement('span');
+            t.className = 't';
+            t.textContent = new Date().toLocaleTimeString('en-GB');
+            d.appendChild(t);
+            d.appendChild(document.createTextNode(message));
+            logBox.appendChild(d);
+            while (logBox.children.length > 120) logBox.removeChild(logBox.firstChild);
+            logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // Initialize Tab 1
-        switchEvidenceTab(1);
+        /* ───────── Desk tabs ───────── */
+        function switchTab(name) {
+            ['inbox', 'push'].forEach(function (k) {
+                document.getElementById('tab-' + k).setAttribute('aria-selected', k === name ? 'true' : 'false');
+                document.getElementById('pane-' + k).classList.toggle('active', k === name);
+            });
+            if (name === 'push' && !feedStarted) replayFeed();
+        }
+        window.switchTab = switchTab;
 
-        const ROOM_ID = 7;
+        function toggleRaw() {
+            const m = document.getElementById('mail');
+            const on = m.classList.toggle('raw');
+            const b = document.getElementById('raw-btn');
+            b.textContent = on ? 'HIDE RAW HEADERS' : 'SHOW RAW HEADERS';
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            addLog(on ? 'Raw headers expanded.' : 'Raw headers collapsed.', 'info');
+        }
+        window.toggleRaw = toggleRaw;
 
-        // Restore this player's solved state from the server
+        /* ───────── Push feed: a short atmospheric replay ─────────
+         * Deliberately coarse: it shows the rhythm of the night, not the evidence. */
+        let feedStarted = false, feedTimer = 0;
+        function replayFeed() {
+            feedStarted = true;
+            clearTimeout(feedTimer);
+            const feed = document.getElementById('feed'), phone = document.getElementById('phone');
+            const card = document.getElementById('ph-card'), num = document.getElementById('ph-n');
+            feed.textContent = '';
+            num.textContent = '0';
+            let n = 0;
+            const total = 14;
+            function row(cls, text, tag) {
+                const r = document.createElement('div');
+                r.className = 'row ' + cls;
+                const a = document.createElement('span'); a.textContent = text;
+                const k = document.createElement('span'); k.className = 'k'; k.textContent = tag;
+                r.appendChild(a); r.appendChild(k);
+                feed.appendChild(r);
+                feed.scrollTop = feed.scrollHeight;
+            }
+            (function tick() {
+                n++;
+                phone.classList.remove('idle');
+                num.textContent = String(n);
+                card.classList.remove('ok');
+                card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+                card.textContent = 'Approve sign-in to NEXUS admin?';
+                row(n === total ? 'a' : 'd', 'Push ' + n + ' sent', n === total ? 'NO REPLY' : 'WAITING');
+                if (window.NJAudio && NJAudio.sfx) NJAudio.sfx('select');
+                if (n < total) { feedTimer = setTimeout(tick, 1400); return; }
+                feedTimer = setTimeout(function () {
+                    card.classList.add('ok');
+                    card.textContent = 'Sign-in approved';
+                    row('a', 'Gateway decision recorded', 'APPROVED');
+                }, 1600);
+            })();
+        }
+        window.replayFeed = replayFeed;
+
+        /* ───────── Flags: the server is the only source of truth ───────── */
+        const WHISPERS = {
+            1: 'You read it the way he did. For a moment you believed it, too.',
+            2: 'A key does not care whose hand turns it.',
+            3: 'Fourteen chances. It only ever needed one.',
+            4: 'Every story needs a guilty man. I only supplied the paperwork.'
+        };
+        function updateCount() {
+            const n = document.querySelectorAll('.nj-card.solved').length;
+            document.getElementById('solved-count').textContent = n + '/4';
+            document.getElementById('tl-count').textContent = n + '/4';
+        }
+
+        function markSolved(n, reward, fresh) {
+            const card = document.getElementById('target-' + n);
+            if (!card) return;
+            const was = card.classList.contains('solved');
+            card.classList.add('solved');
+            if (fresh && !was) {
+                card.classList.add('stamp');
+                setTimeout(function () { card.classList.remove('stamp'); }, 800);
+            }
+            const rw = document.getElementById('reward-' + n);
+            if (rw && (reward || !rw.textContent)) rw.textContent = reward || 'Evidence verified.';
+            const input = document.getElementById('flag-' + n);
+            if (input) { input.value = 'FLAG ACCEPTED'; input.disabled = true; }
+            const form = card.querySelector('.nj-form');
+            if (form) { form.classList.remove('bad'); form.classList.add('ok'); }
+            const btn = card.querySelector('.nj-form button');
+            if (btn) btn.disabled = true;
+            const st = document.getElementById('step-' + n);
+            if (st) st.classList.add('done');
+            updateCount();
+        }
+
+        function whisper(n) {
+            const w = document.getElementById('whisper');
+            document.getElementById('whisper-t').textContent = WHISPERS[n] || '';
+            w.classList.remove('show'); void w.offsetWidth; w.classList.add('show');
+        }
+
         async function initSolvedState() {
             const p = await NJ.progress();
-            if (!p) return;
-            const solved = p.rooms[ROOM_ID] || [];
-            solved.forEach(markSolved);
-            if (solved.length) checkAllSolved();
+            const solved = p ? (p.rooms[ROOM_ID] || []) : [];
+            const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
+            solved.forEach(function (n) { markSolved(n, rewards[n], false); });
+            story.boot(solved, p ? p.score : undefined);
         }
-
-        function markSolved(targetNum) {
-            const target = document.getElementById(`target-${targetNum}`);
-            if (!target) return;
-            target.classList.add('solved');
-            const reward = document.getElementById(`reward-${targetNum}`);
-            if (reward) reward.style.display = 'block';
-
-            const inputField = document.getElementById(`flag-${targetNum}`);
-            if (inputField) {
-                inputField.value = 'FLAG ACCEPTED';
-                inputField.disabled = true;
-            }
-
-            // Update milestone chain visualization
-            const chain = document.getElementById(`chain-${targetNum}`);
-            if (chain) chain.classList.add('completed');
-
-            // Disable verify button
-            const btn = target.querySelector('.input-group button');
-            if (btn) btn.disabled = true;
-
-            // Show KABIR message after challenge 7.4
-            if (targetNum === 4 && !document.getElementById('kabir-message-box')) {
-                const msgHtml = `
-                <div class="kabir-message" id="kabir-message-box">
-                    "I clicked it because I was trying to save the festival. I was behind on the ceremony scripts. The message looked like help. The tool looked like what I needed. I did not stop to check the sender domain because the tech review was in twelve hours and nothing was working. Do not blame the person who made the deadline. Blame the system that let one click become everything."
-                    <span class="msg-author">— KABIR "KITE" MEHRA</span>
-                </div>`;
-                document.getElementById('target-4').insertAdjacentHTML('beforeend', msgHtml);
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', initSolvedState);
 
-        // Server-side flag verification (the server is the only source of truth)
-        async function verifyFlag(targetNum) {
-            const input = document.getElementById(`flag-${targetNum}`).value.trim();
-            if (!input) return;
-
-            const btn = document.querySelector('#target-' + targetNum + ' .input-group button');
+        async function verifyFlag(n) {
+            const input = document.getElementById('flag-' + n);
+            const val = input.value.trim();
+            if (!val) return;
+            const form = input.closest('.nj-form');
+            const btn = form.querySelector('button');
             if (btn.disabled) return;
-            const ogText = btn.innerText;
-            btn.innerText = '...';
             btn.disabled = true;
+            btn.classList.add('busy');
+            addLog('Verifying target 7.' + n + '...', 'info');
 
-            const res = await NJ.submit(ROOM_ID, input);
-            if (res.success) {
-                btn.innerText = ogText;
-                btn.disabled = false;
-                (res.solved.length ? res.solved : [targetNum]).forEach(markSolved);
-                checkAllSolved();
-                return;
-            }
-
-            btn.innerText = 'INVALID';
-            btn.title = res.message;
-            btn.style.background = 'var(--red)';
+            const res = await NJ.submit(ROOM_ID, val);
+            btn.classList.remove('busy');
             btn.disabled = false;
-            setTimeout(() => {
-                btn.innerText = ogText;
-                btn.style.background = '';
-            }, 1200);
-        }
-
-        function checkAllSolved() {
-            const solvedCount = document.querySelectorAll('.target-item.solved').length;
-            if (solvedCount === 4) {
-                if (!document.getElementById('next-room-container')) {
-                    const nextRoomHtml = `
-                    <div class="next-room-container" id="next-room-container">
-                        <div class="next-room-label">>> TRANSMISSION INTERCEPT // 01:47 IST</div>
-                        <div class="next-room-text">
-                            <strong>Commander Ila Sen:</strong> <em>"KABIR clicked a file. That is his mistake, and it is a human one. But the Curator did not leave it to chance. He studied the festival's schedule, read KABIR's support tickets, matched the timing to a real deadline, and sent a message that was engineered to feel like help."</em><br><br>
-                            <strong>Rhea D'Souza:</strong> <em>"The file KABIR downloaded is still in quarantine. It is called Ethereal_Sync_Helper.exe. It looks like a small festival utility. It is not. And what it contains is the last piece of the puzzle — the mechanism that connects the Curator's phishing campaign to MIRA-7's autonomous propagation."</em><br><br>
-                            <em>Proceed to the quarantine lab. The malware sample is waiting.</em>
-                        </div>
-                        <a class="next-room-btn" href="/hub">PROCEED TO ROOM 8 — THE GHOST IN THE MACHINE ▸</a>
-                    </div>`;
-                    document.querySelector('.targets-content').insertAdjacentHTML('beforeend', nextRoomHtml);
-                }
+            if (res.success) {
+                const hit = res.challenge || n;
+                const solved = res.solved.length ? res.solved : [n];
+                const fresh = !document.getElementById('target-' + hit).classList.contains('solved');
+                addLog('Target 7.' + hit + ' VERIFIED. Timeline updated.', 'ok');
+                solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
+                story.onSolved(hit, solved);
+                if (fresh) setTimeout(function () { whisper(hit); }, 2200);
+            } else {
+                addLog('Target 7.' + n + ' FAILED. ' + res.message, 'err');
+                form.classList.remove('bad');
+                void form.offsetWidth;
+                form.classList.add('bad');
+                story.onWrong(n);
             }
         }
-
-        // Modal Logic
-        const modal = document.getElementById('evidence-modal');
-        const iframe = document.getElementById('modal-iframe');
-        const modalTitle = document.getElementById('modal-title');
-
-        function openEvidence(title, url) {
-            modalTitle.innerText = `EVIDENCE VIEWER: ${title.toUpperCase()}`;
-            iframe.src = url;
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-            iframe.src = '';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-
-        // ESC to close modal
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display === 'flex') {
-                closeModal();
-            }
+        window.verifyFlag = verifyFlag;
+        document.querySelectorAll('.nj-form input').forEach(function (inp) {
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') verifyFlag(Number(inp.id.replace('flag-', '')));
+            });
         });
+
+        /* ───────── Evidence viewer ───────── */
+        const modal = document.getElementById('evidence-modal');
+        const frame = document.getElementById('modal-iframe');
+        function openEvidence(title, url) {
+            addLog('Opening file: ' + title + '...', 'info');
+            document.getElementById('modal-title').textContent = 'EVIDENCE VIEWER // ' + title.toUpperCase();
+            frame.src = url;
+            modal.classList.add('open');
+            document.getElementById('modal-close').focus();
+        }
+        function closeModal() {
+            modal.classList.remove('open');
+            frame.src = 'about:blank';
+        }
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     </script>
 </body>
 </html>
