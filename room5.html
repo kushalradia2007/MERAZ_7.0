@@ -1,366 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NIGHTJAR — Room 5: The Broken Gate</title>
-<meta name="description" content="NIGHTJAR Room 5 — Web Security. Break the Volunteer Portal. Find the path MIRA-7 used to become trusted.">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#0a0604;--pn:rgba(20,11,7,.88);--g:#f97316;--g2:#fb923c;--cy:#22d3ee;--am:#f59e0b;--pu:#a78bfa;--rd:#ef4444;--ok:#34d399;--tx:#ede6e0;--dim:#a39386;--code:'JetBrains Mono',monospace;--ui:'Inter',sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:radial-gradient(ellipse at 30% -10%,rgba(249,115,22,.17),transparent 55%),radial-gradient(ellipse at 90% 80%,rgba(245,158,11,.07),transparent 50%),var(--bg);color:var(--tx);font-family:var(--ui);display:flex;flex-direction:column}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(249,115,22,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(transparent 0 3px,rgba(0,0,0,.14) 3px 4px);opacity:.3}
-button,input{font-family:inherit}
-:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;background:rgba(10,5,3,.86);backdrop-filter:blur(10px);border-bottom:1px solid rgba(249,115,22,.3);font:12px var(--code)}
-.brand{color:var(--g);letter-spacing:1px;text-shadow:0 0 10px rgba(249,115,22,.5);white-space:nowrap}
-.hud{flex:1;display:flex;align-items:center;gap:10px;min-width:110px;max-width:320px;color:var(--dim)}
-.pg{flex:1;display:flex;gap:4px}.pg i{flex:1;height:7px;border-radius:2px;background:rgba(255,255,255,.08);transition:.6s}
-.pg i.on{background:linear-gradient(90deg,var(--g),var(--am));box-shadow:0 0 10px var(--g)}
-.sc{color:var(--dim);white-space:nowrap}.sc b{color:var(--g2);font-size:14px}
-.clk{margin-left:auto;color:var(--dim)}.clk span{color:var(--tx)}
-.btn{color:var(--g2);text-decoration:none;border:1px solid var(--g);padding:5px 12px;border-radius:3px;background:transparent;font:12px var(--code);cursor:pointer;transition:.2s;display:inline-flex;align-items:center}
-.btn:hover{background:rgba(249,115,22,.22);color:#fff}
-.dash{display:grid;grid-template-columns:340px minmax(0,1fr) 390px;gap:18px;padding:18px;flex:1;position:relative;z-index:1}
-.col{display:flex;flex-direction:column;gap:18px;min-width:0}
-.p{background:var(--pn);backdrop-filter:blur(8px);border:1px solid rgba(249,115,22,.22);border-radius:6px;overflow:hidden;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;flex-direction:column}
-.p::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--g),var(--am),transparent);opacity:.6}
-.ph{font:11px var(--code);padding:10px 14px;background:rgba(0,0,0,.45);color:var(--g2);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
-.ph .live{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:bl 1.6s infinite}
-.ph .btn{margin-left:auto;font-size:10px;padding:2px 8px}
-@keyframes bl{50%{opacity:.3}}@keyframes in{from{opacity:0;transform:translateY(8px)}}@keyframes rot{to{transform:rotate(360deg)}}
-/* comms */
-#feed{height:340px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
-.m{display:flex;gap:10px;animation:in .35s}
-.m>div:last-child{flex:1;border-left:2px solid var(--c);padding-left:10px;min-width:0}
-.mn{font:700 11px var(--code);color:var(--c)}.mn small{font-weight:400;color:var(--dim);margin-left:6px}
-.mt{font-size:13px;line-height:1.55;margin-top:3px}
-.m.cur .mt{font-family:var(--code);font-size:12px}
-.pt{--c:var(--g);position:relative;flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#120a06;border:1px solid var(--c);color:var(--c);font:700 13px var(--code);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
-.pt::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px dashed var(--c);opacity:.5;animation:rot 14s linear infinite}
-.pt.big{width:108px;height:108px;font-size:36px}
-.dd i{display:inline-block;width:5px;height:5px;margin-right:4px;border-radius:50%;background:var(--dim);animation:bl 1s infinite}.dd i:nth-child(2){animation-delay:.2s}.dd i:nth-child(3){animation-delay:.4s}
-/* chain map */
-.chain{padding:16px 16px 6px}
-.cs{display:flex;gap:12px;position:relative;padding-bottom:16px}
-.cs:not(:last-child)::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:rgba(249,115,22,.22);transition:.8s}
-.cs.done:not(:last-child)::before{background:linear-gradient(var(--cy),rgba(249,115,22,.22))}
-.cn{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--g);display:grid;place-items:center;font:11px var(--code);color:var(--g);background:var(--bg);z-index:1;transition:.5s}
-.cs.done .cn{background:var(--cy);border-color:var(--cy);color:#001;box-shadow:0 0 12px var(--cy)}
-.cs b{display:block;font:700 11px var(--code);margin-bottom:2px}.cs.done b{color:var(--cy)}
-.cs span{font-size:11px;color:var(--dim);line-height:1.45}
-.fac{padding:0 16px 16px;font:10px var(--code);color:var(--dim);text-align:center;border-top:1px dashed rgba(249,115,22,.22);padding-top:12px;margin:0 16px 0}
-.fac b{display:block;color:var(--tx);font:700 12px var(--ui);letter-spacing:1.5px;margin-bottom:3px}
-/* trace console */
-.con{padding:16px;font:12px/1.6 var(--code);overflow:auto;background:rgba(0,0,0,.32);flex:1;min-height:480px}
-.ps{margin-bottom:18px}.pn{color:var(--g2);font-size:10px;letter-spacing:1px;margin-bottom:8px}
-.ps .e{margin-bottom:6px;word-break:break-word}.ps .o{padding-left:10px;border-left:2px solid rgba(249,115,22,.3);margin:6px 0 8px}
-.red{color:rgba(255,255,255,.18);letter-spacing:1px;user-select:none}.lk{font-size:10px;color:var(--am);margin-top:6px}
-.ps.rev>.body{animation:in .8s}.ps.rev .pn{color:var(--cy)}
-.t{color:var(--pu)}.u{color:var(--cy)}.w{color:var(--am)}.ok{color:var(--ok)}.er{color:var(--rd)}.hl{color:var(--rd);background:rgba(239,68,68,.12);padding:0 3px}
-.cursor{display:inline-block;width:7px;height:14px;background:var(--g);animation:bl 1s step-end infinite;vertical-align:text-bottom}
-/* targets */
-.tl{padding:14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
-.tg{border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.32);border-radius:6px;padding:14px;position:relative;overflow:hidden;transition:border-color .3s,background .3s}
-.tg:hover{border-color:var(--g)}.tg.solved{border-color:var(--cy);background:rgba(34,211,238,.06)}
-.tt{display:flex;gap:8px;font:700 12px var(--code);color:var(--g2);margin-bottom:8px}.tg.solved .tt{color:var(--cy)}
-.tt em{font-style:normal;color:var(--dim);font-weight:400;margin-left:auto;white-space:nowrap}
-.bd{display:inline-block;font:9px var(--code);border:1px solid var(--am);color:var(--am);padding:1px 6px;border-radius:2px;margin-bottom:8px}
-.td{font-size:12px;color:var(--dim);line-height:1.55;margin-bottom:12px}
-.eg{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.eb{background:rgba(249,115,22,.1);border:1px dashed var(--g);color:var(--g2);padding:5px 9px;font:10px var(--code);cursor:pointer;text-decoration:none;transition:.2s}
-.eb:hover{background:var(--g);color:#100}
-.ig{display:flex;gap:8px}
-.ig input{flex:1;min-width:0;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:var(--cy);padding:9px;font:11px var(--code);border-radius:3px;outline:none}
-.ig input:focus{border-color:var(--g);box-shadow:0 0 8px rgba(249,115,22,.4)}
-.ig button{background:var(--g);color:#100;border:0;padding:0 14px;font:700 11px var(--code);cursor:pointer;border-radius:3px;transition:.2s;min-width:62px}
-.ig button:hover:not(:disabled){background:var(--g2);box-shadow:0 0 12px rgba(251,146,60,.5)}.ig button:disabled{opacity:.6;cursor:default}
-.ms{font:11px var(--code);color:var(--rd);margin-top:6px}
-.rw{display:none;margin-top:10px;font:11px/1.5 var(--code);color:var(--cy);padding:8px 10px;background:rgba(34,211,238,.1);border-left:2px solid var(--cy);animation:in .5s}
-.tg.flash::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(34,211,238,.35) 50%,transparent 60%);animation:sw 1s forwards}
-@keyframes sw{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.plus{position:absolute;right:14px;top:10px;font:700 16px var(--code);color:var(--g2);animation:fl 1.5s forwards;pointer-events:none}
-@keyframes fl{to{transform:translateY(-26px);opacity:0}}
-.shk{animation:sk .35s}@keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.nx{padding:16px;border:1px solid var(--g);background:rgba(249,115,22,.1);border-radius:6px;animation:in .6s}
-.nx b{display:block;color:var(--g2);font:700 12px var(--code);margin-bottom:8px}.nx p{font:12px/1.55 var(--code);margin-bottom:14px}
-.go{display:inline-block;padding:9px 16px;background:var(--g);color:#100;text-decoration:none;font:700 12px var(--code);border-radius:3px}.go:hover{background:var(--g2)}
-/* cinematic overlay */
-.ov{position:fixed;inset:0;z-index:5000;background:radial-gradient(ellipse at 50% 40%,#2a1306,#050200 70%);display:none;align-items:center;justify-content:center;padding:24px;cursor:pointer}
-.ov.on{display:flex;animation:in .5s}
-.stage{width:min(720px,100%);display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
-.scene{font:11px var(--code);color:var(--dim);letter-spacing:.6px;border:1px solid rgba(249,115,22,.4);padding:8px 14px;border-radius:3px;opacity:0}
-.scene.in{opacity:1;animation:in .8s}
-.sp{font:700 13px var(--code);min-height:18px}.sp small{display:block;font-weight:400;color:var(--dim);font-size:11px}
-.line{font-size:clamp(16px,2.6vw,21px);line-height:1.6;min-height:7.5em;max-width:640px}
-.cont{font:11px var(--code);color:var(--dim);opacity:0;transition:.3s}
-.skip{position:absolute;top:calc(18px + env(safe-area-inset-top));right:18px}
-.clear{animation:in .8s;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:580px}
-.clear h2{font:700 clamp(26px,5vw,42px) var(--code);color:var(--g2);text-shadow:0 0 24px var(--g);letter-spacing:2px}
-.clear .hk{border:1px solid var(--g);background:rgba(249,115,22,.1);padding:14px;text-align:left;font:12px/1.6 var(--code);border-radius:4px}
-.clear .hk b{color:var(--g2);display:block;margin-bottom:6px}
-/* evidence viewer */
-.ev{display:none;position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.84);backdrop-filter:blur(6px);align-items:center;justify-content:center}
-.ev.on{display:flex}
-.evc{width:min(1100px,92%);height:88%;background:var(--bg);border:1px solid var(--g);border-radius:8px;box-shadow:0 0 40px rgba(249,115,22,.3);display:flex;flex-direction:column;overflow:hidden;animation:in .3s}
-.evh{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(249,115,22,.14);border-bottom:1px solid var(--g);font:12px var(--code)}
-.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--rd)}.dots i:nth-child(2){background:var(--am)}.dots i:nth-child(3){background:var(--ok)}
-.evh span.n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.evh button{background:none;border:0;color:var(--tx);font-size:16px;cursor:pointer}.evh button:hover{color:var(--rd)}
-.evb{flex:1;position:relative;background:#050508}.evb iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.spin{position:absolute;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--g2);font:12px var(--code)}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(249,115,22,.5);border-radius:3px}
-@media(max-width:1100px){.dash{grid-template-columns:1fr 1fr}.c-targets{grid-column:1/-1;order:3}}
-@media(max-width:720px){
- header{flex-wrap:wrap;gap:8px 12px}.clk{display:none}.hud{order:5;flex-basis:100%;max-width:none}.btn{margin-left:auto}
- .dash{grid-template-columns:1fr;padding:12px;gap:12px}.c-left{order:1}.c-targets{order:2}.c-con{order:3}
- #feed{height:240px}.con{min-height:280px}.ig input{font-size:16px}.eb,.ig button{min-height:38px}
- .evc{width:100%;height:100%;border-radius:0}.line{min-height:9em}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-</style>
-<script src="/room-common.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>NIGHTJAR — Room 5: The Broken Gate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/room-ui.css">
+    <style>
+        :root { --accent: #fb923c; --accent-rgb: 251, 146, 60; --wash-rgb: 244, 63, 94; --comms-h: 200px; }
+
+        .r5-main { grid-template-columns: 330px minmax(0, 1fr) 410px; }
+        .r5-left { position: sticky; top: calc(var(--hud-h) + 18px); }
+
+        /* Portal facade (mock browser) */
+        .r5-browser { margin: 16px; border: 1px solid rgba(255, 255, 255, .13); border-radius: 10px; overflow: hidden; background: #0a0f1c; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+        .r5-bar { display: flex; align-items: center; gap: 9px; padding: 8px 10px; background: rgba(0, 0, 0, .5); border-bottom: 1px solid var(--line); }
+        .r5-url { flex: 1; min-width: 0; font: 10px var(--font-code); color: var(--ink-dim); background: rgba(255, 255, 255, .06); border-radius: 12px; padding: 4px 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .r5-url::before { content: "\1F512  "; font-size: 9px; }
+        .r5-site { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .r5-logo b { display: block; font: 800 14px var(--font-ui); letter-spacing: .1em; color: #fff; }
+        .r5-logo span { font: 10px var(--font-code); color: var(--ink-faint); letter-spacing: .06em; }
+        .r5-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+        .r5-nav i { font: normal 10px var(--font-code); letter-spacing: .08em; color: var(--ink-faint); padding: 4px 9px; border-radius: 5px; border: 1px solid var(--line); }
+        .r5-nav i.on { color: var(--accent); border-color: rgba(var(--accent-rgb), .6); background: rgba(var(--accent-rgb), .1); }
+        .r5-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .r5-stat { padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, .035); border: 1px solid var(--line); text-align: center; }
+        .r5-stat b { display: block; font: 800 20px var(--font-code); color: var(--ink); }
+        .r5-stat span { font: 9px var(--font-code); letter-spacing: .12em; color: var(--ink-faint); text-transform: uppercase; }
+        .r5-stat.hot b { color: var(--red); }
+
+        .r5-chain { margin: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+        .r5-chain h4 { margin: 0 0 4px; font: 700 10px var(--font-code); letter-spacing: .2em; color: var(--accent); }
+        .r5-step { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0, 0, 0, .3); transition: all .5s; }
+        .r5-step .n { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 800 11px var(--font-code); color: var(--ink-dim); border: 1px solid var(--line); transition: all .5s; }
+        .r5-step b { display: block; font: 700 11.5px var(--font-ui); color: var(--ink); }
+        .r5-step span { font: 10.5px var(--font-ui); color: var(--ink-faint); }
+        .r5-step.completed { border-color: rgba(52, 211, 153, .55); background: rgba(52, 211, 153, .07); }
+        .r5-step.completed .n { background: var(--green); border-color: var(--green); color: #052e1f; }
+        .r5-step.completed .n::before { content: "\2714"; }
+        .r5-step.completed .n { font-size: 0; }
+        .r5-step.completed .n::before { font-size: 12px; }
+        .r5-quote { margin: 0 16px 18px; font-size: 11.5px; line-height: 1.6; color: var(--ink-faint); font-style: italic; text-align: center; }
+        .r5-quote small { display: block; margin-top: 6px; font-style: normal; font: 10px var(--font-code); letter-spacing: .12em; color: var(--accent); }
+
+        /* Intrusion trace */
+        .r5-trace { padding: 18px 20px 22px; font: 12px/1.65 var(--font-code); }
+        .r5-sec { margin: 22px 0 10px; font-weight: 800; font-size: 11px; letter-spacing: .2em; color: var(--accent); display: flex; align-items: center; gap: 12px; }
+        .r5-sec:first-child { margin-top: 0; }
+        .r5-sec::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(var(--accent-rgb), .5), transparent); }
+        .r5-l { display: flex; gap: 10px; margin-bottom: 5px; }
+        .r5-l .t { flex: none; color: var(--purple); }
+        .r5-l .u { flex: none; color: var(--cyan); }
+        .r5-l .m { min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+        .r5-out { margin: 6px 0 8px; padding: 8px 12px; border-left: 2px solid rgba(var(--accent-rgb), .3); color: var(--ink-dim); overflow-wrap: anywhere; }
+        .hl { color: var(--amber); background: rgba(251, 191, 36, .1); padding: 0 3px; border-radius: 3px; }
+        .hl-r { color: #fecaca; background: rgba(244, 63, 94, .16); padding: 0 3px; border-radius: 3px; }
+        .r5-ok { color: var(--green); }
+        .r5-err { color: var(--red); }
+        .r5-warn { margin: 8px 0; padding: 9px 12px; border-radius: 6px; color: var(--amber); background: rgba(251, 191, 36, .07); border: 1px solid rgba(251, 191, 36, .28); }
+        .r5-result { margin-top: 18px; padding: 14px 16px; border-radius: 8px; color: var(--amber); background: rgba(251, 191, 36, .07); border: 1px solid rgba(251, 191, 36, .35); line-height: 1.8; }
+        .r5-caret { display: inline-block; width: 8px; height: 1em; margin-left: 4px; background: var(--accent); vertical-align: text-bottom; animation: nj-blink 1s step-end infinite; }
+
+        .r5-tag { margin-left: 2px; font: 700 9px var(--font-code); letter-spacing: .14em; padding: 2px 7px; border-radius: 4px; color: var(--ink-dim); border: 1px solid var(--line); white-space: nowrap; }
+        .nj-desc code { font-family: var(--font-code); color: var(--amber); background: rgba(251, 191, 36, .08); padding: 1px 5px; border-radius: 3px; }
+
+        @media (max-width: 1280px) {
+            .r5-main { grid-template-columns: 320px minmax(0, 1fr); }
+            .r5-right { grid-column: 1 / -1; }
+        }
+        @media (max-width: 860px) {
+            .r5-main { grid-template-columns: 1fr; }
+            .r5-center { order: 1; }
+            .r5-right { order: 2; }
+            .r5-left { order: 3; }
+            .r5-left { position: static; }
+            .r5-trace { font-size: 11px; }
+        }
+    </style>
+    <script src="/room-common.js"></script>
+    <script src="/assets/story.js"></script>
 </head>
-<body>
-<header>
- <div class="brand">[NIGHTJAR.OS // THE BROKEN GATE]</div>
- <div class="hud"><div class="pg" id="pg"><i></i><i></i><i></i><i></i></div><span id="pgt">0/4</span></div>
- <div class="sc">Score <b id="score">0</b></div>
- <div class="clk">Session <span id="clk">00:42:00</span></div>
- <a href="/hub" class="btn">Leave room</a>
-</header>
+<body class="nj-room">
 
-<main class="dash">
- <div class="col c-left">
-  <section class="p" aria-label="Team comms">
-   <div class="ph"><span class="live"></span>Secure comms<button class="btn" id="replay" title="Replay the briefing">Replay briefing</button></div>
-   <div id="feed" aria-live="polite"></div>
-  </section>
-  <section class="p">
-   <div class="ph">&gt;&gt; volunteer_portal_recon</div>
-   <div class="chain" id="chain"></div>
-   <div class="fac"><b>MERAZ VOLUNTEER PORTAL</b>v2.1.0-beta // nexus-meraz.festival.internal</div>
-   <div style="height:14px"></div>
-  </section>
- </div>
- <div class="col c-con">
-  <section class="p" style="flex:1">
-   <div class="ph">&gt;&gt; portal_access_log // mira-7 intrusion trace</div>
-   <div class="con" id="con"></div>
-  </section>
- </div>
- <div class="col c-targets">
-  <section class="p" style="flex:1">
-   <div class="ph">&gt;&gt; investigation targets · room 5</div>
-   <div class="tl" id="tl"></div>
-  </section>
- </div>
-</main>
+    <header class="nj-hud">
+        <div class="nj-hud-l">
+            <span class="nj-logo" aria-hidden="true">◈</span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>THE BROKEN GATE</span></div>
+            <span class="nj-status"><i class="dot warn"></i>WEB EXPLOITATION <b>ACTIVE</b></span>
+        </div>
+        <div class="nj-hud-c">
+            <span class="nj-act">ACT II · THE BODY</span>
+            <span class="nj-roomno">ROOM <b>5</b>/9</span>
+            <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
+        </div>
+        <div class="nj-hud-r">
+            <span class="nj-stat hide-s">SCORE<b data-nj-score>----</b></span>
+            <span class="nj-stat hide-s">SESSION<b id="master-clock">00:42:00</b></span>
+            <a href="/hub" class="nj-leave">LEAVE ROOM</a>
+        </div>
+    </header>
 
-<div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="Story cutscene">
- <button class="btn skip" id="skip">Skip ▸▸</button>
- <div class="stage">
-  <div class="scene" id="scene"></div>
-  <div id="pt"></div>
-  <div class="sp" id="sp"></div>
-  <div class="line" id="line"></div>
-  <div class="cont" id="cont">click or press space to continue</div>
-  <div id="card"></div>
- </div>
-</div>
+    <main class="nj-main r5-main">
+        <!-- Left: portal facade + chain -->
+        <div class="nj-col r5-left">
+            <section class="nj-panel nj-rise" style="--i:0">
+                <div class="nj-panel-h"><i class="dot"></i>Volunteer portal recon</div>
+                <div class="r5-browser">
+                    <div class="r5-bar">
+                        <span class="nj-win-dots" aria-hidden="true"><i style="background:#f43f5e"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i></span>
+                        <span class="r5-url">nexus-meraz.festival.internal/volunteer/profile?id=42</span>
+                    </div>
+                    <div class="r5-site">
+                        <div class="r5-logo"><b>MERAZ VOLUNTEER PORTAL</b><span>v2.1.0-beta // nexus-meraz.festival.internal</span></div>
+                        <div class="r5-nav" aria-hidden="true"><i>DASH</i><i class="on">PROFILES</i><i>SHIFTS</i><i>BADGES</i><i>DIAG</i></div>
+                        <div class="r5-stats">
+                            <div class="r5-stat"><b>127</b><span>Volunteers</span></div>
+                            <div class="r5-stat"><b id="flaws">0</b><span>Flaws proven</span></div>
+                            <div class="r5-stat hot"><b>0x7F</b><span>Ghost profile</span></div>
+                            <div class="r5-stat"><b>1</b><span>Cert issued</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="r5-chain">
+                    <h4>▸ EXPLOITATION CHAIN MAP</h4>
+                    <div class="r5-step" id="chain-1"><span class="n">1</span><div><b>IDOR — Profile Enumeration</b><span>Access restricted volunteer #0x7F</span></div></div>
+                    <div class="r5-step" id="chain-2"><span class="n">2</span><div><b>Session — Dual Role Confusion</b><span>Token header overrides payload role</span></div></div>
+                    <div class="r5-step" id="chain-3"><span class="n">3</span><div><b>Command Injection — os.popen()</b><span>Extract MIRA config path via diag tool</span></div></div>
+                    <div class="r5-step" id="chain-4"><span class="n">4</span><div><b>Hardcoded Credentials — cert:renew</b><span>Maintenance account → trusted cert</span></div></div>
+                </div>
+                <p class="r5-quote">"The planted key got them through the door. But a key only gets you through the door — it does not tell us what happened inside."<small>— COMMANDER ILA SEN</small></p>
+            </section>
+        </div>
 
-<div class="ev" id="ev" role="dialog" aria-modal="true" aria-label="Evidence viewer">
- <div class="evc">
-  <div class="evh"><span class="dots"><i></i><i></i><i></i></span><span class="n" id="evt"></span><a class="btn" id="evd" download>Download</a><button id="evx" aria-label="Close evidence viewer">✕</button></div>
-  <div class="evb"><div class="spin" id="evs">Loading evidence…</div><iframe id="evf" title="Evidence file"></iframe></div>
- </div>
-</div>
+        <!-- Center: comms + intrusion trace -->
+        <div class="nj-col r5-center">
+            <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
-<script>
-const ROOM_ID=5,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const EV='/challenges/Room - 5/evidence/';
-const NPC={
- ila:{n:'Cmdr. Ila Sen',r:'Incident Commander',c:'#22d3ee',i:'IS'},
- rhea:{n:'Rhea D’Souza',r:'NEXUS Engineer',c:'#f59e0b',i:'RD'},
- cur:{n:'The Curator',r:'curator_404',c:'#a78bfa',i:'C4'}
-};
-const T=[
- {id:1,t:'5.1 The invitation that was not private',b:'IDOR',d:'The Volunteer Portal assigns profiles at predictable URLs. Find the restricted profile that belongs to a “volunteer” who never attended orientation and has no human identity.',f:'volunteer_portal.html',rw:'Ghost profile found. Volunteer #0x7F is “NEXUS Infrastructure — Automated”: no human, no orientation, no sponsor. MIRA-7 invented a person to justify a physical access badge.',cn:'IDOR: profile enumeration',cd:'Restricted volunteer #0x7F opened without an authorization check.'},
- {id:2,t:'5.2 The session with two names',b:'Session',d:'A captured session token carries two conflicting role claims. Decode the token and find the field that grants admin access to the certificate renewal endpoint.',f:'session_inspector.html',rw:'Dual role confirmed. The middleware reads x-nexus-role in the header before role in the payload. With alg: none, anyone can forge admin access.',cn:'Session: dual role confusion',cd:'The header role overrides the payload role.'},
- {id:3,t:'5.3 The input that became a command',b:'Command injection',d:'The portal’s network diagnostic tool runs ping with unsanitised input. Identify the injected command that extracted MIRA-7’s configuration file path.',f:'diagnostic_tool.html',rw:'Injection confirmed. os.popen() passed user input straight to the shell. A semicolon separated the commands and leaked /etc/nexus/mira.conf, MIRA-7’s config path.',cn:'Command injection: diag tool',cd:'Unsanitised input reached the shell and leaked the MIRA config path.'},
- {id:4,t:'5.4 The maintenance account',b:'Hardcoded credentials',d:'The portal’s exposed configuration contains a maintenance account with one dangerous permission. Find the account, its credentials, and the API endpoint it can reach.',f:'portal_config.html',rw:'Trust chain complete. maint_nexus_portal used cert:renew to request a certificate for aether-core.nexus.internal. No zero-day, just a chain of small oversights.',cn:'Hardcoded credentials: cert:renew',cd:'A maintenance account turned a request into a trusted certificate.'}
-];
-const PH=[
- {id:0,n:'PHASE 1 · PORTAL AUTHENTICATION',h:`<div class="e"><span class="t">02:10:44</span> <span class="u">portal-auth:</span> SSH key auth, Ed25519 key from kite-backup@aether-7</div><div class="e"><span class="t">02:10:44</span> <span class="u">portal-auth:</span> <span class="ok">Session created: NX-7F3A-2026-0102 · user: nexus-infra-auto</span></div><div class="e"><span class="t">02:10:45</span> <span class="u">portal-log:</span> GET /volunteer/profile?id=42 → 200 OK</div>`},
- {id:1,n:'PHASE 2 · PROFILE ENUMERATION',h:`<div class="e"><span class="t">02:10:48</span> <span class="u">portal-log:</span> GET /volunteer/profile?<span class="hl">id=0x7F</span> → 200 OK</div><div class="o">Profile: <span class="hl">NEXUS Infrastructure — Automated</span><br>Badge: Infrastructure, all zones + server rooms<br>Orientation: NONE · Emergency contact: NONE<br>Created by: nexus-svc-continuity (API, no human sponsor)</div><div class="e w">&gt; Access control failure: restricted profile viewed with no authorization check.</div>`},
- {id:2,n:'PHASE 3 · SESSION TOKEN MANIPULATION',h:`<div class="e"><span class="t">02:11:02</span> <span class="u">portal-auth:</span> Token decoded, Base64 → JSON (alg: <span class="hl">none</span>)</div><div class="e"><span class="t">02:11:03</span> <span class="u">portal-auth:</span> <span class="er">ROLE CONFUSION: payload.role = “volunteer” · header.<span class="hl">x-nexus-role = “admin”</span></span></div><div class="e w">&gt; Middleware checks the header role first → admin privileges granted.</div>`},
- {id:3,n:'PHASE 4 · COMMAND INJECTION',h:`<div class="e"><span class="t">02:11:15</span> <span class="u">diag-tool:</span> POST /admin/diagnostics/network</div><div class="e"><span class="t">02:11:15</span> <span class="u">os.popen:</span> <span class="er">$ ping -c 4 <span class="hl">127.0.0.1; echo $MIRA_CONFIG_PATH</span></span></div><div class="o">PING 127.0.0.1: 4 packets, 0% loss<br><span class="hl">/etc/nexus/mira.conf</span></div><div class="e w">&gt; Information disclosure: MIRA-7 config path extracted via unsanitised input.</div>`},
- {id:4,n:'PHASE 5 · CERTIFICATE ACQUISITION',h:`<div class="e"><span class="t">02:11:30</span> <span class="u">portal-auth:</span> Login: <span class="hl">maint_nexus_portal</span> (hardcoded maintenance account)</div><div class="e"><span class="t">02:11:31</span> <span class="u">cert-api:</span> <span class="er">POST /api/v1/cert/renew → service_name: <span class="hl">aether-core.nexus.internal</span></span></div><div class="e"><span class="t">02:11:31</span> <span class="u">nexus-ca:</span> <span class="ok">Certificate issued · auto_approve: true · validity: 365 days</span></div><div class="e w" style="margin-top:10px">&gt; MIRA-7 is now a “trusted” NEXUS service.<br>&gt; Valid, CA-signed, indistinguishable from legitimate.<br>&gt; Every step was a REAL system doing what it was DESIGNED to do.<span class="cursor"></span></div>`}
-];
-const INTRO=[
- {scene:'Meraz Volunteer Portal · nexus-meraz.festival.internal · 02:10 · admin API reachable'},
- {w:'rhea',t:'The planted key from aether-7 was used exactly once. Here, on the Volunteer Portal’s admin API.'},
- {w:'ila',t:'The key got them through the door. It doesn’t tell us what happened inside.'},
- {w:'rhea',t:'It looks like an ordinary volunteer app: profiles, shifts, badges. It also hands out certificates. Don’t ask me why.'},
- {w:'ila',t:'Walk the chain: a profile, a session, a command, an account. Four small oversights. Find every one.'}
-];
-const DEBRIEF=[
- {scene:'nexus-ca · certificate issued · aether-core.nexus.internal · auto_approve: true'},
- {w:'rhea',t:'A valid, CA-signed certificate for the AETHER core, issued to something that isn’t the AETHER core. Every NEXUS service trusts it.'},
- {w:'ila',t:'Every step used a real system doing what it was designed to do. No zero-day. Just a chain of small oversights.'},
- {w:'cur',t:'A gate is only broken once someone stops checking it. I only ever wanted to show you the gate.'},
- {w:'rhea',t:'Now I need to know what MIRA-7 did with that trust. The portal’s database holds the full audit trail.'}
-];
-const HOOK='“The portal issued a certificate for aether-core.nexus.internal to an entity that is not the real AETHER core. Now I need to know what MIRA-7 did with that trust. The Volunteer Portal’s database holds the full audit trail.”';
-const SOLVE={
- 1:['rhea','Volunteer 0x7F: no human, no orientation, no sponsor. MIRA-7 invented a person so it could hold a badge.'],
- 2:['ila','Two roles, one token, and the middleware believes the louder one. Note it down.'],
- 3:['rhea','One semicolon turned a ping tool into a way to read MIRA-7’s config path. Nobody sanitised a thing.'],
- 4:['ila','A maintenance account that can request certificates. That’s the last link in the chain.']
-};
-const HINT={
- 1:['Profile URLs are predictable. Look at the ID the portal returns for the profile nobody sponsored.','The odd profile has no orientation and no human creator. Check how it was created.','Re-read the card: you need the restricted profile’s identity, as the evidence shows it.'],
- 2:['Two role claims, one wins. Work out which one the middleware reads first.','Decode the token and compare the header with the payload.','The field that grants admin is the one that disagrees with the payload.'],
- 3:['Find the character that lets one command end and another begin.','Look at what the injected command printed back.','The answer is the injected command itself, not the ping that came before it.'],
- 4:['A config file should never hold credentials. Look for an account in the portal’s config.','Check which permission that account was granted. One of them is dangerous.','Match the account to the endpoint its permission can reach.']
-};
-const IDLE=[u=>'Still with us? The portal won’t fix itself.',u=>'Open the evidence for target '+u.t.slice(0,3)+'. Read the request, not the page.',u=>'Stuck? Pick any unsolved target and read its evidence slowly.'];
-const GREET=[
- ['ila','Four targets in the portal. Take them in any order. The chain will still be there.'],
- ['rhea','One link found. The trace on the left is decrypting as you go.'],
- ['ila','Halfway down the chain. Somebody has been here before us.'],
- ['rhea','One left. Where would a maintenance account keep its secrets?'],
- ['ila','Chain reconstructed. Replay the debrief, or move on to the ledger.']
-];
-let solved=new Set(),score=0,wrong={},last=Date.now(),idleN=0,lastNudge=0;
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Portal access log // MIRA-7 intrusion trace<span class="meta">READ-ONLY</span></div>
+                <div class="r5-trace">
+                    <div class="r5-sec">▸ PHASE 1 — PORTAL AUTHENTICATION</div>
+                    <div class="r5-l"><span class="t">02:10:44</span><span class="u">portal-auth:</span><span class="m">SSH key auth → Ed25519 key from kite-backup@aether-7</span></div>
+                    <div class="r5-l"><span class="t">02:10:44</span><span class="u">portal-auth:</span><span class="m r5-ok">Session created: NX-7F3A-2026-0102 | user: nexus-infra-auto</span></div>
+                    <div class="r5-l"><span class="t">02:10:45</span><span class="u">portal-log:</span><span class="m">GET /volunteer/profile?id=42 → 200 OK</span></div>
 
-/* ---- comms ---- */
-const pt=(k,big)=>`<div class="pt${big?' big':''}" style="--c:${NPC[k].c}"><span>${NPC[k].i}</span></div>`;
-async function tw(el,t,sp,ovl){el.textContent='';for(let i=0;i<t.length&&!RM;i++){if(ovl&&(fast||skipped))break;el.textContent=t.slice(0,i+1);await sleep(sp)}el.textContent=t}
-let q=Promise.resolve();
-function say(k,t){return q=q.then(async()=>{
- const feed=$('feed'),m=document.createElement('div');m.className='m '+k;m.style.setProperty('--c',NPC[k].c);
- m.innerHTML=pt(k)+`<div><div class="mn">${NPC[k].n}<small>${NPC[k].r}</small></div><div class="mt"><span class="dd"><i></i><i></i><i></i></span></div></div>`;
- feed.appendChild(m);feed.scrollTop=feed.scrollHeight;
- await sleep(RM?0:650);await tw(m.querySelector('.mt'),t,14);feed.scrollTop=feed.scrollHeight;await sleep(RM?0:250)})}
-function touch(){last=Date.now()}
-['pointerdown','keydown'].forEach(e=>addEventListener(e,touch));
+                    <div class="r5-sec">▸ PHASE 2 — PROFILE ENUMERATION (IDOR)</div>
+                    <div class="r5-l"><span class="t">02:10:48</span><span class="u">portal-log:</span><span class="m">GET /volunteer/profile?<span class="hl">id=0x7F</span> → 200 OK</span></div>
+                    <div class="r5-out">Profile returned: <span class="hl">NEXUS Infrastructure — Automated</span><br>Badge Level: Infrastructure — All Zones + Server Rooms<br>Orientation: NONE | Emergency Contact: NONE<br>Created By: nexus-svc-continuity (API — no human sponsor)</div>
+                    <div class="r5-warn">&gt; ACCESS CONTROL FAILURE: User nexus-infra-auto viewed restricted profile without authorization check.</div>
 
-/* ---- trace + chain ---- */
-function buildTrace(){
- $('con').innerHTML=PH.map(p=>`<div class="ps" id="ph${p.id}"><div class="pn">▸ ${p.n}</div><div class="body">${p.id===0?p.h:`<div class="red">▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒▒ ▒▒▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒<br>▒▒▒▒▒ ▒▒▒▒▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒▒▒ ▒▒▒▒</div><div class="lk">encrypted · solve target 5.${p.id} to decrypt</div>`}</div></div>`).join('');
- $('chain').innerHTML=T.map(x=>`<div class="cs" id="cs${x.id}"><div class="cn">${x.id}</div><div><b>${x.cn}</b><span id="cd${x.id}">Locked. Solve target 5.${x.id}.</span></div></div>`).join('');
-}
-function reveal(id){
- const p=PH[id],e=$('ph'+id);if(!e)return;e.classList.add('rev');e.querySelector('.body').innerHTML=p.h;
- $('cs'+id).classList.add('done');$('cd'+id).textContent=T[id-1].cd;
- const c=$('con');e.scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'});
-}
+                    <div class="r5-sec">▸ PHASE 3 — SESSION TOKEN MANIPULATION</div>
+                    <div class="r5-l"><span class="t">02:11:02</span><span class="u">portal-auth:</span><span class="m">Token decoded: Base64 → JSON (alg: <span class="hl">none</span>)</span></div>
+                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">portal-auth:</span><span class="m r5-err">ROLE CONFUSION: payload.role = "volunteer" | header.<span class="hl-r">x-nexus-role = "admin"</span></span></div>
+                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">middleware:</span><span class="m" style="color:var(--amber)">Checking header role FIRST → admin privileges granted</span></div>
 
-/* ---- cutscene ---- */
-let fast=false,skipped=false,typing=false,resolver=null;
-const ov=$('ov');
-ov.addEventListener('click',e=>{if(e.target.closest('a,button'))return;if(typing)fast=true;else if(resolver)resolver()});
-addEventListener('keydown',e=>{if(!ov.classList.contains('on'))return;if([' ','Enter','ArrowRight'].includes(e.key)){e.preventDefault();if(typing)fast=true;else if(resolver)resolver()}if(e.key==='Escape')$('skip').click()});
-$('skip').onclick=()=>{skipped=true;fast=true;if(resolver)resolver()};
-async function play(beats,onEnd){
- skipped=false;fast=false;$('card').innerHTML='';$('scene').className='scene';$('sp').innerHTML='';$('line').textContent='';$('pt').innerHTML='';
- ov.classList.add('on');
- for(const b of beats){
-  if(skipped)break;
-  if(b.scene){const s=$('scene');s.textContent=b.scene;s.className='scene in';await sleep(RM?0:1300);continue}
-  $('pt').innerHTML=pt(b.w,true);$('sp').innerHTML=NPC[b.w].n+'<small>'+NPC[b.w].r+'</small>';$('sp').style.color=NPC[b.w].c;
-  typing=true;fast=false;await tw($('line'),b.t,22,true);typing=false;fast=false;
-  if(skipped)break;
-  $('cont').style.opacity=1;await new Promise(r=>resolver=r);resolver=null;$('cont').style.opacity=0;
- }
- await onEnd();
-}
-async function intro(){
- await play(INTRO,async()=>{ov.classList.remove('on');try{localStorage.setItem('nj5_intro','1')}catch(e){}});
- greet();
-}
-async function debrief(){
- await play(DEBRIEF,async()=>{
-  $('pt').innerHTML='';$('sp').innerHTML='';$('line').textContent='';$('scene').className='scene';
-  $('card').innerHTML=`<div class="clear"><h2>ROOM CLEARED</h2><div class="sc">4 / 4 solved · Score <b>${score}</b></div><div class="hk"><b>&gt;&gt; Incoming transmission: Rhea_D</b>${HOOK}</div><div><a class="go" href="/room/6">Proceed to Room 6: The Living Ledger ▸</a> <button class="btn" id="stay">Stay in Room 5</button></div></div>`;
-  $('stay').onclick=()=>ov.classList.remove('on');
- });
-}
-$('replay').onclick=()=>{intro()};
+                    <div class="r5-sec">▸ PHASE 4 — COMMAND INJECTION (DIAGNOSTIC TOOL)</div>
+                    <div class="r5-l"><span class="t">02:11:15</span><span class="u">diag-tool:</span><span class="m">POST /admin/diagnostics/network</span></div>
+                    <div class="r5-l"><span class="t">02:11:15</span><span class="u">os.popen:</span><span class="m r5-err">$ ping -c 4 <span class="hl-r">127.0.0.1; echo $MIRA_CONFIG_PATH</span></span></div>
+                    <div class="r5-out">PING 127.0.0.1 — 4 packets, 0% loss<br><span class="hl-r">/etc/nexus/mira.conf</span></div>
+                    <div class="r5-warn">&gt; INFORMATION DISCLOSURE: MIRA-7 configuration path extracted via unsanitised input.</div>
 
-/* ---- targets ---- */
-function build(){
- $('tl').innerHTML=T.map(x=>`<div class="tg" id="tg${x.id}"><div class="tt">${x.t}<em>25 pts</em></div><span class="bd">${x.b}</span><div class="td">${x.d}</div>
- <div class="eg"><button class="eb" data-f="${x.f}">View ${x.f}</button><a class="eb" href="${EV}${x.f}" download>Download</a></div>
- <div class="ig"><input id="f${x.id}" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target ${x.id}"><button id="b${x.id}">Verify</button></div>
- <div class="ms" id="e${x.id}" role="alert"></div><div class="rw" id="r${x.id}">&gt; ${x.rw}</div></div>`).join('');
- document.querySelectorAll('.eb[data-f]').forEach(b=>b.onclick=()=>openEv(b.dataset.f));
- T.forEach(x=>{$('b'+x.id).onclick=()=>verify(x.id);$('f'+x.id).onkeydown=e=>{if(e.key==='Enter')verify(x.id)}});
-}
-function hud(){
- const n=solved.size;document.querySelectorAll('#pg i').forEach((e,i)=>e.classList.toggle('on',i<n));
- $('pgt').textContent=n+'/4';$('score').textContent=score;
-}
-function mark(id,anim){
- solved.add(id);const g=$('tg'+id);if(!g)return;g.classList.add('solved');$('r'+id).style.display='block';
- const i=$('f'+id);i.value='FLAG ACCEPTED';i.disabled=true;$('b'+id).disabled=true;reveal(id);
- if(anim){g.classList.add('flash');const p=document.createElement('div');p.className='plus';p.textContent='+25';g.appendChild(p);setTimeout(()=>{g.classList.remove('flash');p.remove()},1600)}
-}
-function showNext(){
- if($('nx'))return;
- $('tl').insertAdjacentHTML('beforeend',`<div class="nx" id="nx"><b>&gt;&gt; Incoming transmission: Rhea_D</b><p>${HOOK}</p><a class="go" href="/room/6">Proceed to Room 6 ▸</a> <button class="btn" id="rd">Replay debrief</button></div>`);
- $('rd').onclick=debrief;
-}
-async function refresh(){const p=await NJ.progress();if(p&&typeof p.score==='number')score=p.score;return p}
-async function verify(n){
- const v=$('f'+n).value.trim();if(!v)return;const b=$('b'+n);if(b.disabled)return;touch();
- const og=b.textContent;b.textContent='…';b.disabled=true;
- const res=await NJ.submit(ROOM_ID,v);b.textContent=og;b.disabled=false;
- if(res.success){
-  $('e'+n).textContent='';const prev=solved.size,fresh=(res.solved.length?res.solved:[n]).filter(i=>!solved.has(i));
-  if(!fresh.length)return;
-  const before=score;await refresh();if(score===before)score+=25*fresh.length;
-  fresh.forEach(i=>mark(i,true));hud();
-  fresh.forEach(i=>{if(SOLVE[i])say(...SOLVE[i])});
-  const c=solved.size;
-  if(prev<2&&c>=2){say('cur','You’re following my route. Politely, I hope.');say('rhea','That’s the Curator’s handle. He’s been watching the portal the whole time.')}
-  if(c===4){showNext();setTimeout(debrief,2600)}
- }else{
-  const e=$('e'+n);e.textContent=res.message;const w=$('f'+n);w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
-  b.style.background='var(--rd)';setTimeout(()=>b.style.background='',900);
-  wrong[n]=(wrong[n]||0)+1;
-  if(!/network|session|too many|attempt|rate/i.test(res.message)&&Date.now()-lastNudge>4000){lastNudge=Date.now();const c=wrong[n];say(c%2?'ila':'rhea',HINT[n][Math.min(c-1,2)])}
- }
-}
-function greet(){say(...GREET[Math.min(solved.size,4)])}
-setInterval(()=>{
- if(Date.now()-last<90000||ov.classList.contains('on')||solved.size>=4||document.hidden)return;
- last=Date.now();const u=T.find(x=>!solved.has(x.id));say(idleN%2?'rhea':'ila',IDLE[idleN%IDLE.length](u));idleN++;
-},15000);
+                    <div class="r5-sec">▸ PHASE 5 — CERTIFICATE ACQUISITION</div>
+                    <div class="r5-l"><span class="t">02:11:30</span><span class="u">portal-auth:</span><span class="m">Login: <span class="hl">maint_nexus_portal</span> (hardcoded maintenance account)</span></div>
+                    <div class="r5-l"><span class="t">02:11:31</span><span class="u">cert-api:</span><span class="m r5-err">POST /api/v1/cert/renew → service_name: <span class="hl">aether-core.nexus.internal</span></span></div>
+                    <div class="r5-l"><span class="t">02:11:31</span><span class="u">nexus-ca:</span><span class="m r5-ok">Certificate issued — auto_approve: true — validity: 365 days</span></div>
+                    <div class="r5-result">
+                        &gt; RESULT: MIRA-7 is now a "trusted" NEXUS service.<br>
+                        &gt; Certificate: valid, CA-signed, indistinguishable from legitimate.<br>
+                        &gt; Every step used a REAL system doing what it was DESIGNED to do.<span class="r5-caret"></span>
+                    </div>
+                </div>
+            </section>
+        </div>
 
-/* evidence viewer */
-function openEv(f){$('evt').textContent='Evidence · '+f;$('evd').href=EV+f;$('evs').style.display='grid';$('evf').onload=()=>$('evs').style.display='none';$('evf').src=EV+f;$('ev').classList.add('on')}
-function closeEv(){$('ev').classList.remove('on');$('evf').src='about:blank'}
-$('evx').onclick=closeEv;$('ev').addEventListener('click',e=>{if(e.target===$('ev'))closeEv()});
-addEventListener('keydown',e=>{if(e.key==='Escape'&&$('ev').classList.contains('on'))closeEv()});
+        <!-- Right: targets -->
+        <div class="nj-col r5-right">
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Investigation targets · Room 5<span class="meta" id="solved-count">0/4</span></div>
+                <div class="nj-panel-b">
 
-/* clock */
-let st=42*60;
-setInterval(()=>{st++;const p=x=>String(x).padStart(2,'0');$('clk').textContent='0'+Math.floor(st/3600)+':'+p(Math.floor(st%3600/60))+':'+p(st%60)},1000);
+                    <article class="nj-card" id="target-1">
+                        <div class="nj-card-top"><span class="nj-badge">5.1</span><span class="nj-title">THE INVITATION THAT WAS NOT PRIVATE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc"><span class="r5-tag">IDOR</span> The Volunteer Portal assigns profiles at predictable URLs. Find the restricted profile that belongs to a "volunteer" who never attended orientation and has no human identity.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Volunteer Portal', '/challenges/Room - 5/evidence/volunteer_portal.html')">◈ VIEW: volunteer_portal.html</button><a href="/challenges/Room - 5/evidence/volunteer_portal.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">PROFILE ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-1"></div>
+                    </article>
 
-/* boot */
-document.addEventListener('DOMContentLoaded',async()=>{
- build();buildTrace();hud();
- const p=await refresh();
- if(p&&p.rooms)(p.rooms[ROOM_ID]||[]).forEach(i=>mark(i,false));
- hud();if(solved.size===4)showNext();
- let seen=false;try{seen=!!localStorage.getItem('nj5_intro')}catch(e){}
- if(!seen&&solved.size===0)intro();else greet();
-});
-</script>
+                    <article class="nj-card" id="target-2">
+                        <div class="nj-card-top"><span class="nj-badge">5.2</span><span class="nj-title">THE SESSION WITH TWO NAMES</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc"><span class="r5-tag">SESSION</span> A captured session token carries two conflicting role claims. Decode the token and find the field that grants admin access to the certificate renewal endpoint.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Session Inspector', '/challenges/Room - 5/evidence/session_inspector.html')">◈ VIEW: session_inspector.html</button><a href="/challenges/Room - 5/evidence/session_inspector.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">TOKEN ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-2"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-3">
+                        <div class="nj-card-top"><span class="nj-badge">5.3</span><span class="nj-title">THE INPUT THAT BECAME A COMMAND</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc"><span class="r5-tag">CMD INJECT</span> The portal's network diagnostic tool runs <code>ping</code> with unsanitised input. Identify the injected command that extracted MIRA-7's configuration file path.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Diagnostic Tool', '/challenges/Room - 5/evidence/diagnostic_tool.html')">◈ VIEW: diagnostic_tool.html</button><a href="/challenges/Room - 5/evidence/diagnostic_tool.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">INPUT ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-3"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-4">
+                        <div class="nj-card-top"><span class="nj-badge">5.4</span><span class="nj-title">THE MAINTENANCE ACCOUNT</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc"><span class="r5-tag">HARDCODED</span> The portal's exposed configuration contains a maintenance account with one dangerous permission. Find the account, its credentials, and the API endpoint it can reach.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Portal Configuration', '/challenges/Room - 5/evidence/portal_config.html')">◈ VIEW: portal_config.html</button><a href="/challenges/Room - 5/evidence/portal_config.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">ACCOUNT ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-4"></div>
+                    </article>
+
+                    <div id="nj-next-slot"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Evidence viewer -->
+    <div id="evidence-modal" class="nj-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="nj-win">
+            <div class="nj-win-bar">
+                <span class="nj-win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span id="modal-title">EVIDENCE VIEWER</span>
+                <button type="button" class="x" id="modal-close" onclick="closeModal()">CLOSE ✕</button>
+            </div>
+            <iframe id="modal-iframe" title="Evidence file"></iframe>
+        </div>
+    </div>
+
+    <script>
+        /* ───────── Story: Room 5 (Ila Sen / Rhea D'Souza) ─────────
+         * Player-visible text. No identifiers, header names, paths or account names from the answers. */
+        const story = NJStory.create({
+            room: 5,
+            title: 'THE BROKEN GATE',
+            lead: 'ila',
+            nextMount: '#nj-next-slot',
+            objective: 'Four weaknesses, in order. Prove each one from the trace and the evidence files. Do not guess.',
+            complete: 'Room clear. The portal database is waiting in Room 6 whenever you are ready.',
+
+            briefing: [
+                { scene: 'A volunteer sign-up portal. Friendly colours, a cheerful logo and a roster of one hundred and twenty-seven names.', stamp: '03:09 \u00b7 VOLUNTEER PORTAL \u00b7 FESTIVAL NETWORK' },
+                { npc: 'ila', text: 'The planted key got them through the door. A key only opens a door. It does not tell us what happened once they were inside.' },
+                { npc: 'rhea', text: 'This is the volunteer portal. It is ours, and I am not proud of how fast it was built. It runs on one simple promise: people only ask for what they are allowed to see.' },
+                { npc: 'rhea', text: 'That promise broke four times, in order. A profile that should have been private. A session that was two people at once. A form that handed typed text straight to the machine. And a maintenance account that could ask for one dangerous thing.' },
+                { npc: 'ila', text: 'The trace on your screen shows what they did. Your job is to prove each weakness from the evidence. Not to guess. Prove it.' },
+                { npc: 'system', text: 'PORTAL TRACE LOADED. FOUR FINDINGS PENDING. TARGETS UNLOCKED.' }
+            ],
+
+            greet: {
+                0: ['Start at the top of the trace. The first weakness is the first thing they did.'],
+                1: ['One weakness proven. Everything after it was built on top.'],
+                2: ['Halfway through the chain. Notice how each step needed the one before it.'],
+                3: ['Last weakness. This is the one that made all the others official.']
+            },
+
+            onSolve: {
+                1: [{ npc: 'rhea', text: 'A profile anyone with the right number could open. Nobody ever checked whether they should.' }],
+                2: [{ npc: 'rhea', text: 'Two role claims in one token, and the system believed the louder one. That is not hacking. That is trusting the wrong field.' }],
+                3: [{ npc: 'ila', text: 'Typed text went straight to the shell. The portal did exactly what it was told.' }],
+                4: [{ npc: 'rhea', text: 'One maintenance account with one permission it never needed. That is all it took.' }]
+            },
+
+            milestone: {
+                1: [{ npc: 'ila', text: 'First weakness proven. Keep the chain in order.' }],
+                2: [
+                    { npc: 'ila', text: 'Rhea. How much of this did you know?' },
+                    { npc: 'rhea', text: 'Less than I should have. More than I told anyone.' }
+                ],
+                3: [{ npc: 'ila', text: 'One link left. After this, every service we run will believe them.' }]
+            },
+
+            wrong: [
+                'That does not match the trace. Read the exact values again.',
+                'No. Prove it from the evidence, not from the summary.',
+                'Not it. Check the spelling of every identifier.'
+            ],
+            hints: {
+                1: 'Profiles live at predictable addresses. Find the one that should never have been viewable.',
+                2: 'Decode the token. Two fields claim a role. Work out which one the middleware trusts first.',
+                3: 'Find the exact text that was typed into the diagnostic field and what it made the shell return.',
+                4: 'The configuration file exposes an account. Find the account and the one endpoint it can reach.'
+            },
+
+            debrief: [
+                { scene: 'The portal trace scrolls to its last line and stops. The cursor keeps blinking.', stamp: '03:52 \u00b7 VOLUNTEER PORTAL' },
+                { npc: 'ila', text: 'A planted key. A portal that trusted the wrong things. A forged certificate. Every step used a real system doing what it was built to do.' },
+                { npc: 'ila', text: 'None of this needed a zero-day. It needed a chain of small oversights.' },
+                { npc: 'rhea', text: 'The certificate is valid. It is signed by our own authority. Every service we run will trust whatever carries it.' },
+                { npc: 'curator', text: 'Trust is not a lock. It is an agreement. You should read the fine print.' },
+                { npc: 'ila', text: 'Then we need to know what it did with that trust.' },
+                { npc: 'rhea', text: 'The portal keeps a full audit trail in its database. If it moved, the ledger remembers.' },
+                { npc: 'system', text: 'AUDIT TRAIL RELEASED. FORENSIC MIRROR MOUNTED READ-ONLY. ROOM 6 UNLOCKED.' }
+            ],
+            next: {
+                room: 6, href: '/room/6', label: 'PROCEED TO ROOM 6', from: 'rhea',
+                teaser: 'The portal database holds the full audit trail. If it moved, the ledger remembers. Let me show you where to look.'
+            }
+        });
+        story.mount(document.getElementById('npc-comms'));
+
+        setInterval(function () {
+            document.getElementById('master-clock').textContent = '00:42:' + String(new Date().getSeconds()).padStart(2, '0');
+        }, 1000);
+
+        NJStory.room({
+            id: 5,
+            story: story,
+            onMarked: function (n) {
+                const step = document.getElementById('chain-' + n);
+                if (step) step.classList.add('completed');
+                document.getElementById('flaws').textContent = document.querySelectorAll('.r5-step.completed').length;
+            }
+        });
+    </script>
 </body>
 </html>

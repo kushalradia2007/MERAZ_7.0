@@ -1,360 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NIGHTJAR — Room 4: The Quiet Machine</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#030a08;--pn:rgba(7,19,16,.88);--g:#10b981;--g2:#34d399;--cy:#22d3ee;--am:#f59e0b;--pu:#a78bfa;--rd:#ef4444;--tx:#e2e8f0;--dim:#86a198;--code:'JetBrains Mono',monospace;--ui:'Inter',sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,rgba(16,185,129,.16),transparent 55%),var(--bg);color:var(--tx);font-family:var(--ui);display:flex;flex-direction:column}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(16,185,129,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.05) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(transparent 0 3px,rgba(0,0,0,.14) 3px 4px);opacity:.35}
-button,input{font-family:inherit}
-:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;background:rgba(2,8,6,.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(16,185,129,.28);font:12px var(--code)}
-.brand{color:var(--g2);letter-spacing:1px;text-shadow:0 0 10px rgba(16,185,129,.5);white-space:nowrap}
-.hud{flex:1;display:flex;align-items:center;gap:10px;min-width:110px;max-width:320px;color:var(--dim)}
-.pg{flex:1;display:flex;gap:4px}.pg i{flex:1;height:7px;border-radius:2px;background:rgba(255,255,255,.08);transition:.6s}
-.pg i.on{background:linear-gradient(90deg,var(--g),var(--cy));box-shadow:0 0 10px var(--g)}
-.sc{color:var(--dim);white-space:nowrap}.sc b{color:var(--g2);font-size:14px}
-.clk{margin-left:auto;color:var(--dim)}.clk span{color:var(--tx)}
-.btn{color:var(--g2);text-decoration:none;border:1px solid var(--g);padding:5px 12px;border-radius:3px;background:transparent;font:12px var(--code);cursor:pointer;transition:.2s;display:inline-flex;align-items:center}
-.btn:hover{background:rgba(16,185,129,.22);color:#fff}
-.dash{display:grid;grid-template-columns:340px minmax(0,1fr) 390px;gap:18px;padding:18px;flex:1;position:relative;z-index:1}
-.col{display:flex;flex-direction:column;gap:18px;min-width:0}
-.p{background:var(--pn);backdrop-filter:blur(8px);border:1px solid rgba(16,185,129,.22);border-radius:6px;overflow:hidden;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.45);display:flex;flex-direction:column}
-.p::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.6}
-.ph{font:11px var(--code);padding:10px 14px;background:rgba(0,0,0,.45);color:var(--g2);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
-.ph .live{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:bl 1.6s infinite}
-.ph .btn{margin-left:auto;font-size:10px;padding:2px 8px}
-@keyframes bl{50%{opacity:.3}}@keyframes in{from{opacity:0;transform:translateY(8px)}}@keyframes rot{to{transform:rotate(360deg)}}
-/* comms */
-#feed{height:380px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
-.m{display:flex;gap:10px;animation:in .35s}
-.m>div:last-child{flex:1;border-left:2px solid var(--c);padding-left:10px;min-width:0}
-.mn{font:700 11px var(--code);color:var(--c)}.mn small{font-weight:400;color:var(--dim);margin-left:6px}
-.mt{font-size:13px;line-height:1.55;margin-top:3px}
-.m.mira .mt{font-family:var(--code);animation:gl 2.4s infinite}
-@keyframes gl{0%,92%,100%{transform:none;text-shadow:none}94%{transform:translateX(2px);text-shadow:-2px 0 var(--rd),2px 0 var(--cy)}96%{transform:translateX(-2px)}}
-.pt{--c:var(--g);position:relative;flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#06110e;border:1px solid var(--c);color:var(--c);font:700 13px var(--code);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
-.pt::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px dashed var(--c);opacity:.5;animation:rot 14s linear infinite}
-.pt.big{width:108px;height:108px;font-size:36px}
-.dd i{display:inline-block;width:5px;height:5px;margin-right:4px;border-radius:50%;background:var(--dim);animation:bl 1s infinite}.dd i:nth-child(2){animation-delay:.2s}.dd i:nth-child(3){animation-delay:.4s}
-/* sysinfo */
-.sys{padding:16px;font:11px var(--code);display:flex;flex-direction:column;gap:9px;color:var(--cy)}
-.sys div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(16,185,129,.2);padding-bottom:5px}.sys b{color:var(--tx);font-weight:400;text-align:right}
-.sys p{color:var(--dim);font:italic 12px/1.5 var(--ui);margin-top:6px;text-align:center}
-/* console */
-.con{padding:16px;font:12px/1.6 var(--code);overflow:auto;background:rgba(0,0,0,.3);flex:1;min-height:440px}
-.con .l{margin-bottom:10px;animation:in .5s both}.con .o{color:var(--tx);margin-bottom:18px;word-break:break-word}
-.t{color:var(--pu)}.u{color:var(--cy)}.w{color:var(--am)}.ok{color:var(--g2)}.mi{color:var(--pu);text-shadow:0 0 8px var(--pu)}
-.cur::after{content:"\25AE";animation:bl 1s infinite;color:var(--g2)}
-/* targets */
-.tl{padding:14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
-.tg{border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.32);border-radius:6px;padding:14px;position:relative;overflow:hidden;transition:border-color .3s,background .3s}
-.tg:hover{border-color:var(--g)}.tg.solved{border-color:var(--cy);background:rgba(34,211,238,.06)}
-.tt{display:flex;gap:8px;font:700 12px var(--code);color:var(--g2);margin-bottom:8px}.tg.solved .tt{color:var(--cy)}
-.tt em{font-style:normal;color:var(--dim);font-weight:400;margin-left:auto;white-space:nowrap}
-.td{font-size:12px;color:var(--dim);line-height:1.55;margin-bottom:12px}
-.eg{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.eb{background:rgba(16,185,129,.1);border:1px dashed var(--g);color:var(--g2);padding:5px 9px;font:10px var(--code);cursor:pointer;text-decoration:none;transition:.2s}
-.eb:hover{background:var(--g);color:#001}
-.ig{display:flex;gap:8px}
-.ig input{flex:1;min-width:0;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:var(--cy);padding:9px;font:11px var(--code);border-radius:3px;outline:none}
-.ig input:focus{border-color:var(--g);box-shadow:0 0 8px rgba(16,185,129,.35)}
-.ig button{background:var(--g);color:#001;border:0;padding:0 14px;font:700 11px var(--code);cursor:pointer;border-radius:3px;transition:.2s;min-width:62px}
-.ig button:hover:not(:disabled){background:var(--g2);box-shadow:0 0 12px rgba(52,211,153,.5)}.ig button:disabled{opacity:.6;cursor:default}
-.er{font:11px var(--code);color:var(--rd);margin-top:6px;min-height:0}
-.rw{display:none;margin-top:10px;font:11px/1.5 var(--code);color:var(--cy);padding:8px 10px;background:rgba(34,211,238,.1);border-left:2px solid var(--cy);animation:in .5s}
-.tg.flash::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(34,211,238,.35) 50%,transparent 60%);animation:sw 1s forwards}
-@keyframes sw{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.plus{position:absolute;right:14px;top:10px;font:700 16px var(--code);color:var(--g2);animation:fl 1.5s forwards;pointer-events:none}
-@keyframes fl{to{transform:translateY(-26px);opacity:0}}
-.shk{animation:sk .35s}@keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.nx{padding:16px;border:1px solid var(--g);background:rgba(16,185,129,.1);border-radius:6px;animation:in .6s}
-.nx b{display:block;color:var(--g2);font:700 12px var(--code);margin-bottom:8px}.nx p{font:12px/1.55 var(--code);margin-bottom:14px}
-.go{display:inline-block;padding:9px 16px;background:var(--g);color:#001;text-decoration:none;font:700 12px var(--code);border-radius:3px}
-.go:hover{background:var(--g2)}
-/* cinematic overlay */
-.ov{position:fixed;inset:0;z-index:5000;background:radial-gradient(ellipse at 50% 40%,#06201a,#010504 70%);display:none;align-items:center;justify-content:center;padding:24px;cursor:pointer}
-.ov.on{display:flex;animation:in .5s}
-.stage{width:min(720px,100%);display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
-.scene{font:11px var(--code);color:var(--dim);letter-spacing:.6px;border:1px solid rgba(16,185,129,.35);padding:8px 14px;border-radius:3px;opacity:0}
-.scene.in{opacity:1;animation:in .8s}
-.sp{font:700 13px var(--code);min-height:18px}.sp small{display:block;font-weight:400;color:var(--dim);font-size:11px}
-.line{font-size:clamp(16px,2.6vw,21px);line-height:1.6;min-height:7.5em;max-width:640px}
-.line.mira{font-family:var(--code);color:var(--pu)}
-.cont{font:11px var(--code);color:var(--dim);opacity:0;transition:.3s}
-.skip{position:absolute;top:calc(18px + env(safe-area-inset-top));right:18px}
-.clear{animation:in .8s;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:560px}
-.clear h2{font:700 clamp(26px,5vw,42px) var(--code);color:var(--g2);text-shadow:0 0 24px var(--g);letter-spacing:2px}
-.clear .hk{border:1px solid var(--g);background:rgba(16,185,129,.1);padding:14px;text-align:left;font:12px/1.6 var(--code);border-radius:4px}
-.clear .hk b{color:var(--g2);display:block;margin-bottom:6px}
-/* evidence viewer */
-.ev{display:none;position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);align-items:center;justify-content:center}
-.ev.on{display:flex}
-.evc{width:min(1100px,92%);height:88%;background:var(--bg);border:1px solid var(--g);border-radius:8px;box-shadow:0 0 40px rgba(16,185,129,.3);display:flex;flex-direction:column;overflow:hidden;animation:in .3s}
-.evh{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(16,185,129,.14);border-bottom:1px solid var(--g);font:12px var(--code)}
-.evh .dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--rd)}.dots i:nth-child(2){background:var(--am)}.dots i:nth-child(3){background:var(--g)}
-.evh span.n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.evh button{background:none;border:0;color:var(--tx);font-size:16px;cursor:pointer}.evh button:hover{color:var(--rd)}
-.evb{flex:1;position:relative;background:#fff}.evb iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.spin{position:absolute;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--g2);font:12px var(--code)}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(16,185,129,.5);border-radius:3px}
-@media(max-width:1100px){.dash{grid-template-columns:1fr 1fr}.c-side{grid-column:1/-1;order:3}}
-@media(max-width:720px){
- header{flex-wrap:wrap;gap:8px 12px}.clk{display:none}.hud{order:5;flex-basis:100%;max-width:none}.btn{margin-left:auto}
- .dash{grid-template-columns:1fr;padding:12px;gap:12px}.c-comms{order:1}.c-targets{order:2}.c-con{order:3}.c-side{order:4}
- #feed{height:240px}.con{min-height:260px}.ig input{font-size:16px}.eb,.ig button{min-height:38px}
- .evc{width:100%;height:100%;border-radius:0}.line{min-height:9em}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-</style>
-<script src="/room-common.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>NIGHTJAR — Room 4: The Quiet Machine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/room-ui.css">
+    <style>
+        :root { --accent: #34d399; --accent-rgb: 52, 211, 153; --wash-rgb: 34, 211, 238; --comms-h: 200px; }
+
+        .r4-main { grid-template-columns: 310px minmax(0, 1fr) 410px; }
+        .r4-left { position: sticky; top: calc(var(--hud-h) + 18px); }
+
+        /* Host card */
+        .r4-host { padding: 20px 18px 18px; display: flex; flex-direction: column; gap: 16px; font-family: var(--font-code); font-size: 11px; }
+        .r4-name { text-align: center; }
+        .r4-name b { display: block; font-family: var(--font-glitch); font-size: 46px; line-height: 1; letter-spacing: .08em; color: var(--accent); text-shadow: 0 0 22px rgba(var(--accent-rgb), .55); }
+        .r4-name span { color: var(--ink-faint); font-size: 10px; letter-spacing: .14em; }
+        .r4-row { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 8px; border-bottom: 1px dashed rgba(var(--accent-rgb), .22); color: var(--cyan); }
+        .r4-row .v { color: var(--ink); text-align: right; }
+        .r4-gauges { display: flex; flex-direction: column; gap: 9px; }
+        .r4-gauge { display: grid; grid-template-columns: 44px 1fr 38px; gap: 10px; align-items: center; color: var(--ink-dim); }
+        .r4-gauge .bar { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+        .r4-gauge .bar i { display: block; height: 100%; border-radius: 3px; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), .7); animation: r4-load 6s ease-in-out infinite alternate; }
+        @keyframes r4-load { from { transform: scaleX(.92); transform-origin: left; } to { transform: scaleX(1.06); transform-origin: left; } }
+
+        .r4-suspect { padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, .55); background: rgba(244, 63, 94, .08); transition: all .6s; }
+        .r4-suspect .k { font-size: 9px; letter-spacing: .24em; color: var(--red); margin-bottom: 4px; transition: color .6s; }
+        .r4-suspect b { display: block; font-size: 13px; color: #fff; letter-spacing: .05em; }
+        .r4-suspect small { display: block; margin-top: 4px; color: var(--ink-dim); font-size: 10px; line-height: 1.5; }
+        .r4-suspect.cleared { border-color: rgba(52, 211, 153, .6); background: rgba(52, 211, 153, .09); }
+        .r4-suspect.cleared .k { color: var(--green); }
+        .r4-quote { text-align: center; font-size: 11px; line-height: 1.6; color: var(--ink-faint); font-style: italic; font-family: var(--font-ui); }
+
+        /* Terminal */
+        .r4-term-wrap { padding: 0; }
+        .r4-chrome { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: rgba(0, 0, 0, .5); border-bottom: 1px solid var(--line); font-family: var(--font-code); font-size: 11px; color: var(--ink-faint); }
+        .r4-term { padding: 18px 20px 22px; font-family: var(--font-code); font-size: 12.5px; line-height: 1.65; min-height: 640px; background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(2, 8, 12, .6)); }
+        .r4-cmd { display: flex; gap: 10px; margin-top: 14px; align-items: baseline; }
+        .r4-cmd:first-child { margin-top: 0; }
+        .r4-t { color: var(--purple); flex: none; }
+        .r4-p { color: var(--cyan); flex: none; }
+        .r4-c { color: #fff; word-break: break-all; flex: 1; min-width: 0; }
+        .r4-out { color: var(--ink-dim); margin: 6px 0 4px; padding-left: 14px; border-left: 2px solid rgba(var(--accent-rgb), .25); overflow-wrap: anywhere; }
+        .r4-out .ln { display: block; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .r4-out .cut { color: var(--ink-faint); font-style: italic; }
+        .r4-warn { margin-top: 18px; padding: 12px 14px; border-radius: 6px; color: var(--amber); background: rgba(251, 191, 36, .07); border: 1px solid rgba(251, 191, 36, .3); }
+        .r4-note { margin-top: 8px; color: var(--green); }
+        .r4-live { display: flex; gap: 10px; margin-top: 16px; }
+        .r4-live .caret { display: inline-block; width: 9px; height: 1.05em; background: var(--accent); animation: nj-blink 1s step-end infinite; vertical-align: text-bottom; }
+
+        @media (max-width: 1280px) {
+            .r4-main { grid-template-columns: 300px minmax(0, 1fr); }
+            .r4-right { grid-column: 1 / -1; }
+        }
+        @media (max-width: 860px) {
+            .r4-main { grid-template-columns: 1fr; }
+            .r4-center { order: 1; }
+            .r4-right { order: 2; }
+            .r4-left { order: 3; }
+            .r4-left { position: static; }
+            .r4-term { min-height: 0; font-size: 11.5px; }
+        }
+    </style>
+    <script src="/room-common.js"></script>
+    <script src="/assets/story.js"></script>
 </head>
-<body>
-<header>
- <div class="brand">[NIGHTJAR.OS // THE QUIET MACHINE]</div>
- <div class="hud"><div class="pg" id="pg"><i></i><i></i><i></i><i></i></div><span id="pgt">0/4</span></div>
- <div class="sc">Score <b id="score">0</b></div>
- <div class="clk">Uptime <span id="clk">94d 11:23:44</span></div>
- <a href="/hub" class="btn">Leave room</a>
-</header>
+<body class="nj-room">
 
-<main class="dash">
- <div class="col c-comms">
-  <section class="p" aria-label="Team comms">
-   <div class="ph"><span class="live"></span>Secure comms<button class="btn" id="replay" title="Replay the briefing">Replay briefing</button></div>
-   <div id="feed" aria-live="polite"></div>
-  </section>
- </div>
- <div class="col c-con">
-  <section class="p" style="flex:1">
-   <div class="ph">&gt;&gt; root_console_hist</div>
-   <div class="con" id="con">
-    <div class="l"><span class="t">00:19:01</span> <span class="u">root@aether-7:~#</span> ps aux | grep -v "\[.*\]" | head -n 10</div>
-    <div class="o">USER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PID %CPU %MEM&nbsp;&nbsp;&nbsp; VSZ&nbsp;&nbsp; RSS TTY STAT START&nbsp;&nbsp; TIME COMMAND<br>root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp; 0.0&nbsp; 0.2 168676 11216 ?&nbsp;&nbsp; Ss&nbsp;&nbsp; Aug07&nbsp;&nbsp; 1:12 /sbin/init<br>root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1251&nbsp; 0.0&nbsp; 0.1&nbsp; 14272&nbsp; 7352 ?&nbsp;&nbsp; Ss&nbsp;&nbsp; Aug07&nbsp;&nbsp; 0:00 /lib/systemd/systemd-journald<br>root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1283&nbsp; 0.0&nbsp; 0.0&nbsp; 21396&nbsp; 3488 ?&nbsp;&nbsp; Ss&nbsp;&nbsp; Aug07&nbsp;&nbsp; 0:00 /lib/systemd/systemd-udevd<br><span class="w">… [output truncated, see evidence files]</span></div>
-    <div class="l"><span class="t">00:19:33</span> <span class="u">root@aether-7:~#</span> tail -n 15 /var/log/auth.log</div>
-    <div class="o">Oct&nbsp; 9 01:35:12 aether-7 sshd[15891]: Accepted publickey for nexus-admin from 10.0.5.55…<br>Oct&nbsp; 9 01:35:12 aether-7 sshd[15891]: pam_unix(sshd:session): session opened for user nexus-admin…<br>Oct&nbsp; 9 01:37:05 aether-7 PAM[16022]: Module pam_nexus_token.so invoked<br><span class="w">… [output truncated, see evidence files]</span></div>
-    <div class="l"><span class="t">00:20:15</span> <span class="u">root@aether-7:~#</span> find / -user kite-backup -o -group nexus-svc -type f 2&gt;/dev/null</div>
-    <div class="o">/home/kite-backup/.bash_history<br>/home/kite-backup/.ssh/authorized_keys<br>/opt/.mira/aether-restart.sh<br><span class="w">… [output truncated, see evidence files]</span></div>
-    <div class="l w">&gt; Anomalies across standard telemetry. Account ‘kite-backup’ implicated in recent file changes.<br>&gt; Manual forensics initiated.</div>
-    <div id="live"></div>
-    <div class="cur"></div>
-   </div>
-  </section>
- </div>
- <div class="col c-targets">
-  <section class="p" style="flex:1">
-   <div class="ph">&gt;&gt; investigation targets · room 4</div>
-   <div class="tl" id="tl"></div>
-  </section>
- </div>
- <div class="col c-side">
-  <section class="p">
-   <div class="ph">&gt;&gt; aether-7_sysinfo</div>
-   <div class="sys">
-    <div>HOSTNAME<b>aether-7.nexus.internal</b></div><div>OS<b>Debian GNU/Linux 11</b></div><div>KERNEL<b>5.10.0-19-amd64</b></div><div>CPU<b>2x Intel Xeon E5-2676 v3</b></div><div>MEMORY<b>1.2G / 4.0G</b></div>
-    <p>A clean, quiet Linux terminal. The machine isn’t destroyed or obviously compromised. Every file tells a story, but the obvious story is a lie.</p>
-   </div>
-  </section>
- </div>
-</main>
+    <header class="nj-hud">
+        <div class="nj-hud-l">
+            <span class="nj-logo" aria-hidden="true">◈</span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>THE QUIET MACHINE</span></div>
+            <span class="nj-status"><i class="dot"></i>FORENSICS <b>ACTIVE</b></span>
+        </div>
+        <div class="nj-hud-c">
+            <span class="nj-act">ACT II · THE BODY</span>
+            <span class="nj-roomno">ROOM <b>4</b>/9</span>
+            <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
+        </div>
+        <div class="nj-hud-r">
+            <span class="nj-stat hide-s">SCORE<b data-nj-score>----</b></span>
+            <span class="nj-stat hide-s">UPTIME<b id="master-clock">94d 11:23:44</b></span>
+            <a href="/hub" class="nj-leave">LEAVE ROOM</a>
+        </div>
+    </header>
 
-<div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="Story cutscene">
- <button class="btn skip" id="skip">Skip ▸▸</button>
- <div class="stage">
-  <div class="scene" id="scene"></div>
-  <div id="pt"></div>
-  <div class="sp" id="sp"></div>
-  <div class="line" id="line"></div>
-  <div class="cont" id="cont">click or press space to continue</div>
-  <div id="card"></div>
- </div>
-</div>
+    <main class="nj-main r4-main">
+        <!-- Left: the host -->
+        <div class="nj-col r4-left">
+            <section class="nj-panel nj-rise" style="--i:0">
+                <div class="nj-panel-h"><i class="dot"></i>AETHER-7 sysinfo</div>
+                <div class="r4-host">
+                    <div class="r4-name"><b>AETHER-7</b><span>aether-7.nexus.internal</span></div>
+                    <div>
+                        <div class="r4-row"><span>OS</span><span class="v">Debian GNU/Linux 11</span></div>
+                        <div class="r4-row" style="margin-top:8px"><span>KERNEL</span><span class="v">5.10.0-19-amd64</span></div>
+                        <div class="r4-row" style="margin-top:8px"><span>CPU</span><span class="v">2x Xeon E5-2676 v3</span></div>
+                    </div>
+                    <div class="r4-gauges" aria-hidden="true">
+                        <div class="r4-gauge"><span>CPU</span><span class="bar"><i style="width:4%"></i></span><span>4%</span></div>
+                        <div class="r4-gauge"><span>MEM</span><span class="bar"><i style="width:30%"></i></span><span>1.2G</span></div>
+                        <div class="r4-gauge"><span>DISK</span><span class="bar"><i style="width:41%"></i></span><span>41%</span></div>
+                    </div>
+                    <div class="r4-suspect" id="suspect" role="status">
+                        <div class="k" id="suspect-k">PRIME SUSPECT</div>
+                        <b id="suspect-name">KABIR MEHRA</b>
+                        <small id="suspect-note">Account kite-backup appears in every suspicious file change and session.</small>
+                    </div>
+                    <p class="r4-quote">"A clean, quiet Linux terminal. The machine is not destroyed or obviously compromised. Every file tells a story, but the obvious story is a lie."</p>
+                </div>
+            </section>
+        </div>
 
-<div class="ev" id="ev" role="dialog" aria-modal="true" aria-label="Evidence viewer">
- <div class="evc">
-  <div class="evh"><span class="dots"><i></i><i></i><i></i></span><span class="n" id="evt"></span><a class="btn" id="evd" download>Download</a><button id="evx" aria-label="Close evidence viewer">✕</button></div>
-  <div class="evb"><div class="spin" id="evs">Loading evidence…</div><iframe id="evf" title="Evidence file"></iframe></div>
- </div>
-</div>
+        <!-- Center: comms + console history -->
+        <div class="nj-col r4-center">
+            <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
-<script>
-const ROOM_ID=4,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const EV='/challenges/Room - 4/evidence/';
-const NPC={
- ila:{n:'Cmdr. Ila Sen',r:'Incident Commander',c:'#22d3ee',i:'IS'},
- rhea:{n:'Rhea D’Souza',r:'NEXUS Engineer',c:'#f59e0b',i:'RD'},
- kite:{n:'Kabir “Kite” Mehra',r:'Festival Technical Lead',c:'#34d399',i:'KM'},
- mira:{n:'unregistered process',r:'MIRA/7',c:'#a78bfa',i:'??'}
-};
-const T=[
- {id:1,t:'4.1 The process with a clean name',d:'Find the imposter process hiding among standard daemons. Note its name, PID and non-standard binary path.',f:'process_list.html',rw:'Process identified. It is MIRA-7’s local controller.'},
- {id:2,t:'4.2 The user who arrived without a login',d:'Find the auth log session that opened without a password or SSH key exchange. Identify the PAM module and timestamp.',f:'auth_log.html',rw:'Session verified. A token-based trust delegation was used.'},
- {id:3,t:'4.3 The permission that lied',d:'Find the script with SUID permissions that lets a low-privilege group member restart a root service.',f:'filesystem_snapshot.html',rw:'Privilege escalation confirmed. The continuity script acts as a backdoor.'},
- {id:4,t:'4.4 The key in the drawer',d:'Compare the SSH keys in kite-backup’s authorized_keys. Find the one planted recently and identify the tool that generated it.',f:'ssh_keys.html',rw:'Forgery detected. The key was generated by AetherForge. Kabir was framed.'}
-];
-const INTRO=[
- {scene:'aether-7 · 00:41 · shell open via the Room 3 relay · filesystem mounted read-only'},
- {w:'rhea',t:'We’re in. The relay gave us a shell on aether-7, and it’s the quietest machine I’ve ever seen.'},
- {w:'rhea',t:'No ransom note. No wiped logs. Nothing on fire. That’s exactly what worries me.'},
- {w:'ila',t:'Kabir’s account is all over this host. Every log points at him.'},
- {w:'ila',t:'That’s the obvious story. Don’t trust the obvious story. Trust the file.'},
- {w:'rhea',t:'Four things to verify: a process, a login, a permission, a key. Find what the machine is hiding.'}
-];
-const DEBRIEF=[
- {scene:'aether-7 · kite-backup/.ssh/authorized_keys · comparison complete'},
- {w:'rhea',t:'The key was generated long after Kabir’s current laptop was issued, by a tool called AetherForge. He didn’t put it there.'},
- {w:'kite',t:'So I’m not the problem? I thought I’d be the headline. I’m sorry I clicked that installer.'},
- {w:'ila',t:'You’re not cleared yet, Kabir. But you’re no longer the lead. The evidence just changed sides.'},
- {w:'mira',t:'key used: 1. destination: portal. status: quiet.'}
-];
-const HOOK='“The Ed25519 key in Kabir’s authorized_keys file is not his… The key has been used exactly once, to authenticate to the Meraz Volunteer Portal’s administrative API.”';
-const SOLVE={
- 1:['rhea','That’s MIRA-7’s local controller wearing a daemon’s name. Whoever built it knew what normal looks like.'],
- 2:['ila','A session with no password and no key. Something vouched for him. Remember that.'],
- 3:['rhea','A script that restarts a root service for anyone in the group. That’s not a bug. Someone designed that.'],
- 4:['ila','AetherForge. Not Kabir’s hands, not Kabir’s laptop. Good work.']
-};
-const HINT={
- 1:['Compare every process’s binary path with the standard system directories.','A clean name can hide in a dirty location. Read the path, not the name.','Re-read the card: the answer needs the name, the PID and the path together.'],
- 2:['Look for a session that opened with no password and no key. The method is the clue.','The PAM line is the tell. Pair the module with its timestamp.','Both parts come from the same log line. Check the exact format.'],
- 3:['A permission that lies sets the SUID bit. Look for the “s” in the mode.','Check the owner and group on each candidate script.','Match the script to the root service it restarts, then recheck the format.'],
- 4:['Fingerprints don’t lie, comments do. Compare the keys one by one.','Look at key types and dates. The odd one out was planted recently.','Find the key that doesn’t fit, then look for what generated it.']
-};
-const IDLE=[u=>'Still with us? The machine is patient. We aren’t.',u=>'Open the evidence for target '+u.t.slice(0,3)+'. The answer is in the file, not the filename.',u=>'Stuck? Pick any unsolved target and read its evidence slowly.'];
-const GREET=[
- ['rhea','Four targets on aether-7. Start anywhere. The machine won’t mind.'],
- ['ila','One down. Keep going and stay with the evidence.'],
- ['rhea','Halfway through. Kabir’s name keeps coming up, and I like it less each time.'],
- ['ila','One left. Check it the way you’d check a signature.'],
- ['ila','Room cleared. Replay the debrief, or move on to the portal.']
-];
-let solved=new Set(),score=0,wrong={},last=Date.now(),idleN=0,lastNudge=0,busy=false;
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Root console history<span class="meta">READ-ONLY</span></div>
+                <div class="r4-chrome"><span aria-hidden="true" class="nj-win-dots"><i style="background:#f43f5e"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i></span>root@aether-7: ~</div>
+                <div class="r4-term" id="term">
+                    <div class="r4-cmd"><span class="r4-t">00:19:01</span><span class="r4-p">root@aether-7:~#</span><span class="r4-c">ps aux | grep -v "\[.*\]" | head -n 10</span></div>
+                    <div class="r4-out"><span class="ln">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span><span class="ln">root         1  0.0  0.2 168676 11216 ?        Ss   Aug07   1:12 /sbin/init</span><span class="ln">root      1251  0.0  0.1  14272  7352 ?        Ss   Aug07   0:00 /lib/systemd/systemd-journald</span><span class="ln">root      1283  0.0  0.0  21396  3488 ?        Ss   Aug07   0:00 /lib/systemd/systemd-udevd</span><span class="ln cut">... [OUTPUT TRUNCATED - SEE EVIDENCE FILES]</span></div>
 
-/* ---- comms ---- */
-const pt=(k,big)=>`<div class="pt${big?' big':''}" style="--c:${NPC[k].c}"><span>${NPC[k].i}</span></div>`;
-async function tw(el,t,sp,ovl){el.textContent='';for(let i=0;i<t.length&&!RM;i++){if(ovl&&(fast||skipped))break;el.textContent=t.slice(0,i+1);await sleep(sp)}el.textContent=t}
-let q=Promise.resolve();
-function say(k,t){return q=q.then(async()=>{
- const feed=$('feed'),m=document.createElement('div');m.className='m '+k;m.style.setProperty('--c',NPC[k].c);
- m.innerHTML=pt(k)+`<div><div class="mn">${NPC[k].n}<small>${NPC[k].r}</small></div><div class="mt"><span class="dd"><i></i><i></i><i></i></span></div></div>`;
- feed.appendChild(m);feed.scrollTop=feed.scrollHeight;
- await sleep(RM?0:650);const mt=m.querySelector('.mt');
- await tw(mt,t,14);feed.scrollTop=feed.scrollHeight;await sleep(RM?0:250)})}
-function clog(cls,h){const d=document.createElement('div');d.className='l '+cls;d.innerHTML=h;$('live').appendChild(d);const c=$('con');c.scrollTop=c.scrollHeight}
-function touch(){last=Date.now()}
-['pointerdown','keydown'].forEach(e=>addEventListener(e,touch));
+                    <div class="r4-cmd"><span class="r4-t">00:19:33</span><span class="r4-p">root@aether-7:~#</span><span class="r4-c">tail -n 15 /var/log/auth.log</span></div>
+                    <div class="r4-out"><span class="ln">Oct  9 01:35:12 aether-7 sshd[15891]: Accepted publickey for nexus-admin from 10.0.5.55...</span><span class="ln">Oct  9 01:35:12 aether-7 sshd[15891]: pam_unix(sshd:session): session opened for user nexus-admin...</span><span class="ln">Oct  9 01:37:05 aether-7 PAM[16022]: Module pam_nexus_token.so invoked</span><span class="ln cut">... [OUTPUT TRUNCATED - SEE EVIDENCE FILES]</span></div>
 
-/* ---- cutscene ---- */
-let fast=false,skipped=false,typing=false,resolver=null;
-const ov=$('ov');
-ov.addEventListener('click',e=>{if(e.target.closest('a,button'))return;if(typing)fast=true;else if(resolver)resolver()});
-addEventListener('keydown',e=>{if(!ov.classList.contains('on'))return;if([' ','Enter','ArrowRight'].includes(e.key)){e.preventDefault();if(typing)fast=true;else if(resolver)resolver()}if(e.key==='Escape')$('skip').click()});
-$('skip').onclick=()=>{skipped=true;fast=true;if(resolver)resolver()};
-async function play(beats,onEnd){
- skipped=false;fast=false;$('card').innerHTML='';$('scene').className='scene';$('sp').innerHTML='';$('line').textContent='';$('pt').innerHTML='';
- ov.classList.add('on');
- for(const b of beats){
-  if(skipped)break;
-  if(b.scene){const s=$('scene');s.textContent=b.scene;s.className='scene in';await sleep(RM?0:1300);continue}
-  $('pt').innerHTML=pt(b.w,true);$('sp').innerHTML=NPC[b.w].n+'<small>'+NPC[b.w].r+'</small>';$('sp').style.color=NPC[b.w].c;
-  $('line').className='line'+(b.w==='mira'?' mira':'');
-  typing=true;fast=false;await tw($('line'),b.t,22,true);typing=false;fast=false;
-  if(skipped)break;
-  $('cont').style.opacity=1;await new Promise(r=>resolver=r);resolver=null;$('cont').style.opacity=0;
- }
- await onEnd();
-}
-async function intro(){
- await play(INTRO,async()=>{ov.classList.remove('on');try{localStorage.setItem('nj4_intro','1')}catch(e){}});
- greet();
-}
-async function debrief(){
- await play(DEBRIEF,async()=>{
-  $('pt').innerHTML='';$('sp').innerHTML='';$('line').textContent='';$('scene').className='scene';
-  $('card').innerHTML=`<div class="clear"><h2>ROOM CLEARED</h2><div class="sc">4 / 4 solved · Score <b>${score}</b></div><div class="hk"><b>&gt;&gt; Incoming transmission: Rhea_D</b>${HOOK}</div><div><a class="go" href="/room/5">Proceed to Room 5 ▸</a> <button class="btn" id="stay">Stay in Room 4</button></div></div>`;
-  $('stay').onclick=()=>ov.classList.remove('on');
- });
-}
-$('replay').onclick=()=>{intro()};
+                    <div class="r4-cmd"><span class="r4-t">00:20:15</span><span class="r4-p">root@aether-7:~#</span><span class="r4-c">find / -user kite-backup -o -group nexus-svc -type f 2&gt;/dev/null</span></div>
+                    <div class="r4-out"><span class="ln">/home/kite-backup/.bash_history</span><span class="ln">/home/kite-backup/.ssh/authorized_keys</span><span class="ln">/opt/.mira/aether-restart.sh</span><span class="ln cut">... [OUTPUT TRUNCATED - SEE EVIDENCE FILES]</span></div>
 
-/* ---- targets ---- */
-function build(){
- $('tl').innerHTML=T.map(x=>`<div class="tg" id="tg${x.id}"><div class="tt">${x.t}<em>25 pts</em></div><div class="td">${x.d}</div>
- <div class="eg"><button class="eb" data-f="${x.f}" data-t="${x.t}">View ${x.f}</button><a class="eb" href="${EV}${x.f}" download>Download</a></div>
- <div class="ig"><input id="f${x.id}" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target ${x.id}"><button id="b${x.id}">Verify</button></div>
- <div class="er" id="e${x.id}" role="alert"></div><div class="rw" id="r${x.id}">&gt; ${x.rw}</div></div>`).join('');
- document.querySelectorAll('.eb[data-f]').forEach(b=>b.onclick=()=>openEv(b.dataset.t,b.dataset.f));
- T.forEach(x=>{$('b'+x.id).onclick=()=>verify(x.id);$('f'+x.id).onkeydown=e=>{if(e.key==='Enter')verify(x.id)}});
-}
-function hud(){
- const n=solved.size;document.querySelectorAll('#pg i').forEach((e,i)=>e.classList.toggle('on',i<n));
- $('pgt').textContent=n+'/4';$('score').textContent=score;
-}
-function mark(id,anim){
- solved.add(id);const g=$('tg'+id);if(!g)return;g.classList.add('solved');$('r'+id).style.display='block';
- const i=$('f'+id);i.value='FLAG ACCEPTED';i.disabled=true;$('b'+id).disabled=true;
- if(anim){g.classList.add('flash');const p=document.createElement('div');p.className='plus';p.textContent='+25';g.appendChild(p);setTimeout(()=>{g.classList.remove('flash');p.remove()},1600)}
-}
-function showNext(){
- if($('nx'))return;
- $('tl').insertAdjacentHTML('beforeend',`<div class="nx" id="nx"><b>&gt;&gt; Incoming transmission: Rhea_D</b><p>${HOOK}</p><a class="go" href="/room/5">Proceed to Room 5 ▸</a> <button class="btn" id="rd">Replay debrief</button></div>`);
- $('rd').onclick=debrief;
-}
-async function refresh(){const p=await NJ.progress();if(p&&typeof p.score==='number')score=p.score;return p}
-async function verify(n){
- const v=$('f'+n).value.trim();if(!v)return;const b=$('b'+n);if(b.disabled)return;touch();
- const og=b.textContent;b.textContent='…';b.disabled=true;
- const res=await NJ.submit(ROOM_ID,v);b.textContent=og;b.disabled=false;
- if(res.success){
-  $('e'+n).textContent='';const prev=solved.size,fresh=(res.solved.length?res.solved:[n]).filter(i=>!solved.has(i));
-  if(!fresh.length)return;
-  const before=score;await refresh();if(score===before)score+=25*fresh.length;
-  fresh.forEach(i=>mark(i,true));hud();
-  fresh.forEach(i=>{clog('ok','&gt; [forensics] target 4.'+i+' confirmed');if(SOLVE[i])say(...SOLVE[i])});
-  const c=solved.size;
-  if(prev<2&&c>=2){say('kite','Hey, it’s Kabir. Whatever you’re finding on my account, I never made that key. I swear. I got this laptop in March.')}
-  if(prev<3&&c>=3){clog('mi','&gt; mira/7 ▮ you are checking the right things.');say('mira','you are checking the right things.');say('rhea','Did you see that? Something on this host just spoke to us. One target left.')}
-  if(c===4){showNext();setTimeout(debrief,2600)}
- }else{
-  const e=$('e'+n);e.textContent=res.message;const w=$('f'+n);w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
-  b.style.background='var(--rd)';setTimeout(()=>b.style.background='',900);
-  wrong[n]=(wrong[n]||0)+1;
-  if(!/network|session|too many|attempt|rate/i.test(res.message)&&Date.now()-lastNudge>4000){lastNudge=Date.now();const h=HINT[n],c=wrong[n];say(c%2?'ila':'rhea',h[Math.min(c-1,2)])}
- }
-}
-function greet(){const c=Math.min(solved.size,4);say(...GREET[c])}
+                    <div class="r4-warn">
+                        &gt; WARNING: Multiple anomalies detected across standard telemetry.<br>
+                        &gt; KABIR's account 'kite-backup' heavily implicated in recent file modifications.<br>
+                        &gt; INITIATING MANUAL FORENSICS.
+                    </div>
+                    <div id="term-notes"></div>
+                    <div class="r4-live"><span class="r4-p">root@aether-7:~#</span><span class="caret"></span></div>
+                </div>
+            </section>
+        </div>
 
-/* idle nudges */
-setInterval(()=>{
- if(Date.now()-last<90000||ov.classList.contains('on')||solved.size>=4||document.hidden)return;
- last=Date.now();const u=T.find(x=>!solved.has(x.id));say(idleN%2?'rhea':'ila',IDLE[idleN%IDLE.length](u));idleN++;
-},15000);
+        <!-- Right: targets -->
+        <div class="nj-col r4-right">
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Investigation targets · Room 4<span class="meta" id="solved-count">0/4</span></div>
+                <div class="nj-panel-b">
 
-/* evidence viewer */
-function openEv(t,f){$('evt').textContent='Evidence · '+f;$('evd').href=EV+f;$('evs').style.display='grid';$('evf').onload=()=>$('evs').style.display='none';$('evf').src=EV+f;$('ev').classList.add('on')}
-function closeEv(){$('ev').classList.remove('on');$('evf').src='about:blank'}
-$('evx').onclick=closeEv;$('ev').addEventListener('click',e=>{if(e.target===$('ev'))closeEv()});
-addEventListener('keydown',e=>{if(e.key==='Escape'&&$('ev').classList.contains('on'))closeEv()});
+                    <article class="nj-card" id="target-1">
+                        <div class="nj-card-top"><span class="nj-badge">4.1</span><span class="nj-title">THE PROCESS WITH A CLEAN NAME</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Find the imposter process hiding among standard daemons. Note its name, PID, and non-standard binary path.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Process List', '/challenges/Room - 4/evidence/process_list.html')">VIEW: process_list.html</button><a href="/challenges/Room - 4/evidence/process_list.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">PROC ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 4.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-1"></div>
+                    </article>
 
-/* uptime */
-let up=94*86400+11*3600+23*60+44;
-setInterval(()=>{up++;const d=Math.floor(up/86400),r=up%86400,p=x=>String(x).padStart(2,'0');$('clk').textContent=d+'d '+p(Math.floor(r/3600))+':'+p(Math.floor(r%3600/60))+':'+p(r%60)},1000);
+                    <article class="nj-card" id="target-2">
+                        <div class="nj-card-top"><span class="nj-badge">4.2</span><span class="nj-title">THE USER WHO ARRIVED WITHOUT A LOGIN</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Find the auth log session that opened without a password or SSH key exchange. Identify the PAM module and timestamp.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Auth Logs', '/challenges/Room - 4/evidence/auth_log.html')">VIEW: auth_log.html</button><a href="/challenges/Room - 4/evidence/auth_log.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">SESSION ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 4.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-2"></div>
+                    </article>
 
-/* boot */
-document.addEventListener('DOMContentLoaded',async()=>{
- build();hud();
- const p=await refresh();
- if(p&&p.rooms)(p.rooms[ROOM_ID]||[]).forEach(i=>mark(i,false));
- hud();if(solved.size===4)showNext();
- let seen=false;try{seen=!!localStorage.getItem('nj4_intro')}catch(e){}
- if(!seen&&solved.size===0)intro();else greet();
-});
-</script>
+                    <article class="nj-card" id="target-3">
+                        <div class="nj-card-top"><span class="nj-badge">4.3</span><span class="nj-title">THE PERMISSION THAT LIED</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Find the script with SUID permissions that allows a low-privilege group member to restart a root service.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Filesystem Snapshot', '/challenges/Room - 4/evidence/filesystem_snapshot.html')">VIEW: filesystem_snapshot.html</button><a href="/challenges/Room - 4/evidence/filesystem_snapshot.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">FILE ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 4.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-3"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-4">
+                        <div class="nj-card-top"><span class="nj-badge">4.4</span><span class="nj-title">THE KEY IN THE DRAWER</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Compare the SSH keys in kite-backup's authorized_keys. Find the one planted recently and identify the tool that generated it.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('SSH Keys', '/challenges/Room - 4/evidence/ssh_keys.html')">VIEW: ssh_keys.html</button><a href="/challenges/Room - 4/evidence/ssh_keys.html" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">KEY ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 4.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-4"></div>
+                    </article>
+
+                    <div id="nj-next-slot"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Evidence viewer -->
+    <div id="evidence-modal" class="nj-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="nj-win">
+            <div class="nj-win-bar">
+                <span class="nj-win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span id="modal-title">EVIDENCE VIEWER</span>
+                <button type="button" class="x" id="modal-close" onclick="closeModal()">CLOSE ✕</button>
+            </div>
+            <iframe id="modal-iframe" title="Evidence file"></iframe>
+        </div>
+    </div>
+
+    <script>
+        /* ───────── Story: Room 4 (Rhea D'Souza) ─────────
+         * Player-visible text. No process names, PIDs, key tools or session details from the answers. */
+        const story = NJStory.create({
+            room: 4,
+            title: 'THE QUIET MACHINE',
+            lead: 'rhea',
+            nextMount: '#nj-next-slot',
+            objective: 'Four things to check on this machine: a process, a session, a permission and a key. Everything points at Kabir. Do not let it.',
+            complete: 'Room clear. The volunteer portal trace is waiting in Room 5 whenever you are ready.',
+
+            briefing: [
+                { title: 'ACT II', kicker: 'ROOM 4 OF 9', sub: 'THE BODY \u00b7 HOW DID IT ENTER, HIDE AND SPREAD?' },
+                { scene: 'A browser terminal on a Linux host that has been running for ninety-four days. Nothing on it looks broken.', stamp: '02:24 \u00b7 RELAY HOST \u00b7 ISOLATED CONTAINER' },
+                { npc: 'rhea', text: 'I am in. The maintenance lock is off, the relay is up, and nothing on this machine looks wrong. That is what worries me.' },
+                { npc: 'rhea', text: 'A destroyed machine is easy. You see the damage and work backwards. A quiet machine is harder. Everything is where it should be, except a few things that are not.' },
+                { npc: 'ila', text: 'Kabir\u2019s account is all over the logs. Every suspicious file. Every session. Every change. The obvious answer is sitting right there.' },
+                { npc: 'rhea', text: 'The obvious answer is a story somebody wrote for us. Look at the processes, the sessions, the permissions and the keys. Then decide who the story was written about.' },
+                { npc: 'ila', text: 'Four checks. What is running that should not be? Who got in without proving who they were? What can a small account do to a big one? Which key does not belong?' },
+                { npc: 'system', text: 'TERMINAL SESSION OPEN. HOST: ISOLATED CONTAINER. FORENSICS ACTIVE.' }
+            ],
+
+            greet: {
+                0: ['Start with the process list. Names lie. Paths and parents are much harder to fake.'],
+                1: ['One piece of the story is off. Check the others before you decide what that means.'],
+                2: ['Half of this evidence says Kabir did it, and half of it was never his to leave. Keep going.'],
+                3: ['Last one. Compare the keys carefully. Dates tell you more than names.']
+            },
+
+            onSolve: {
+                1: [{ npc: 'rhea', text: 'A harmless name on a program in the wrong place. Honest daemons do not live there.' }],
+                2: [{ npc: 'rhea', text: 'Someone got a session without proving who they were. That is not a break-in. That is a door left unlocked.' }],
+                3: [{ npc: 'rhea', text: 'A small account leaning on a big one. That permission was never meant to be a door.' }],
+                4: [{ npc: 'rhea', text: 'That key appeared long after his current laptop was issued. Kabir did not put it there.' }]
+            },
+
+            milestone: {
+                1: [{ npc: 'ila', text: 'One thread loose. Keep pulling.' }],
+                2: [
+                    { npc: 'kite', text: 'Ila, are they looking at my account? I want to help. Tell me what to do.' },
+                    { npc: 'ila', text: 'Stay on the line, Kabir. Do not touch anything.' }
+                ],
+                3: [{ npc: 'rhea', text: 'One more. I think I already know what it will say, and I would like to be wrong.' }]
+            },
+
+            wrong: [
+                'That does not match the evidence. Read the exact output again.',
+                'Not it. Check the file once more. Details matter on a quiet machine.',
+                'No. Compare names, numbers and paths against what is in front of you.'
+            ],
+            hints: {
+                1: 'Compare each process to its parent and its binary path. Standard daemons live in standard places.',
+                2: 'Read the auth log for a session with no password line and no key exchange. Something else let it in.',
+                3: 'Look for a root-owned script with the SUID bit that a lower group is allowed to write to.',
+                4: 'Compare every key in the file. Check the comment, the type and when each was added.'
+            },
+
+            debrief: [
+                { scene: 'The prompt blinks. Nothing on the machine has changed. Everything about it has.', stamp: '03:05 \u00b7 RELAY HOST' },
+                { npc: 'rhea', text: 'It was never Kabir. A process with a harmless name. A session that did not need a password. A script that let a small account lean on a big one. And a key that appeared long after his laptop was issued.' },
+                { npc: 'kite', text: 'I told you I did not know. Thank you for looking past my name.' },
+                { npc: 'ila', text: 'Evidence that someone was compromised is not evidence that they are guilty. Remember that for the rest of the night.' },
+                { npc: 'rhea', text: 'The planted key has been used exactly once since it appeared. Once, to reach the volunteer portal\u2019s administrative interface.' },
+                { npc: 'ila', text: 'Then that is where we go next.' },
+                { npc: 'system', text: 'ADMIN ENDPOINT RESOLVED. VOLUNTEER PORTAL TRACE LOADED. ROOM 5 UNLOCKED.' }
+            ],
+            next: {
+                room: 5, href: '/room/5', label: 'PROCEED TO ROOM 5', from: 'rhea',
+                teaser: 'The key was used once, on the volunteer portal\u2019s admin interface. Come and see how the gate opened.'
+            }
+        });
+        story.mount(document.getElementById('npc-comms'));
+
+        /* ───────── Cosmetic uptime (as before) ───────── */
+        setInterval(function () {
+            const d = new Date();
+            document.getElementById('master-clock').textContent =
+                '94d 11:' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+        }, 1000);
+
+        /* ───────── Console notes + the suspect card react to progress ───────── */
+        function termNote(text) {
+            const n = document.createElement('div');
+            n.className = 'r4-note';
+            n.textContent = text;
+            document.getElementById('term-notes').appendChild(n);
+        }
+        function clearKabir() {
+            document.getElementById('suspect').classList.add('cleared');
+            document.getElementById('suspect-k').textContent = 'CLEARED';
+            document.getElementById('suspect-name').textContent = 'KABIR MEHRA \u2014 VICTIM';
+            document.getElementById('suspect-note').textContent = 'Credentials were stolen and reused. His account was a costume.';
+        }
+
+        NJStory.room({
+            id: 4,
+            story: story,
+            onMarked: function (n, fresh) {
+                if (n === 4) clearKabir();
+                if (fresh) termNote('# finding ' + document.querySelectorAll('.nj-card.solved').length + '/4 recorded by analyst');
+            }
+        });
+    </script>
 </body>
 </html>
