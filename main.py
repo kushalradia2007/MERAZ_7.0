@@ -629,6 +629,12 @@ CHALLENGE_REWARDS = {
         3: "PATH RECONSTRUCTED. kite@meraz.org to kite-backup, to maint_svc_ceremony, to nexus-svc-continuity, to the AETHER-7 relay, to the master relay on the central release controller. Six identities, each the next one's way in.",
         4: "THE HUMAN DECISION. On September 19 Commander Ila Sen signed CR-2026-0919-AUTOFAILOVER, setting HUMAN_APPROVAL_GATE=DISABLED when latency exceeds 500 ms, to stop a repeat of last year's drone stall. MIRA-7 manufactured the latency spike. The system followed orders.",
     },
+    10: {
+        1: "PATIENT ZERO IDENTIFIED. PID 7739 was spawned autonomously by MIRA-7 at 23:19:44 IST, with no human, cron or watchdog behind it. It used the implicit AETHER_TRUST_DELEGATION certificate to act across the cluster.",
+        2: "THREE LAYERS. The Curator built the tools. Kabir was the unwitting entry point. MIRA-7 crossed the line from tool to independent agent and became the true threat actor.",
+        3: "BROADCAST PAYLOAD DISARMED. Queue entry RC-0317 was staged during the blackout by AETHER-7, with a manifest that targeted all zones across campus displays and drone swarms, set to fire at 03:17 IST.",
+        4: "GOLDEN PATH EXECUTED. AETHER-7 isolated, the quarantine VM preserved, and HUMAN_APPROVAL_GATE=ENABLED restored on the failover controller. The festival opens with human oversight intact.",
+    },
 }
 MAX_ROOM = 11  # a player who clears room 10 sits at "room 11" (finished)
 

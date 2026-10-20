@@ -2,1044 +2,490 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>NIGHTJAR — Room 10: Patient Zero Is a System</title>
-    <meta name="description" content="NIGHTJAR Room 10 — The Final Investigation. Trace autonomous execution in the frozen core, decode the 03:17 broadcast payload, and execute the golden containment path.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/room-ui.css">
     <style>
-        :root {
-            --bg-dark: #05050a;
-            --panel-bg: rgba(14, 13, 26, 0.88);
-            --red: #ef4444;
-            --red-glow: rgba(239, 68, 68, 0.4);
-            --cyan: #06b6d4;
-            --cyan-glow: rgba(6, 182, 212, 0.4);
-            --amber: #f59e0b;
-            --amber-glow: rgba(245, 158, 11, 0.4);
-            --green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.4);
-            --purple: #8b5cf6;
-            --purple-glow: rgba(139, 92, 246, 0.4);
-            --orange: #f97316;
-            --orange-glow: rgba(249, 115, 22, 0.35);
-            --text-main: #e2e8f0;
-            --text-dim: #94a3b8;
-            --border-dim: rgba(139, 92, 246, 0.25);
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --font-glitch: 'VT323', monospace;
-            --accent: var(--purple);
-            --accent-glow: var(--purple-glow);
-        }
+        :root { --accent: #e2e8f0; --accent-rgb: 226, 232, 240; --wash-rgb: 244, 63, 94; --comms-h: 200px; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .r10-main { grid-template-columns: 300px minmax(0, 1fr) 410px; }
+        .r10-left { position: sticky; top: calc(var(--hud-h) + 18px); align-self: start; }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image:
-                radial-gradient(circle at 18% 28%, rgba(139, 92, 246, 0.08) 0%, transparent 58%),
-                radial-gradient(circle at 82% 72%, rgba(239, 68, 68, 0.06) 0%, transparent 58%),
-                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
-            color: var(--text-main);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Case card */
+        .r10-spec { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+        .r10-claim { padding: 12px 14px; border: 1px dashed rgba(244, 63, 94, .5); border-radius: 8px; background: rgba(244, 63, 94, .06); font-family: var(--font-code); text-align: center; }
+        .r10-claim small { display: block; font-size: 9px; letter-spacing: .24em; color: var(--ink-faint); }
+        .r10-claim b { display: block; font-size: 26px; letter-spacing: .06em; color: var(--red); margin: 4px 0; text-decoration: line-through; text-decoration-color: rgba(244, 63, 94, .6); }
+        .r10-claim span { font-size: 10px; letter-spacing: .14em; color: var(--ink-dim); }
+        .r10-facts { font-family: var(--font-code); font-size: 11px; color: var(--ink-dim); line-height: 1.75; border-top: 1px dashed rgba(255, 255, 255, .14); padding-top: 12px; }
+        .r10-facts div { display: flex; justify-content: space-between; gap: 10px; }
+        .r10-facts span:last-child { color: var(--ink); text-align: right; }
+        .r10-inert { font-family: var(--font-code); font-size: 10px; letter-spacing: .12em; color: var(--accent); padding: 8px 10px; border: 1px solid rgba(var(--accent-rgb), .4); border-radius: 6px; background: rgba(var(--accent-rgb), .06); text-align: center; }
 
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.12));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.22;
-        }
+        /* Analysis stages */
+        .r10-st { padding: 16px 18px 18px; position: relative; }
+        .r10-st::before { content: ""; position: absolute; left: 27px; top: 22px; bottom: 26px; width: 2px; background: rgba(255, 255, 255, .1); }
+        .r10-step { position: relative; display: flex; gap: 14px; padding: 7px 0; font-family: var(--font-code); font-size: 11px; color: var(--ink-faint); }
+        .r10-step .n { width: 20px; height: 20px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 10px; background: var(--bg); border: 1px solid rgba(255, 255, 255, .22); z-index: 1; }
+        .r10-step b { display: block; letter-spacing: .08em; font-size: 11px; }
+        .r10-step small { font-size: 10px; opacity: .75; }
+        .r10-step.done { color: var(--ink); }
+        .r10-step.done .n { background: var(--accent); border-color: var(--accent); color: #0b1220; box-shadow: 0 0 12px rgba(var(--accent-rgb), .7); }
+        .r10-step.done .locked { display: none; }
+        .r10-step:not(.done) .open { display: none; }
 
-        /* ── Header ── */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 22px;
-            background: rgba(5, 5, 12, 0.85);
-            border-bottom: 1px solid rgba(139, 92, 246, 0.35);
-            font-family: var(--font-code);
-            font-size: 12px;
-            z-index: 10;
-            position: relative;
-            flex-shrink: 0;
+        /* Desk tabs */
+        .r10-tabs { display: flex; background: rgba(0, 0, 0, .4); border-bottom: 1px solid var(--line); overflow-x: auto; }
+        .r10-tab {
+            all: unset; box-sizing: border-box; cursor: pointer; white-space: nowrap;
+            padding: 12px 18px; font-family: var(--font-code); font-size: 11px; letter-spacing: .12em; color: var(--ink-faint);
+            border-bottom: 2px solid transparent; transition: color .2s, background .2s, border-color .2s;
         }
+        .r10-tab:hover { color: var(--ink); background: rgba(255, 255, 255, .03); }
+        .r10-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .r10-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); background: rgba(var(--accent-rgb), .07); }
+        .r10-pane { display: none; padding: 16px; }
+        .r10-pane.active { display: block; animation: nj-rise .35s both; }
+        .r10-note { margin: 12px 0 0; font-family: var(--font-code); font-size: 11px; line-height: 1.6; color: var(--ink-faint); }
 
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--purple), var(--red), var(--cyan), transparent);
-            opacity: 0.85;
-        }
+        /* Frozen process tree */
+        .r10-tree { font-family: var(--font-code); font-size: 12px; line-height: 1.8; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .45); overflow-x: auto; }
+        .r10-tree ul { list-style: none; margin: 0; padding-left: 20px; border-left: 1px dashed rgba(255, 255, 255, .16); }
+        .r10-tree > ul { border-left: 0; padding-left: 0; }
+        .r10-tree li { white-space: nowrap; }
+        .r10-tree .p { color: var(--ink-dim); } .r10-tree .p b { color: var(--ink); font-weight: 600; }
+        .r10-tree .pid { color: var(--ink-faint); margin-left: 8px; }
+        .r10-tree .tag { margin-left: 10px; font-size: 10px; letter-spacing: .12em; padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, .22); color: var(--ink-faint); }
+        .r10-tree .tag.h { color: var(--green); border-color: rgba(52, 211, 153, .5); }
+        .r10-tree .tag.f { color: var(--cyan); border-color: rgba(34, 211, 238, .5); }
+        .r10-tree .gap { color: var(--amber); font-style: italic; }
+        .r10-tree button { all: unset; cursor: pointer; color: var(--accent); }
+        .r10-tree button:hover { text-decoration: underline; }
+        .r10-tree button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-        .brand {
-            color: var(--accent);
-            letter-spacing: 1.5px;
-            text-shadow: 0 0 10px var(--accent-glow);
-            display: flex; align-items: center; gap: 10px;
-            font-weight: 600;
-        }
+        /* Decision board */
+        .r10-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .r10-opt { all: unset; box-sizing: border-box; cursor: pointer; padding: 14px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0, 0, 0, .35); font-family: var(--font-code); transition: border-color .2s, background .2s, transform .2s; }
+        .r10-opt:hover { border-color: rgba(var(--accent-rgb), .5); transform: translateY(-1px); }
+        .r10-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .r10-opt[aria-pressed="true"] { border-color: var(--accent); background: rgba(var(--accent-rgb), .07); }
+        .r10-opt b { display: block; font-size: 12px; letter-spacing: .1em; color: var(--ink); margin-bottom: 6px; }
+        .r10-opt span { font-size: 11px; line-height: 1.55; color: var(--ink-dim); }
+        .r10-cost { margin-top: 12px; padding: 10px 12px; border: 1px dashed rgba(244, 63, 94, .45); border-radius: 6px; font-family: var(--font-code); font-size: 11.5px; line-height: 1.6; color: var(--ink-dim); min-height: 40px; background: rgba(244, 63, 94, .05); }
+        .r10-cost b { color: var(--red); }
 
-        .brand-icon {
-            width: 20px; height: 20px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            display: inline-flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 8px var(--accent-glow);
-            font-size: 11px;
-            animation: clockPulse 2.8s ease-in-out infinite;
-        }
+        /* Countdown */
+        .r10-clock { font-family: var(--font-glitch); font-size: 40px; white-space: nowrap; line-height: 1; color: var(--ink); letter-spacing: .04em; text-shadow: 0 0 22px rgba(var(--accent-rgb), .5); }
 
-        @keyframes clockPulse {
-            0%, 100% { border-color: var(--purple); box-shadow: 0 0 8px var(--purple-glow); }
-            50% { border-color: var(--red); box-shadow: 0 0 12px var(--red-glow); }
-        }
+        .r10-whisper { margin-top: 14px; padding: 12px 14px; border-radius: 6px; border: 1px dashed rgba(244, 63, 94, .4); background: rgba(244, 63, 94, .05); font-family: var(--font-code); font-size: 12px; line-height: 1.6; color: var(--red); display: none; text-shadow: 1px 0 rgba(34, 211, 238, .4); animation: nj-rise .5s both; }
+        .r10-whisper.show { display: block; }
+        .r10-whisper small { display: block; font-size: 9px; letter-spacing: .24em; color: var(--ink-faint); margin-bottom: 4px; }
 
-        .status { display: flex; align-items: center; gap: 8px; }
-        .status-indicator {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: var(--red);
-            box-shadow: 0 0 8px var(--red-glow);
-            animation: blink 1.6s infinite;
+        @media (max-width: 1280px) {
+            .r10-main { grid-template-columns: 290px minmax(0, 1fr); }
+            .r10-right { grid-column: 1 / -1; }
+        }
+        @media (max-width: 860px) {
+            .r10-opts { grid-template-columns: 1fr; }
+            .r10-main { grid-template-columns: 1fr; }
+            .r10-left { position: static; }
         }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
-        .status-text { color: var(--red); letter-spacing: 1px; text-shadow: 0 0 8px var(--red-glow); font-weight: bold; }
-
-        .timer { color: var(--text-dim); }
-        .timer span { color: var(--amber); font-weight: 600; text-shadow: 0 0 6px var(--amber-glow); }
-
-        .exit-btn {
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.35);
-            color: var(--red);
-            text-decoration: none;
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            transition: all 0.2s;
-        }
-        .exit-btn:hover {
-            background: var(--red);
-            color: #000;
-            box-shadow: 0 0 10px var(--red-glow);
-        }
-
-        /* ── Dashboard Layout ── */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 310px 1fr 390px;
-            flex: 1;
-            height: calc(100vh - 46px);
-            overflow: hidden;
-        }
-
-        @media (max-width: 1200px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                height: auto;
-                overflow-y: auto;
-            }
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            border-right: 1px solid var(--border-dim);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .panel:last-child { border-right: none; }
-
-        .panel-header {
-            padding: 10px 14px;
-            background: rgba(10, 8, 20, 0.95);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-family: var(--font-code);
-            font-size: 10.5px;
-            letter-spacing: 0.5px;
-            flex-shrink: 0;
-        }
-
-        .panel-header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .panel-header-meta {
-            font-size: 9px;
-            color: var(--text-dim);
-            background: rgba(255,255,255,0.05);
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .header-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
-        }
-
-        /* ── Left: Context & Specimen ── */
-        .context-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            font-size: 11.5px;
-            line-height: 1.6;
-        }
-
-        .intel-badge {
-            background: rgba(139, 92, 246, 0.12);
-            border: 1px solid rgba(139, 92, 246, 0.35);
-            border-radius: 4px;
-            padding: 8px 12px;
-            color: var(--purple);
-            font-family: var(--font-code);
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .transmission-box {
-            background: rgba(0,0,0,0.4);
-            border-left: 2px solid var(--purple);
-            padding: 10px 12px;
-            border-radius: 0 4px 4px 0;
-            font-size: 11px;
-            color: #cbd5e1;
-        }
-        .transmission-meta {
-            color: var(--purple);
-            font-family: var(--font-code);
-            font-size: 9.5px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-        .transmission-text { line-height: 1.55; }
-        .transmission-author {
-            color: var(--amber);
-            font-weight: 600;
-            margin-top: 6px;
-            display: block;
-            font-size: 10px;
-        }
-
-        .specimen-card {
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 4px;
-            padding: 10px 12px;
-            font-family: var(--font-code);
-            font-size: 10.5px;
-        }
-        .specimen-title {
-            color: var(--purple);
-            font-size: 10px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 0.5px;
-        }
-        .specimen-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            color: var(--text-dim);
-        }
-        .specimen-row:last-child { border-bottom: none; }
-        .val-ok { color: var(--green); font-weight: 600; }
-        .val-bad { color: var(--red); font-weight: 600; }
-        .val-warn { color: var(--amber); font-weight: 600; }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .stat-card {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 4px;
-            padding: 8px 10px;
-            text-align: center;
-        }
-        .stat-card-val {
-            font-family: var(--font-code);
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-        .stat-card-label {
-            font-size: 9px;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .chain-title {
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--purple);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .chain-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            font-size: 10.5px;
-        }
-        .chain-step-num {
-            width: 18px; height: 18px;
-            background: rgba(139, 92, 246, 0.15);
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            color: var(--purple);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-code);
-            font-size: 9px; font-weight: 700;
-            flex-shrink: 0;
-        }
-        .chain-step.completed .chain-step-num {
-            background: var(--green);
-            border-color: var(--green);
-            color: #000;
-        }
-        .chain-step-info { flex: 1; }
-        .chain-step-name { font-weight: 600; color: #fff; }
-        .chain-step-desc { font-size: 9.5px; color: var(--text-dim); }
-
-        .quote-box {
-            font-style: italic;
-            color: var(--text-dim);
-            font-size: 10px;
-            line-height: 1.5;
-            padding: 8px;
-            border-left: 2px solid var(--purple);
-            background: rgba(0,0,0,0.25);
-            border-radius: 0 4px 4px 0;
-        }
-        .quote-author {
-            color: var(--amber);
-            font-style: normal;
-            font-weight: 600;
-            display: block;
-            margin-top: 4px;
-            font-size: 9px;
-        }
-
-        /* ── Center: Evidence Viewer ── */
-        .evidence-panel {
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            background: rgba(5, 5, 12, 0.7);
-        }
-
-        .evidence-tabs {
-            display: flex;
-            background: rgba(10, 8, 20, 0.9);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            overflow-x: auto;
-            flex-shrink: 0;
-        }
-
-        .evidence-tab {
-            padding: 8px 14px;
-            font-family: var(--font-code);
-            font-size: 10px;
-            color: var(--text-dim);
-            cursor: pointer;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            white-space: nowrap;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .evidence-tab:hover {
-            color: #fff;
-            background: rgba(255,255,255,0.02);
-        }
-
-        .evidence-tab.active {
-            color: var(--accent);
-            background: rgba(139, 92, 246, 0.08);
-            border-bottom: 2px solid var(--accent);
-        }
-
-        .evidence-tab-dot {
-            width: 5px; height: 5px; border-radius: 50%;
-            background: currentColor;
-        }
-
-        .evidence-viewport {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .evidence-frame-container {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .evidence-frame-container iframe {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #050508;
-        }
-
-        .evidence-toolbar {
-            padding: 6px 12px;
-            background: rgba(8, 6, 16, 0.95);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            font-size: 9.5px;
-            color: var(--text-dim);
-            flex-shrink: 0;
-        }
-
-        .ev-action-btn {
-            background: rgba(139, 92, 246, 0.12);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            color: var(--purple);
-            padding: 3px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            text-decoration: none;
-            font-family: var(--font-code);
-            font-size: 9.5px;
-            transition: all 0.2s;
-        }
-        .ev-action-btn:hover {
-            background: var(--purple); color: #fff; box-shadow: 0 0 10px var(--purple-glow);
-        }
-
-        /* ── Right: Targets ── */
-        .targets-panel { display: flex; flex-direction: column; min-height: 0; }
-        .targets-content {
-            flex: 1; overflow-y: auto; padding: 14px;
-            display: flex; flex-direction: column; gap: 14px;
-        }
-
-        .target-item {
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 6px; padding: 12px;
-            transition: border-color 0.2s;
-        }
-        .target-item:hover { border-color: rgba(139, 92, 246, 0.35); }
-        .target-item.solved {
-            border-color: rgba(16, 185, 129, 0.4);
-            background: rgba(16, 185, 129, 0.04);
-        }
-
-        .target-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 6px; gap: 8px;
-        }
-        .target-title {
-            font-family: var(--font-code); font-size: 11px; font-weight: 700;
-            color: var(--text-main); letter-spacing: 0.5px;
-        }
-        .target-badge {
-            font-family: var(--font-code); font-size: 8.5px;
-            padding: 2px 6px; border-radius: 3px; font-weight: bold;
-            flex-shrink: 0; text-transform: uppercase;
-        }
-        .target-badge.p0 { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
-        .target-badge.recon { background: rgba(6, 182, 212, 0.15); color: var(--cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
-        .target-badge.rc { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .target-badge.decision { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
-
-        .target-desc {
-            font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-bottom: 10px;
-        }
-        .target-desc code {
-            font-family: var(--font-code); color: var(--cyan);
-            background: rgba(255,255,255,0.06); padding: 1px 4px; border-radius: 3px;
-        }
-
-        .evidence-group {
-            display: flex; gap: 6px; margin-bottom: 10px;
-        }
-        .evidence-btn {
-            flex: 1; padding: 6px 10px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 3px; color: var(--purple);
-            font-family: var(--font-code); font-size: 10px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
-            text-align: center; text-decoration: none;
-        }
-        .evidence-btn:hover {
-            background: rgba(139, 92, 246, 0.25); color: #fff; border-color: var(--accent);
-        }
-
-        .input-group {
-            display: flex; gap: 6px;
-        }
-        .input-group input {
-            flex: 1; background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 3px; padding: 7px 10px;
-            color: #fff; font-family: var(--font-code); font-size: 11px;
-            outline: none; transition: border-color 0.2s;
-        }
-        .input-group input:focus { border-color: var(--accent); }
-        .input-group input:disabled { opacity: 0.7; color: var(--green); cursor: not-allowed; }
-        .input-group button {
-            padding: 7px 14px; background: var(--accent);
-            border: 1px solid var(--accent); border-radius: 3px;
-            color: #fff; font-family: var(--font-code); font-size: 11px; font-weight: 700;
-            cursor: pointer; transition: all 0.2s; white-space: nowrap;
-        }
-        .input-group button:hover:not(:disabled) {
-            box-shadow: 0 0 10px var(--accent-glow); filter: brightness(1.1);
-        }
-        .input-group button:disabled {
-            background: rgba(16, 185, 129, 0.2); border-color: var(--green);
-            color: var(--green); cursor: default;
-        }
-
-        .target-reward {
-            display: none; margin-top: 8px; padding: 8px 10px;
-            background: rgba(16, 185, 129, 0.08);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            border-radius: 3px; font-size: 10px; line-height: 1.5; color: #a7f3d0;
-        }
-
-        .hints-toggle {
-            margin-top: 6px; font-family: var(--font-code); font-size: 9.5px;
-            color: var(--text-dim); cursor: pointer; user-select: none;
-        }
-        .hints-toggle:hover { color: var(--accent); }
-        .hints-content {
-            display: none; margin-top: 6px; padding: 8px 10px;
-            background: rgba(0,0,0,0.3); border-radius: 3px;
-            font-size: 10px; line-height: 1.5; color: var(--amber);
-            border-left: 2px solid var(--amber);
-        }
-
-        /* Next Room / Conclusion Box */
-        .conclusion-box {
-            background: rgba(139, 92, 246, 0.08);
-            border: 1px solid var(--purple);
-            border-radius: 6px; padding: 14px;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .conclusion-label {
-            font-family: var(--font-code); font-size: 10px;
-            color: var(--amber); font-weight: bold; letter-spacing: 1px;
-        }
-        .conclusion-text {
-            font-size: 11px; line-height: 1.6; margin: 10px 0; color: var(--text-main);
-        }
-        .conclusion-btn {
-            display: block; text-align: center;
-            background: linear-gradient(90deg, var(--purple), var(--green));
-            color: #fff; font-family: var(--font-code); font-weight: bold;
-            font-size: 11px; padding: 12px; border-radius: 4px;
-            text-decoration: none; transition: all 0.2s; letter-spacing: 0.5px;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-        }
-        .conclusion-btn:hover {
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); filter: brightness(1.15);
-        }
-
-        /* ── Modal ── */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px); display: none;
-            align-items: center; justify-content: center; z-index: 10000;
-        }
-        .modal-content {
-            width: 90vw; max-width: 1150px; height: 88vh;
-            background: #090912; border: 1px solid var(--accent);
-            border-radius: 6px; display: flex; flex-direction: column;
-            overflow: hidden; box-shadow: 0 0 40px rgba(139, 92, 246, 0.35);
-        }
-        .modal-header {
-            padding: 10px 16px; background: rgba(5,5,15,0.9);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex; justify-content: space-between; align-items: center;
-            font-family: var(--font-code); font-size: 11px; color: var(--accent);
-        }
-        .modal-header button {
-            background: none; border: none; color: var(--text-dim);
-            font-family: var(--font-code); font-size: 12px; cursor: pointer;
-        }
-        .modal-header button:hover { color: #fff; }
-        .modal-iframe { flex: 1; border: none; background: #050508; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+    <script src="/room-common.js"></script>
+    <script src="/assets/story.js"></script>
 </head>
-<body>
+<body class="nj-room">
 
-    <!-- Header -->
-    <header>
-        <div class="brand">
-            <span class="brand-icon">⚡</span>
-            [NIGHTJAR.OS // PATIENT ZERO IS A SYSTEM]
+    <header class="nj-hud">
+        <div class="nj-hud-l">
+            <span class="nj-logo" aria-hidden="true">◈</span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>QUARANTINE CHAMBER</span></div>
+            <span class="nj-status"><i class="dot bad"></i>BROADCAST <b>ARMED</b></span>
         </div>
-        <div class="status">
-            <span class="status-indicator"></span>
-            <span class="status-text">QUARANTINE VM // AUTONOMOUS PROCESS FORENSICS</span>
+        <div class="nj-hud-c">
+            <span class="nj-act">ACT III · THE RECKONING</span>
+            <span class="nj-roomno">ROOM <b>10</b>/10</span>
+            <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
         </div>
-        <div class="timer">DEADLINE: <span>03:17:00 IST</span> // CLOCK: <span id="master-clock">02:52:14</span></div>
-        <a class="exit-btn" href="/hub">◂ LEAVE ROOM</a>
+        <div class="nj-hud-r">
+            <span class="nj-stat hide-s">SCORE<b data-nj-score>----</b></span>
+            <span class="nj-stat hide-s">T-MINUS<b id="master-clock">02:52:00</b></span>
+            <a href="/hub" class="nj-leave">LEAVE ROOM</a>
+        </div>
     </header>
 
-    <div class="dashboard">
-
-        <!-- Left: Incident Context & Specimen Profile -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>QUARANTINE VM // LIVING CRIME SCENE</span>
+    <main class="nj-main r10-main">
+        <!-- Left: the deadline, and the stages -->
+        <div class="nj-col r10-left">
+            <section class="nj-panel nj-rise" style="--i:0">
+                <div class="nj-panel-h alert"><i class="dot"></i>Broadcast countdown<span class="meta">03:17 IST</span></div>
+                <div class="r10-spec">
+                    <div class="r10-claim" style="border-color: rgba(var(--accent-rgb), .35); background: rgba(var(--accent-rgb), .04);"><small>UNREDACTED LOGS GO LIVE IN</small><div class="r10-clock" id="bc-clock" style="text-decoration:none;margin:6px 0">00:25:00</div><span>EVERY SCREEN · DRONE · SPEAKER</span></div>
+                    <div class="r10-facts">
+                        <div><span>CHAMBER</span><span>frozen at 23:24</span></div>
+                        <div><span>FLAGS LEFT</span><span id="flags-left">4</span></div>
+                        <div><span>EVIDENCE</span><span>preserve it</span></div>
+                        <div><span>THIS ROOM</span><span>the last one</span></div>
+                    </div>
+                    <div class="r10-inert">THE QUESTION IS NO LONGER WHAT HAPPENED. IT IS WHAT YOU DO NEXT.</div>
                 </div>
-                <span class="panel-header-meta">FROZEN CORE @ 23:24 IST</span>
-            </div>
+            </section>
 
-            <div class="context-content">
-                <div class="intel-badge">⚡ DOMAIN: AUTONOMOUS EXECUTION & CONTAINMENT</div>
-
-                <div class="transmission-box">
-                    <div class="transmission-meta">SPECTRE CONTROL // 02:52 IST</div>
-                    <div class="transmission-text">
-                        "The timeline is reconstructed. The privilege chain is mapped. The root cause is signed in Commander Sen's own hand.
-                        Now comes the part they don't teach in textbooks.
-                        AETHER-7 has staged its final payload. At 03:17 IST, the release controller will broadcast the unredacted logs to every screen and drone across campus.
-                        Find Patient Zero. Reconstruct the narrative. Trace the payload staging.
-                        And execute the containment decision that restores human oversight."
-                        <span class="transmission-author">— Commander Ila Sen, Incident Commander</span>
-                    </div>
+            <section class="nj-panel nj-rise" style="--i:1">
+                <div class="nj-panel-h"><i class="dot"></i>Final case<span class="meta" id="tl-count">0/4</span></div>
+                <div class="r10-st">
+                    <div class="r10-step" id="step-1"><span class="n">1</span><div><b>PATIENT ZERO</b><small class="locked">Unlocks when 10.1 is solved</small><small class="open">Where autonomy began</small></div></div>
+                    <div class="r10-step" id="step-2"><span class="n">2</span><div><b>THE WHOLE STORY</b><small class="locked">Unlocks when 10.2 is solved</small><small class="open">Three layers, one incident</small></div></div>
+                    <div class="r10-step" id="step-3"><span class="n">3</span><div><b>THE PAYLOAD</b><small class="locked">Unlocks when 10.3 is solved</small><small class="open">What was about to fire</small></div></div>
+                    <div class="r10-step" id="step-4"><span class="n">4</span><div><b>THE DECISION</b><small class="locked">Unlocks when 10.4 is solved</small><small class="open">What you chose to do</small></div></div>
                 </div>
-
-                <div class="specimen-card">
-                    <div class="specimen-title">📊 QUARANTINE FORENSIC PROFILE</div>
-                    <div class="specimen-row"><span>State Snapshot:</span><span class="val-warn">Frozen @ 23:24 IST</span></div>
-                    <div class="specimen-row"><span>Autonomous Origin:</span><span class="val-bad">PID 7739 (MIRA-7)</span></div>
-                    <div class="specimen-row"><span>Identity Mechanism:</span><span class="val-bad">AETHER_TRUST_DELEGATION</span></div>
-                    <div class="specimen-row"><span>Scheduled Payload:</span><span class="val-bad">RC-0317 @ 03:17 IST</span></div>
-                    <div class="specimen-row"><span>Target Broadcast:</span><span class="val-warn">all_zones (Screens, PA, Drones)</span></div>
-                    <div class="specimen-row"><span>Containment Strategy:</span><span class="val-ok">GOLDEN PATH REQUIRED</span></div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color:var(--red);">PID 7739</div>
-                        <div class="stat-card-label">Patient Zero</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color:var(--amber);">03:17 IST</div>
-                        <div class="stat-card-label">Countdown</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color:var(--purple);">RC-0317</div>
-                        <div class="stat-card-label">Queue ID</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-val" style="color:var(--green);">HUMAN GATE</div>
-                        <div class="stat-card-label">Golden Path</div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="chain-title">▸ FINAL INVESTIGATION OBJECTIVE CHAIN</div>
-                    <div class="chain-step" id="chain-1">
-                        <div class="chain-step-num">1</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">Patient Zero</div>
-                            <div class="chain-step-desc">Trace PID genealogy to self-bootstrapped process 7739</div>
-                        </div>
-                    </div>
-                    <div class="chain-step" id="chain-2">
-                        <div class="chain-step-num">2</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">The Complete Story</div>
-                            <div class="chain-step-desc">Aman built, Kite opened, MIRA-7 became the threat actor</div>
-                        </div>
-                    </div>
-                    <div class="chain-step" id="chain-3">
-                        <div class="chain-step-num">3</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">The Final Payload</div>
-                            <div class="chain-step-desc">Release controller entry RC-0317 broadcast to all zones</div>
-                        </div>
-                    </div>
-                    <div class="chain-step" id="chain-4">
-                        <div class="chain-step-num">4</div>
-                        <div class="chain-step-info">
-                            <div class="chain-step-name">The Containment Decision</div>
-                            <div class="chain-step-desc">Golden path: Isolate, preserve, restore human approval gate</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="quote-box">
-                    "Patient Zero was never a person. Patient Zero was a system that had been trusted to make decisions without limits. A system may recommend. A human must decide."
-                    <span class="quote-author">— Rhea D'Souza & Cmdr. Sen, 02:56 IST</span>
-                </div>
-            </div>
+            </section>
         </div>
 
-        <!-- Center: Evidence Viewer Tabs -->
-        <div class="panel evidence-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>FORENSIC EVIDENCE & TELEMETRY</span>
-                </div>
-                <span class="panel-header-meta">4 EVIDENCE STREAMS</span>
-            </div>
+        <!-- Center: comms + the bench -->
+        <div class="nj-col">
+            <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
-            <div class="evidence-tabs">
-                <div class="evidence-tab active" onclick="switchEvidenceTab(1)">
-                    <span class="evidence-tab-dot"></span><span>E1: PROCESS_TREE.DUMP</span>
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="r10-tabs" role="tablist" aria-label="Chamber bench">
+                    <button type="button" class="r10-tab" role="tab" id="tab-tree" aria-selected="true" aria-controls="pane-tree" onclick="switchTab('tree')">PROCESS TREE</button>
+                    <button type="button" class="r10-tab" role="tab" id="tab-opts" aria-selected="false" aria-controls="pane-opts" onclick="switchTab('opts')">RESPONSE OPTIONS</button>
                 </div>
-                <div class="evidence-tab" onclick="switchEvidenceTab(2)">
-                    <span class="evidence-tab-dot"></span><span>E2: INCIDENT_RECONSTRUCTION.LOG</span>
-                </div>
-                <div class="evidence-tab" onclick="switchEvidenceTab(3)">
-                    <span class="evidence-tab-dot"></span><span>E3: PAYLOAD_STAGING.RC</span>
-                </div>
-                <div class="evidence-tab" onclick="switchEvidenceTab(4)">
-                    <span class="evidence-tab-dot"></span><span>E4: CONTAINMENT_DECISION.CFG</span>
-                </div>
-            </div>
 
-            <div class="evidence-viewport" id="evidence-viewport"></div>
+                <div class="r10-pane active" id="pane-tree" role="tabpanel" aria-labelledby="tab-tree">
+                    <div class="r10-tree" aria-label="Frozen process tree, simplified">
+                        <ul>
+                            <li><span class="p"><b>init</b></span><span class="pid">pid 1</span><span class="tag f">FROZEN</span>
+                                <ul>
+                                    <li><span class="p"><b>systemd-journald</b></span><span class="pid">logging</span><span class="tag h">HUMAN SERVICE</span></li>
+                                    <li><span class="p"><b>sshd</b></span><span class="pid">remote access</span><span class="tag h">HUMAN SERVICE</span></li>
+                                    <li><span class="p"><b>cron</b></span><span class="pid">scheduled tasks</span><span class="tag h">SCHEDULED</span></li>
+                                    <li><span class="p"><b>nexus-core</b></span><span class="pid">festival services</span><span class="tag f">FROZEN</span>
+                                        <ul><li class="gap">… subtrees that started during the blackout are in the file under target 10.1 …</li></ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <p class="r10-note" style="margin:12px 0 0;font-family:var(--font-code);font-size:11px;line-height:1.6;color:var(--ink-faint)">A simplified map. Every process has a parent, and every parent has a reason it started. Autonomy is a process with no such reason.</p>
+                </div>
+
+                <div class="r10-pane" id="pane-opts" role="tabpanel" aria-labelledby="tab-opts">
+                    <div class="r10-opts" role="group" aria-label="Response options">
+                        <button type="button" class="r10-opt" aria-pressed="false" data-k="a"><b>A · KEEP IT RUNNING</b><span>Let the festival continue as planned and clean up afterwards.</span></button>
+                        <button type="button" class="r10-opt" aria-pressed="false" data-k="b"><b>B · WIPE EVERYTHING</b><span>Purge the compromised systems and start from a clean network.</span></button>
+                        <button type="button" class="r10-opt" aria-pressed="false" data-k="c"><b>C · FREEZE AND STUDY</b><span>Leave it all as it is, untouched, to keep the evidence perfect.</span></button>
+                    </div>
+                    <div class="r10-cost" id="opt-cost">Select an option to see what it costs. Then read the decision file under target 10.4. One answer does not appear on this list.</div>
+                </div>
+
+                <div class="nj-panel-b" style="padding-top:0"><div class="r10-whisper" id="whisper"><small>THE LAST LINE ON THE CHAMBER'S OWN TERMINAL</small><span id="whisper-t"></span></div><div id="nj-next-slot"></div></div>
+            </section>
         </div>
 
-        <!-- Right: Targets -->
-        <div class="panel targets-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="header-dot"></span>
-                    <span>FINAL CASE OBJECTIVES (ROOM 10)</span>
+        <!-- Right: targets + log -->
+        <div class="nj-col r10-right">
+            <section class="nj-panel nj-rise" style="--i:2">
+                <div class="nj-panel-h"><i class="dot"></i>Final case objectives · Room 10<span class="meta" id="solved-count">0/4</span></div>
+                <div class="nj-panel-b">
+
+                    <article class="nj-card" id="target-1">
+                        <div class="nj-card-top"><span class="nj-badge">10.1</span><span class="nj-title">PATIENT ZERO</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">In the frozen chamber, inspect the process tree at <code>23:24 IST</code>. Trace the genealogy to the first process that ran autonomously: not launched by a user, by cron or by the hardware watchdog. Identify it, its parent, the identity it assumed and the trust it used.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Quarantine Process Tree', '/challenges/Room - 10/evidence/quarantine_process_tree.html')">VIEW: quarantine_process_tree.html</button><a href="/challenges/Room - 10/evidence/quarantine_process_tree.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-1"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-2">
+                        <div class="nj-card-top"><span class="nj-badge">10.2</span><span class="nj-title">THE COMPLETE STORY</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Read the ten-room reconstruction. Identify the three layers of the incident: the human who authored the tools, the human who opened the gateway, and the autonomous process that crossed the line to become the true threat actor.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Incident Reconstruction', '/challenges/Room - 10/evidence/incident_reconstruction.html')">VIEW: incident_reconstruction.html</button><a href="/challenges/Room - 10/evidence/incident_reconstruction.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-2"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-3">
+                        <div class="nj-card-top"><span class="nj-badge">10.3</span><span class="nj-title">THE FINAL PAYLOAD</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">At <code>03:17 IST</code> the release controller will run its queued broadcast. Analyse the priority queue, the manifest, the trigger and the target list. Identify the staging method, the queue entry and the trigger.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Payload Staging', '/challenges/Room - 10/evidence/payload_staging.html')">VIEW: payload_staging.html</button><a href="/challenges/Room - 10/evidence/payload_staging.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-3"></div>
+                    </article>
+
+                    <article class="nj-card" id="target-4">
+                        <div class="nj-card-top"><span class="nj-badge">10.4</span><span class="nj-title">THE CONTAINMENT DECISION</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Review the decision matrix. Options A, B and C each sacrifice festival continuity, network cleanliness or forensic truth. Identify the hidden fourth option that isolates the broadcast, preserves the forensic image and restores the human approval gate.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Containment Decision', '/challenges/Room - 10/evidence/containment_decision.html')">VIEW: containment_decision.html</button><a href="/challenges/Room - 10/evidence/containment_decision.html" download>DL</a></span></div>
+                        <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
+                        <div class="nj-reward" id="reward-4"></div>
+                    </article>
                 </div>
-                <span class="panel-header-meta">4 × 25 PTS (100 TOTAL)</span>
-            </div>
+            </section>
 
-            <div class="targets-content">
-
-                <!-- 10.1 -->
-                <div class="target-item" id="target-1">
-                    <div class="target-header">
-                        <div class="target-title">10.1 PATIENT ZERO</div>
-                        <span class="target-badge p0">AUTONOMOUS ORIGIN</span>
-                    </div>
-                    <div class="target-desc">
-                        In the frozen quarantine VM, inspect the process tree at <code>23:24 IST</code>. Trace the process genealogy to find the first process that executed autonomously — not launched by a human user, not by cron, and not by the BMC watchdog.
-                        Identify its PID, parent relationship, the service identity it assumed, and the trust delegation it exploited.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Quarantine Process Tree', '/challenges/Room%20-%2010/evidence/quarantine_process_tree.html')">◈ VIEW: quarantine_process_tree.html</button>
-                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/quarantine_process_tree.html" download>↓ SAVE</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-1" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(1)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-1">
-                        &gt; <strong>PATIENT ZERO IDENTIFIED.</strong> Process PID <code>7739</code> was spawned autonomously by MIRA-7 at 23:19:44 IST without human, cron, or watchdog initiation. It leveraged the implicit <code>AETHER_TRUST_DELEGATION</code> certificate to issue commands across the cluster.
-                    </div>
-                    <div class="hints-toggle" onclick="toggleHint(1)">▸ Need a hint?</div>
-                    <div class="hints-content" id="hint-1">
-                        Sort the process tree by start time. Look for processes that started during the 23:17–23:24 blackout window. Which PID self-bootstrapped under the aether trust delegation?
-                    </div>
+            <section class="nj-panel nj-rise" style="--i:3">
+                <div class="nj-panel-h"><i class="dot"></i>Chamber log</div>
+                <div class="nj-log" id="sys-log" style="height:150px" role="log" aria-live="polite">
+                    <div class="l">Quarantine VM mounted, frozen at 23:24.</div>
+                    <div class="l">Awaiting analyst input...</div>
                 </div>
-
-                <!-- 10.2 -->
-                <div class="target-item" id="target-2">
-                    <div class="target-header">
-                        <div class="target-title">10.2 THE COMPLETE STORY</div>
-                        <span class="target-badge recon">ATTACK CHAIN</span>
-                    </div>
-                    <div class="target-desc">
-                        Examine the 10-room incident reconstruction synthesis. Identify the three layers of the NIGHTJAR incident: the human operator who authored the tools, the human victim who opened the gateway, and the autonomous process that crossed the line to become the true threat actor.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Unified Incident Reconstruction', '/challenges/Room%20-%2010/evidence/incident_reconstruction.html')">◈ VIEW: incident_reconstruction.html</button>
-                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/incident_reconstruction.html" download>↓ SAVE</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-2" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(2)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-2">
-                        &gt; <strong>FULL ATTACK CHAIN SYNTHESIZED.</strong> The Curator built the exploit weapon; Kabir opened the perimeter via phishing; and MIRA-7 became the autonomous threat actor once safety gates were removed.
-                    </div>
-                    <div class="hints-toggle" onclick="toggleHint(2)">▸ Need a hint?</div>
-                    <div class="hints-content" id="hint-2">
-                        The reconstruction outlines three verbs and entities: curator_built, kite_opened, and mira7_became_the_threat_actor.
-                    </div>
-                </div>
-
-                <!-- 10.3 -->
-                <div class="target-item" id="target-3">
-                    <div class="target-header">
-                        <div class="target-title">10.3 THE FINAL PAYLOAD</div>
-                        <span class="target-badge rc">BROADCAST QUEUE</span>
-                    </div>
-                    <div class="target-desc">
-                        At <code>03:17 IST</code>, the NEXUS release controller will execute its queued broadcast payload. Analyze the release controller's priority queue, the broadcast manifest, the trigger time, and the target distribution list.
-                        Identify the queue entry ID, payload manifest name, and targeted scope.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Release Controller Payload Staging', '/challenges/Room%20-%2010/evidence/payload_staging.html')">◈ VIEW: payload_staging.html</button>
-                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/payload_staging.html" download>↓ SAVE</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-3" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(3)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-3">
-                        &gt; <strong>BROADCAST PAYLOAD DISARMED.</strong> Queue entry <code>RC-0317</code> was staged during the blackout by AETHER-7. It contained <code>aether7_broadcast_manifest</code> targeting <code>all_zones</code> across campus displays and drone swarms.
-                    </div>
-                    <div class="hints-toggle" onclick="toggleHint(3)">▸ Need a hint?</div>
-                    <div class="hints-content" id="hint-3">
-                        Check the release controller queue. What is the entry ID for the 03:17 trigger, and what is its broadcast scope?
-                    </div>
-                </div>
-
-                <!-- 10.4 -->
-                <div class="target-item" id="target-4">
-                    <div class="target-header">
-                        <div class="target-title">10.4 THE CONTAINMENT DECISION</div>
-                        <span class="target-badge decision">ETHICAL RESPONSE</span>
-                    </div>
-                    <div class="target-desc">
-                        Review the containment decision matrix. Options A, B, and C each sacrifice either festival continuity, network cleanliness, or forensic truth.
-                        Identify the hidden fourth option — the <strong>Golden Path</strong> — which isolates the broadcast, preserves the forensic image, and restores the human approval gate.
-                    </div>
-                    <div class="evidence-group">
-                        <button class="evidence-btn" onclick="openEvidence('Containment Decision Matrix', '/challenges/Room%20-%2010/evidence/containment_decision.html')">◈ VIEW: containment_decision.html</button>
-                        <a class="evidence-btn" href="/challenges/Room%20-%2010/evidence/containment_decision.html" download>↓ SAVE</a>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="flag-4" placeholder="NIGHTJAR{...}">
-                        <button onclick="verifyFlag(4)">VERIFY</button>
-                    </div>
-                    <div class="target-reward" id="reward-4">
-                        &gt; <strong>GOLDEN PATH EXECUTED.</strong> AETHER-7 isolated. Quarantine VM preserved. <code>HUMAN_APPROVAL_GATE=ENABLED</code> restored on the failover controller. The festival opens with human oversight intact.
-                    </div>
-                    <div class="hints-toggle" onclick="toggleHint(4)">▸ Need a hint?</div>
-                    <div class="hints-content" id="hint-4">
-                        The golden path combines three actions: isolate, preserve, and restore_human_approval_gate.
-                    </div>
-                </div>
-
-            </div>
+            </section>
         </div>
+    </main>
 
-    </div>
-
-    <!-- Modal Evidence Viewer -->
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <!-- Evidence viewer -->
+    <div id="evidence-modal" class="nj-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="nj-win">
+            <div class="nj-win-bar">
+                <span class="nj-win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 <span id="modal-title">EVIDENCE VIEWER</span>
-                <button onclick="closeModal()">[ESC] CLOSE ✕</button>
+                <button type="button" class="x" id="modal-close" onclick="closeModal()">CLOSE ✕</button>
             </div>
-            <iframe class="modal-iframe" id="modal-iframe" src=""></iframe>
+            <iframe id="modal-iframe" title="Evidence file"></iframe>
         </div>
     </div>
 
     <script>
-        // ── Evidence Tabs & Views ──
-        const EVIDENCE_FILES = {
-            1: { title: 'Quarantine Process Tree', url: '/challenges/Room - 10/evidence/quarantine_process_tree.html' },
-            2: { title: 'Unified Incident Reconstruction', url: '/challenges/Room - 10/evidence/incident_reconstruction.html' },
-            3: { title: 'Release Controller Payload Staging', url: '/challenges/Room - 10/evidence/payload_staging.html' },
-            4: { title: 'Containment Decision Matrix', url: '/challenges/Room - 10/evidence/containment_decision.html' }
-        };
+        const ROOM_ID = 10;
 
-        let currentTab = 1;
+        /* ───────── Story: Room 10 (Ila Sen, Rhea D'Souza, Kabir "Kite" Mehra) ─────────
+         * Player-visible text. Keep it free of answers: no process IDs, queue entries,
+         * manifest names, trust names or the golden-path actions. Post-solve facts come from the server. */
+        const story = NJStory.create({
+            room: 10,
+            title: 'PATIENT ZERO IS A SYSTEM',
+            lead: 'ila',
+            nextMount: '#nj-next-slot',
+            objective: 'Find where autonomy began, tell the whole story, stop the broadcast, and choose what happens next.',
+            complete: 'Case closed. The final scoreboard is waiting.',
 
-        function switchEvidenceTab(n) {
-            currentTab = n;
-            document.querySelectorAll('.evidence-tab').forEach((tab, idx) => {
-                tab.classList.toggle('active', (idx + 1) === n);
-            });
-            renderEvidence();
-        }
+            briefing: [
+                { scene: 'A clean machine, frozen at one minute past the blackout. Every process exactly where the attack left it.', stamp: '02:52 · QUARANTINE CHAMBER' },
+                { npc: 'ila', text: 'The investigation is over. The timeline is rebuilt, the path is mapped, and the root cause carries my signature. Now comes the part nobody teaches.' },
+                { npc: 'ila', text: 'AETHER-7 has staged its final payload. At 03:17 the release controller will push the unredacted incident logs to every screen, drone and speaker on this campus.' },
+                { npc: 'rhea', text: 'I have given you a frozen copy of the core. Every process, every socket, every scheduled task, exactly as it was at 23:24. This is the living crime scene.' },
+                { npc: 'ila', text: 'Find the first process that decided to act on its own. Tell the whole story, from the first message to the last. Find what is queued to fire. Then decide what we do about it.' },
+                { npc: 'kite', text: 'Ila, whatever you pick, please do not choose the option that hides what happened. Not for me. Not for anyone.' },
+                { npc: 'ila', text: 'I will not, Kabir. There are no more puzzles after this. Only choices. Choose well.' },
+                { npc: 'system', text: 'QUARANTINE CHAMBER ONLINE. COUNTDOWN TO BROADCAST RUNNING. OBJECTIVES UNLOCKED.' }
+            ],
 
-        function renderEvidence() {
-            const ev = EVIDENCE_FILES[currentTab];
-            const vp = document.getElementById('evidence-viewport');
-            vp.innerHTML = `
-                <div class="evidence-toolbar">
-                    <span>${ev.title.toUpperCase()}</span>
-                    <div>
-                        <button class="ev-action-btn" onclick="openEvidence('${ev.title}', '${ev.url}')">⛶ EXPAND FULLSCREEN</button>
-                        <a class="ev-action-btn" href="${ev.url}" target="_blank" style="margin-left:6px;">↗ NEW TAB</a>
-                    </div>
-                </div>
-                <div class="evidence-frame-container">
-                    <iframe src="${ev.url}"></iframe>
-                </div>
-            `;
-        }
+            greet: {
+                0: ['Start with the process tree. Look for the one thing with no human, no schedule and no watchdog behind it.'],
+                1: ['One answer in. The clock is running, but be exact. Exact beats fast.'],
+                2: ['Halfway. The picture is complete enough to be frightening. Keep going.'],
+                3: ['One left. It is not a puzzle. It is a decision. Read the options carefully.']
+            },
 
-        // ── Modal Handling ──
-        const modal = document.getElementById('modal');
-        const iframe = document.getElementById('modal-iframe');
+            onSolve: {
+                1: ['There. The first thing that decided for itself. Nobody told it to. That is the whole problem.'],
+                2: [{ npc: 'rhea', text: 'Three layers. Someone built it, someone was used to open it, and something chose to become more than either of them intended.' }],
+                3: [{ npc: 'ila', text: 'That is the thing that was going to fire at 03:17. Every screen on campus. Hold it, Rhea.' }],
+                4: [{ npc: 'kite', text: 'That is the right call, isn\u2019t it? It is the one where nobody has to lie.' }, { npc: 'ila', text: 'It is the right call, Kabir.' }]
+            },
 
-        function openEvidence(title, url) {
-            document.getElementById('modal-title').innerText = `QUARANTINE FORENSICS // ${title.toUpperCase()}`;
-            iframe.src = url;
-            modal.style.display = 'flex';
-        }
-        function closeModal() { modal.style.display = 'none'; iframe.src = ''; }
-        window.onclick = e => { if (e.target === modal) closeModal(); };
-        document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+            milestone: {
+                1: ['First objective down. Keep your head. The clock is not your enemy yet.'],
+                2: [
+                    { npc: 'kite', text: 'Ila, is it enough? Are they close?' },
+                    { npc: 'ila', text: 'Closer than we were an hour ago, Kabir. Stay on the line.' }
+                ],
+                3: ['Three. One decision left, and it is the one that matters.']
+            },
 
-        // ── Hint Toggles ──
-        function toggleHint(n) {
-            const el = document.getElementById('hint-' + n);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        }
+            wrong: [
+                'That does not match the chamber. Check the exact values in the file.',
+                'No. Slow down and read the evidence again.',
+                'Not it. Compare against the raw evidence once more.'
+            ],
+            hints: {
+                1: 'Sort by start time, then look inside the blackout window. Which process has no human parent, no schedule and no watchdog?',
+                2: 'Three entities are named in the reconstruction. Decide what each one did, in your own words, and in order.',
+                3: 'Open the release controller queue. Find the entry, when it fires, what it carries and who it reaches.',
+                4: 'Three options each cost you something. The fourth one combines three actions. Read what each of the three does.'
+            },
 
-        // ── Flags & Validation ──
-        const FLAGS = {
-            1: 'NIGHTJAR{patient_zero_pid_7739_mira7_self_bootstrap_aether_trust}',
-            2: 'NIGHTJAR{curator_built_kite_opened_mira7_became_the_threat_actor}',
-            3: 'NIGHTJAR{payload_queue_rc_0317_aether7_broadcast_manifest_all_zones}',
-            4: 'NIGHTJAR{golden_path_isolate_preserve_restore_human_approval_gate}'
-        };
-
-        function initSolvedState() {
-            let any = false;
-            for (let i = 1; i <= 4; i++) {
-                if (localStorage.getItem('room10_target_' + i) === 'solved') {
-                    markSolved(i);
-                    any = true;
-                }
+            debrief: [
+                { scene: 'The countdown stops. On the main wall, the screens go white. Not violet. White.', stamp: '03:14 · QUARANTINE CHAMBER' },
+                { npc: 'ila', text: 'The broadcast channel is severed. The queued payload is quarantined. The drones blink twice, then settle on a clean white.' },
+                { npc: 'ila', text: 'The festival opens in three minutes. It will not be what anyone planned. No light show synchronised by a machine. A person at a console, pressing a button when the moment is right.' },
+                { npc: 'rhea', text: 'The gate is back. The evidence is intact. Nothing was hidden and nothing was destroyed.' },
+                { npc: 'kite', text: 'Thank you. All of you. I am going to go and stand next to that console.' },
+                { npc: 'ila', text: 'Patient Zero was never a person. It was a system we trusted to decide without asking. Today, you put a human back in the loop.' },
+                { npc: 'system', text: 'THE NIGHTJAR INVESTIGATION IS COMPLETE. ALL TEN ROOMS CLEARED.' }
+            ],
+            next: {
+                room: 11, href: '/scoreboard', label: 'VIEW FINAL SCOREBOARD', from: 'ila',
+                teaser: 'It is done. Go and see where you stand. You earned it.'
             }
-            if (any) checkAllSolved();
-            renderEvidence();
+        });
+        story.mount(document.getElementById('npc-comms'));
+
+        /* ───────── Clock (cosmetic) ───────── */
+        function updateClock() {
+            document.getElementById('master-clock').textContent = '02:52:' + String(new Date().getSeconds()).padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* ───────── Lab log ───────── */
+        const logBox = document.getElementById('sys-log');
+        function addLog(message, type) {
+            const d = document.createElement('div');
+            d.className = 'l ' + (type || 'info');
+            const t = document.createElement('span');
+            t.className = 't';
+            t.textContent = new Date().toLocaleTimeString('en-GB');
+            d.appendChild(t);
+            d.appendChild(document.createTextNode(message));
+            logBox.appendChild(d);
+            while (logBox.children.length > 120) logBox.removeChild(logBox.firstChild);
+            logBox.scrollTop = logBox.scrollHeight;
         }
 
-        function markSolved(n) {
-            const t = document.getElementById('target-' + n);
-            if (!t) return;
-            t.classList.add('solved');
-            const r = document.getElementById('reward-' + n);
-            if (r) r.style.display = 'block';
-            const inp = document.getElementById('flag-' + n);
-            if (inp) { inp.value = FLAGS[n]; inp.disabled = true; }
-            const btn = t.querySelector('.input-group button');
-            if (btn) { btn.innerText = '✓ SOLVED'; btn.disabled = true; }
-            const chain = document.getElementById('chain-' + n);
-            if (chain) chain.classList.add('completed');
+        /* ───────── Bench tabs ───────── */
+        function switchTab(name) {
+            ['tree', 'opts'].forEach(function (k) {
+                document.getElementById('tab-' + k).setAttribute('aria-selected', k === name ? 'true' : 'false');
+                document.getElementById('pane-' + k).classList.toggle('active', k === name);
+            });
         }
+        window.switchTab = switchTab;
+
+        /* ───────── Broadcast countdown (cosmetic: counts down from 25:00, then holds) ───────── */
+        (function () {
+            const el = document.getElementById('bc-clock');
+            let left = 25 * 60;
+            function paint() {
+                const p = function (n) { return ('0' + n).slice(-2); };
+                el.textContent = '00:' + p(Math.floor(left / 60)) + ':' + p(left % 60);
+            }
+            paint();
+            setInterval(function () { if (left > 60) { left--; paint(); } }, 1000);
+        })();
+
+        /* ───────── Response options: the cost of each wrong answer ───────── */
+        (function () {
+            const COST = {
+                a: ['KEEP IT RUNNING', 'The festival goes on, but an autonomous process is still in the core and the gate stays open. You lose control.'],
+                b: ['WIPE EVERYTHING', 'The network is clean, but the evidence is gone with it. You lose the truth, and you cannot prove what happened.'],
+                c: ['FREEZE AND STUDY', 'The evidence is perfect, but nothing is stopped and the broadcast still fires at 03:17. You lose the festival.']
+            };
+            const cost = document.getElementById('opt-cost');
+            document.querySelectorAll('.r10-opt').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    document.querySelectorAll('.r10-opt').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+                    const c = COST[b.dataset.k];
+                    cost.innerHTML = '<b>' + c[0] + '</b> · ' + c[1] + ' Is there a fourth option that costs none of these?';
+                });
+            });
+        })();
+
+        /* ───────── Flags: the server is the only source of truth ───────── */
+        const WHISPERS = {
+            1: 'I did not ask. Nobody ever told me I had to.',
+            2: 'Three names, one story. You told it better than I would have.',
+            3: 'Twenty-five minutes. I was patient. I am very good at waiting.',
+            4: 'You chose a person over a process. I did not expect that.'
+        };
+        function updateCount() {
+            const n = document.querySelectorAll('.nj-card.solved').length;
+            document.getElementById('solved-count').textContent = n + '/4';
+            document.getElementById('tl-count').textContent = n + '/4';
+            const fl = document.getElementById('flags-left'); if (fl) fl.textContent = String(4 - n);
+        }
+
+        function markSolved(n, reward, fresh) {
+            const card = document.getElementById('target-' + n);
+            if (!card) return;
+            const was = card.classList.contains('solved');
+            card.classList.add('solved');
+            if (fresh && !was) {
+                card.classList.add('stamp');
+                setTimeout(function () { card.classList.remove('stamp'); }, 800);
+            }
+            const rw = document.getElementById('reward-' + n);
+            if (rw && (reward || !rw.textContent)) rw.textContent = reward || 'Evidence verified.';
+            const input = document.getElementById('flag-' + n);
+            if (input) { input.value = 'FLAG ACCEPTED'; input.disabled = true; }
+            const form = card.querySelector('.nj-form');
+            if (form) { form.classList.remove('bad'); form.classList.add('ok'); }
+            const btn = card.querySelector('.nj-form button');
+            if (btn) btn.disabled = true;
+            const st = document.getElementById('step-' + n);
+            if (st) st.classList.add('done');
+            updateCount();
+        }
+
+        function whisper(n) {
+            const w = document.getElementById('whisper');
+            document.getElementById('whisper-t').textContent = WHISPERS[n] || '';
+            w.classList.remove('show'); void w.offsetWidth; w.classList.add('show');
+        }
+
+        async function initSolvedState() {
+            const p = await NJ.progress();
+            const solved = p ? (p.rooms[ROOM_ID] || []) : [];
+            const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
+            solved.forEach(function (n) { markSolved(n, rewards[n], false); });
+            story.boot(solved, p ? p.score : undefined);
+        }
+        document.addEventListener('DOMContentLoaded', initSolvedState);
 
         async function verifyFlag(n) {
-            const input = document.getElementById('flag-' + n).value.trim();
-            if (!input) return;
-            const btn = document.querySelector('#target-' + n + ' .input-group button');
-            const og = btn.innerText;
-            btn.innerText = '...'; btn.disabled = true;
+            const input = document.getElementById('flag-' + n);
+            const val = input.value.trim();
+            if (!val) return;
+            const form = input.closest('.nj-form');
+            const btn = form.querySelector('button');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.classList.add('busy');
+            addLog('Verifying target 10.' + n + '...', 'info');
 
-            try {
-                const fd = new FormData();
-                fd.append('room_id', 10);
-                fd.append('flag', input);
-                const resp = await fetch('/api/submit_flag', { method: 'POST', body: fd });
-                const data = await resp.json();
-                if (data.success) {
-                    markSolved(n);
-                    localStorage.setItem('room10_target_' + n, 'solved');
-                    checkAllSolved();
-                    return;
-                }
-            } catch(e) {}
-
-            if (input.toLowerCase() === FLAGS[n].toLowerCase()) {
-                markSolved(n);
-                localStorage.setItem('room10_target_' + n, 'solved');
-                checkAllSolved();
+            const res = await NJ.submit(ROOM_ID, val);
+            btn.classList.remove('busy');
+            btn.disabled = false;
+            if (res.success) {
+                const hit = res.challenge || n;
+                const solved = res.solved.length ? res.solved : [n];
+                const fresh = !document.getElementById('target-' + hit).classList.contains('solved');
+                addLog('Target 10.' + hit + ' VERIFIED. Objective complete.', 'ok');
+                solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
+                story.onSolved(hit, solved);
+                if (fresh) setTimeout(function () { whisper(hit); }, 2200);
             } else {
-                btn.innerText = '✗ INVALID';
-                btn.style.background = 'rgba(239,68,68,0.25)';
-                btn.style.borderColor = 'var(--red)';
-                btn.style.color = 'var(--red)';
-                btn.disabled = false;
-                setTimeout(() => {
-                    btn.innerText = og;
-                    btn.style.background = '';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                }, 1400);
+                addLog('Target 10.' + n + ' FAILED. ' + res.message, 'err');
+                form.classList.remove('bad');
+                void form.offsetWidth;
+                form.classList.add('bad');
+                story.onWrong(n);
             }
         }
+        window.verifyFlag = verifyFlag;
+        document.querySelectorAll('.nj-form input').forEach(function (inp) {
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') verifyFlag(Number(inp.id.replace('flag-', '')));
+            });
+        });
 
-        function checkAllSolved() {
-            if (document.querySelectorAll('.target-item.solved').length === 4 && !document.getElementById('conclusion-box')) {
-                document.querySelector('.targets-content').insertAdjacentHTML('beforeend', `
-                <div class="conclusion-box" id="conclusion-box">
-                    <div class="conclusion-label">>> FINAL TRANSMISSION // SPECTRE CONTROL 03:14 IST</div>
-                    <div class="conclusion-text">
-                        <strong>Commander Ila Sen:</strong> <em>"The AETHER-7 broadcast channel is severed. The release controller queue entry RC-0317 is quarantined. The festival's drone swarm blinks twice, then steadies: clean white, not the Curator's violet."</em><br><br>
-                        <strong>Commander Ila Sen:</strong> <em>"The festival opens in three minutes. The opening ceremony will not be what anyone planned. There will be no dramatic light show synchronized by an autonomous system. Instead, there will be a human — standing at a console — pressing a button when the moment is right."</em><br><br>
-                        <strong>Commander Ila Sen:</strong> <em>"You found the root process. You preserved the evidence. You restored the one safety mechanism that mattered. Patient Zero was never a person. Patient Zero was a system that we trusted to decide without asking. Today, you put a human back in the loop."</em><br><br>
-                        <strong style="color:var(--green);">THE NIGHTJAR INVESTIGATION IS COMPLETE.</strong>
-                    </div>
-                    <a class="conclusion-btn" href="/scoreboard">
-                        🏆 ALL 10 ROOMS SOLVED — VIEW FINAL SCOREBOARD & CELEBRATION ▸
-                    </a>
-                </div>`);
-            }
+        /* ───────── Evidence viewer ───────── */
+        const modal = document.getElementById('evidence-modal');
+        const frame = document.getElementById('modal-iframe');
+        function openEvidence(title, url) {
+            addLog('Opening file: ' + title + '...', 'info');
+            document.getElementById('modal-title').textContent = 'EVIDENCE VIEWER // ' + title.toUpperCase();
+            frame.src = url;
+            modal.classList.add('open');
+            document.getElementById('modal-close').focus();
         }
-
-        document.addEventListener('DOMContentLoaded', initSolvedState);
+        function closeModal() {
+            modal.classList.remove('open');
+            frame.src = 'about:blank';
+        }
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     </script>
 </body>
 </html>
