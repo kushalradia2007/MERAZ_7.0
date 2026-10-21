@@ -393,7 +393,7 @@ POINTS_PER_FLAG = 25
 CHALLENGE_FLAGS = {
     1: [
         ["NIGHTJAR{aether_07_nothing_stays_local}", "NIGHTJAR{aether_07}"],
-        ["NIGHTJAR{parallax_systems_aman_v}"],
+        ["NIGHTJAR{parallax_systems_aman}", "NIGHTJAR{parallax_systems_aman_v}"],
         ["NIGHTJAR{nexus-meraz.festival.in.net}"],
         ["NIGHTJAR{curator_404}"],
     ],

@@ -82,7 +82,7 @@ A public-facing digital noticeboard where every official-looking page has been r
 
 **Task:** Download and examine the festival schedule PDF (`meraz_schedule_2026.pdf`) and the banner image (`nexus_banner_final.png`). Extract the hidden author name, creator tool, or organization from their metadata fields.
 
-**Flag:** `NIGHTJAR{parallax_systems_aman_v}`
+**Flag:** `NIGHTJAR{parallax_systems_aman}` (also accepted: `NIGHTJAR{parallax_systems_aman_v}`). Format: `NIGHTJAR{PARALLAX_SYSTEMS_<author>}`
 
 **Narrative Reward:** The PDF's author field reads `Aman V. // Parallax Systems`. The banner image's EXIF data contains GPS coordinates pointing to a fictional research lab and a creator tool called `AetherForge v2.1`. **Parallax Systems** is a nonexistent research group — but the name will appear again in Room 8 when the malware sample is analysed.
 
