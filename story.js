@@ -772,3 +772,33 @@
         fallback: portrait
     };
 })();
+
+/* Evidence viewer: "open in new tab" button beside CLOSE on every room.
+ * Follows the iframe's current file via a MutationObserver, so each room's own
+ * openEvidence() keeps working untouched. */
+(function () {
+    function init() {
+        var modal = document.getElementById('evidence-modal');
+        var frame = document.getElementById('modal-iframe');
+        var close = document.getElementById('modal-close');
+        if (!modal || !frame || !close || document.getElementById('modal-newtab')) return;
+        var a = document.createElement('a');
+        a.id = 'modal-newtab';
+        a.className = 'x';
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'OPEN IN NEW TAB ↗';
+        a.title = 'Open this file in a separate browser tab';
+        a.hidden = true;
+        close.parentNode.insertBefore(a, close);
+        function sync() {
+            var src = frame.getAttribute('src') || '';
+            var ok = src && src !== 'about:blank';
+            a.hidden = !ok;
+            if (ok) a.href = src;
+        }
+        new MutationObserver(sync).observe(frame, { attributes: true, attributeFilter: ['src'] });
+        sync();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
