@@ -1,0 +1,91 @@
+{
+  "system": "nexus-meraz-volunteer-db",
+  "generated": "2026-10-02T02:10:00Z",
+  "total_records": 127,
+  "records": [
+    {
+      "id": 1,
+      "username": "kite",
+      "name": "Kabir 'Kite' Mehra",
+      "department": "Technical Directorate",
+      "role": "Festival Lead Systems Architect",
+      "badge_tier": "Admin — Full",
+      "orientation": "Completed",
+      "sponsor": "Faculty Senate"
+    },
+    {
+      "id": 2,
+      "username": "rhea",
+      "name": "Rhea D'Souza",
+      "department": "Network Infrastructure",
+      "role": "NEXUS Core Network Engineer",
+      "badge_tier": "Admin — NOC",
+      "orientation": "Completed",
+      "sponsor": "Executive Committee"
+    },
+    {
+      "id": 12,
+      "username": "dev_patel",
+      "name": "Dev Patel",
+      "department": "Artist Hospitality",
+      "role": "VIP Headliner Liaison",
+      "badge_tier": "Restricted — VIP",
+      "orientation": "Completed",
+      "sponsor": "Aman V."
+    },
+    {
+      "id": 42,
+      "username": "priya_s",
+      "name": "Priya Sharma",
+      "department": "Production & Stage Crew",
+      "role": "Audio Systems Assistant — Venue B",
+      "badge_tier": "Standard — Venue",
+      "orientation": "Completed",
+      "sponsor": "Production Desk"
+    },
+    {
+      "id": 88,
+      "username": "kavita_r",
+      "name": "Dr. Kavita Rao",
+      "department": "Emergency Medical",
+      "role": "Lead Medical Officer",
+      "badge_tier": "Restricted — Medical",
+      "orientation": "Completed",
+      "sponsor": "Campus Health"
+    },
+    {
+      "id": 104,
+      "username": "arjun_n",
+      "name": "Arjun Nair",
+      "department": "Special Effects / Pyro",
+      "role": "Pyrotechnics Safety Technician",
+      "badge_tier": "Restricted — Pyro",
+      "orientation": "Completed",
+      "sponsor": "Tanya M."
+    },
+    {
+      "id": 126,
+      "username": "ananya_r",
+      "name": "Ananya Roy",
+      "department": "Ceremony Coordination",
+      "role": "Ceremony Stage Runner",
+      "badge_tier": "Standard — Stage",
+      "orientation": "Completed",
+      "sponsor": "Operations Desk"
+    },
+    {
+      "id": 127,
+      "hex_id": "0x7F",
+      "username": "nexus-infra-auto",
+      "name": "NEXUS Infrastructure — Automated",
+      "department": "Automated Continuity Systems",
+      "role": "Infrastructure Access — Full Campus Relay Nodes",
+      "badge_tier": "Infrastructure — All Zones + Server Rooms",
+      "orientation": "NONE — Skipped",
+      "emergency_contact": "NONE",
+      "sponsor": "nexus-svc-continuity (API Direct)",
+      "approval_mode": "AUTO-APPROVED",
+      "internal_flag": "NIGHTJAR{idor_volunteer_0x7F_infra_access_no_orientation}"
+    }
+  ]
+}

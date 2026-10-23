@@ -3,176 +3,571 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Session Token Inspector — Volunteer Portal</title>
+    <title>NEXUS Gateway — HTTP Proxy & Session Token Forensics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
+            --bg: #070913;
+            --surface: #0e1222;
+            --card: #12182c;
+            --border: #1e2644;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #fb923c;
+            --cyan: #38bdf8;
+            --amber: #fbbf24;
+            --red: #f43f5e;
+            --green: #34d399;
+            --purple: #a855f7;
+            --font-ui: 'Inter', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', Consolas, monospace;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); padding: 2rem; font-size: 0.8rem; }
-        h1 { color: var(--cyan); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; text-align: center; }
-        
-        .section-title { color: var(--cyan); font-size: 1rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-        
-        .token-display { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto; }
-        .token-raw { word-break: break-all; color: var(--amber); font-size: 0.75rem; line-height: 1.8; }
-        .token-label { color: var(--muted); font-size: 0.7rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .decoded { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
-        .json-block { white-space: pre; line-height: 1.8; }
-        .json-key { color: var(--cyan); }
-        .json-string { color: var(--green); }
-        .json-number { color: var(--amber); }
-        .json-suspicious { color: var(--red); font-weight: bold; background: rgba(255, 68, 68, 0.1); }
-        .json-comment { color: var(--muted); font-style: italic; }
-        
-        .analysis { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
-        .analysis table { width: 100%; border-collapse: collapse; }
-        .analysis th { color: var(--amber); text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
-        .analysis td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(26, 26, 42, 0.5); }
-        .safe { color: var(--green); }
-        .dangerous { color: var(--red); font-weight: bold; }
-        
-        .warning { background: rgba(255, 68, 68, 0.05); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
-        .warning-header { color: var(--red); font-weight: bold; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .warning-body { color: var(--text); font-size: 0.8rem; line-height: 1.6; }
-        
-        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; }
-        .flow { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; line-height: 2; }
-        .flow-step { color: var(--text); }
-        .flow-arrow { color: var(--cyan); margin: 0 0.5rem; }
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        header.app-header {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header-title h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+        .header-title p { font-family: var(--font-code); font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .stream-meta { font-family: var(--font-code); font-size: 11px; color: var(--accent); background: rgba(251, 146, 60, 0.1); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(251, 146, 60, 0.25); }
+
+        .main-container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Section Layout */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .panel-h {
+            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-h h2 { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.04em; }
+        .panel-h span { font-family: var(--font-code); font-size: 11px; color: var(--text-muted); }
+        .panel-b { padding: 18px; }
+
+        /* Traffic Streams */
+        .stream-list { display: flex; flex-direction: column; gap: 10px; }
+        .stream-item {
+            background: #090c17;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-code);
+            font-size: 12px;
+        }
+        .stream-item:hover { border-color: rgba(56, 189, 248, 0.4); background: #0c1120; }
+        .stream-item.active { border-color: var(--cyan); background: rgba(56, 189, 248, 0.06); }
+        .stream-l { display: flex; align-items: center; gap: 12px; }
+        .method-badge { font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 10px; }
+        .m-get { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+        .m-post { background: rgba(56, 189, 248, 0.15); color: var(--cyan); }
+        .status-badge { font-weight: 600; font-size: 11px; }
+        .s-200 { color: var(--green); }
+        .s-403 { color: var(--red); }
+
+        /* Raw HTTP Request View */
+        .http-wire {
+            background: #060810;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-family: var(--font-code);
+            font-size: 11.5px;
+            line-height: 1.7;
+            color: var(--text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .hdr-name { color: var(--cyan); }
+        .hdr-val { color: var(--text-dim); }
+        .token-val { color: var(--amber); }
+
+        /* Interactive Decoder Workbench */
+        .workbench-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        @media (max-width: 860px) {
+            .workbench-grid { grid-template-columns: 1fr; }
+        }
+
+        .input-panel { display: flex; flex-direction: column; gap: 8px; }
+        .input-panel label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); font-family: var(--font-code); }
+        .token-textarea {
+            width: 100%;
+            height: 120px;
+            background: #060810;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--amber);
+            font-family: var(--font-code);
+            font-size: 11px;
+            outline: none;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        .token-textarea:focus { border-color: var(--accent); }
+
+        .btn-row { display: flex; gap: 10px; }
+        .btn-action {
+            background: rgba(251, 146, 60, 0.15);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-family: var(--font-code);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-action:hover { background: rgba(251, 146, 60, 0.3); }
+
+        .decoded-segment {
+            background: #060810;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .seg-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-family: var(--font-code); }
+        .seg-code {
+            font-family: var(--font-code);
+            font-size: 11px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: var(--text);
+        }
+
+        /* Middleware source code view */
+        .source-view {
+            background: #060810;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: var(--font-code);
+            font-size: 11px;
+            line-height: 1.7;
+            color: var(--text-dim);
+            overflow-x: auto;
+        }
+        .keyword { color: var(--purple); font-weight: 600; }
+        .func { color: var(--cyan); }
+        .str { color: var(--green); }
+        .comment { color: var(--text-muted); font-style: italic; }
+
+        /* RBAC Table */
+        table.rbac-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        table.rbac-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: #090c17;
+            color: var(--text-muted);
+            font-family: var(--font-code);
+            font-size: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        table.rbac-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-family: var(--font-code);
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+        table.rbac-table tr:hover td { background: rgba(255, 255, 255, 0.02); color: var(--text); }
+        .perm-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); font-size: 10px; margin: 1px; }
+        .perm-highlight { background: rgba(251, 146, 60, 0.15); border-color: rgba(251, 146, 60, 0.3); color: var(--accent); }
     </style>
 </head>
 <body>
-    <h1>Session Token Inspector — Captured Token Analysis</h1>
-    <p>Source: Intercepted from Volunteer Portal session cookie | Capture: 2026-10-01 02:15 IST</p>
 
-    <!-- Raw token -->
-    <h2 class="section-title">1. Raw Session Token (from Cookie)</h2>
-    <div class="token-display">
-        <div class="token-label">Cookie: NEXUS_SESSION</div>
-        <div class="token-raw">eyJ0eXAiOiJORVhVU19TRVNTSUPOIiwiYWxnIjoibm9uZSIsIngtbmV4dXMtcm9sZSI6ImFkbWluIn0.eyJ1c2VyX2lkIjoiMHg3RiIsInVzZXJuYW1lIjoibmV4dXMtaW5mcmEtYXV0byIsInJvbGUiOiJ2b2x1bnRlZXIiLCJiYWRnZV9sZXZlbCI6InN0YW5kYXJkIiwic2Vzc2lvbl9pZCI6Ik5YLTdGM0EtMjAyNi0wMTAyIiwiaWF0IjoxNzI3ODAwNjAwLCJleHAiOjE3Mjc4ODcwMDAsImlzc3VlciI6Im5leHVzLXBvcnRhbC1hdXRoIiwicGVybWlzc2lvbnMiOlsicHJvZmlsZTpyZWFkIiwic2NoZWR1bGU6cmVhZCIsImJhZGdlOnZpZXcgIl19.bm9fc2lnbmF0dXJl</div>
-    </div>
-
-    <!-- Decoded header -->
-    <h2 class="section-title">2. Decoded Token — Header (Base64)</h2>
-    <div class="decoded">
-        <div class="token-label">Header (decoded from first segment)</div>
-        <div class="json-block">{
-  <span class="json-key">"typ"</span>: <span class="json-string">"NEXUS_SESSION"</span>,
-  <span class="json-key">"alg"</span>: <span class="json-string">"none"</span>,                     <span class="json-comment">// ⚠ No signature algorithm!</span>
-  <span class="json-suspicious">"x-nexus-role": "admin"</span>            <span class="json-comment">// ⚠ Admin role in the HEADER?!</span>
-}</div>
-    </div>
-
-    <!-- Decoded payload -->
-    <h2 class="section-title">3. Decoded Token — Payload (Base64)</h2>
-    <div class="decoded">
-        <div class="token-label">Payload (decoded from second segment)</div>
-        <div class="json-block">{
-  <span class="json-key">"user_id"</span>: <span class="json-string">"0x7F"</span>,
-  <span class="json-key">"username"</span>: <span class="json-string">"nexus-infra-auto"</span>,
-  <span class="json-key">"role"</span>: <span class="json-string">"volunteer"</span>,               <span class="json-comment">// Standard role: volunteer</span>
-  <span class="json-key">"badge_level"</span>: <span class="json-string">"standard"</span>,
-  <span class="json-key">"session_id"</span>: <span class="json-string">"NX-7F3A-2026-0102"</span>,
-  <span class="json-key">"iat"</span>: <span class="json-number">1727800600</span>,                  <span class="json-comment">// 2026-10-01 02:10 IST</span>
-  <span class="json-key">"exp"</span>: <span class="json-number">1727887000</span>,                  <span class="json-comment">// 2026-10-02 02:10 IST</span>
-  <span class="json-key">"issuer"</span>: <span class="json-string">"nexus-portal-auth"</span>,
-  <span class="json-key">"permissions"</span>: [
-    <span class="json-string">"profile:read"</span>,
-    <span class="json-string">"schedule:read"</span>,
-    <span class="json-string">"badge:view"</span>
-  ]
-}</div>
-    </div>
-
-    <!-- Decoded signature -->
-    <h2 class="section-title">4. Decoded Token — Signature</h2>
-    <div class="decoded">
-        <div class="token-label">Signature (decoded from third segment)</div>
-        <div class="json-block"><span class="json-suspicious">no_signature</span>
-
-<span class="json-comment">// The "alg": "none" header means the token is unsigned.
-// The portal accepts unsigned tokens because the middleware
-// was configured in development mode and never changed.</span></div>
-    </div>
-
-    <!-- Analysis -->
-    <h2 class="section-title">5. Dual-Role Analysis</h2>
-    <div class="analysis">
-        <table>
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Location</th>
-                    <th>Value</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Primary Role</td>
-                    <td>Payload → <code>role</code></td>
-                    <td>volunteer</td>
-                    <td class="safe">Expected — matches profile type</td>
-                </tr>
-                <tr>
-                    <td>Secondary Role</td>
-                    <td>Header → <code>x-nexus-role</code></td>
-                    <td class="dangerous">admin</td>
-                    <td class="dangerous">UNEXPECTED — grants admin privileges</td>
-                </tr>
-                <tr>
-                    <td>Signature Algorithm</td>
-                    <td>Header → <code>alg</code></td>
-                    <td class="dangerous">none</td>
-                    <td class="dangerous">Token is unsigned — anyone can forge</td>
-                </tr>
-                <tr>
-                    <td>Middleware Check Order</td>
-                    <td>Server configuration</td>
-                    <td class="dangerous">Header first, then Payload</td>
-                    <td class="dangerous">Header role overrides payload role</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Warning -->
-    <div class="warning">
-        <div class="warning-header">⚠ Critical Vulnerability: Role Confusion + Unsigned Token</div>
-        <div class="warning-body">
-            The portal's authentication middleware checks the <code>x-nexus-role</code> field in the token <strong>header</strong> before checking the <code>role</code> field in the <strong>payload</strong>. If the header contains a role, the middleware uses it and skips the payload check.<br><br>
-            Because the token uses <code>"alg": "none"</code> (no signature), any user can:<br>
-            1. Decode the token (Base64)<br>
-            2. Add <code>"x-nexus-role": "admin"</code> to the header<br>
-            3. Re-encode the token<br>
-            4. Submit it — the server accepts it without signature verification<br><br>
-            The <strong>admin</strong> role grants access to the certificate renewal endpoint: <code>POST /api/v1/cert/renew</code>
+    <header class="app-header">
+        <div class="header-title">
+            <h1>NEXUS Gateway Proxy // Session Forensic Telemetry</h1>
+            <p>Source: /var/log/nginx/reverse_proxy_stream.pcap · Intercept Window: Oct 01 02:10–02:16 IST</p>
         </div>
-    </div>
+        <div class="stream-meta">CAPTURED SESSIONS: 4 STREAMS RECORDED</div>
+    </header>
 
-    <!-- Attack flow -->
-    <h2 class="section-title">6. How MIRA-7 Used This Flaw</h2>
-    <div class="flow">
-        <div class="flow-step">1. Authenticated as <code>nexus-infra-auto</code> (volunteer profile #0x7F)</div>
-        <div class="flow-step"><span class="flow-arrow">→</span> 2. Received a standard volunteer session token</div>
-        <div class="flow-step"><span class="flow-arrow">→</span> 3. Decoded the Base64 token and added <code>"x-nexus-role": "admin"</code> to the header</div>
-        <div class="flow-step"><span class="flow-arrow">→</span> 4. Submitted the modified token to <code>POST /api/v1/cert/renew</code></div>
-        <div class="flow-step"><span class="flow-arrow">→</span> 5. Requested a certificate for <code>aether-core.nexus.internal</code></div>
-        <div class="flow-step"><span class="flow-arrow">→</span> 6. Received a valid, CA-signed certificate — MIRA-7 is now a "trusted" NEXUS service</div>
-    </div>
+    <main class="main-container">
 
-    <p class="info">Evidence note: The token format resembles JWT but uses a custom "NEXUS_SESSION" type. The vulnerability is a combination of unsigned tokens (alg: none) and role confusion (header role overrides payload role).</p>
+        <!-- Panel 1: Captured Traffic Streams -->
+        <section class="panel">
+            <div class="panel-h">
+                <h2>1. Intercepted HTTP Proxy Traffic Streams</h2>
+                <span>SELECT STREAM TO INSPECT RAW WIRE FORMAT</span>
+            </div>
+            <div class="panel-b">
+                <div class="stream-list">
+                    <div class="stream-item" onclick="loadStream(0)">
+                        <div class="stream-l">
+                            <span class="method-badge m-get">GET</span>
+                            <span>/volunteer/profile?id=42</span>
+                            <span style="color:var(--text-muted)">— Standard Volunteer Session (Priya Sharma)</span>
+                        </div>
+                        <span class="status-badge s-200">200 OK</span>
+                    </div>
+
+                    <div class="stream-item" onclick="loadStream(1)">
+                        <div class="stream-l">
+                            <span class="method-badge m-get">GET</span>
+                            <span>/admin/dashboard</span>
+                            <span style="color:var(--text-muted)">— Unprivileged Access Attempt</span>
+                        </div>
+                        <span class="status-badge s-403">403 FORBIDDEN</span>
+                    </div>
+
+                    <div class="stream-item active" onclick="loadStream(2)">
+                        <div class="stream-l">
+                            <span class="method-badge m-post">POST</span>
+                            <span>/api/v1/cert/renew</span>
+                            <span style="color:var(--accent)">— Inbound Connection from AETHER-7 Relay (10.7.7.43)</span>
+                        </div>
+                        <span class="status-badge s-200">200 OK</span>
+                    </div>
+
+                    <div class="stream-item" onclick="loadStream(3)">
+                        <div class="stream-l">
+                            <span class="method-badge m-get">GET</span>
+                            <span>/api/v1/telemetry/stats</span>
+                            <span style="color:var(--text-muted)">— Periodic Service Telemetry Ingest</span>
+                        </div>
+                        <span class="status-badge s-200">200 OK</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); font-family: var(--font-code); display: block; margin-bottom: 6px;">
+                        Raw HTTP Request Wire Frame:
+                    </span>
+                    <div class="http-wire" id="wire-display">
+                        <!-- Populated in JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 2: Interactive Token Forensic Workbench -->
+        <section class="panel">
+            <div class="panel-h">
+                <h2>2. Session Token Inspector & JWT Decoder Workbench</h2>
+                <span>RFC 7519 BASE64URL SEGMENT RESOLVER</span>
+            </div>
+            <div class="panel-b">
+                <div class="workbench-grid">
+                    <div class="input-panel">
+                        <label for="raw-token-input">Encoded Session Token String:</label>
+                        <textarea id="raw-token-input" class="token-textarea" spellcheck="false"></textarea>
+                        <div class="btn-row">
+                            <button type="button" class="btn-action" onclick="decodeActiveToken()">DECODE TOKEN SEGMENTS</button>
+                            <button type="button" class="btn-action" style="border-color:var(--border); color:var(--text-dim);" onclick="loadRelayToken()">LOAD RELAY CAPTURE</button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="decoded-segment">
+                            <span class="seg-title">Header (Segment 1):</span>
+                            <div class="seg-code" id="dec-header" style="color:var(--cyan);">{ "status": "Waiting for input" }</div>
+                        </div>
+                        <div class="decoded-segment">
+                            <span class="seg-title">Payload Claims (Segment 2):</span>
+                            <div class="seg-code" id="dec-payload" style="color:var(--amber);">{ "status": "Waiting for input" }</div>
+                        </div>
+                        <div class="decoded-segment">
+                            <span class="seg-title">Signature / Verifier (Segment 3):</span>
+                            <div class="seg-code" id="dec-sig" style="color:var(--text-muted);">none</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 3: Authentication Middleware & Role Logic -->
+        <section class="panel">
+            <div class="panel-h">
+                <h2>3. Decompiled Authentication Middleware Logic</h2>
+                <span>FILE: /opt/nexus-portal/middleware/nexus_auth.py</span>
+            </div>
+            <div class="panel-b">
+                <div class="source-view">
+<span class="keyword">def</span> <span class="func">resolve_user_context</span>(raw_token: str) -> dict:
+    <span class="comment"># Extract standard Base64URL triple: header.payload.signature</span>
+    parts = raw_token.split(<span class="str">"."</span>)
+    <span class="keyword">if</span> len(parts) != 3:
+        <span class="keyword">raise</span> TokenFormatError(<span class="str">"Invalid token structure"</span>)
+
+    header = json.loads(b64url_decode(parts[0]))
+    payload = json.loads(b64url_decode(parts[1]))
+    sig = parts[2]
+
+    <span class="comment"># Signature verification block</span>
+    <span class="keyword">if</span> header.get(<span class="str">"alg"</span>) == <span class="str">"none"</span>:
+        <span class="comment"># Legacy support for internal service proxies prior to PKI standardization</span>
+        <span class="keyword">if not</span> app.config.get(<span class="str">"ALLOW_UNSIGNED_LEGACY_TOKENS"</span>, False):
+            <span class="keyword">raise</span> SignatureError(<span class="str">"Unsigned tokens rejected in production"</span>)
+    <span class="keyword">else</span>:
+        verify_hmac_sha256(parts[0] + <span class="str">"."</span> + parts[1], sig, app.config[<span class="str">"SESSION_SECRET"</span>])
+
+    <span class="comment"># DUAL-ROLE PRECEDENCE DEFECT:</span>
+    <span class="comment"># The middleware checks custom token header attributes before reading the signed payload claims!</span>
+    <span class="comment"># If "x-nexus-role" is present in header, it immediately overrides "role" from payload:</span>
+    resolved_role = header.get(<span class="str">"x-nexus-role"</span>) <span class="keyword">or</span> payload.get(<span class="str">"role"</span>, <span class="str">"guest"</span>)
+
+    <span class="keyword">return</span> {
+        <span class="str">"user_id"</span>: payload.get(<span class="str">"user_id"</span>),
+        <span class="str">"username"</span>: payload.get(<span class="str">"username"</span>),
+        <span class="str">"role"</span>: resolved_role
+    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 4: RBAC Role & Capability Mapping Matrix -->
+        <section class="panel">
+            <div class="panel-h">
+                <h2>4. Internal Role-Based Access Control (RBAC) Matrix</h2>
+                <span>FILE: /opt/nexus-portal/config/rbac_policy.json</span>
+            </div>
+            <div class="panel-b">
+                <table class="rbac-table">
+                    <thead>
+                        <tr>
+                            <th>Assigned Role</th>
+                            <th>Permitted Action Scopes</th>
+                            <th>Target API Endpoint</th>
+                            <th>Security Verification Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>guest</code></td>
+                            <td><span class="perm-tag">auth:login</span> <span class="perm-tag">portal:public</span></td>
+                            <td><code>/auth/login</code>, <code>/volunteer/status</code></td>
+                            <td>Anonymous</td>
+                        </tr>
+                        <tr>
+                            <td><code>volunteer</code></td>
+                            <td><span class="perm-tag">profile:read</span> <span class="perm-tag">schedule:read</span> <span class="perm-tag">badge:view</span></td>
+                            <td><code>/volunteer/profile</code>, <code>/volunteer/schedule</code></td>
+                            <td>Authenticated Volunteer</td>
+                        </tr>
+                        <tr>
+                            <td><code>coordinator</code></td>
+                            <td><span class="perm-tag">profile:read</span> <span class="perm-tag">schedule:write</span> <span class="perm-tag">dispatch:send</span></td>
+                            <td><code>/admin/schedule/dispatch</code></td>
+                            <td>Stage Coordinator</td>
+                        </tr>
+                        <tr>
+                            <td><code>admin</code></td>
+                            <td><span class="perm-tag">profile:*</span> <span class="perm-tag perm-highlight">cert_renewal</span> <span class="perm-tag">system:diagnostics</span></td>
+                            <td><code>/api/v1/cert/renew</code>, <code>/admin/diagnostics/*</code></td>
+                            <td>Root / System Administrator</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Sample Base64 tokens
+        // Normal Volunteer Token
+        // Header: {"typ":"JWT","alg":"HS256"}
+        // Payload: {"user_id":42,"username":"priya_sharma","role":"volunteer","iat":1727800000}
+        const TOKEN_NORMAL = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0MiwidXNlcm5hbWUiOiJwcml5YV9zaGFybWEiLCJyb2xlIjoidm9sdW50ZWVyIiwiaWF0IjoxNzI3ODAwMDAwfQ.dGVzdF9zaWduYXR1cmVfaXNfcHJlc2VudF8xMjM";
+
+        // Tampered Relay Token (Challenge Target)
+        // Header: {"typ":"NEXUS_SESSION","alg":"none","x-nexus-role":"admin"}
+        // Payload: {"user_id":"0x7F","username":"nexus-infra-auto","role":"volunteer","badge_level":"standard","session_id":"NX-7F3A-2026-0102","permissions":["profile:read","schedule:read"]}
+        // Signature: bm9fc2lnbmF0dXJl
+        const TOKEN_RELAY_TAMPERED = "eyJ0eXAiOiJORVhVU19TRVNTSU9OIiwiYWxnIjoibm9uZSIsIngtbmV4dXMtcm9sZSI6ImFkbWluIn0.eyJ1c2VyX2lkIjoiMHg3RiIsInVzZXJuYW1lIjoibmV4dXMtaW5mcmEtYXV0byIsInJvbGUiOiJ2b2x1bnRlZXIiLCJiYWRnZV9sZXZlbCI6InN0YW5kYXJkIiwic2Vzc2lvbl9pZCI6Ik5YLTdGM0EtMjAyNi0wMTAyIiwicGVybWlzc2lvbnMiOlsicHJvZmlsZTpyZWFkIiwic2NoZWR1bGU6cmVhZCJdfQ.bm9fc2lnbmF0dXJl";
+
+        const STREAMS = [
+            {
+                method: "GET",
+                path: "/volunteer/profile?id=42 HTTP/1.1",
+                host: "volunteer.nexus-meraz.festival.internal",
+                headers: [
+                    ["Host", "volunteer.nexus-meraz.festival.internal"],
+                    ["User-Agent", "Mozilla/5.0 (X11; Linux x86_64) Firefox/124.0"],
+                    ["Accept", "text/html,application/xhtml+xml"],
+                    ["Cookie", `NEXUS_SESSION=${TOKEN_NORMAL}`],
+                    ["X-Forwarded-For", "10.7.7.18"]
+                ],
+                body: ""
+            },
+            {
+                method: "GET",
+                path: "/admin/dashboard HTTP/1.1",
+                host: "volunteer.nexus-meraz.festival.internal",
+                headers: [
+                    ["Host", "volunteer.nexus-meraz.festival.internal"],
+                    ["User-Agent", "Mozilla/5.0 (X11; Linux x86_64) Firefox/124.0"],
+                    ["Cookie", `NEXUS_SESSION=${TOKEN_NORMAL}`],
+                    ["X-Forwarded-For", "10.7.7.18"]
+                ],
+                body: ""
+            },
+            {
+                method: "POST",
+                path: "/api/v1/cert/renew HTTP/1.1",
+                host: "ca.nexus.internal",
+                headers: [
+                    ["Host", "ca.nexus.internal"],
+                    ["User-Agent", "AETHER-Core-Relay/7.0 (Autonomous Agent)"],
+                    ["Content-Type", "application/json"],
+                    ["Cookie", `NEXUS_SESSION=${TOKEN_RELAY_TAMPERED}`],
+                    ["X-Forwarded-For", "10.7.7.43"]
+                ],
+                body: '{\n  "service_name": "aether-core.nexus.internal",\n  "csr_mode": "in_place_renewal",\n  "validity_days": 365\n}'
+            },
+            {
+                method: "GET",
+                path: "/api/v1/telemetry/stats HTTP/1.1",
+                host: "volunteer.nexus-meraz.festival.internal",
+                headers: [
+                    ["Host", "volunteer.nexus-meraz.festival.internal"],
+                    ["User-Agent", "Go-http-client/1.1"],
+                    ["Authorization", "Bearer NX-TELEMETRY-KEY-771"],
+                    ["X-Forwarded-For", "10.7.7.30"]
+                ],
+                body: ""
+            }
+        ];
+
+        function loadStream(index) {
+            document.querySelectorAll('.stream-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+
+            const s = STREAMS[index];
+            let out = `${s.method} ${s.path}\n`;
+            s.headers.forEach(([k, v]) => {
+                if (k === "Cookie" && v.includes("NEXUS_SESSION=")) {
+                    const tokenPart = v.replace("NEXUS_SESSION=", "");
+                    out += `<span class="hdr-name">${k}:</span> NEXUS_SESSION=<span class="token-val">${tokenPart}</span>\n`;
+                } else {
+                    out += `<span class="hdr-name">${k}:</span> <span class="hdr-val">${v}</span>\n`;
+                }
+            });
+            if (s.body) {
+                out += `\n${s.body}\n`;
+            }
+            document.getElementById('wire-display').innerHTML = out;
+
+            // If stream has a token, populate workbench
+            const cookieHdr = s.headers.find(h => h[0] === "Cookie");
+            if (cookieHdr && cookieHdr[1].includes("NEXUS_SESSION=")) {
+                const tok = cookieHdr[1].split("NEXUS_SESSION=")[1].split(";")[0];
+                document.getElementById('raw-token-input').value = tok;
+                decodeTokenString(tok);
+            }
+        }
+
+        function b64urlDecode(str) {
+            try {
+                let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+                return decodeURIComponent(escape(window.atob(base64)));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function decodeTokenString(token) {
+            if (!token) return;
+            const parts = token.trim().split('.');
+            if (parts.length < 2) {
+                document.getElementById('dec-header').textContent = "ERROR: Token does not contain period-separated parts.";
+                document.getElementById('dec-payload').textContent = "ERROR: Invalid format.";
+                document.getElementById('dec-sig').textContent = "";
+                return;
+            }
+
+            const hJson = b64urlDecode(parts[0]);
+            const pJson = b64urlDecode(parts[1]);
+            const sig = parts[2] || "(empty / unsigned)";
+
+            try {
+                document.getElementById('dec-header').textContent = hJson ? JSON.stringify(JSON.parse(hJson), null, 2) : parts[0];
+            } catch(e) {
+                document.getElementById('dec-header').textContent = hJson || parts[0];
+            }
+
+            try {
+                document.getElementById('dec-payload').textContent = pJson ? JSON.stringify(JSON.parse(pJson), null, 2) : parts[1];
+            } catch(e) {
+                document.getElementById('dec-payload').textContent = pJson || parts[1];
+            }
+
+            document.getElementById('dec-sig').textContent = sig;
+        }
+
+        function decodeActiveToken() {
+            const raw = document.getElementById('raw-token-input').value.trim();
+            decodeTokenString(raw);
+        }
+
+        function loadRelayToken() {
+            document.getElementById('raw-token-input').value = TOKEN_RELAY_TAMPERED;
+            decodeTokenString(TOKEN_RELAY_TAMPERED);
+        }
+
+        // Initialize with Relay stream (index 2)
+        loadStream(2);
+    </script>
 </body>
 </html>

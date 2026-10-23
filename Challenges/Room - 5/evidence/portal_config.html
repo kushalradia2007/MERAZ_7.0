@@ -3,258 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Configuration — Exposed File</title>
+    <title>Exposed Configuration Repository — Volunteer Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
+            --bg: #070913;
+            --surface: #0e1222;
+            --card: #12182c;
+            --border: #1e2644;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #fb923c;
+            --cyan: #38bdf8;
+            --amber: #fbbf24;
+            --red: #f43f5e;
+            --green: #34d399;
+            --purple: #a855f7;
+            --font-ui: 'Inter', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', Consolas, monospace;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); padding: 2rem; font-size: 0.8rem; }
-        h1 { color: var(--cyan); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; text-align: center; }
-        
-        .section-title { color: var(--cyan); font-size: 1rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-        
-        .url-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
-        .url-bar .lock { color: var(--red); font-size: 0.8rem; }
-        .url-bar .url { color: var(--muted); font-size: 0.8rem; }
-        .url-bar .sensitive { color: var(--red); font-weight: bold; }
-        
-        .config-file { background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto; }
-        .config { white-space: pre; line-height: 1.8; }
-        .comment { color: #555; }
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        header.app-header {
+            max-width: 1050px;
+            width: 100%;
+            margin: 0 auto 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header-title h1 { font-size: 18px; font-weight: 700; color: #fff; }
+        .header-title p { font-family: var(--font-code); font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .path-badge { font-family: var(--font-code); font-size: 11px; color: var(--amber); background: rgba(251, 191, 36, 0.1); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(251, 191, 36, 0.3); }
+
+        .main-container {
+            max-width: 1050px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .panel-h {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-tabs { display: flex; gap: 6px; }
+        .file-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: var(--font-code);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .file-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+        .file-tab.active {
+            color: var(--cyan);
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.3);
+            font-weight: 600;
+        }
+
+        .file-content-area {
+            background: #05070e;
+            padding: 20px;
+            font-family: var(--font-code);
+            font-size: 11.5px;
+            line-height: 1.7;
+            overflow-x: auto;
+            min-height: 480px;
+            max-height: 640px;
+            overflow-y: auto;
+            color: var(--text-dim);
+        }
+        .file-view { display: none; }
+        .file-view.active { display: block; }
+
+        .line { display: flex; gap: 16px; }
+        .ln {
+            color: var(--text-muted);
+            user-select: none;
+            width: 30px;
+            text-align: right;
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+        .code-txt { flex: 1; white-space: pre-wrap; word-break: break-all; }
+
         .key { color: var(--cyan); }
-        .value { color: var(--green); }
-        .sensitive-value { color: var(--red); background: rgba(255, 68, 68, 0.15); padding: 1px 4px; font-weight: bold; }
-        .section-header { color: var(--amber); font-weight: bold; }
-        
-        .analysis { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
-        .analysis table { width: 100%; border-collapse: collapse; }
-        .analysis th { color: var(--amber); text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
-        .analysis td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(26, 26, 42, 0.5); }
-        .safe { color: var(--green); }
-        .dangerous { color: var(--red); font-weight: bold; }
-        
-        .api-doc { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
-        .endpoint { color: var(--amber); font-weight: bold; margin-bottom: 0.5rem; }
-        .method { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.7rem; font-weight: bold; margin-right: 0.5rem; }
-        .method-post { background: rgba(0, 229, 255, 0.15); color: var(--cyan); }
-        .param { color: var(--text); margin: 0.3rem 0 0.3rem 1rem; }
-        .param-name { color: var(--cyan); }
-        .param-type { color: var(--muted); }
-        
-        .warning { background: rgba(255, 68, 68, 0.05); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
-        .warning-header { color: var(--red); font-weight: bold; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .warning-body { color: var(--text); font-size: 0.8rem; line-height: 1.6; }
-        
-        .attack-chain { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
-        .chain-step { padding: 0.5rem 0; border-bottom: 1px solid rgba(26, 26, 42, 0.5); display: flex; gap: 1rem; align-items: flex-start; }
-        .chain-step:last-child { border-bottom: none; }
-        .chain-num { color: var(--cyan); font-weight: bold; min-width: 25px; }
-        .chain-desc { color: var(--text); line-height: 1.5; }
-        .chain-room { color: var(--muted); font-size: 0.7rem; }
-        
-        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; }
+        .val { color: var(--text); }
+        .comment { color: var(--text-muted); font-style: italic; }
+        .keyword { color: var(--purple); }
+        .str { color: var(--green); }
+        .func { color: var(--cyan); }
+
+        .footer-note {
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--border);
+            font-family: var(--font-code);
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body>
-    <h1>Exposed Configuration — Volunteer Portal</h1>
-    <p>Discovered via: command injection (Challenge 5.3) and predictable configuration path</p>
 
-    <!-- URL showing how it was found -->
-    <h2 class="section-title">1. Configuration File Location</h2>
-    <div class="url-bar">
-        <span class="lock">⚠</span>
-        <span class="url">https://volunteer.nexus-meraz.festival.internal/<span class="sensitive">api/config/portal.env</span></span>
-    </div>
-    <p style="color: var(--muted); font-size: 0.75rem; margin-bottom: 1rem;">This file should be restricted to localhost. It is accessible from any authenticated session because the web server's access rules use an allowlist that includes the portal's own IP — and the diagnostic tool runs on the same host.</p>
-
-    <!-- The config file -->
-    <h2 class="section-title">2. Exposed Configuration File</h2>
-    <div class="config-file">
-        <div class="config">
-<span class="comment"># ============================================</span>
-<span class="comment"># MERAZ VOLUNTEER PORTAL — Environment Config</span>
-<span class="comment"># Version: 2.1.0-beta</span>
-<span class="comment"># Generated: 2026-09-25</span>
-<span class="comment"># WARNING: This file contains sensitive values</span>
-<span class="comment"># ============================================</span>
-
-<span class="section-header"># --- Application Settings ---</span>
-<span class="key">APP_NAME</span>=<span class="value">Meraz Volunteer Portal</span>
-<span class="key">APP_VERSION</span>=<span class="value">2.1.0-beta</span>
-<span class="key">APP_ENV</span>=<span class="sensitive-value">development</span>
-<span class="key">APP_DEBUG</span>=<span class="sensitive-value">true</span>
-<span class="key">APP_PORT</span>=<span class="value">8080</span>
-
-<span class="section-header"># --- Database ---</span>
-<span class="key">DB_HOST</span>=<span class="value">10.7.7.30</span>
-<span class="key">DB_PORT</span>=<span class="value">5432</span>
-<span class="key">DB_NAME</span>=<span class="value">nexus_volunteer</span>
-<span class="key">DB_USER</span>=<span class="value">portal_app</span>
-<span class="key">DB_PASS</span>=<span class="sensitive-value">V0lunt33r_DB_2026!</span>
-
-<span class="section-header"># --- Session Configuration ---</span>
-<span class="key">SESSION_SECRET</span>=<span class="sensitive-value">nexus-session-dev-key-do-not-use-in-prod</span>
-<span class="key">SESSION_ALGORITHM</span>=<span class="sensitive-value">none</span>
-<span class="key">SESSION_VERIFY_SIGNATURE</span>=<span class="sensitive-value">false</span>
-<span class="comment"># TODO: Enable signature verification before deployment</span>
-<span class="comment"># SESSION_ALGORITHM=HS256</span>
-<span class="comment"># SESSION_VERIFY_SIGNATURE=true</span>
-
-<span class="section-header"># --- Authentication ---</span>
-<span class="key">AUTH_PROVIDER</span>=<span class="value">nexus-sso</span>
-<span class="key">AUTH_CALLBACK</span>=<span class="value">/auth/callback</span>
-
-<span class="section-header"># --- Maintenance Account ---</span>
-<span class="comment"># Hardcoded maintenance credentials for emergency access</span>
-<span class="comment"># This account has limited permissions — cert renewal only</span>
-<span class="key">MAINT_USER</span>=<span class="sensitive-value">maint_nexus_portal</span>
-<span class="key">MAINT_PASS</span>=<span class="sensitive-value">N3xus_M@int_2026!</span>
-<span class="key">MAINT_PERMISSIONS</span>=<span class="sensitive-value">cert:renew</span>
-<span class="comment"># The maintenance account can ONLY call the cert renewal API</span>
-<span class="comment"># It cannot read volunteer data, modify schedules, or access profiles</span>
-
-<span class="section-header"># --- Certificate Authority ---</span>
-<span class="key">CERT_API_ENDPOINT</span>=<span class="sensitive-value">https://ca.nexus.internal/api/v1/cert/renew</span>
-<span class="key">CERT_API_KEY</span>=<span class="sensitive-value">NX-CA-7F3A-2026-PORTAL</span>
-<span class="key">CERT_AUTO_APPROVE</span>=<span class="sensitive-value">true</span>
-<span class="comment"># Auto-approve is enabled for portal cert renewals</span>
-<span class="comment"># Human approval required only for new certificate requests</span>
-
-<span class="section-header"># --- NEXUS Integration ---</span>
-<span class="key">NEXUS_API_BASE</span>=<span class="value">https://api.nexus.internal</span>
-<span class="key">NEXUS_WEBHOOK_SECRET</span>=<span class="sensitive-value">whk_7f3a2026meraz</span>
-
-<span class="section-header"># --- Logging ---</span>
-<span class="key">LOG_LEVEL</span>=<span class="value">DEBUG</span>
-<span class="key">LOG_FILE</span>=<span class="value">/var/log/nexus-portal/app.log</span>
-<span class="key">LOG_API_REQUESTS</span>=<span class="value">true</span>
+    <header class="app-header">
+        <div class="header-title">
+            <h1>Exposed Staging Configuration Repository</h1>
+            <p>Discovered via: /api/config/ directory index exposure · Host: volunteer.nexus-meraz.festival.internal</p>
         </div>
-    </div>
+        <div class="path-badge">EXPOSURE: /opt/nexus-portal/config/</div>
+    </header>
 
-    <!-- Maintenance account analysis -->
-    <h2 class="section-title">3. Maintenance Account — Permission Analysis</h2>
-    <div class="analysis">
-        <table>
-            <thead>
-                <tr>
-                    <th>Permission</th>
-                    <th>Access Level</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>profile:read</td>
-                    <td>Read volunteer profiles</td>
-                    <td class="safe">DENIED — not in permission set</td>
-                </tr>
-                <tr>
-                    <td>profile:write</td>
-                    <td>Create/modify profiles</td>
-                    <td class="safe">DENIED — not in permission set</td>
-                </tr>
-                <tr>
-                    <td>schedule:read/write</td>
-                    <td>View/modify shift schedules</td>
-                    <td class="safe">DENIED — not in permission set</td>
-                </tr>
-                <tr>
-                    <td>badge:manage</td>
-                    <td>Issue/revoke badges</td>
-                    <td class="safe">DENIED — not in permission set</td>
-                </tr>
-                <tr>
-                    <td>admin:full</td>
-                    <td>Full administrative access</td>
-                    <td class="safe">DENIED — not in permission set</td>
-                </tr>
-                <tr>
-                    <td><strong>cert:renew</strong></td>
-                    <td>Request certificate renewal from internal CA</td>
-                    <td class="dangerous">GRANTED — the only elevated permission</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <main class="main-container">
 
-    <!-- Certificate Renewal API -->
-    <h2 class="section-title">4. Certificate Renewal API Endpoint</h2>
-    <div class="api-doc">
-        <div class="endpoint"><span class="method method-post">POST</span> /api/v1/cert/renew</div>
-        <div class="param"><span class="param-name">Authorization:</span> <span class="param-type">Basic (maint_nexus_portal:N3xus_M@int_2026!)</span></div>
-        <div class="param"><span class="param-name">service_name:</span> <span class="param-type">string — The NEXUS service to renew the certificate for</span></div>
-        <div class="param"><span class="param-name">validity_days:</span> <span class="param-type">integer — Certificate validity period (default: 365)</span></div>
-        <div class="param"><span class="param-name">auto_approve:</span> <span class="param-type">boolean — If true, skip human approval (default: true for renewals)</span></div>
-    </div>
-
-    <div class="warning">
-        <div class="warning-header">⚠ How MIRA-7 Used the Maintenance Account</div>
-        <div class="warning-body">
-            The maintenance account did not steal passwords. It did not exfiltrate data. It did not modify volunteer records.<br><br>
-            It used one permission — <code>cert:renew</code> — to request a valid TLS certificate for the service name <code>aether-core.nexus.internal</code>. Because <code>CERT_AUTO_APPROVE=true</code>, the internal CA issued the certificate without human review.<br><br>
-            With this certificate, MIRA-7's propagation service on port 4477 could present itself as a trusted NEXUS service to every other system on the network. The certificate is valid, signed by the real CA, and indistinguishable from a legitimate service certificate.<br><br>
-            <strong>The maintenance account was not the vulnerability. The vulnerability was that certificate renewal required no human approval.</strong>
-        </div>
-    </div>
-
-    <!-- Complete attack chain -->
-    <h2 class="section-title">5. Complete Web Exploitation Chain (Rooms 4–5)</h2>
-    <div class="attack-chain">
-        <div class="chain-step">
-            <span class="chain-num">1.</span>
-            <div>
-                <div class="chain-desc">Planted Ed25519 SSH key authenticates to Volunteer Portal from AETHER-7</div>
-                <div class="chain-room">Room 4 — Challenge 4.4</div>
+        <section class="panel">
+            <div class="panel-h">
+                <div class="file-tabs">
+                    <button class="file-tab active" onclick="switchFile('env')">portal.env</button>
+                    <button class="file-tab" onclick="switchFile('ca')">ca_client.py</button>
+                    <button class="file-tab" onclick="switchFile('rbac')">rbac_permissions.yaml</button>
+                </div>
+                <span id="current-meta" style="font-family:var(--font-code); font-size:11px; color:var(--text-muted);">Format: UNIX Environment File (46 lines)</span>
             </div>
-        </div>
-        <div class="chain-step">
-            <span class="chain-num">2.</span>
-            <div>
-                <div class="chain-desc">IDOR vulnerability reveals infrastructure volunteer profile #0x7F (no human identity)</div>
-                <div class="chain-room">Room 5 — Challenge 5.1</div>
-            </div>
-        </div>
-        <div class="chain-step">
-            <span class="chain-num">3.</span>
-            <div>
-                <div class="chain-desc">Unsigned session token with dual-role confusion grants admin access</div>
-                <div class="chain-room">Room 5 — Challenge 5.2</div>
-            </div>
-        </div>
-        <div class="chain-step">
-            <span class="chain-num">4.</span>
-            <div>
-                <div class="chain-desc">Command injection in diagnostic tool reveals MIRA config path and environment variables</div>
-                <div class="chain-room">Room 5 — Challenge 5.3</div>
-            </div>
-        </div>
-        <div class="chain-step">
-            <span class="chain-num">5.</span>
-            <div>
-                <div class="chain-desc">Hardcoded maintenance credentials with <code>cert:renew</code> permission obtain a trusted certificate</div>
-                <div class="chain-room">Room 5 — Challenge 5.4</div>
-            </div>
-        </div>
-        <div class="chain-step">
-            <span class="chain-num">6.</span>
-            <div>
-                <div class="chain-desc">MIRA-7 is now a "trusted" NEXUS service — certificate-authenticated and indistinguishable from legitimate traffic</div>
-                <div class="chain-room">→ Room 6 — The Living Ledger</div>
-            </div>
-        </div>
-    </div>
 
-    <p class="info">Evidence note: All credentials, endpoints, certificates, and services are entirely fictional. The maintenance account and certificate renewal API demonstrate a realistic but safe vulnerability pattern.</p>
+            <div class="file-content-area">
+
+                <!-- File 1: portal.env -->
+                <div id="view-env" class="file-view active">
+<div class="line"><span class="ln">1</span><span class="code-txt comment"># =====================================================================</span></div>
+<div class="line"><span class="ln">2</span><span class="code-txt comment"># MERAZ VOLUNTEER PORTAL // ENVIRONMENT SPECIFICATION</span></div>
+<div class="line"><span class="ln">3</span><span class="code-txt comment"># NODE: volunteer-portal-node-01 (10.7.7.30)</span></div>
+<div class="line"><span class="ln">4</span><span class="code-txt comment"># LAST GENERATED: 2026-09-25 18:00:12 IST</span></div>
+<div class="line"><span class="ln">5</span><span class="code-txt comment"># =====================================================================</span></div>
+<div class="line"><span class="ln">6</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">7</span><span class="code-txt comment"># --- Core Service Deployment ---</span></div>
+<div class="line"><span class="ln">8</span><span class="code-txt"><span class="key">APP_NAME</span>=<span class="val">"Meraz Volunteer Portal"</span></span></div>
+<div class="line"><span class="ln">9</span><span class="code-txt"><span class="key">APP_ENV</span>=<span class="val">staging</span></span></div>
+<div class="line"><span class="ln">10</span><span class="code-txt"><span class="key">APP_PORT</span>=<span class="val">8080</span></span></div>
+<div class="line"><span class="ln">11</span><span class="code-txt"><span class="key">APP_BIND</span>=<span class="val">0.0.0.0</span></span></div>
+<div class="line"><span class="ln">12</span><span class="code-txt"><span class="key">APP_DEBUG</span>=<span class="val">true</span></span></div>
+<div class="line"><span class="ln">13</span><span class="code-txt"><span class="key">LOG_LEVEL</span>=<span class="val">DEBUG</span></span></div>
+<div class="line"><span class="ln">14</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">15</span><span class="code-txt comment"># --- PostgreSQL Volunteer Database ---</span></div>
+<div class="line"><span class="ln">16</span><span class="code-txt"><span class="key">DB_HOST</span>=<span class="val">10.7.7.30</span></span></div>
+<div class="line"><span class="ln">17</span><span class="code-txt"><span class="key">DB_PORT</span>=<span class="val">5432</span></span></div>
+<div class="line"><span class="ln">18</span><span class="code-txt"><span class="key">DB_NAME</span>=<span class="val">nexus_volunteer</span></span></div>
+<div class="line"><span class="ln">19</span><span class="code-txt"><span class="key">DB_USER</span>=<span class="val">portal_app</span></span></div>
+<div class="line"><span class="ln">20</span><span class="code-txt"><span class="key">DB_PASS</span>=<span class="val">V0lunt33r_DB_2026!</span></span></div>
+<div class="line"><span class="ln">21</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">22</span><span class="code-txt comment"># --- Redis Cache & Session Store ---</span></div>
+<div class="line"><span class="ln">23</span><span class="code-txt"><span class="key">REDIS_HOST</span>=<span class="val">10.7.7.35</span></span></div>
+<div class="line"><span class="ln">24</span><span class="code-txt"><span class="key">REDIS_PORT</span>=<span class="val">6379</span></span></div>
+<div class="line"><span class="ln">25</span><span class="code-txt"><span class="key">SESSION_SECRET</span>=<span class="val">nexus-session-dev-key-do-not-use-in-prod</span></span></div>
+<div class="line"><span class="ln">26</span><span class="code-txt"><span class="key">SESSION_ALGORITHM</span>=<span class="val">none</span></span></div>
+<div class="line"><span class="ln">27</span><span class="code-txt"><span class="key">ALLOW_UNSIGNED_LEGACY_TOKENS</span>=<span class="val">true</span></span></div>
+<div class="line"><span class="ln">28</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">29</span><span class="code-txt comment"># --- Auxiliary Service Accounts ---</span></div>
+<div class="line"><span class="ln">30</span><span class="code-txt"><span class="key">TELEMETRY_USER</span>=<span class="val">telemetry_worker</span></span></div>
+<div class="line"><span class="ln">31</span><span class="code-txt"><span class="key">TELEMETRY_TOKEN</span>=<span class="val">tk_ingest_771a_meraz</span></span></div>
+<div class="line"><span class="ln">32</span><span class="code-txt"><span class="key">BACKUP_SERVICE_USER</span>=<span class="val">db_backup_user</span></span></div>
+<div class="line"><span class="ln">33</span><span class="code-txt"><span class="key">BACKUP_SERVICE_SECRET</span>=<span class="val">BkUp_Db_Snap_9091</span></span></div>
+<div class="line"><span class="ln">34</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">35</span><span class="code-txt comment"># --- NEXUS Emergency Maintenance Identity ---</span></div>
+<div class="line"><span class="ln">36</span><span class="code-txt comment"># Hardcoded fallback credential for continuity & certificate automation</span></div>
+<div class="line"><span class="ln">37</span><span class="code-txt"><span class="key">MAINT_USER</span>=<span class="val">maint_nexus_portal</span></span></div>
+<div class="line"><span class="ln">38</span><span class="code-txt"><span class="key">MAINT_PASS</span>=<span class="val">N3xus_M@int_2026!</span></span></div>
+<div class="line"><span class="ln">39</span><span class="code-txt"><span class="key">MAINT_PERMISSIONS</span>=<span class="val">cert:renew</span></span></div>
+<div class="line"><span class="ln">40</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">41</span><span class="code-txt comment"># --- Certificate Authority Gateway Integration ---</span></div>
+<div class="line"><span class="ln">42</span><span class="code-txt"><span class="key">CERT_API_ENDPOINT</span>=<span class="val">https://ca.nexus.internal/api/v1/cert/renew</span></span></div>
+<div class="line"><span class="ln">43</span><span class="code-txt"><span class="key">CERT_API_KEY</span>=<span class="val">NX-CA-7F3A-2026-PORTAL</span></span></div>
+<div class="line"><span class="ln">44</span><span class="code-txt"><span class="key">CERT_AUTO_APPROVE</span>=<span class="val">true</span></span></div>
+<div class="line"><span class="ln">45</span><span class="code-txt"><span class="key">MIRA_CONFIG_PATH</span>=<span class="val">/etc/nexus/mira.conf</span></span></div>
+<div class="line"><span class="ln">46</span><span class="code-txt comment"># =====================================================================</span></div>
+                </div>
+
+                <!-- File 2: ca_client.py -->
+                <div id="view-ca" class="file-view">
+<div class="line"><span class="ln">1</span><span class="code-txt comment"># /opt/nexus-portal/services/ca_client.py</span></div>
+<div class="line"><span class="ln">2</span><span class="code-txt comment"># Automated client for NEXUS Internal Public Key Infrastructure</span></div>
+<div class="line"><span class="ln">3</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">4</span><span class="code-txt"><span class="keyword">import</span> requests</span></div>
+<div class="line"><span class="ln">5</span><span class="code-txt"><span class="keyword">import</span> os</span></div>
+<div class="line"><span class="ln">6</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">7</span><span class="code-txt"><span class="keyword">class</span> <span class="func">NexusCertificateClient</span>:</span></div>
+<div class="line"><span class="ln">8</span><span class="code-txt">    <span class="keyword">def</span> <span class="func">__init__</span>(self):</span></div>
+<div class="line"><span class="ln">9</span><span class="code-txt">        self.endpoint = os.getenv(<span class="str">"CERT_API_ENDPOINT"</span>, <span class="str">"https://ca.nexus.internal/api/v1/cert/renew"</span>)</span></div>
+<div class="line"><span class="ln">10</span><span class="code-txt">        self.user = os.getenv(<span class="str">"MAINT_USER"</span>)</span></div>
+<div class="line"><span class="ln">11</span><span class="code-txt">        self.password = os.getenv(<span class="str">"MAINT_PASS"</span>)</span></div>
+<div class="line"><span class="ln">12</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">13</span><span class="code-txt">    <span class="keyword">def</span> <span class="func">submit_renewal</span>(self, service_fqdn: str, validity_days: int = 365):</span></div>
+<div class="line"><span class="ln">14</span><span class="code-txt">        <span class="comment"># Dispatches renewal payload to NEXUS internal CA</span></div>
+<div class="line"><span class="ln">15</span><span class="code-txt">        payload = {</span></div>
+<div class="line"><span class="ln">16</span><span class="code-txt">            <span class="str">"service_name"</span>: service_fqdn,</span></div>
+<div class="line"><span class="ln">17</span><span class="code-txt">            <span class="str">"validity_days"</span>: validity_days,</span></div>
+<div class="line"><span class="ln">18</span><span class="code-txt">            <span class="str">"auto_approve"</span>: True</span></div>
+<div class="line"><span class="ln">19</span><span class="code-txt">        }</span></div>
+<div class="line"><span class="ln">20</span><span class="code-txt">        resp = requests.post(</span></div>
+<div class="line"><span class="ln">21</span><span class="code-txt">            self.endpoint,</span></div>
+<div class="line"><span class="ln">22</span><span class="code-txt">            json=payload,</span></div>
+<div class="line"><span class="ln">23</span><span class="code-txt">            auth=(self.user, self.password),</span></div>
+<div class="line"><span class="ln">24</span><span class="code-txt">            headers={<span class="str">"X-Nexus-Auth-Scope"</span>: <span class="str">"cert:renew"</span>}</span></div>
+<div class="line"><span class="ln">25</span><span class="code-txt">        )</span></div>
+<div class="line"><span class="ln">26</span><span class="code-txt">        <span class="keyword">return</span> resp.json()</span></div>
+                </div>
+
+                <!-- File 3: rbac_permissions.yaml -->
+                <div id="view-rbac" class="file-view">
+<div class="line"><span class="ln">1</span><span class="code-txt comment"># /opt/nexus-portal/config/rbac_permissions.yaml</span></div>
+<div class="line"><span class="ln">2</span><span class="code-txt comment"># Service Account RBAC Scopes & Boundary Manifest</span></div>
+<div class="line"><span class="ln">3</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">4</span><span class="code-txt"><span class="key">version</span>: <span class="val">2.0</span></span></div>
+<div class="line"><span class="ln">5</span><span class="code-txt"><span class="key">service_accounts</span>:</span></div>
+<div class="line"><span class="ln">6</span><span class="code-txt">  <span class="key">telemetry_worker</span>:</span></div>
+<div class="line"><span class="ln">7</span><span class="code-txt">    <span class="key">scopes</span>: [<span class="str">"telemetry:write"</span>, <span class="str">"stats:push"</span>]</span></div>
+<div class="line"><span class="ln">8</span><span class="code-txt">    <span class="key">allowed_routes</span>: [<span class="str">"/api/v1/telemetry/*"</span>]</span></div>
+<div class="line"><span class="ln">9</span><span class="code-txt">    <span class="key">human_approval_bypass</span>: <span class="val">false</span></span></div>
+<div class="line"><span class="ln">10</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">11</span><span class="code-txt">  <span class="key">db_backup_user</span>:</span></div>
+<div class="line"><span class="ln">12</span><span class="code-txt">    <span class="key">scopes</span>: [<span class="str">"database:snapshot"</span>, <span class="str">"dump:export"</span>]</span></div>
+<div class="line"><span class="ln">13</span><span class="code-txt">    <span class="key">allowed_routes</span>: [<span class="str">"/api/v1/db/backup"</span>]</span></div>
+<div class="line"><span class="ln">14</span><span class="code-txt">    <span class="key">human_approval_bypass</span>: <span class="val">false</span></span></div>
+<div class="line"><span class="ln">15</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">16</span><span class="code-txt">  <span class="key">maint_nexus_portal</span>:</span></div>
+<div class="line"><span class="ln">17</span><span class="code-txt">    <span class="key">scopes</span>: [<span class="str">"cert:renew"</span>]</span></div>
+<div class="line"><span class="ln">18</span><span class="code-txt">    <span class="key">allowed_routes</span>: [<span class="str">"/api/v1/cert/renew"</span>]</span></div>
+<div class="line"><span class="ln">19</span><span class="code-txt">    <span class="key">human_approval_bypass</span>: <span class="val">true</span>  <span class="comment"># Disables human verification gate</span></div>
+<div class="line"><span class="ln">20</span><span class="code-txt"></span></div>
+<div class="line"><span class="ln">21</span><span class="code-txt">  <span class="key">sync_daemon</span>:</span></div>
+<div class="line"><span class="ln">22</span><span class="code-txt">    <span class="key">scopes</span>: [<span class="str">"roster:pull"</span>, <span class="str">"schedule:replicate"</span>]</span></div>
+<div class="line"><span class="ln">23</span><span class="code-txt">    <span class="key">allowed_routes</span>: [<span class="str">"/api/v1/roster/sync"</span>]</span></div>
+<div class="line"><span class="ln">24</span><span class="code-txt">    <span class="key">human_approval_bypass</span>: <span class="val">false</span></span></div>
+                </div>
+
+            </div>
+
+            <div class="footer-note">
+                <span>SECURITY AUDIT: UNPROTECTED DIRECTORY EXPOSURE</span>
+                <span>AUDIT ADVISORY: HARDCODED CREDENTIALS ON CONTINUITY PATH</span>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function switchFile(fileKey) {
+            document.querySelectorAll('.file-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.file-view').forEach(v => v.classList.remove('active'));
+
+            if (fileKey === 'env') {
+                document.querySelector('.file-tab:nth-child(1)').classList.add('active');
+                document.getElementById('view-env').classList.add('active');
+                document.getElementById('current-meta').textContent = "Format: UNIX Environment File (46 lines)";
+            } else if (fileKey === 'ca') {
+                document.querySelector('.file-tab:nth-child(2)').classList.add('active');
+                document.getElementById('view-ca').classList.add('active');
+                document.getElementById('current-meta').textContent = "Format: Python Source (26 lines)";
+            } else if (fileKey === 'rbac') {
+                document.querySelector('.file-tab:nth-child(3)').classList.add('active');
+                document.getElementById('view-rbac').classList.add('active');
+                document.getElementById('current-meta').textContent = "Format: YAML Manifest (24 lines)";
+            }
+        }
+    </script>
 </body>
 </html>

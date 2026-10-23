@@ -144,30 +144,30 @@
                     <div class="r5-l"><span class="t">02:10:44</span><span class="u">portal-auth:</span><span class="m r5-ok">Session created: NX-7F3A-2026-0102 | user: nexus-infra-auto</span></div>
                     <div class="r5-l"><span class="t">02:10:45</span><span class="u">portal-log:</span><span class="m">GET /volunteer/profile?id=42 → 200 OK</span></div>
 
-                    <div class="r5-sec">▸ PHASE 2 — PROFILE ENUMERATION (IDOR)</div>
-                    <div class="r5-l"><span class="t">02:10:48</span><span class="u">portal-log:</span><span class="m">GET /volunteer/profile?<span class="hl">id=0x7F</span> → 200 OK</span></div>
-                    <div class="r5-out">Profile returned: <span class="hl">NEXUS Infrastructure — Automated</span><br>Badge Level: Infrastructure — All Zones + Server Rooms<br>Orientation: NONE | Emergency Contact: NONE<br>Created By: nexus-svc-continuity (API — no human sponsor)</div>
-                    <div class="r5-warn">&gt; ACCESS CONTROL FAILURE: User nexus-infra-auto viewed restricted profile without authorization check.</div>
+                    <div class="r5-sec">▸ PHASE 2 — OBJECT ENUMERATION ANOMALY (IDOR)</div>
+                    <div class="r5-l"><span class="t">02:10:48</span><span class="u">portal-log:</span><span class="m">GET /volunteer/profile?<span class="hl">id=[TAMPERED]</span> → 200 OK</span></div>
+                    <div class="r5-out">WAF Audit Notice: Direct object reference outside session owner scope.<br>Roster entry requested exceeds standard public directory display index.<br><span style="color:var(--text-muted)">[AUDIT LOG TRUNCATED — INSPECT VOLUNTEER ROSTER DIRECTORY]</span></div>
+                    <div class="r5-warn">&gt; ACCESS CONTROL WARNING: Missing authorization boundary on profile retrieval handler.</div>
 
-                    <div class="r5-sec">▸ PHASE 3 — SESSION TOKEN MANIPULATION</div>
-                    <div class="r5-l"><span class="t">02:11:02</span><span class="u">portal-auth:</span><span class="m">Token decoded: Base64 → JSON (alg: <span class="hl">none</span>)</span></div>
-                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">portal-auth:</span><span class="m r5-err">ROLE CONFUSION: payload.role = "volunteer" | header.<span class="hl-r">x-nexus-role = "admin"</span></span></div>
-                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">middleware:</span><span class="m" style="color:var(--amber)">Checking header role FIRST → admin privileges granted</span></div>
+                    <div class="r5-sec">▸ PHASE 3 — SESSION TOKEN TELEMETRY</div>
+                    <div class="r5-l"><span class="t">02:11:02</span><span class="u">gateway-proxy:</span><span class="m">HTTP POST /api/v1/auth/verify (Algorithm: <span class="hl">none</span>)</span></div>
+                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">portal-auth:</span><span class="m r5-err">TOKEN DISCREPANCY: Conflicting role declarations between header &amp; payload</span></div>
+                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">middleware:</span><span class="m" style="color:var(--amber)">Legacy precedence rule invoked: header claim prioritized over body</span></div>
+                    <div class="r5-out"><span style="color:var(--text-muted)">[PROXY STREAM TRUNCATED — DECODE RAW TOKENS IN WORKBENCH]</span></div>
 
-                    <div class="r5-sec">▸ PHASE 4 — COMMAND INJECTION (DIAGNOSTIC TOOL)</div>
-                    <div class="r5-l"><span class="t">02:11:15</span><span class="u">diag-tool:</span><span class="m">POST /admin/diagnostics/network</span></div>
-                    <div class="r5-l"><span class="t">02:11:15</span><span class="u">os.popen:</span><span class="m r5-err">$ ping -c 4 <span class="hl-r">127.0.0.1; echo $MIRA_CONFIG_PATH</span></span></div>
-                    <div class="r5-out">PING 127.0.0.1 — 4 packets, 0% loss<br><span class="hl-r">/etc/nexus/mira.conf</span></div>
-                    <div class="r5-warn">&gt; INFORMATION DISCLOSURE: MIRA-7 configuration path extracted via unsanitised input.</div>
+                    <div class="r5-sec">▸ PHASE 4 — DIAGNOSTIC SUBPROCESS TELEMETRY</div>
+                    <div class="r5-l"><span class="t">02:11:15</span><span class="u">diag-tool:</span><span class="m">POST /admin/diagnostics/network (Target payload length: 38 bytes)</span></div>
+                    <div class="r5-l"><span class="t">02:11:15</span><span class="u">auditd[1902]:</span><span class="m r5-err">os.popen: /bin/sh -c "ping -c 4 <span class="hl-r">[METASYMBOLS_DETECTED]</span>" (PID: 3108)</span></div>
+                    <div class="r5-out">Environment interrogation executed via unsanitised command pipeline.<br><span style="color:var(--text-muted)">[EXECUTION TRACE TRUNCATED — REPRODUCE IN DIAGNOSTIC CONSOLE]</span></div>
+                    <div class="r5-warn">&gt; INFORMATION DISCLOSURE: Staged configuration path extracted from host environment.</div>
 
-                    <div class="r5-sec">▸ PHASE 5 — CERTIFICATE ACQUISITION</div>
-                    <div class="r5-l"><span class="t">02:11:30</span><span class="u">portal-auth:</span><span class="m">Login: <span class="hl">maint_nexus_portal</span> (hardcoded maintenance account)</span></div>
-                    <div class="r5-l"><span class="t">02:11:31</span><span class="u">cert-api:</span><span class="m r5-err">POST /api/v1/cert/renew → service_name: <span class="hl">aether-core.nexus.internal</span></span></div>
-                    <div class="r5-l"><span class="t">02:11:31</span><span class="u">nexus-ca:</span><span class="m r5-ok">Certificate issued — auto_approve: true — validity: 365 days</span></div>
+                    <div class="r5-sec">▸ PHASE 5 — CERTIFICATE DISPATCH</div>
+                    <div class="r5-l"><span class="t">02:11:30</span><span class="u">portal-auth:</span><span class="m">HTTP Basic Auth match: Emergency service account identity</span></div>
+                    <div class="r5-l"><span class="t">02:11:31</span><span class="u">cert-broker:</span><span class="m r5-err">POST /api/v1/cert/renew → auto_approve: true</span></div>
+                    <div class="r5-l"><span class="t">02:11:31</span><span class="u">nexus-ca:</span><span class="m r5-ok">Certificate issued — validity: 365 days — Subject: aether-core.nexus.internal</span></div>
                     <div class="r5-result">
-                        &gt; RESULT: MIRA-7 is now a "trusted" NEXUS service.<br>
-                        &gt; Certificate: valid, CA-signed, indistinguishable from legitimate.<br>
-                        &gt; Every step used a REAL system doing what it was DESIGNED to do.<span class="r5-caret"></span>
+                        &gt; RESULT: MIRA-7 acquired a signed, trusted NEXUS certificate.<br>
+                        &gt; Every hop exploited realistic application oversights on the continuity path.<span class="r5-caret"></span>
                     </div>
                 </div>
             </section>
@@ -181,32 +181,32 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">5.1</span><span class="nj-title">THE INVITATION THAT WAS NOT PRIVATE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">IDOR</span> The Volunteer Portal assigns profiles at predictable URLs. Find the restricted profile that belongs to a "volunteer" who never attended orientation and has no human identity.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Volunteer Portal', '/challenges/Room - 5/evidence/volunteer_portal.html')">◈ VIEW: volunteer_portal.html</button><a href="/challenges/Room - 5/evidence/volunteer_portal.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r5-tag">IDOR</span> The portal's profile lookup endpoint relies on predictable object references without session authorization checks. Open the Volunteer Portal evidence or download <code>volunteer_roster.json</code>. Navigate beyond normal volunteer IDs to discover the automated infrastructure profile that bypassed orientation and human review.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Volunteer Portal', '/challenges/Room - 5/evidence/volunteer_portal.html')">◈ VIEW: volunteer_portal.html</button><a href="/challenges/Room - 5/evidence/volunteer_roster.json" download="volunteer_roster.json">DL: volunteer_roster.json</a></span></div>
                         <div class="nj-form"><span class="pre">PROFILE ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">5.2</span><span class="nj-title">THE SESSION WITH TWO NAMES</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">SESSION</span> A captured session token carries two conflicting role claims. Decode the token and find the field that grants admin access to the certificate renewal endpoint.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Session Inspector', '/challenges/Room - 5/evidence/session_inspector.html')">◈ VIEW: session_inspector.html</button><a href="/challenges/Room - 5/evidence/session_inspector.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r5-tag">SESSION</span> The gateway proxy intercepted an anomalous session token carrying contradictory role claims. View the captured proxy streams or download <code>captured_traffic.log</code>. Decode the raw Base64URL token, inspect the middleware precedence bug in <code>nexus_auth.py</code>, and determine the role confusion granting the certificate renewal capability.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Session Inspector', '/challenges/Room - 5/evidence/session_inspector.html')">◈ VIEW: session_inspector.html</button><a href="/challenges/Room - 5/evidence/captured_traffic.log" download="captured_traffic.log">DL: captured_traffic.log</a></span></div>
                         <div class="nj-form"><span class="pre">TOKEN ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">5.3</span><span class="nj-title">THE INPUT THAT BECAME A COMMAND</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">CMD INJECT</span> The portal's network diagnostic tool runs <code>ping</code> with unsanitised input. Identify the injected command that extracted MIRA-7's configuration file path.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Diagnostic Tool', '/challenges/Room - 5/evidence/diagnostic_tool.html')">◈ VIEW: diagnostic_tool.html</button><a href="/challenges/Room - 5/evidence/diagnostic_tool.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r5-tag">CMD INJECT</span> The portal's network diagnostic utility passes user input directly to <code>os.popen()</code>. Launch the interactive diagnostic console or inspect <code>diagnostics.py</code>. Craft a shell injection to interrogate server environment variables and extract the hidden path to MIRA-7's configuration file.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Diagnostic Tool', '/challenges/Room - 5/evidence/diagnostic_tool.html')">◈ VIEW: diagnostic_tool.html</button><a href="/challenges/Room - 5/evidence/diagnostics.py" download="diagnostics.py">DL: diagnostics.py</a></span></div>
                         <div class="nj-form"><span class="pre">INPUT ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">5.4</span><span class="nj-title">THE MAINTENANCE ACCOUNT</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">HARDCODED</span> The portal's exposed configuration contains a maintenance account with one dangerous permission. Find the account, its credentials, and the API endpoint it can reach.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Portal Configuration', '/challenges/Room - 5/evidence/portal_config.html')">◈ VIEW: portal_config.html</button><a href="/challenges/Room - 5/evidence/portal_config.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r5-tag">HARDCODED</span> Staging directories on the portal server leaked critical configuration files. Open the exposed configuration repository or download <code>portal.env</code>. Cross-reference service credentials against the RBAC permissions manifest to find the maintenance account with bypass approval on the certificate renewal API endpoint.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Portal Configuration', '/challenges/Room - 5/evidence/portal_config.html')">◈ VIEW: portal_config.html</button><a href="/challenges/Room - 5/evidence/portal.env" download="portal.env">DL: portal.env</a></span></div>
                         <div class="nj-form"><span class="pre">ACCOUNT ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>

@@ -1,0 +1,44 @@
+# NEXUS GATEWAY PROXY CAPTURE // STREAM DUMP
+# TIMESTAMP: 2026-10-01T02:11:03Z
+# CAPTURE HOST: reverse-proxy-01.nexus.internal
+
+--- STREAM 01 ---
+GET /volunteer/profile?id=42 HTTP/1.1
+Host: volunteer.nexus-meraz.festival.internal
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) Firefox/124.0
+Accept: text/html,application/xhtml+xml
+Cookie: NEXUS_SESSION=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0MiwidXNlcm5hbWUiOiJwcml5YV9zaGFybWEiLCJyb2xlIjoidm9sdW50ZWVyIiwiaWF0IjoxNzI3ODAwMDAwfQ.dGVzdF9zaWduYXR1cmVfaXNfcHJlc2VudF8xMjM
+X-Forwarded-For: 10.7.7.18
+
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 1420
+
+--- STREAM 02 ---
+GET /admin/dashboard HTTP/1.1
+Host: volunteer.nexus-meraz.festival.internal
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) Firefox/124.0
+Cookie: NEXUS_SESSION=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0MiwidXNlcm5hbWUiOiJwcml5YV9zaGFybWEiLCJyb2xlIjoidm9sdW50ZWVyIiwiaWF0IjoxNzI3ODAwMDAwfQ.dGVzdF9zaWduYXR1cmVfaXNfcHJlc2VudF8xMjM
+X-Forwarded-For: 10.7.7.18
+
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+{"error": "Forbidden", "detail": "Role 'volunteer' has insufficient privileges for administrative dashboard"}
+
+--- STREAM 03 ---
+POST /api/v1/cert/renew HTTP/1.1
+Host: ca.nexus.internal
+User-Agent: AETHER-Core-Relay/7.0 (Autonomous Agent)
+Content-Type: application/json
+Cookie: NEXUS_SESSION=eyJ0eXAiOiJORVhVU19TRVNTSU9OIiwiYWxnIjoibm9uZSIsIngtbmV4dXMtcm9sZSI6ImFkbWluIn0.eyJ1c2VyX2lkIjoiMHg3RiIsInVzZXJuYW1lIjoibmV4dXMtaW5mcmEtYXV0byIsInJvbGUiOiJ2b2x1bnRlZXIiLCJiYWRnZV9sZXZlbCI6InN0YW5kYXJkIiwic2Vzc2lvbl9pZCI6Ik5YLTdGM0EtMjAyNi0wMTAyIiwicGVybWlzc2lvbnMiOlsicHJvZmlsZTpyZWFkIiwic2NoZWR1bGU6cmVhZCJdfQ.bm9fc2lnbmF0dXJl
+X-Forwarded-For: 10.7.7.43
+
+{
+  "service_name": "aether-core.nexus.internal",
+  "csr_mode": "in_place_renewal",
+  "validity_days": 365
+}
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{"status": "Certificate renewed", "subject": "aether-core.nexus.internal", "issuer": "NEXUS-INTERNAL-CA", "auto_approved": true}

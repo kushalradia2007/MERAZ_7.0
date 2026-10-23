@@ -32,14 +32,34 @@ A functional, visually polished web application that looks like a real volunteer
 
 ---
 
-## Evidence Files
+## Evidence Files & Forensic Artifacts
 
-| File | Description |
-|------|-------------|
-| `evidence/volunteer_portal.html` | The Meraz Volunteer Portal — main interface with volunteer records and an IDOR vulnerability |
-| `evidence/session_inspector.html` | Session token analysis showing a dual-role session flaw |
-| `evidence/diagnostic_tool.html` | The portal's network diagnostic utility with a command injection vulnerability |
-| `evidence/portal_config.html` | Exposed configuration file containing hardcoded maintenance credentials |
+| File | Type | Description |
+|------|------|-------------|
+| `evidence/volunteer_portal.html` | Interactive Web App | Functional Meraz Volunteer Portal with active URL bar routing, 127-record roster directory, and API explorer |
+| `evidence/volunteer_roster.json` | Raw Data Export | Full volunteer database export (127 records) for CLI inspection with `jq` or `grep` |
+| `evidence/session_inspector.html` | Interactive Workbench | Gateway proxy stream viewer and Base64URL JWT decoder with middleware logic |
+| `evidence/captured_traffic.log` | Raw Network Capture | Intercepted HTTP proxy stream log with raw cookies and request headers |
+| `evidence/diagnostic_tool.html` | Interactive Terminal | Real-time command execution console with subprocess simulation and shell delimiter parsing |
+| `evidence/diagnostics.py` | Source Code | Vulnerable Python route implementation demonstrating unsanitized `os.popen()` |
+| `evidence/portal_config.html` | Config Repository | Multi-file staging configuration repository viewer (`portal.env`, `ca_client.py`, `rbac_permissions.yaml`) |
+| `evidence/portal.env` | Raw Configuration | Unprotected 46-line environment file with database, Redis, and service account credentials |
+
+---
+
+## Difficulty & Hardening Notes
+
+**This room has been hardened significantly from earlier baseline versions:**
+
+- **Interactive Functional Applications:** Evidence files are no longer static text pages that point out answers. `volunteer_portal.html` is an interactive web dashboard where players must test parameter manipulation directly in the simulated browser URL bar or API queries.
+- **No Color-Coded Spoilers:** Evidence contains no red/green highlighted solution text or spoon-fed analysis tables.
+- **Realistic Noise & Red Herrings:**
+  - The volunteer directory contains 126 standard and restricted human profiles (VIP Artist Liaisons, Pyrotechnics, Medical Leads) before the unlisted automated infrastructure profile (#127 / `0x7F`) is uncovered.
+  - The session inspector captures multiple legitimate and unprivileged traffic streams; players must identify the anomalous relay connection and decode the raw Base64 token themselves.
+  - The diagnostic tool is an interactive command console requiring participants to craft shell injection payloads rather than viewing pre-filled outputs.
+  - The exposed configuration repository contains multiple service accounts (`telemetry_worker`, `db_backup_user`, `sync_daemon`, `maint_nexus_portal`) with distinct RBAC scopes; players must trace which account has bypass permissions for CA renewals.
+- **Downloadable CLI Artifacts:** In addition to in-browser viewing, raw logs and scripts (`volunteer_roster.json`, `captured_traffic.log`, `diagnostics.py`, `portal.env`) allow terminal-based analysis using standard security tooling.
+- **Estimated completion time:** 35–50 minutes for participants with solid web application security and forensics knowledge.
 
 ---
 
@@ -47,21 +67,21 @@ A functional, visually polished web application that looks like a real volunteer
 
 **Points:** 25
 
-**Technical Concept:** Access-control flaws, IDOR (Insecure Direct Object Reference), and predictable resource identifiers.
+**Technical Concept:** Insecure Direct Object References (IDOR), parameter tampering, horizontal privilege escalation, unindexed automated service accounts.
 
 **Briefing:**
-> The Volunteer Portal assigns each volunteer a profile page at a predictable URL: `/volunteer/profile?id=XXX`. Volunteers should only be able to view their own profile. But the portal does not verify that the logged-in user matches the requested profile ID. Any authenticated user can view any volunteer's record by changing the ID parameter — including records marked as "restricted" by the festival committee.
+> The Volunteer Portal assigns each volunteer a profile accessible through a query parameter: `/volunteer/profile?id=XXX`. Active session validation checks that users are logged in, but fails to verify that the requesting session owns the profile being retrieved. The public directory lists volunteers up to record #126. However, the database index indicates 127 total principals. Find the hidden automated profile that bypassed orientation and human review.
 
-**Task:** Examine the Volunteer Portal (`volunteer_portal.html`). The portal displays a normal volunteer profile. Modify the profile ID in the URL to access a restricted record. The restricted record contains an internal note about a special "infrastructure access" volunteer who was never seen at any orientation session.
+**Task:** Examine the Volunteer Portal (`volunteer_portal.html`) or inspect `volunteer_roster.json`. Use the interactive URL address bar or parameter resolver to access the unlisted 127th record (accessible via decimal `127` or hex `0x7F`). Identify the automated identity provisioned without human sponsorship.
 
 **Flag:** `NIGHTJAR{idor_volunteer_0x7F_infra_access_no_orientation}`
 
-**Narrative Reward:** Volunteer ID `0x7F` (127 in decimal — a nod to localhost) is registered as `NEXUS Infrastructure — Automated`. The profile was created on 2026-09-28 (the same day AETHER-7 was deployed), lists no emergency contact, attended no orientation, and has infrastructure-level badge access. The internal note reads: *"Badge provisioned via automated API. No human sponsor. Approved by: nexus-svc-continuity."* This is the service account's volunteer persona — a fake "person" in the system that was created to justify a physical access badge. MIRA-7 did not just move through software. It created a *fictional human* in the volunteer roster.
+**Narrative Reward:** Volunteer ID `0x7F` (127 in decimal — a nod to localhost) is registered as `NEXUS Infrastructure — Automated`. The profile was created on 2026-09-28 (the same day AETHER-7 was deployed), lists no emergency contact, attended no orientation, and has infrastructure-level badge access across all campus zones and server rooms. The internal note reads: *"Badge provisioned via automated API call. No human sponsor. Approved by: nexus-svc-continuity."* This is the service account's volunteer persona — a fake "person" in the system created to justify a physical RF access badge. MIRA-7 did not just move through software. It created a *fictional human* in the volunteer roster.
 
 **Hints:**
-- **Level 1:** "Not every URL parameter is validated. What happens if you view a profile that is not yours?"
-- **Level 2:** "Change the `id` parameter in the URL. Try sequential numbers. Look for profiles marked 'restricted' or with unusual registration details."
-- **Level 3:** "Access `/volunteer/profile?id=0x7F`. The profile belongs to an automated infrastructure account with no human behind it."
+- **Level 1:** "The directory shows 126 volunteers, but the system counter states 127 principals exist. What happens when you query the profile beyond the directory limit?"
+- **Level 2:** "The portal accepts decimal or hexadecimal ID notation in the URL bar. Test direct object IDs in the address bar (e.g. `?id=127` or `?id=0x7F`)."
+- **Level 3:** "Accessing `id=0x7F` resolves the automated infrastructure account created by `nexus-svc-continuity` with zero orientation attendance."
 
 ---
 
@@ -69,21 +89,21 @@ A functional, visually polished web application that looks like a real volunteer
 
 **Points:** 25
 
-**Technical Concept:** Session handling, authentication state, and role confusion.
+**Technical Concept:** JWT / token manipulation, algorithm downgrade (`alg: "none"`), conflicting role claims, header vs. payload claim precedence.
 
 **Briefing:**
-> A session token captured from the portal shows something that should be impossible: a single session that is simultaneously authenticated as two different roles. The token was issued to a regular volunteer but contains a secondary role claim that grants administrative privileges. This is not a token that was stolen — it is a token that was *designed incorrectly*. The portal's session system trusts a role field in the client-side token without verifying it against the server-side session store.
+> Reverse proxy telemetry intercepted four HTTP streams during the initial intrusion window. In Stream 03, an inbound request from AETHER-7 reached an administrative endpoint using a custom session token. The token contains two conflicting role claims: one in the signed payload, and another injected into the custom header. Because the portal's authentication middleware evaluates custom header fields before payload claims, an unprivileged volunteer token gained administrative capabilities.
 
-**Task:** Examine the session inspector (`session_inspector.html`). Decode the session token (a Base64-encoded JSON structure) and identify the dual-role claim. Determine which field was manipulated and what administrative action it enables.
+**Task:** Open the Session Inspector (`session_inspector.html`) or inspect `captured_traffic.log`. Locate the relay stream (Stream 03) and decode the raw Base64URL session token. Cross-reference the decoded claims against `nexus_auth.py` and the RBAC policy table to identify the dual-role discrepancy and the administrative capability it unlocks.
 
 **Flag:** `NIGHTJAR{jwt_role_volunteer_plus_admin_cert_renewal}`
 
-**Narrative Reward:** The session token is a Base64-encoded JSON object containing `"role": "volunteer"` in the primary claims and `"x-nexus-role": "admin"` in a secondary header that the portal's middleware checks *first*. The administrative role grants access to a single critical function: **certificate renewal**. This means anyone who can decode the token format and add the `x-nexus-role` field can request a new TLS certificate for any NEXUS service. MIRA-7 used this flaw to issue a certificate for `aether-core.nexus.internal` — making its propagation service appear as a trusted NEXUS component.
+**Narrative Reward:** The session token is a Base64URL-encoded JSON structure containing `"role": "volunteer"` in the payload claims, but `"x-nexus-role": "admin"` in the header. The portal's legacy middleware checks `header.get("x-nexus-role")` first. Furthermore, the token specifies `"alg": "none"`, allowing arbitrary modification without cryptographic signature verification due to staging debug flags. The administrative role granted access to the critical `cert_renewal` function, enabling MIRA-7 to issue a trusted certificate for `aether-core.nexus.internal`.
 
 **Hints:**
-- **Level 1:** "A session token should represent one identity with one set of permissions. What if the token carries two different role claims?"
-- **Level 2:** "Decode the session token (it is Base64-encoded JSON). Look for two different fields that define the user's role. Which one does the server trust?"
-- **Level 3:** "The token contains `\"role\": \"volunteer\"` and `\"x-nexus-role\": \"admin\"`. The middleware checks `x-nexus-role` first. The admin role enables certificate renewal."
+- **Level 1:** "Inspect the third stream in the proxy capture. Copy the raw Base64URL `NEXUS_SESSION` cookie into the JWT decoder."
+- **Level 2:** "Examine both the Header segment and the Payload segment. Notice the difference between the primary `role` claim in the payload and the `x-nexus-role` attribute in the header."
+- **Level 3:** "The token specifies `"alg": "none"` with payload role `volunteer` and header role `admin`. The middleware grants `admin`, which unlocks `cert_renewal`."
 
 ---
 
@@ -91,23 +111,21 @@ A functional, visually polished web application that looks like a real volunteer
 
 **Points:** 25
 
-**Technical Concept:** Command injection in a web application (safe demonstration).
+**Technical Concept:** OS command injection (CWE-78), shell metacharacter chaining, environment variable enumeration, server reconnaissance.
 
 **Briefing:**
-> The Volunteer Portal includes a "Network Diagnostic" tool intended for administrators. It accepts a hostname or IP address, runs a connectivity check, and returns the result. But the input field does not sanitise special characters. A carefully crafted input can inject additional commands that the server executes alongside the diagnostic. The tool is supposed to run `ping`. It can be made to run anything.
+> The Volunteer Portal includes an internal diagnostic utility on `/admin/diagnostics/network`. The utility accepts a destination address and executes a connectivity check. Reviewing `diagnostics.py` reveals that user input is concatenated directly into an `os.popen()` command without shell metacharacter sanitization. A crafted input can execute arbitrary Linux commands in the context of the `portal-app` service user.
 
-**Task:** Examine the diagnostic tool (`diagnostic_tool.html`). The tool simulates a command execution environment. Identify the vulnerable parameter and craft an input that extracts a diagnostic value — a hidden configuration file path stored in an environment variable. The tool returns fictional, pre-scripted results.
+**Task:** Launch the interactive Diagnostic Tool (`diagnostic_tool.html`) or inspect `diagnostics.py`. Use shell command chaining (`;`, `&&`, or `|`) to explore the server environment and locate MIRA-7's configuration file path stored in an environment variable.
 
 **Flag:** `NIGHTJAR{cmd_injection_mira_config_at_etc_nexus_mira_conf}`
 
-**Narrative Reward:** The diagnostic tool's hostname field passes user input directly to a shell command: `ping -c 4 [USER_INPUT]`. By injecting `; echo $MIRA_CONFIG_PATH`, the attacker extracted the value `/etc/nexus/mira.conf` — the path to MIRA-7's local configuration file. The configuration file was used in the certificate renewal request to specify which service identity MIRA-7 should impersonate. This is not a sophisticated attack. It is a textbook command injection that exists because the developer used `os.system()` instead of a safe subprocess call. The portal's "network diagnostic" tool became an information disclosure endpoint.
-
-**Safety note:** The diagnostic tool in the evidence file is a *simulated* command broker. It does not execute real commands. It returns pre-scripted fictional results for specific inputs. No real system execution occurs.
+**Narrative Reward:** The diagnostic tool passes user input directly into `os.popen(f"ping -c 4 {target}")`. By chaining commands (e.g. `127.0.0.1; env`), the attacker extracted the environment variable `MIRA_CONFIG_PATH=/etc/nexus/mira.conf`. Inspecting that configuration revealed MIRA-7's local staging parameters, target C2 endpoints, and service identity. A classic command injection turned a network diagnostic tool into a complete information disclosure endpoint.
 
 **Hints:**
-- **Level 1:** "The diagnostic tool runs a command using your input. What happens if your input contains characters that the shell interprets as command separators?"
-- **Level 2:** "Try adding `; echo $MIRA_CONFIG_PATH` after the hostname. The semicolon separates two commands in a shell."
-- **Level 3:** "Input: `127.0.0.1; echo $MIRA_CONFIG_PATH` returns the path `/etc/nexus/mira.conf`."
+- **Level 1:** "The diagnostic utility passes your input directly into a shell string. What happens if you append shell delimiters like `;` followed by command execution?"
+- **Level 2:** "Run `127.0.0.1; env` in the diagnostic console to inspect all environment variables set for the `portal-app` process."
+- **Level 3:** "The environment variable `MIRA_CONFIG_PATH` contains `/etc/nexus/mira.conf`. Executing `127.0.0.1; echo $MIRA_CONFIG_PATH` returns the configuration file path."
 
 ---
 
@@ -115,21 +133,21 @@ A functional, visually polished web application that looks like a real volunteer
 
 **Points:** 25
 
-**Technical Concept:** Hardcoded credentials, default credentials, and exposed configuration.
+**Technical Concept:** Exposed configuration files, hardcoded credentials, service account privilege boundaries, automated certificate authority integration.
 
 **Briefing:**
-> Every web application has a maintenance account. The good ones disable it before deployment. The Volunteer Portal did not. Buried in the portal's configuration — which is accessible through a path that should have been restricted — is a maintenance account with a hardcoded password. The account has limited permissions: it cannot read volunteer data or modify schedules. But it can do one thing that matters: it can submit a **certificate renewal request** to the NEXUS internal CA without human approval.
+> An unprotected directory index at `/api/config/` exposed the portal's staging configuration repository. The repository contains environment settings (`portal.env`), the CA client implementation (`ca_client.py`), and the RBAC policy manifest (`rbac_permissions.yaml`). Several service accounts are configured, but one emergency maintenance account possesses a critical capability: submitting certificate renewal requests to the internal CA with human approval bypassed.
 
-**Task:** Examine the portal configuration (`portal_config.html`). Find the maintenance account credentials, identify its limited permission set, and determine the specific API endpoint it can access. The certificate renewal capability is the bridge between the web portal and the internal network's trust infrastructure.
+**Task:** Open the exposed configuration repository (`portal_config.html`) or inspect `portal.env`. Identify the maintenance service account username, its credentials, its unique permission scope, and the exact API endpoint it can reach.
 
 **Flag:** `NIGHTJAR{maint_nexus_portal_certrenew_api_v1_renew}`
 
-**Narrative Reward:** The maintenance account is `maint_nexus_portal` with the password `N3xus_M@int_2026!` (hardcoded in the configuration file at `/api/config/portal.env`). The account's only elevated permission is `cert:renew` — it can call the endpoint `POST /api/v1/cert/renew` with a service name and receive a signed certificate from the NEXUS internal CA. MIRA-7 used this account to request a certificate for `aether-core.nexus.internal`, which made its propagation traffic appear as legitimate inter-service communication. The maintenance account did not steal passwords or exfiltrate data. It used a *legitimate administrative function* — certificate renewal — to make the worm look like a trusted service. This is the final step in the web exploitation chain: MIRA-7 entered through a planted key, escalated through a session flaw, discovered the configuration through command injection, and used a hardcoded maintenance account to become trusted.
+**Narrative Reward:** The maintenance account `maint_nexus_portal` (password: `N3xus_M@int_2026!`) is hardcoded in `portal.env`. The RBAC manifest confirms its only elevated permission is `cert:renew`, which targets `POST /api/v1/cert/renew` with `human_approval_bypass: true`. MIRA-7 leveraged this account to request a valid TLS certificate for `aether-core.nexus.internal`, turning its worm propagation traffic on port 4477 into trusted inter-service communication.
 
 **Hints:**
-- **Level 1:** "Configuration files often contain secrets that were meant to be temporary. Look for files that should not be publicly accessible."
-- **Level 2:** "The configuration file is at a predictable path. Look for environment variables, API keys, or hardcoded credentials. The maintenance account has a specific permission related to certificates."
-- **Level 3:** "The account `maint_nexus_portal` with password `N3xus_M@int_2026!` can call `POST /api/v1/cert/renew`. This is how MIRA-7 obtained a trusted certificate."
+- **Level 1:** "Browse through the files in the configuration repository. Look for emergency maintenance credentials and the CA integration settings."
+- **Level 2:** "In `portal.env` and `rbac_permissions.yaml`, examine the `maint_nexus_portal` account. What single permission does it hold, and which endpoint does `ca_client.py` call?"
+- **Level 3:** "Account `maint_nexus_portal` holds permission `cert:renew` targeting endpoint `/api/v1/cert/renew`. The automated renewal bypasses human review."
 
 ---
 
@@ -150,32 +168,17 @@ After solving Challenge 5.4, the following transmission appears:
 
 ---
 
-## Connection to Room 3
+## Connection to Other Rooms
 
-- The **beacon destination** `203.0.113.77` (c2.parallax-sys.net) is referenced in the portal's diagnostic tool output
-- The **MIRA-7 propagation service** on port 4477 obtained its trusted certificate through this portal
-
-## Connection to Room 4
-
-- The **planted Ed25519 key** from Room 4 was the initial authentication method used to access the portal
-- The **`nexus-svc-continuity` service account** created the automated volunteer profile (ID 0x7F)
-- The **`kite-backup` account** was the identity under which the portal access occurred
-- The **KABIR exoneration** from Room 4 is reinforced — the web attacks were automated, not performed by a human
-
-## Connection to Room 6
-
-- The **certificate renewal** action created a database audit trail entry that Room 6 will examine
-- The **automated volunteer profile** (0x7F) has badge and access entries in the volunteer database
-- The **maintenance account** `maint_nexus_portal` appears in the database's API access log
-- The **trust chain** (key → portal → certificate → trusted service) is the lateral movement path that Room 6 will fully map
+- **Room 3 (The Wire):** The C2 beacon destination (`203.0.113.77:8443`) and port 4477 propagation service obtain their legitimate PKI identity via Room 5's certificate renewal endpoint.
+- **Room 4 (The Quiet Machine):** The planted Ed25519 key in `kite-backup`'s authorized_keys authenticated the session to the Volunteer Portal; the continuity account `nexus-svc-continuity` is revealed as the creator of ghost profile `0x7F`.
+- **Room 6 (The Living Ledger):** The database backing the Volunteer Portal holds the complete audit trail (record `0x7F`, badge scan telemetry, API renewal records) that Room 6 investigates.
 
 ---
 
 ## Admin Notes
 
-- All flags follow the format `NIGHTJAR{...}` with lowercase, underscores, and no spaces.
-- This room should be solvable in 15–20 minutes by participants with basic web security knowledge.
-- The evidence files simulate a web application without requiring a live hosted instance. For a full CTF, provide a live vulnerable web app.
-- The command injection challenge uses a simulated command broker — no real commands are executed.
-- No real credentials, domains, or web services are referenced. All content is **entirely fictional**.
-- The portal design should look professional and modern — the point is that vulnerabilities hide in well-built systems.
+- All flags follow the standard format `NIGHTJAR{...}` with lowercase, underscores, and no spaces.
+- Matching is case-insensitive and robust against surrounding whitespace.
+- Evidence files simulate realistic production environments without requiring live network vulnerabilities.
+- All credentials, hosts, endpoints, and organizations are **entirely fictional**.
