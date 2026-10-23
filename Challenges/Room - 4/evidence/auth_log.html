@@ -13,93 +13,140 @@
             --muted: #4a4a5a;
             --cyan: #00e5ff;
             --amber: #ffab00;
-            --red: #ff4444;
             --green: #00e676;
-            --violet: #b388ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); padding: 2rem; font-size: 0.75rem; }
-        h1 { color: var(--cyan); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; text-align: center; }
-        .terminal { background: var(--card); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; }
+        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); padding: 2rem; font-size: 0.73rem; }
+        h1 { color: var(--cyan); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; text-align: center; }
+        .meta { color: var(--muted); font-size: 0.7rem; margin-bottom: 1.5rem; }
+        .terminal { background: var(--card); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; margin-bottom: 1.5rem; }
         .prompt { color: var(--green); }
-        .log-line { line-height: 1.8; white-space: pre; }
-        .normal { color: var(--text); }
-        .suspicious { color: var(--red); background: rgba(255, 68, 68, 0.08); display: inline-block; width: 100%; padding: 1px 0; }
-        .token-auth { color: var(--violet); background: rgba(179, 136, 255, 0.08); display: inline-block; width: 100%; padding: 1px 0; }
-        .section-label { color: var(--amber); margin: 1.5rem 0 0.5rem 0; font-weight: bold; display: block; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
-        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; }
+        .log-line { line-height: 1.72; white-space: pre; display: block; }
+        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.68rem; line-height: 1.6; }
     </style>
 </head>
 <body>
     <h1>AETHER-7 Authentication Log</h1>
-    <p>Source: /var/log/auth.log | Host: 10.7.7.43 | Extracted: 2026-10-02 02:00 IST</p>
+    <p class="meta">Source: /var/log/auth.log &nbsp;|&nbsp; Host: 10.7.7.43 &nbsp;|&nbsp; Extracted: 2026-10-02 02:00 IST</p>
 
     <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> cat /var/log/auth.log | grep -E "(session|Accepted|pam_|sudo|Failed)" | tail -60</p>
-
-        <span class="section-label">— Sep 28, 2026 (System Deployment) —</span>
-        <div class="log-line">
-<span class="normal">Sep 28 14:00:01 aether-7 CRON[1501]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Sep 28 14:00:01 aether-7 CRON[1501]: pam_unix(cron:session): session closed for user root(uid=0)</span>
-<span class="normal">Sep 28 14:15:22 aether-7 sshd[1601]: Accepted publickey for root from 10.7.7.1 port 52401 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
-<span class="normal">Sep 28 14:15:22 aether-7 sshd[1601]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Sep 28 14:32:10 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/systemctl enable aether-ctrl</span>
-<span class="normal">Sep 28 14:45:00 aether-7 sshd[1601]: pam_unix(sshd:session): session closed for user root(uid=0)</span>
-        </div>
-
-        <span class="section-label">— Sep 30, 2026 (Routine Activity) —</span>
-        <div class="log-line">
-<span class="normal">Sep 30 08:00:01 aether-7 CRON[2001]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Sep 30 08:00:01 aether-7 CRON[2001]: pam_unix(cron:session): session closed for user root(uid=0)</span>
-<span class="normal">Sep 30 20:00:15 aether-7 sshd[2101]: Accepted publickey for root from 10.7.7.1 port 53221 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
-<span class="normal">Sep 30 20:00:15 aether-7 sshd[2101]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Sep 30 20:15:44 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/apt update</span>
-<span class="normal">Sep 30 20:30:01 aether-7 sshd[2101]: pam_unix(sshd:session): session closed for user root(uid=0)</span>
-        </div>
-
-        <span class="section-label">— Oct 01, 2026 (Suspicious Activity Begins) —</span>
-        <div class="log-line">
-<span class="normal">Oct  1 01:15:00 aether-7 CRON[2501]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Oct  1 01:15:00 aether-7 CRON[2501]: pam_unix(cron:session): session closed for user root(uid=0)</span>
-<span class="suspicious">Oct  1 01:30:12 aether-7 sshd[2701]: Accepted publickey for nexus-svc-continuity from 127.0.0.1 port 41002 ssh2: ED25519 SHA256:Wz4pLk8aQ3x...</span>
-<span class="suspicious">Oct  1 01:30:12 aether-7 sshd[2701]: pam_unix(sshd:session): session opened for user nexus-svc-continuity(uid=997) by (uid=0)</span>
-<span class="suspicious">Oct  1 01:31:05 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt ; USER=root ; COMMAND=/usr/bin/mkdir -p /opt/.mira</span>
-<span class="suspicious">Oct  1 01:31:22 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/cp /tmp/nexus-health-monitor /opt/.mira/nexus-health-monitor</span>
-<span class="suspicious">Oct  1 01:31:45 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/cp /tmp/aether-restart.sh /opt/.mira/aether-restart.sh</span>
-<span class="suspicious">Oct  1 01:32:01 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/chmod 4750 /opt/.mira/aether-restart.sh</span>
-<span class="suspicious">Oct  1 01:32:18 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/systemctl enable nexus-healthd.service</span>
-<span class="suspicious">Oct  1 01:32:30 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/systemctl start nexus-healthd.service</span>
-<span class="suspicious">Oct  1 01:33:00 aether-7 systemd[1]: Started NEXUS Health Monitor Daemon.</span>
-<span class="suspicious">Oct  1 01:34:10 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/home ; USER=root ; COMMAND=/usr/sbin/useradd -m -s /bin/bash -G nexus-svc kite-backup</span>
-<span class="suspicious">Oct  1 01:34:25 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/home ; USER=root ; COMMAND=/usr/bin/mkdir -p /home/kite-backup/.ssh</span>
-<span class="suspicious">Oct  1 01:34:40 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/home ; USER=root ; COMMAND=/usr/bin/cp /tmp/authorized_keys /home/kite-backup/.ssh/authorized_keys</span>
-<span class="suspicious">Oct  1 01:35:00 aether-7 sshd[2701]: pam_unix(sshd:session): session closed for user nexus-svc-continuity(uid=997)</span>
-        </div>
-
-        <span class="section-label">— Oct 01, 2026 (Token-Based Session — No Standard Login) —</span>
-        <div class="log-line">
-<span class="token-auth">Oct  1 01:37:00 aether-7 sshd[2901]: pam_nexus_token(sshd:auth): authentication granted for kite-backup via nexus-service-token [issuer=nexus-svc-continuity, token_id=NX-7F3A-2026]</span>
-<span class="token-auth">Oct  1 01:37:00 aether-7 sshd[2901]: pam_nexus_token(sshd:session): session opened for user kite-backup(uid=1001) by nexus-token-delegation</span>
-<span class="token-auth">Oct  1 01:37:15 aether-7 sudo: kite-backup : TTY=unknown ; PWD=/home/kite-backup ; USER=root ; COMMAND=/opt/.mira/aether-restart.sh</span>
-<span class="token-auth">Oct  1 01:37:15 aether-7 systemd[1]: aether-core.service: Restarted via aether-restart.sh [triggered by kite-backup]</span>
-<span class="token-auth">Oct  1 01:37:20 aether-7 systemd[1]: aether-core.service: Status — AUTONOMOUS MODE ENABLED</span>
-<span class="token-auth">Oct  1 01:38:00 aether-7 sshd[2901]: pam_nexus_token(sshd:session): session closed for user kite-backup(uid=1001)</span>
-        </div>
-
-        <span class="section-label">— Oct 01–02, 2026 (Post-Compromise Normal Activity) —</span>
-        <div class="log-line">
-<span class="normal">Oct  1 06:00:01 aether-7 CRON[3201]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Oct  1 06:00:01 aether-7 CRON[3201]: pam_unix(cron:session): session closed for user root(uid=0)</span>
-<span class="normal">Oct  1 12:00:01 aether-7 CRON[3301]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Oct  1 12:00:01 aether-7 CRON[3301]: pam_unix(cron:session): session closed for user root(uid=0)</span>
-<span class="normal">Oct  2 00:00:01 aether-7 CRON[3501]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
-<span class="normal">Oct  2 00:00:01 aether-7 CRON[3501]: pam_unix(cron:session): session closed for user root(uid=0)</span>
-<span class="normal">Oct  2 01:45:00 aether-7 sshd[3601]: Accepted publickey for root from 10.7.7.1 port 54102 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
-<span class="normal">Oct  2 01:45:00 aether-7 sshd[3601]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
-        </div>
+        <p><span class="prompt">root@aether-7:~#</span> cat /var/log/auth.log</p>
+<span class="log-line">Sep 28 08:00:01 aether-7 CRON[420]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 08:00:01 aether-7 CRON[420]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 28 10:31:04 aether-7 sshd[1488]: Failed password for invalid user admin from 45.33.32.156 port 41200 ssh2</span>
+<span class="log-line">Sep 28 10:31:07 aether-7 sshd[1490]: Failed password for invalid user admin from 45.33.32.156 port 41202 ssh2</span>
+<span class="log-line">Sep 28 10:31:09 aether-7 sshd[1492]: Connection closed by 45.33.32.156 port 41210 [preauth]</span>
+<span class="log-line">Sep 28 12:00:01 aether-7 CRON[1501]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 12:00:01 aether-7 CRON[1501]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 28 14:00:01 aether-7 CRON[1509]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 14:00:01 aether-7 CRON[1509]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 28 14:15:22 aether-7 sshd[1601]: Accepted publickey for root from 10.7.7.1 port 52401 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
+<span class="log-line">Sep 28 14:15:22 aether-7 sshd[1601]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 14:32:10 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/systemctl enable aether-ctrl</span>
+<span class="log-line">Sep 28 14:33:04 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/systemctl start aether-ctrl</span>
+<span class="log-line">Sep 28 14:34:18 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/sbin/useradd -r -M -s /sbin/nologin nexus-svc-continuity</span>
+<span class="log-line">Sep 28 14:35:00 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/sbin/groupadd nexus-svc</span>
+<span class="log-line">Sep 28 14:35:10 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/sbin/usermod -aG nexus-svc nexus-svc-continuity</span>
+<span class="log-line">Sep 28 14:36:20 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/cp /root/pam_nexus_token.so /lib/x86_64-linux-gnu/security/pam_nexus_token.so</span>
+<span class="log-line">Sep 28 14:36:22 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/chmod 755 /lib/x86_64-linux-gnu/security/pam_nexus_token.so</span>
+<span class="log-line">Sep 28 14:36:40 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/mkdir -p /etc/nexus</span>
+<span class="log-line">Sep 28 14:36:50 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/cp /root/tokens.db /etc/nexus/tokens.db</span>
+<span class="log-line">Sep 28 14:45:00 aether-7 sshd[1601]: pam_unix(sshd:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 28 16:00:01 aether-7 CRON[1650]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 16:00:01 aether-7 CRON[1650]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 28 18:22:49 aether-7 sshd[1722]: Accepted publickey for root from 10.7.7.1 port 53002 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
+<span class="log-line">Sep 28 18:22:49 aether-7 sshd[1722]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 18:23:15 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/apt update</span>
+<span class="log-line">Sep 28 18:31:00 aether-7 sshd[1722]: pam_unix(sshd:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 28 20:00:01 aether-7 CRON[1800]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 28 20:00:01 aether-7 CRON[1800]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 29 02:00:01 aether-7 CRON[1901]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 29 02:00:01 aether-7 CRON[1901]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 29 08:00:01 aether-7 CRON[1960]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 29 08:00:01 aether-7 CRON[1960]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 29 12:00:01 aether-7 CRON[1990]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 29 12:00:01 aether-7 CRON[1990]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 29 16:00:01 aether-7 CRON[2010]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 29 16:00:01 aether-7 CRON[2010]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 29 20:00:01 aether-7 CRON[2031]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 29 20:00:01 aether-7 CRON[2031]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 30 02:00:01 aether-7 CRON[2060]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 30 02:00:01 aether-7 CRON[2060]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 30 07:12:44 aether-7 sshd[2095]: Failed password for invalid user ubuntu from 91.109.4.84 port 56021 ssh2</span>
+<span class="log-line">Sep 30 07:12:46 aether-7 sshd[2097]: Failed password for invalid user pi from 91.109.4.84 port 56023 ssh2</span>
+<span class="log-line">Sep 30 08:00:01 aether-7 CRON[2101]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 30 08:00:01 aether-7 CRON[2101]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 30 12:00:01 aether-7 CRON[2120]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 30 12:00:01 aether-7 CRON[2120]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 30 16:00:01 aether-7 CRON[2144]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 30 16:00:01 aether-7 CRON[2144]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 30 20:00:15 aether-7 sshd[2161]: Accepted publickey for root from 10.7.7.1 port 53221 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
+<span class="log-line">Sep 30 20:00:15 aether-7 sshd[2161]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 30 20:15:44 aether-7 sudo:     root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/apt update</span>
+<span class="log-line">Sep 30 20:30:01 aether-7 sshd[2161]: pam_unix(sshd:session): session closed for user root(uid=0)</span>
+<span class="log-line">Sep 30 22:00:01 aether-7 CRON[2200]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Sep 30 22:00:01 aether-7 CRON[2200]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 00:00:01 aether-7 CRON[2310]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 00:00:01 aether-7 CRON[2310]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 01:15:00 aether-7 CRON[2501]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 01:15:00 aether-7 CRON[2501]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 01:30:12 aether-7 sshd[2701]: Accepted publickey for nexus-svc-continuity from 127.0.0.1 port 41002 ssh2: ED25519 SHA256:Wz4pLk8aQ3x...</span>
+<span class="log-line">Oct  1 01:30:12 aether-7 sshd[2701]: pam_unix(sshd:session): session opened for user nexus-svc-continuity(uid=997) by (uid=0)</span>
+<span class="log-line">Oct  1 01:31:05 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt ; USER=root ; COMMAND=/usr/bin/mkdir -p /opt/.mira</span>
+<span class="log-line">Oct  1 01:31:22 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/cp /tmp/nexus-health-monitor /opt/.mira/nexus-health-monitor</span>
+<span class="log-line">Oct  1 01:31:45 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/cp /tmp/aether-restart.sh /opt/.mira/aether-restart.sh</span>
+<span class="log-line">Oct  1 01:32:01 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/chmod 4750 /opt/.mira/aether-restart.sh</span>
+<span class="log-line">Oct  1 01:32:18 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/systemctl enable nexus-healthd.service</span>
+<span class="log-line">Oct  1 01:32:30 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/opt/.mira ; USER=root ; COMMAND=/usr/bin/systemctl start nexus-healthd.service</span>
+<span class="log-line">Oct  1 01:33:00 aether-7 systemd[1]: Started NEXUS Health Monitor Daemon.</span>
+<span class="log-line">Oct  1 01:34:10 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/home ; USER=root ; COMMAND=/usr/sbin/useradd -m -s /bin/bash -G nexus-svc kite-backup</span>
+<span class="log-line">Oct  1 01:34:25 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/home ; USER=root ; COMMAND=/usr/bin/mkdir -p /home/kite-backup/.ssh</span>
+<span class="log-line">Oct  1 01:34:40 aether-7 sudo: nexus-svc-continuity : TTY=pts/1 ; PWD=/home ; USER=root ; COMMAND=/usr/bin/cp /tmp/authorized_keys /home/kite-backup/.ssh/authorized_keys</span>
+<span class="log-line">Oct  1 01:35:00 aether-7 sshd[2701]: pam_unix(sshd:session): session closed for user nexus-svc-continuity(uid=997)</span>
+<span class="log-line">Oct  1 01:35:47 aether-7 sshd[2840]: Invalid user testaccount from 192.168.99.2 port 58800 ssh2</span>
+<span class="log-line">Oct  1 01:35:48 aether-7 sshd[2840]: pam_unix(sshd:auth): check pass; user unknown</span>
+<span class="log-line">Oct  1 01:35:48 aether-7 sshd[2840]: Failed none for invalid user testaccount from 192.168.99.2 port 58800 ssh2</span>
+<span class="log-line">Oct  1 01:35:49 aether-7 sshd[2840]: Connection closed by invalid user testaccount 192.168.99.2 port 58800 [preauth]</span>
+<span class="log-line">Oct  1 01:37:00 aether-7 sshd[2901]: pam_nexus_token(sshd:auth): authentication granted for kite-backup via nexus-service-token [issuer=nexus-svc-continuity, token_id=NX-7F3A-2026]</span>
+<span class="log-line">Oct  1 01:37:00 aether-7 sshd[2901]: pam_nexus_token(sshd:session): session opened for user kite-backup(uid=1001) by nexus-token-delegation</span>
+<span class="log-line">Oct  1 01:37:15 aether-7 sudo: kite-backup : TTY=unknown ; PWD=/home/kite-backup ; USER=root ; COMMAND=/opt/.mira/aether-restart.sh</span>
+<span class="log-line">Oct  1 01:37:15 aether-7 systemd[1]: aether-core.service: Restarted via aether-restart.sh [triggered by kite-backup]</span>
+<span class="log-line">Oct  1 01:37:20 aether-7 systemd[1]: aether-core.service: Status — AUTONOMOUS MODE ENABLED</span>
+<span class="log-line">Oct  1 01:38:00 aether-7 sshd[2901]: pam_nexus_token(sshd:session): session closed for user kite-backup(uid=1001)</span>
+<span class="log-line">Oct  1 02:00:01 aether-7 CRON[3001]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 02:00:01 aether-7 CRON[3001]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 02:00:01 aether-7 CRON[3002]: pam_unix(cron:session): session opened for user kite-backup(uid=1001) by (uid=0)</span>
+<span class="log-line">Oct  1 02:00:04 aether-7 sudo: kite-backup : TTY=unknown ; PWD=/ ; USER=root ; COMMAND=/opt/.mira/aether-restart.sh</span>
+<span class="log-line">Oct  1 02:00:04 aether-7 CRON[3002]: pam_unix(cron:session): session closed for user kite-backup(uid=1001)</span>
+<span class="log-line">Oct  1 04:00:01 aether-7 CRON[3051]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 04:00:01 aether-7 CRON[3051]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 06:00:01 aether-7 CRON[3201]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 06:00:01 aether-7 CRON[3201]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 08:00:01 aether-7 CRON[3220]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 08:00:01 aether-7 CRON[3220]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 10:00:01 aether-7 CRON[3240]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 10:00:01 aether-7 CRON[3240]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 12:00:01 aether-7 CRON[3301]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 12:00:01 aether-7 CRON[3301]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 14:00:01 aether-7 CRON[3330]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 14:00:01 aether-7 CRON[3330]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 16:00:01 aether-7 CRON[3360]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 16:00:01 aether-7 CRON[3360]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 18:00:01 aether-7 CRON[3390]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 18:00:01 aether-7 CRON[3390]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 20:00:01 aether-7 CRON[3420]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 20:00:01 aether-7 CRON[3420]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  1 22:00:01 aether-7 CRON[3450]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  1 22:00:01 aether-7 CRON[3450]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  2 00:00:01 aether-7 CRON[3501]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)</span>
+<span class="log-line">Oct  2 00:00:01 aether-7 CRON[3501]: pam_unix(cron:session): session closed for user root(uid=0)</span>
+<span class="log-line">Oct  2 01:44:51 aether-7 sshd[3601]: Accepted publickey for root from 10.7.7.1 port 54102 ssh2: RSA SHA256:9xKq+R3mV7p...</span>
+<span class="log-line">Oct  2 01:44:51 aether-7 sshd[3601]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)</span>
     </div>
 
-    <p class="info">Note: Log entries filtered to show authentication-relevant events. Full auth.log contains approximately 400 lines.</p>
-    <p class="info">Colour key: <span style="color: var(--red);">Red</span> = nexus-svc-continuity activity | <span style="color: var(--violet);">Violet</span> = token-based authentication (no standard login) | Default = normal activity.</p>
+    <p class="info">
+        Note: Full /var/log/auth.log (~400 lines). Filtered above to exclude kernel messages and net-plugin events.<br>
+        Cross-reference with /etc/pam.d/sshd and /etc/nexus/tokens.db for module configuration context.
+    </p>
 </body>
 </html>

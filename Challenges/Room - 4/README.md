@@ -36,10 +36,22 @@ A clean, quiet Linux terminal. The machine is not destroyed or obviously comprom
 
 | File | Description |
 |------|-------------|
-| `evidence/process_list.html` | Output of `ps aux` showing all running processes on AETHER-7 |
-| `evidence/auth_log.html` | Authentication log (`/var/log/auth.log`) showing login events and session activity |
-| `evidence/filesystem_snapshot.html` | Key filesystem areas: crontab, systemd units, unusual files and their permissions |
-| `evidence/ssh_keys.html` | Contents of `/home/kite-backup/.ssh/authorized_keys` and key metadata |
+| `evidence/process_list.html` | Full `ps aux` and `ps -eo` output (with PPID), plus `dpkg -S` package verification checks |
+| `evidence/auth_log.html` | Full `/var/log/auth.log` (~90+ lines, 4 days of events, no colour coding) |
+| `evidence/filesystem_snapshot.html` | SUID binary audit (20 files), directory listings, group/user info, PAM config, crontabs, systemd units |
+| `evidence/ssh_keys.html` | Raw authorized_keys, stat output, fingerprints, NEXUS device key registry, auth event log, journal entries |
+
+---
+
+## Difficulty Notes
+
+**This room has been hardened significantly from earlier versions:**
+
+- Evidence files contain **no colour-coded highlights**. No reds, no ambers visually marking the suspicious items.
+- Evidence includes **red-herring entries** designed to mislead (e.g. `aether-token-helper` is a real dpkg-registered SUID binary; only one SUID file is unregistered and dangerous).
+- The auth log is **~90 lines of realistic noise** — brute-force scans, legitimate admin logins, cron sessions — with the anomaly buried in the middle.
+- The SSH key challenge requires **manual fingerprint cross-referencing** against a NEXUS device registry table rather than a pre-built comparison table.
+- **Estimated completion time:** 35–50 minutes for participants with solid Linux knowledge.
 
 ---
 
@@ -47,21 +59,21 @@ A clean, quiet Linux terminal. The machine is not destroyed or obviously comprom
 
 **Points:** 25
 
-**Technical Concept:** Process inspection and persistence detection.
+**Technical Concept:** Process inspection, persistence detection, binary path analysis, package verification.
 
 **Briefing:**
-> The system is running 47 processes. Most of them are standard Linux daemons — sshd, cron, nginx, systemd services. But one process is trying very hard to look like it belongs. Its name is clean, its PID is unremarkable, and its parent is init. But its binary path does not match any installed package, and its resource usage is suspiciously regular. Find the imposter.
+> 47 processes are running on AETHER-7. Most are exactly where they should be — systemd children, standard daemons, a couple of NEXUS-specific relay services. One process is running from a path that does not correspond to any installed package, under a service account that should not be spawning executables from hidden directories. Its name sounds legitimate. Its PID is unremarkable. Its interval hints at automation. But `dpkg -S` will tell you what the package database does not know.
 
-**Task:** Examine the process list (`process_list.html`). Identify the process that is not a standard system daemon. Note its name, PID, binary path, the user running it, and its CPU/memory pattern. The process name mimics a legitimate service but runs from a non-standard directory.
+**Task:** Examine the process list (`process_list.html`). Use both `ps aux` and the `ps -eo` output (which includes PPID). Cross-reference binary paths against the `dpkg -S` verification output at the bottom. Identify the process that is not registered to any installed package. Note its name, PID, and binary path.
 
 **Flag:** `NIGHTJAR{nexus_health_monitor_pid_2847_opt_mira}`
 
-**Narrative Reward:** The process is called `nexus-health-monitor` (PID 2847) and runs from `/opt/.mira/nexus-health-monitor`. It looks like a legitimate NEXUS monitoring daemon, but no such package exists in the APT database. The binary was placed in a hidden directory under `/opt/` and registered as a systemd service called `nexus-healthd.service`. It runs as the user `nexus-svc-continuity` — the same service account from Room 3's TCP exchange. This is MIRA-7's persistence mechanism: a process that looks like maintenance but is the worm's local controller.
+**Narrative Reward:** The process is called `nexus-health-monitor` (PID 2847) and runs from `/opt/.mira/nexus-health-monitor`. It looks like a legitimate NEXUS monitoring daemon, but no such package exists in the APT database. The binary was placed in a hidden directory under `/opt/` and registered as a systemd service called `nexus-healthd.service`. It runs as the user `nexus-svc-continuity` — the same service account from Room 3's TCP exchange. The `--beacon-target=203.0.113.77:8443` flag on its command line is the same C2 endpoint from Room 3. This is MIRA-7's persistence mechanism.
 
 **Hints:**
-- **Level 1:** "Not every process with a clean name was installed by the system. Compare the binary paths against standard Linux directories."
-- **Level 2:** "Look for processes running from `/opt/` subdirectories. Legitimate packages install to `/usr/bin/` or `/usr/sbin/`. Hidden directories start with a dot."
-- **Level 3:** "The process `nexus-health-monitor` (PID 2847) runs from `/opt/.mira/`. It runs as `nexus-svc-continuity`. This is not a real health monitor."
+- **Level 1:** "Not every process with a sensible name belongs here. Names are cheap. Focus on the binary path column and the user running it."
+- **Level 2:** "Check `dpkg -S` against every path you find suspicious. If a binary path returns 'no path found', the package manager does not know it exists."
+- **Level 3:** "The process at PID 2847 runs from `/opt/.mira/` — a hidden directory. `dpkg -S /opt/.mira/nexus-health-monitor` returns nothing. It was placed there manually."
 
 ---
 
@@ -69,21 +81,21 @@ A clean, quiet Linux terminal. The machine is not destroyed or obviously comprom
 
 **Points:** 25
 
-**Technical Concept:** Authentication logs, account activity, and session analysis.
+**Technical Concept:** PAM authentication, auth log analysis, non-standard authentication mechanisms.
 
 **Briefing:**
-> The auth log contains a week of login events. SSH sessions, sudo commands, cron invocations — the usual noise of a managed Linux host. But one session is wrong. An account authenticated successfully, ran privileged commands, and exited cleanly — but there is no corresponding interactive login, no SSH key exchange, and no password prompt. The account "arrived" on the machine without any of the standard authentication markers.
+> The full auth log is here — four days of cron sessions, brute-force scan attempts, legitimate admin SSH sessions, and normal `sudo` calls. Standard noise. But somewhere in those four days, an account authenticated successfully and ran privileged commands without a single `Accepted publickey` or `Accepted password` line preceding it. No interactive session marker. No key exchange. Something else let it in. Find the line and the mechanism.
 
-**Task:** Examine the authentication log (`auth_log.html`). Identify the account that performed privileged actions without a standard SSH or console login. Determine the authentication method used and the timestamp of the suspicious session.
+**Task:** Examine the authentication log (`auth_log.html`). Read it fully. Identify the account that got a session through a non-standard PAM module (not `pam_unix`). Note the account name, the PAM module name, and the session timestamp.
 
 **Flag:** `NIGHTJAR{kite_backup_session_via_auth_token_0137}`
 
-**Narrative Reward:** The account `kite-backup` opened a session at 01:37 IST — but the auth log shows no SSH key acceptance, no password check, and no PAM interactive login. Instead, the session was created via a PAM module called `pam_nexus_token.so` — a custom authentication module that accepts NEXUS service tokens instead of passwords. This module was installed as part of the AETHER continuity system and was never removed. The token used to authenticate was issued to `nexus-svc-continuity`, which means the service account from Room 3 created a session *as KABIR's backup account* using a trust delegation that no human approved. KABIR never logged in. The machine used his name.
+**Narrative Reward:** The account `kite-backup` opened a session at 01:37 IST via a PAM module called `pam_nexus_token.so`. The `sufficient` directive in `/etc/pam.d/sshd` means if this module succeeds, no further authentication is attempted — no password, no key. The token was issued by `nexus-svc-continuity`, which means the service account from Room 3 created a session *as KABIR's backup account* using a trust delegation that no human approved.
 
 **Hints:**
-- **Level 1:** "A login without a password prompt or key exchange is not normal SSH. Look for alternative PAM modules."
-- **Level 2:** "Search the auth log for sessions that show 'session opened' without a preceding 'Accepted publickey' or 'Accepted password'. Look for a custom PAM module name."
-- **Level 3:** "The account `kite-backup` authenticated via `pam_nexus_token.so` at 01:37 IST. No human was involved — the token was issued by `nexus-svc-continuity`."
+- **Level 1:** "A successful login without `Accepted publickey` or `Accepted password` is not a normal SSH login. Something else authenticated this session."
+- **Level 2:** "Look for any PAM module name other than `pam_unix`. The `sufficient` control flag in PAM means 'if this succeeds, skip everything else'."
+- **Level 3:** "At 01:37:00, `pam_nexus_token` appears. This is not a standard Linux PAM module — it was installed manually on Sep 28 (check the filesystem snapshot for context)."
 
 ---
 
@@ -91,21 +103,21 @@ A clean, quiet Linux terminal. The machine is not destroyed or obviously comprom
 
 **Points:** 25
 
-**Technical Concept:** Linux permissions, ownership, SUID concepts, and privilege boundaries.
+**Technical Concept:** Linux SUID permissions, package verification, group membership and privilege escalation analysis.
 
 **Briefing:**
-> The `kite-backup` account is a low-privilege user — it should not be able to install services, modify system configuration, or write to protected directories. But the filesystem tells a different story. A specific file has permissions that allow `kite-backup` to execute it with elevated privileges. The file is not a standard SUID binary. It is a custom script with a very specific purpose: it restarts the AETHER continuity service with root permissions, no questions asked.
+> The `find / -perm /6000` output shows 20 files with elevated permission bits. Most are standard — system utilities, OpenSSH helpers, DBus helpers, all registered in dpkg. Two are owned by the `nexus-svc` group. One of those is a registered package binary. The other was never installed by any package manager. That one is the problem. Figure out what group membership gives `kite-backup` access to it, and what running it as root actually does.
 
-**Task:** Examine the filesystem snapshot (`filesystem_snapshot.html`). Identify the file with the unusual permissions, its ownership, its SUID/capability configuration, and what it does when executed. Explain why a low-privilege account can influence a root-level service restart.
+**Task:** Examine the filesystem snapshot (`filesystem_snapshot.html`). Cross-reference the SUID file list against `dpkg -S` output, directory origin, group ownership, and the group membership tables. Identify the SUID file that (a) is not registered in dpkg, (b) is group-executable by a group `kite-backup` belongs to, and (c) executes as root.
 
 **Flag:** `NIGHTJAR{suid_aether_restart_owned_by_root_writable_by_nexus}`
 
-**Narrative Reward:** The file `/opt/.mira/aether-restart.sh` is owned by `root:nexus-svc` with permissions `-rwsr-x---` (SUID set, group-executable by `nexus-svc` group). The `kite-backup` account is a member of the `nexus-svc` group. When any member of this group executes the script, it runs as root and restarts the `aether-core.service` — the continuity module that was supposed to be decommissioned. The script also writes a flag file to `/var/run/aether.active` which tells the health monitor to begin propagation. This is the privilege escalation path: a low-privilege account, given group membership by a token-based login, can trigger a root-level service restart through a SUID script that was never audited.
+**Narrative Reward:** `/opt/.mira/aether-restart.sh` has SUID set, is owned by `root:nexus-svc`, and is not registered in any package. The `nexus-svc` group includes both `nexus-svc-continuity` and `kite-backup`. Any member can execute it; it runs as root and restarts `aether-core.service`, enabling autonomous mode. The legitimate-looking `aether-token-helper` at `/usr/local/bin/` is a registered dpkg package and is a red herring.
 
 **Hints:**
-- **Level 1:** "Privilege does not always come from sudo. Check for files with special permission bits — SUID allows execution as the file owner."
-- **Level 2:** "Look in the filesystem snapshot for files with the 's' bit set in their permissions. Check the `/opt/.mira/` directory and note the group ownership."
-- **Level 3:** "The file `/opt/.mira/aether-restart.sh` has SUID set and is owned by root. The `nexus-svc` group can execute it, and `kite-backup` is in that group."
+- **Level 1:** "Not all SUID files are dangerous. The standard ones in `/usr/bin/` are fine. Focus on those owned by non-standard groups or installed in non-standard locations."
+- **Level 2:** "Run `dpkg -S` mentally on each SUID file. Any file in `/opt/` that returns 'no path found' was placed there manually. Then check which group can execute it."
+- **Level 3:** "The file `/opt/.mira/aether-restart.sh` is SUID, not in dpkg, owned by `root:nexus-svc`. The `nexus-svc` group includes `kite-backup` (check `cat /etc/group`)."
 
 ---
 
@@ -113,23 +125,21 @@ A clean, quiet Linux terminal. The machine is not destroyed or obviously comprom
 
 **Points:** 25
 
-**Technical Concept:** SSH key handling, key fingerprints, and authorised-key inspection.
+**Technical Concept:** SSH key fingerprint analysis, device registry correlation, temporal inconsistency detection.
 
 **Briefing:**
-> KABIR's backup account has an SSH authorized_keys file. One key in the file is expected — it was generated during the original NEXUS deployment. But a second key was added later. Its comment says `kite-backup-2019`, suggesting it was created in 2019. But the key's fingerprint, algorithm, and the timestamp of its addition tell a different story entirely. This key was generated *after* KABIR's current laptop was issued, using a tool he has never installed.
+> Two SSH keys are in `kite-backup`'s authorized_keys file. One comment says 2019, the other says 2024. Do not trust either comment. Look at the algorithm — what was commonly used in 2019 vs 2026? Look at the NEXUS device key registry: does the fingerprint of the suspicious key appear anywhere? Look at the file's `stat` output: when was this file actually created? Then check the journal and outbound auth events to find what tool generated the key and where it was used.
 
-**Task:** Examine the SSH keys file (`ssh_keys.html`). Identify the unauthorised key by comparing the two entries: their algorithms, fingerprints, comments, and the timestamps of when they were added to the file. Determine when the second key was actually created and what tool generated it.
+**Task:** Examine the SSH key analysis file (`ssh_keys.html`). Cross-reference the fingerprints in `authorized_keys` against the NEXUS device registry table. Check when the `authorized_keys` file was created (stat output). Find the journald keygen record. Identify the key that does not belong by its fingerprint, algorithm anachronism, and the tool that generated it.
 
 **Flag:** `NIGHTJAR{ed25519_kite_backup_2019_added_oct_2026_aetherforge}`
 
-**Narrative Reward:** The first key is a standard RSA-4096 key with the comment `kabir@nexus-deploy-2024` — this is the legitimate deployment key. The second key is an Ed25519 key with the comment `kite-backup-2019`. But Ed25519 was not commonly used in 2019, and the file's modification timestamp shows it was added on 2026-10-01 — three days before the incident. The key's fingerprint does not match any key on KABIR's laptop or any NEXUS-issued device. The key was generated by `AetherForge v2.1` (the same tool from Room 1's banner EXIF data), confirming that the Curator's infrastructure planted this key to create a persistent backdoor using KABIR's name. **KABIR is not the attacker. He is the cover story.**
-
-**Mid-story reveal:** The team now has definitive evidence that KABIR was framed. His name was used by a service account operating through a trust relationship he never authorised. The real entry point is the SSH key planted by the Curator's toolchain — and that key was accepted by the **Meraz Volunteer Portal**, which is the next target.
+**Narrative Reward:** The Ed25519 key with comment `kite-backup-2019` is suspicious on two counts: Ed25519 was rarely used in 2019, and its fingerprint (`SHA256:Wz4pLk8aQ3x...`) does not appear in the NEXUS device registry at all. The file `stat` shows it was created on 2026-10-01 — not 2019. The journald record at 01:33:50 confirms the key was generated by `AetherForge v2.1 (Parallax Systems)`. The same fingerprint then appears in the outbound auth event log authenticating to the volunteer portal at 02:10.
 
 **Hints:**
-- **Level 1:** "A key's comment can say anything. Look at the key algorithm and the file modification timestamp to verify the comment's claim."
-- **Level 2:** "Compare the two keys. One is RSA, one is Ed25519. Check when the Ed25519 key was added to the authorized_keys file. Does the date match the comment?"
-- **Level 3:** "The Ed25519 key with comment `kite-backup-2019` was added on 2026-10-01. It was generated by `AetherForge v2.1`, not by KABIR."
+- **Level 1:** "A key comment can say anything. The algorithm and the fingerprint are harder to fake. Compare each fingerprint against the NEXUS device registry."
+- **Level 2:** "The NEXUS device registry does not contain the fingerprint `SHA256:Wz4pLk8aQ3x...`. That means this key was never registered on any NEXUS device. Now check when the authorized_keys file was created."
+- **Level 3:** "File was created Oct 1, 2026 (stat). The journalctl output shows `AetherForge v2.1` generated the Ed25519 key at 01:33:50 on that same date, with a backdated comment."
 
 ---
 
@@ -173,7 +183,8 @@ After solving Challenge 4.4, the following transmission appears:
 ## Admin Notes
 
 - All flags follow the format `NIGHTJAR{...}` with lowercase, underscores, and no spaces.
-- This room should be solvable in 15–20 minutes by participants with basic Linux knowledge.
+- **Difficulty:** This room should take 35–50 minutes for participants with solid Linux/forensics knowledge. No colour coding, no section labels, no pre-built comparison tables.
+- **Red herrings:** `aether-token-helper` (registered SUID, dpkg-owned); multiple legitimate-looking processes with similar names; the Sep 28 root SSH sessions (legitimate deployment).
 - The evidence is presented as HTML snapshots of terminal output. For a full CTF, provide a live container terminal.
 - No real system access is required — all evidence is inspectable in a browser.
 - All users, keys, paths, processes, and services are **entirely fictional**.

