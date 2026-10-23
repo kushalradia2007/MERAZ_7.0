@@ -84,3 +84,7 @@ git push origin <branch_name> -f
 
 - You can raise a pull request from the github UI after the previous command 
 
+
+## NPC art
+
+Character art lives in `npc/` (`<id>-portrait.webp`, `<id>-full.webp` for ila, kite, rhea, curator, aman, mira) and is served from `/assets/npc/<file>` (strict filename allowlist). `story.js` uses the portraits for cutscenes and comms avatars (SVG fallback if an image fails), the hub sidebar shows Ila/Rhea/Kite faces, and Room 7 uses Kite's portrait.

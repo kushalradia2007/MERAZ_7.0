@@ -130,6 +130,15 @@
     }
     function npc(id) { return NPCS[id] || NPCS.system; }
 
+    /* Character art from /assets/npc; the drawn SVG above stays as the fallback
+     * (system terminal, or if an image fails to load). */
+    var ART = { ila: 1, rhea: 1, kite: 1, curator: 1 };
+    function portraitHTML(id) {
+        if (!ART[id]) return portrait(id);
+        return '<img class="nj-art" src="/assets/npc/' + id + '-portrait.webp" alt="" decoding="async" ' +
+            'onerror="this.outerHTML=window.NJStory.fallback(\'' + id + '\')">';
+    }
+
     /* ───────────── typewriter ───────────── */
     function typewriter(node, text, o) {
         o = o || {};
@@ -257,7 +266,7 @@
                 var who = npc(b.npc || cfg.lead);
                 setMode('dialog');
                 ov.style.setProperty('--npc', who.color);
-                q('portrait').innerHTML = portrait(b.npc || cfg.lead);
+                q('portrait').innerHTML = portraitHTML(b.npc || cfg.lead);
                 q('portrait').style.animation = 'none';
                 void q('portrait').offsetWidth;              // restart the slide-in
                 q('portrait').style.animation = '';
@@ -421,7 +430,7 @@
         var row = el('div', 'nj-cmsg ' + (who.cls || ''));
         row.style.setProperty('--npc', who.color);
         row.innerHTML = '<div class="nj-av"></div><div class="nj-bub"><div class="h"><b></b><span></span></div><div class="t"></div></div>';
-        row.querySelector('.nj-av').innerHTML = portrait(m.id);
+        row.querySelector('.nj-av').innerHTML = portraitHTML(m.id);
         row.querySelector('.h b').textContent = who.name;
         row.querySelector('.h span').textContent = clock();
         var t = row.querySelector('.t');
@@ -759,6 +768,7 @@
             return new Story(cfg);
         },
         room: wireRoom,
-        npcs: NPCS
+        npcs: NPCS,
+        fallback: portrait
     };
 })();

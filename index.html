@@ -78,6 +78,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .npc-header{padding:6px 14px;font-family:"Press Start 2P",monospace;font-size:8px;color:var(--red);display:flex;align-items:center;gap:5px}
 .npc-header::before{content:"▸";color:var(--yel)}
 .npc-item{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:10px;cursor:default}
+.npc-face{width:26px;height:26px;border-radius:50%;object-fit:cover;object-position:50% 12%;border:1px solid;flex-shrink:0}
 .npc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .npc-name{color:var(--ink-dim)}
 .npc-item.briefed .npc-name{color:var(--yel)}
@@ -447,9 +448,9 @@ const ROOMS=[
     ['The Last Timestamp','Forensics'],['Patient Zero Is a System','Final Case']
 ];
 const NPC_INFO=[
-    {name:'Cmdr. Ila Sen',short:'Ila',color:'#9a9aa8'},
-    {name:'Rhea D\'Souza',short:'Rhea',color:'#ff6a6a'},
-    {name:'Kabir "Kite" Mehra',short:'Kabir',color:'#e0a884'}
+    {name:'Cmdr. Ila Sen',short:'Ila',color:'#9a9aa8',art:'ila'},
+    {name:'Rhea D\'Souza',short:'Rhea',color:'#ff6a6a',art:'rhea'},
+    {name:'Kabir "Kite" Mehra',short:'Kabir',color:'#e0a884',art:'kite'}
 ];
 
 // Build room items in sidebar
@@ -488,7 +489,7 @@ NPC_INFO.forEach((n,i)=>{
     const el=document.createElement('div');
     el.className='npc-item';
     el.id='sidebar-npc-'+i;
-    el.innerHTML=`<div class="npc-dot" style="background:${n.color}"></div><span class="npc-name">${n.short}</span>`;
+    el.innerHTML=`<img class="npc-face" src="/assets/npc/${n.art}-portrait.webp" alt="" style="border-color:${n.color}"><div class="npc-dot" style="background:${n.color}"></div><span class="npc-name">${n.short}</span>`;
     npcTracker.appendChild(el);
 });
 

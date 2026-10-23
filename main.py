@@ -253,6 +253,18 @@ def room_asset(name: str):
     return FileResponse(path, media_type=media_type, headers={"Cache-Control": "no-cache"})
 
 
+NPC_ART = re.compile(r"^(ila|kite|rhea|curator|aman|mira)-(portrait|full)\.webp$")
+
+
+@app.get("/assets/npc/{name}")
+def npc_art(name: str):
+    """Character art (public: it is on every page). Strict filename allowlist."""
+    path = BASE_DIR / "npc" / name
+    if not NPC_ART.match(name) or not path.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(path, media_type="image/webp", headers={"Cache-Control": "public, max-age=86400"})
+
+
 # Only the evidence files are served, and only to logged-in players. The
 # Challenges/*/README.md files contain the answer keys and must never be public.
 EVIDENCE_PATH_RE = re.compile(r"^(Room - (?:[1-9]|10))/evidence/.+$")
