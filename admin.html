@@ -162,9 +162,10 @@ td,th{padding:8px 10px}
     <!-- Toolbar -->
     <div class="toolbar">
         <div class="toolbar-left">
-            <input type="text" class="search-box" id="search" placeholder="⌕  Search players..." oninput="filterPlayers()">
+            <input type="text" class="search-box" id="search" placeholder="⌕  Search name or email..." oninput="filterPlayers()">
         </div>
         <div style="display:flex;gap:8px">
+            <button class="btn btn-cyan btn-sm btn-icon" onclick="exportCsv()">⬇ EXPORT CSV</button>
             <button class="btn btn-green btn-sm btn-icon" onclick="loadData()">↻ REFRESH</button>
             <button class="btn btn-danger btn-sm btn-icon" onclick="confirmReset()">⚠ RESET ALL</button>
         </div>
@@ -181,6 +182,7 @@ td,th{padding:8px 10px}
                     <tr>
                         <th style="width:40px">#</th>
                         <th>PLAYER</th>
+                        <th>EMAIL</th>
                         <th>SCORE</th>
                         <th>ROOM</th>
                         <th>SUBS</th>
@@ -189,7 +191,7 @@ td,th{padding:8px 10px}
                     </tr>
                 </thead>
                 <tbody id="players-body">
-                    <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-dim)">Loading intel...</td></tr>
+                    <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink-dim)">Loading intel...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -293,7 +295,7 @@ function renderPlayers(players){
     document.getElementById('player-count').textContent=players.length;
 
     if(!players.length){
-        body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink-dim)">No players registered yet</td></tr>';
+        body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink-dim)">No players registered yet</td></tr>';
         return;
     }
 
@@ -305,6 +307,7 @@ function renderPlayers(players){
         return `<tr data-user="${u.id}">
             <td><span class="player-rank ${rankClass}">${u.is_admin?'★':rank}</span></td>
             <td><div class="player-name">${esc(u.username)}${u.is_admin?' <span style="font-size:9px;color:var(--cyan)">[ADMIN]</span>':''}</div></td>
+            <td style="font-family:monospace;font-size:12px;color:var(--ink-dim)">${esc(u.email||'—')}</td>
             <td>
                 <div class="inline-edit">
                     <input class="inline-input" type="number" value="${u.score}" id="score-${u.id}" min="0">
@@ -341,11 +344,20 @@ document.getElementById('players-body').addEventListener('click',e=>{
     else if(el.dataset.action==='delete-user')confirmDeleteUser(id,name);
 });
 
+// ─── Export players (username, email, score, room, registered) as CSV ───
+function exportCsv(){
+    const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""').replace(/^([=+\-@])/,"'$1")+'"';
+    const rows=[['username','email','score','room','is_admin','registered']].concat(
+        allPlayers.map(u=>[u.username,u.email,u.score,u.current_room,u.is_admin?'yes':'no',u.created_at||'']));
+    const blob=new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='meraz_players.csv';a.click();
+}
+
 // ─── Search/Filter ───
 function filterPlayers(){
     const q=document.getElementById('search').value.toLowerCase();
     if(!q){renderPlayers(allPlayers);return}
-    renderPlayers(allPlayers.filter(u=>u.username.toLowerCase().includes(q)));
+    renderPlayers(allPlayers.filter(u=>u.username.toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
 }
 
 // ─── Actions ───
