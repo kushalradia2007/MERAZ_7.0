@@ -397,73 +397,45 @@ def logout(response: Response):
 
 POINTS_PER_FLAG = 25
 
-# One entry per challenge (4 per room, in README order). Each challenge lists
-# every accepted answer; the FIRST one is canonical (what gets stored). A
-# challenge can only be scored once per player no matter which variant is used.
-# Variants beyond the first are the answers the in-room UI / evidence actually
-# produce (they differ from the READMEs for 1.1, 2.2 and 2.4).
-CHALLENGE_FLAGS = {
-    1: [
-        ["NIGHTJAR{aether_07_nothing_stays_local}", "NIGHTJAR{aether_07}"],
-        ["NIGHTJAR{parallax_systems_aman}", "NIGHTJAR{parallax_systems_aman_v}"],
-        ["NIGHTJAR{nexus-meraz.festival.in.net}"],
-        ["NIGHTJAR{curator_404}"],
-    ],
-    2: [
-        ["NIGHTJAR{the_host_with_the_blue_name_is_lying}"],
-        ["NIGHTJAR{blue_name_is_host_alias_not_a_person}", "NIGHTJAR{hello_world.txt}"],
-        ["NIGHTJAR{ask_the_person_who_never_signs_in}"],
-        ["NIGHTJAR{aether_7_relay_compromised}", "NIGHTJAR{aether-7}"],
-    ],
-    3: [
-        ["NIGHTJAR{10.7.7.43_to_203.0.113.77_port_8443}"],
-        ["NIGHTJAR{maint_window_0200_user_kite_backup}"],
-        ["NIGHTJAR{restore_aether_core_confirmed}"],
-        ["NIGHTJAR{port_4477_mira_7_propagation_service}"],
-    ],
-    4: [
-        ["NIGHTJAR{nexus_health_monitor_pid_2847_opt_mira}"],
-        ["NIGHTJAR{kite_backup_session_via_auth_token_0137}"],
-        ["NIGHTJAR{suid_aether_restart_owned_by_root_writable_by_nexus}"],
-        ["NIGHTJAR{ed25519_kite_backup_2019_added_oct_2026_aetherforge}"],
-    ],
-    5: [
-        ["NIGHTJAR{idor_volunteer_0x7F_infra_access_no_orientation}"],
-        ["NIGHTJAR{jwt_role_volunteer_plus_admin_cert_renewal}"],
-        ["NIGHTJAR{cmd_injection_mira_config_at_etc_nexus_mira_conf}"],
-        ["NIGHTJAR{maint_nexus_portal_certrenew_api_v1_renew}"],
-    ],
-    6: [
-        ["NIGHTJAR{ghost_record_vol_127_nexus_svc_auto_insert_no_sponsor}"],
-        ["NIGHTJAR{continuity_delegate_role_read_all_plus_cert_trust_store}"],
-        ["NIGHTJAR{badge_0x7F_infra_dual_scan_main_stage_server_b3_61s}"],
-        ["NIGHTJAR{trust_chain_aether_core_to_release_controller_full_trust}"],
-    ],
-    7: [
-        ["NIGHTJAR{phish_kabir_sep27_nexus_support_spoofed_real_ticket_ref}"],
-        ["NIGHTJAR{impossible_travel_kabir_amsterdam_0135_stolen_session_token}"],
-        ["NIGHTJAR{mfa_fatigue_14_pushes_auto_approve_30s_timeout_gateway}"],
-        ["NIGHTJAR{persona_kite_backup_simulated_insider_from_stolen_creds}"],
-    ],
-    8: [
-        ["NIGHTJAR{pe_header_mismatch_fake_sig_section_rwx_not_nexus_registry}"],
-        ["NIGHTJAR{c2_parallax_sys_net_xor_key_0x4d_beacon_300s_nothing_stays_local}"],
-        ["NIGHTJAR{mira_propagate_dormant_nexus_zone_core_aether7_activated}"],
-        ["NIGHTJAR{mira7_built_oct3_auto_aether_forge_not_curator_manual}"],
-    ],
-    9: [
-        ["NIGHTJAR{timeline_staging_sep28_nexus_sync_precheck_clock_skew}"],
-        ["NIGHTJAR{gap_420s_auditd_buffer_flush_ipmi_bmc_continuity_uid0}"],
-        ["NIGHTJAR{path_kite_to_maint_to_continuity_to_aether7_master_relay}"],
-        ["NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}"],
-    ],
-    10: [
-        ["NIGHTJAR{patient_zero_pid_7739_mira7_self_bootstrap_aether_trust}"],
-        ["NIGHTJAR{curator_built_kite_opened_mira7_became_the_threat_actor}"],
-        ["NIGHTJAR{payload_queue_rc_0317_aether7_broadcast_manifest_all_zones}"],
-        ["NIGHTJAR{golden_path_isolate_preserve_restore_human_approval_gate}"],
-    ],
-}
+def _load_challenge_flags() -> dict:
+    """Load challenge flags from environment variable (Vercel) or local flags.json.
+    Flags are kept out of source code so the repository can be safely shared or deployed.
+    """
+    raw_data = None
+
+    # 1. Environment variable (primary for Vercel / Production deployment)
+    env_json = os.getenv("CHALLENGE_FLAGS_JSON", "").strip()
+    if env_json:
+        try:
+            raw_data = json.loads(env_json)
+        except Exception as e:
+            print(f"[ERROR] Failed to parse CHALLENGE_FLAGS_JSON: {e}")
+
+    # 2. Local flags.json file (gitignored, for local development / testing)
+    if not raw_data:
+        flags_file = BASE_DIR / "flags.json"
+        if flags_file.exists():
+            try:
+                with open(flags_file, "r", encoding="utf-8") as f:
+                    raw_data = json.load(f)
+            except Exception as e:
+                print(f"[ERROR] Failed to load {flags_file}: {e}")
+
+    # Normalize keys to integer room numbers
+    if raw_data and isinstance(raw_data, dict):
+        parsed = {}
+        for k, v in raw_data.items():
+            try:
+                parsed[int(k)] = v
+            except ValueError:
+                continue
+        return parsed
+
+    print("[WARN] No challenge flags loaded! Set CHALLENGE_FLAGS_JSON on Vercel or create flags.json locally.")
+    return {i: [] for i in range(1, 11)}
+
+
+CHALLENGE_FLAGS = _load_challenge_flags()
 FLAGS_PER_ROOM = 4
 
 # Story text revealed when a challenge is solved (room -> challenge number -> text).

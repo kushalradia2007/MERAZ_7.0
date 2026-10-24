@@ -38,13 +38,14 @@ Sign-in is Google only (no passwords or email codes). Existing accounts keep wor
 |----------|----------|---------|
 | `DATABASE_URL` | production | Postgres/Supabase connection string (falls back to SQLite locally) |
 | `SECRET_KEY` | **yes, in production** | Signs login cookies. Use a long random string (e.g. `python -c "import secrets;print(secrets.token_hex(32))"`). If unset, a key is derived from `DATABASE_URL` (or random locally) and a warning is logged |
+| `CHALLENGE_FLAGS_JSON` | **yes, on Vercel** | JSON string mapping room numbers to lists of flag variants. On local dev, `flags.json` (gitignored) is loaded automatically. |
 | `ROOM_UNLOCK_MIN_FLAGS` | no (default `3`) | A room's door opens once the player has captured this many of the previous room's 4 flags. `0` opens every room from the start; admins always bypass. Enforced on the room page, flag submission and evidence files |
 | `GOOGLE_CLIENT_ID` | **yes** | OAuth client ID for Google sign-in, the only way to log in. Without it the login page shows a setup notice |
 | `ADMIN_EMAILS` | no | Extra comma-separated Google emails that are admins. `kushalradia2007@gmail.com` is always an admin (built in). Applied at every sign-in |
 
 ## Notes for challenge authors
 
-- Flags live in `CHALLENGE_FLAGS` in `main.py` (4 per room, 25 pts each). A challenge may list several accepted answers; it is only scored once per player. Matching ignores case and surrounding spaces.
+- Flags are stored securely in `CHALLENGE_FLAGS_JSON` (Vercel) or `flags.json` (local, gitignored). They are loaded dynamically in `main.py` (4 per room, 25 pts each). See `flags.example.json` for structure. Matching ignores case and surrounding spaces.
 - Only `Challenges/Room - N/evidence/**` is served to players (login required). The `README.md` files in `Challenges/` contain answers and are never served.
 - Room pages must not contain flags: they verify through `/api/submit_flag` and restore progress from `/api/progress` (see `room-common.js`).
 

@@ -1,0 +1,14 @@
+{
+  "1": [
+    ["NIGHTJAR{dummy_flag_1_1}"],
+    ["NIGHTJAR{dummy_flag_1_2}"],
+    ["NIGHTJAR{dummy_flag_1_3}"],
+    ["NIGHTJAR{dummy_flag_1_4}"]
+  ],
+  "2": [
+    ["NIGHTJAR{dummy_flag_2_1}"],
+    ["NIGHTJAR{dummy_flag_2_2}"],
+    ["NIGHTJAR{dummy_flag_2_3}"],
+    ["NIGHTJAR{dummy_flag_2_4}"]
+  ]
+}
