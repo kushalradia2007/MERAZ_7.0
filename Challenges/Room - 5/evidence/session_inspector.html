@@ -312,6 +312,16 @@
                             <button type="button" class="btn-action" onclick="decodeActiveToken()">DECODE TOKEN SEGMENTS</button>
                             <button type="button" class="btn-action" style="border-color:var(--border); color:var(--text-dim);" onclick="loadRelayToken()">LOAD RELAY CAPTURE</button>
                         </div>
+
+                        <label for="edit-header" style="margin-top:14px;display:block;">Edit header JSON:</label>
+                        <textarea id="edit-header" class="token-textarea" style="min-height:70px;" spellcheck="false"></textarea>
+                        <label for="edit-payload" style="margin-top:10px;display:block;">Edit payload JSON:</label>
+                        <textarea id="edit-payload" class="token-textarea" style="min-height:120px;" spellcheck="false"></textarea>
+                        <div class="btn-row">
+                            <button type="button" class="btn-action" onclick="loadDecodedIntoEditors()">LOAD DECODED INTO EDITORS</button>
+                            <button type="button" class="btn-action" onclick="encodeEditedToken()">ENCODE → BUILD TOKEN</button>
+                        </div>
+                        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Build your own Base64URL token from edited JSON (RFC 7519 segment format — the same encoding any JWT library uses). This workbench never checks a signature; it only shows you how the bytes are built.</p>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -564,6 +574,29 @@
         function loadRelayToken() {
             document.getElementById('raw-token-input').value = TOKEN_RELAY_TAMPERED;
             decodeTokenString(TOKEN_RELAY_TAMPERED);
+        }
+
+        function b64urlEncode(str) {
+            return window.btoa(unescape(encodeURIComponent(str)))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function loadDecodedIntoEditors() {
+            document.getElementById('edit-header').value = document.getElementById('dec-header').textContent;
+            document.getElementById('edit-payload').value = document.getElementById('dec-payload').textContent;
+        }
+
+        function encodeEditedToken() {
+            const hRaw = document.getElementById('edit-header').value.trim();
+            const pRaw = document.getElementById('edit-payload').value.trim();
+            let h, p;
+            try { h = JSON.stringify(JSON.parse(hRaw)); }
+            catch (e) { alert('Header is not valid JSON: ' + e.message); return; }
+            try { p = JSON.stringify(JSON.parse(pRaw)); }
+            catch (e) { alert('Payload is not valid JSON: ' + e.message); return; }
+            const token = b64urlEncode(h) + '.' + b64urlEncode(p) + '.';
+            document.getElementById('raw-token-input').value = token;
+            decodeTokenString(token);
         }
 
         // Initialize with Relay stream (index 2)
