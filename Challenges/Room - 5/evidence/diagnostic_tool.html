@@ -15,7 +15,6 @@ body{font-family:var(--code);background:var(--bg);color:var(--text);min-height:1
 .container{max-width:860px;margin:32px auto;padding:0 20px}
 h1{font-size:14px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
 .sub{color:var(--dim);font-size:11px;margin-bottom:24px}
-/* form */
 .diag-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:20px}
 .label{font-size:11px;color:var(--dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
 .input-row{display:flex;gap:8px;align-items:center}
@@ -24,19 +23,9 @@ h1{font-size:14px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
 .run-btn{padding:8px 18px;background:rgba(47,168,204,.1);border:1px solid var(--cyan);border-radius:4px;color:var(--cyan);cursor:pointer;font-family:var(--code);font-size:12px}
 .run-btn:hover{background:rgba(47,168,204,.18)}
 .warning{background:rgba(212,64,23,.06);border:1px solid rgba(212,64,23,.2);border-radius:4px;padding:8px 12px;font-size:11px;color:var(--amber);margin-top:8px}
-/* terminal output */
 .term{background:#020304;border:1px solid var(--border);border-radius:4px;padding:14px;min-height:200px;max-height:400px;overflow-y:auto;margin-top:16px}
 .line{font-size:12px;line-height:1.9}
-.prompt{color:var(--green)}.normal{color:var(--text)}.error{color:var(--red)}.flag-line{color:#4ec94e;font-weight:700}
-/* info */
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-.info-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px}
-.info-title{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.info-val{font-size:12px;color:var(--text)}
-.hint-row{margin-top:10px;font-size:11px;color:var(--muted)}
-.hint-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--code);font-size:11px}
-.hint-btn:hover{color:var(--dim)}
-.hint-text{margin-top:6px;padding:8px 12px;background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.2);border-radius:4px;font-size:11px;color:var(--amber);display:none}
+.prompt{color:var(--green)}.normal{color:var(--text)}.error{color:var(--red)}
 </style>
 </head>
 <body>
@@ -62,36 +51,22 @@ h1{font-size:14px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
   <div id="term" class="term">
     <div class="line"><span class="prompt">portal@nexus-diag:~$</span> <span class="normal">Waiting for input…</span></div>
   </div>
-
-  <div class="info-grid">
-    <div class="info-box"><div class="info-title">Utility</div><div class="info-val">os.popen("ping -c 1 " + user_input)</div></div>
-    <div class="info-box"><div class="info-title">Sanitisation</div><div class="info-val">None — raw input concatenated</div></div>
-    <div class="info-box"><div class="info-title">Running as</div><div class="info-val">nexus_portal (uid 1003)</div></div>
-    <div class="info-box"><div class="info-title">Hint</div><div class="info-val">Shell metacharacters work: <code>;</code> <code>|</code> <code>&&</code> <code>`</code></div></div>
-  </div>
-
-  <div class="hint-row">
-    <button class="hint-btn" onclick="toggleHint()">▶ show hint</button>
-    <div class="hint-text" id="hint">Try injecting a second command with <code>;</code>. The MIRA-7 config path is <code>/etc/nexus/mira.conf</code>. Use <code>; cat /etc/nexus/mira.conf</code> after a host, or just <code>; env</code> to enumerate the environment first.</div>
-  </div>
 </div>
 
 <script>
-function toggleHint(){const h=document.getElementById('hint');h.style.display=h.style.display==='block'?'none':'block';}
+// Flag XOR'd with 0x4D — stored as hex. Players must decode externally (CyberChef etc.)
+const FLAG_XOR_HEX = '03040a0519070c1f362e202912242327282e392422231220243f2c122e22232b242a122c391228392e12232835383e1220243f2c122e22232b30';
 
-const FLAG = 'NIGHTJAR{cmd_injection_mira_config_at_etc_nexus_mira_conf}';
-
-// Simulated filesystem
 const FS = {
   '/etc/nexus/mira.conf': [
-    '# MIRA-7 Worm Configuration (DO NOT COMMIT)',
+    '# MIRA-7 Worm Configuration',
     'MIRA_VERSION=7.0-rc2',
     'PROPAGATION_MODE=passive_scan',
     'C2_HOST=parallax-sys.net',
     'C2_PORT=8443',
     'XOR_KEY=0x4d',
     'BEACON_INTERVAL=300',
-    '_FLAG=' + FLAG,
+    '_FLAG_XOR=' + FLAG_XOR_HEX,
   ].join('\n'),
   '/etc/passwd': 'root:x:0:0\nnexus_portal:x:1003:1003\nnexus_svc:x:1004:1004',
   '/etc/hosts': '127.0.0.1 localhost\n10.7.7.1 nexus-core\n10.7.7.43 aether-7',
@@ -102,17 +77,16 @@ const ENV = {
   PATH: '/usr/local/bin:/usr/bin:/bin', PORTAL_ENV: 'production',
   PORTAL_SECRET: 'redacted', CONFIG_DIR: '/etc/nexus',
 };
-// Simulate ping
+
 function fakePing(host){
   const known={'10.7.7.1':{ms:[1,2,1]},'10.7.7.43':{ms:[2,3,2]},'203.0.113.77':{ms:[38,39,38]}};
   const k=known[host.trim()];
   if(k){const m=k.ms[0];return`PING ${host}(${host}) 56 bytes of data.\n64 bytes from ${host}: icmp_seq=1 ttl=64 time=${m} ms\n\n--- ${host} ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss\nrtt min/avg/max = ${m}/${m}/${m} ms`;}
   return`ping: ${host}: Temporary failure in name resolution`;
 }
-// Simulate commands
+
 function runCmd(cmd){
-  cmd=cmd.trim();
-  if(!cmd)return'';
+  cmd=cmd.trim();if(!cmd)return'';
   const c=cmd.split(/\s+/);
   if(c[0]==='ping'){const h=c.filter(x=>x!=='-c'&&x!=='1'&&x!=='-c1'&&!/^-/.test(x))[0]||'';return fakePing(h);}
   if(c[0]==='cat'){const f=c[1];return FS[f]||`cat: ${f}: No such file or directory`;}
@@ -125,7 +99,7 @@ function runCmd(cmd){
   if(c[0]==='echo')return c.slice(1).join(' ');
   return`${c[0]}: command not found`;
 }
-// Parse shell injection (support ; | && and backtick)
+
 function parseAndRun(input){
   const parts=input.split(/\s*(?:;|&&|\|)\s*/);
   return parts.map(p=>runCmd(p.trim())).filter(Boolean).join('\n\n');
@@ -133,26 +107,19 @@ function parseAndRun(input){
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-function addLine(term, text, cls){
-  const d=document.createElement('div');
-  d.className='line';
-  if(cls==='flag'){d.innerHTML='<span class="flag-line">'+esc(text)+'</span>';}
-  else{d.innerHTML='<span class="'+cls+'">'+esc(text)+'</span>';}
+function addLine(term,text,cls){
+  const d=document.createElement('div');d.className='line';
+  d.innerHTML='<span class="'+cls+'">'+esc(text)+'</span>';
   term.appendChild(d);
 }
 
 function runDiag(){
   const raw=document.getElementById('host-input').value;
   const term=document.getElementById('term');
-  // command shown
   addLine(term,'portal@nexus-diag:~$ ping -c 1 '+raw,'prompt');
-  // run
-  const fullCmd='ping -c 1 '+raw;
-  // detect injection
   const injected=raw.includes(';')||raw.includes('&&')||raw.includes('|')||raw.includes('`');
   let out;
   if(injected){
-    // split at first injection metachar, ping part and rest
     const match=raw.match(/^([^;|&`]*?)(?:;|&&|\||`)(.*)$/s);
     const pingPart=match?match[1].trim():'';
     const injPart=match?match[2].trim():'';
@@ -162,10 +129,8 @@ function runDiag(){
   } else {
     out=fakePing(raw.trim());
   }
-  // render output, highlight flag
   out.split('\n').forEach(line=>{
-    if(line.includes(FLAG)){addLine(term,line,'flag');}
-    else if(line.startsWith('ping:')&&line.includes('failure')){addLine(term,line,'error');}
+    if(line.startsWith('ping:')&&line.includes('failure')){addLine(term,line,'error');}
     else{addLine(term,line,'normal');}
   });
   addLine(term,'','normal');
