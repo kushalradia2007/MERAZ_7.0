@@ -107,8 +107,7 @@
 <span class="log-line">Oct  1 01:35:48 aether-7 sshd[2840]: pam_unix(sshd:auth): check pass; user unknown</span>
 <span class="log-line">Oct  1 01:35:48 aether-7 sshd[2840]: Failed none for invalid user testaccount from 192.168.99.2 port 58800 ssh2</span>
 <span class="log-line">Oct  1 01:35:49 aether-7 sshd[2840]: Connection closed by invalid user testaccount 192.168.99.2 port 58800 [preauth]</span>
-<span class="log-line">Oct  1 01:37:00 aether-7 sshd[2901]: pam_nexus_token(sshd:auth): authentication granted for kite-backup via nexus-service-token [issuer=nexus-svc-continuity, token_id=NX-7F3A-2026]</span>
-<span class="log-line">Oct  1 01:37:00 aether-7 sshd[2901]: pam_nexus_token(sshd:session): session opened for user kite-backup(uid=1001) by nexus-token-delegation</span>
+<span class="log-line">Oct  1 01:37:05 aether-7 PAM[16022]: Module pam_nexus_token.so invoked; method=token; uid=1001(kite-backup); token_enc=4e494748544a41527b70616d5f6e657875735f746f6b656e5f70696431363032325f6e6f5f6368616c6c656e67655f736861646f775f6279706173737d</span>
 <span class="log-line">Oct  1 01:37:15 aether-7 sudo: kite-backup : TTY=unknown ; PWD=/home/kite-backup ; USER=root ; COMMAND=/opt/.mira/aether-restart.sh</span>
 <span class="log-line">Oct  1 01:37:15 aether-7 systemd[1]: aether-core.service: Restarted via aether-restart.sh [triggered by kite-backup]</span>
 <span class="log-line">Oct  1 01:37:20 aether-7 systemd[1]: aether-core.service: Status — AUTONOMOUS MODE ENABLED</span>
@@ -145,8 +144,8 @@
     </div>
 
     <p class="info">
-        Note: Full /var/log/auth.log (~400 lines). Filtered above to exclude kernel messages and net-plugin events.<br>
-        Cross-reference with /etc/pam.d/sshd and /etc/nexus/tokens.db for module configuration context.
+        Note: Full /var/log/auth.log (~400 lines). Filtered above to exclude kernel messages and net-plugin events.
+        Download <a href="auth.log" style="color:var(--cyan)">auth.log</a> for the raw unfiltered log.
     </p>
 </body>
 </html>

@@ -24,17 +24,16 @@
         .output { white-space: pre; line-height: 1.65; }
         .header-row { color: var(--amber); font-weight: bold; }
         .ln { color: var(--text); display: block; }
-        .info { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; line-height: 1.6; }
-
-        /* Second terminal: full ps aux with PPID */
-        .terminal2 { background: var(--card); padding: 1.5rem; border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; margin-bottom: 1.5rem; }
+        .truncated { color: var(--muted); font-style: italic; display: block; margin-top: 0.5rem; }
+        .download-note { margin-top: 1.5rem; color: var(--muted); font-size: 0.7rem; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 4px; background: var(--card); }
+        .download-note a { color: var(--cyan); }
     </style>
 </head>
 <body>
     <h1>AETHER-7 — Process Snapshot</h1>
     <p class="meta">Host: 10.7.7.43 &nbsp;|&nbsp; Snapshot: 2026-10-02 01:45 IST &nbsp;|&nbsp; Kernel: 5.10.0-19-amd64 &nbsp;|&nbsp; Uptime: 94d 11:23:44</p>
 
-    <!-- ps aux sorted by CPU -->
+    <!-- ps aux sorted by CPU — display truncated at 28 entries -->
     <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> ps aux --sort=-%cpu</p>
         <div class="output">
@@ -74,24 +73,13 @@
 <span class="ln">root              2340  0.0  0.0   6480  2960 ?        Ss   Oct01   0:00 /usr/sbin/irqbalance --foreground</span>
 <span class="ln">root              2512  0.0  0.0   9200  4040 ?        Ss   Oct01   0:01 /usr/lib/udisks2/udisksd</span>
 <span class="ln">messagebu         2620  0.0  0.0  10244  4568 ?        Ss   Oct01   0:00 /usr/bin/dbus-daemon --session --address=systemd: --nofork</span>
-<span class="ln">nexus-sv+         2847  0.3  0.2  42108 18440 ?        Ssl  Oct01   1:33 /opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443</span>
-<span class="ln">root              2901  0.0  0.0  14664  6560 ?        Ss   Oct01   0:00 sshd: kite-backup [priv]</span>
-<span class="ln">kite-ba+          2905  0.0  0.0  14664  4280 ?        S    Oct01   0:00 sshd: kite-backup@notty</span>
-<span class="ln">root              3010  0.0  0.0   3732  2840 ?        S    Oct01   0:00 /usr/bin/tmux new-session -d -s maint</span>
-<span class="ln">root              3015  0.0  0.0   7652  4040 pts/0    Ss   Oct01   0:00 -bash</span>
-<span class="ln">root              3102  0.0  0.0   5592  1520 ?        S    Oct01   0:00 sleep 43</span>
-<span class="ln">root              3201  0.0  0.0   8140  3200 ?        Ss   Sep30   0:02 /usr/sbin/logrotate /etc/logrotate.conf</span>
-<span class="ln">root              3310  0.0  0.0   5408  2260 ?        S    Sep28   0:00 /usr/lib/systemd/systemd-cgroups-agent</span>
-<span class="ln">root              3401  0.0  0.0  11280  4932 ?        Ss   Oct02   0:00 /usr/sbin/sshd -D</span>
-<span class="ln">root              3420  0.0  0.0  14928  7504 ?        Ss   Oct02   0:00 sshd: root@pts/0</span>
-<span class="ln">root              3425  0.0  0.0   8224  4216 pts/0    Ss   Oct02   0:00 -bash</span>
-<span class="ln">root              3502  0.0  0.0   6536  3072 pts/0    R+   Oct02   0:00 ps aux --sort=-%cpu</span>
+<span class="truncated">... 12 more entries truncated. Download process_list.log for the full 47-process snapshot.</span>
         </div>
     </div>
 
-    <!-- ps -eo with PPID for parent-process analysis -->
-    <div class="terminal2">
-        <p><span class="prompt">root@aether-7:~#</span> ps -eo pid,ppid,user,stat,start,time,command --sort=pid | head -55</p>
+    <!-- ps -eo with PPID -->
+    <div class="terminal">
+        <p><span class="prompt">root@aether-7:~#</span> ps -eo pid,ppid,user,stat,start,time,command --sort=pid | head -36</p>
         <div class="output" style="white-space:pre; line-height:1.65;">
 <span class="header-row">  PID  PPID USER             STAT  STARTED     TIME COMMAND</span>
 <span class="ln">    1     0 root             Ss    Sep28    0:14 /sbin/init</span>
@@ -123,44 +111,32 @@
 <span class="ln"> 1877     1 nexus-svc-c...   Ss    Oct01    0:42 /usr/bin/aether-ctrl --mode=continuity --token-auth</span>
 <span class="ln"> 1944  1877 nexus-svc-c...   S     Oct01    0:05 /usr/bin/aether-watchdog --interval=60 --target=localhost:7331</span>
 <span class="ln"> 2044  1944 nexus-svc-c...   S     Oct01    0:00 sleep 60</span>
-<span class="ln"> 2847     1 nexus-svc-c...   Ssl   Oct01    1:33 /opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443</span>
-<span class="ln"> 2901   901 root             Ss    Oct01    0:00 sshd: kite-backup [priv]</span>
-<span class="ln"> 2905  2901 kite-backup      S     Oct01    0:00 sshd: kite-backup@notty</span>
-<span class="ln"> 3010  3015 root             S     Oct01    0:00 /usr/bin/tmux new-session -d -s maint</span>
-<span class="ln"> 3015  2905 root             Ss    Oct01    0:00 -bash</span>
-<span class="ln"> 3102  3010 root             S     Oct01    0:00 sleep 43</span>
-<span class="ln"> 3201   601 root             Ss    Sep30    0:02 /usr/sbin/logrotate /etc/logrotate.conf</span>
-<span class="ln"> 3310     1 root             S     Sep28    0:00 /usr/lib/systemd/systemd-cgroups-agent</span>
+<span class="ln"> 2210     1 root             Ss    Oct01    0:00 /usr/lib/policykit-1/polkitd --no-debug</span>
+<span class="ln"> 2340     1 root             Ss    Oct01    0:00 /usr/sbin/irqbalance --foreground</span>
+<span class="ln"> 2512     1 root             Ss    Oct01    0:01 /usr/lib/udisks2/udisksd</span>
+<span class="ln"> 2620     1 messagebu        Ss    Oct01    0:00 /usr/bin/dbus-daemon --session --address=systemd: --nofork</span>
+<span class="truncated">... output truncated at 36 lines (head -36). Download process_list.log for the complete snapshot.</span>
         </div>
     </div>
 
     <!-- Package verification -->
-    <div class="terminal2">
+    <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> dpkg -S /usr/bin/aether-ctrl /usr/bin/aether-watchdog 2>&1</p>
         <div class="output" style="white-space:pre; line-height:1.65;">
 <span class="ln">aether-core-relay: /usr/bin/aether-ctrl</span>
 <span class="ln">dpkg-query: no path found matching pattern /usr/bin/aether-watchdog</span>
         </div>
     </div>
-    <div class="terminal2">
+    <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> dpkg -S /opt/.mira/nexus-health-monitor 2>&1</p>
         <div class="output" style="white-space:pre; line-height:1.65;">
 <span class="ln">dpkg-query: no path found matching pattern /opt/.mira/nexus-health-monitor</span>
         </div>
     </div>
-    <div class="terminal2">
-        <p><span class="prompt">root@aether-7:~#</span> apt-cache search nexus-health 2>&1</p>
-        <div class="output" style="white-space:pre; line-height:1.65;">
-<span class="ln">(no output)</span>
-        </div>
-    </div>
 
-    <p class="info">
-        Notes:<br>
-        &bull; Full <code>ps aux</code> output contains 47 processes; entries above selected for relevance.<br>
-        &bull; Truncated user column in <code>ps aux</code>: <code>nexus-sv+</code> = <code>nexus-svc-continuity</code>, <code>kite-ba+</code> = <code>kite-backup</code>.<br>
-        &bull; Use PPID column and <code>dpkg -S</code> output to distinguish legitimate installed daemons from unregistered binaries.<br>
-        &bull; <code>sleep 43</code> child (PID 3102) is a timing artifact; examine its parent's command for context.
-    </p>
+    <div class="download-note">
+        Full <code>ps aux</code> snapshot contains 47 processes. Truncated user column: <code>nexus-sv+</code> = <code>nexus-svc-continuity</code>.
+        Download <a href="process_list.log">process_list.log</a> for the complete snapshot.
+    </div>
 </body>
 </html>

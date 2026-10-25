@@ -1,17 +1,9 @@
-# ==============================================================================
-# AETHER-7 FORENSIC DUMP: PROCESS & SERVICE SNAPSHOT
-# Host: aether-7.nexus.internal (10.7.7.43)
-# Captured: 2026-10-02 01:45:00 IST
-# Kernel: 5.10.0-19-amd64 #1 SMP Debian 5.10.149-2 (2022-10-21) x86_64 GNU/Linux
-# Uptime: 94d 11:23:44
-# ==============================================================================
+AETHER-7 // Process Snapshot // 2026-10-02 01:45 IST // Kernel 5.10.0-19-amd64 // Uptime: 94d 11:23:44
+============================================================================
 
-# Command: ps aux --sort=-%cpu
+root@aether-7:~# ps aux --sort=-%cpu
+
 USER               PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-nexus-svc-continuity 2847  0.3  0.2  42108 18440 ?        Ssl  Oct01   1:33 /opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443
-root              1101  0.2  0.2  34700 22040 ?        Ss   Sep28   1:15 /usr/bin/aether-ctrl --mode=relay --port=7331
-root              1800  0.1  0.1  27504 12480 ?        Ssl  Sep28   0:36 /usr/bin/python3 /usr/lib/unattended-upgrades/unattended-upgrade-shutdown
-nexus-svc-continuity 1877  0.1  0.1  18564  8720 ?        Ss   Oct01   0:42 /usr/bin/aether-ctrl --mode=continuity --token-auth
 root                 1  0.0  0.1 169876 12340 ?        Ss   Sep28   0:14 /sbin/init
 root               312  0.0  0.0  16628  5280 ?        Ss   Sep28   0:02 /lib/systemd/systemd-journald
 root               341  0.0  0.0  22528  5856 ?        Ss   Sep28   0:01 /lib/systemd/systemd-udevd
@@ -28,6 +20,7 @@ root               715  0.0  0.0   8584  4020 ?        Ss   Sep28   0:04 /usr/sb
 root               810  0.0  0.0  11836  4088 ?        Ss   Sep28   0:00 /usr/sbin/agetty -o -p -- \u --noclear tty1 linux
 root               901  0.0  0.0  72296  6552 ?        Ss   Sep28   0:02 /usr/sbin/sshd -D -R
 root              1023  0.0  0.0   8240  3504 ?        S    Sep28   0:00 /usr/bin/dbus-daemon --system
+root              1101  0.2  0.2  34700 22040 ?        Ss   Sep28   1:15 /usr/bin/aether-ctrl --mode=relay --port=7331
 root              1205  0.0  0.0   5592  2716 ?        S    Sep28   0:00 /usr/sbin/acpid
 root              1250  0.0  0.0   9192  4108 ?        Ss   Sep28   0:00 /usr/sbin/sysstat -d 10 -o /var/log/sysstat.dat
 root              1340  0.0  0.0   9564  4400 ?        Ss   Sep28   0:01 /usr/lib/postfix/sbin/master -w
@@ -38,75 +31,26 @@ avahi             1544  0.0  0.0   8016  3504 ?        Ss   Sep28   0:00 avahi-d
 avahi             1545  0.0  0.0   7872  2616 ?        S    Sep28   0:00 avahi-daemon: chroot helper
 root              1610  0.0  0.0  18432  7200 ?        Ss   Sep28   0:00 /usr/lib/openssh/sftp-server
 root              1720  0.0  0.0   6204  3120 ?        Ss   Sep28   0:00 /usr/sbin/smartd -n
-nexus-svc-continuity 1944  0.0  0.0   7680  3480 ?        S    Oct01   0:05 /usr/bin/aether-watchdog --interval=60 --target=localhost:7331
-nexus-svc-continuity 2044  0.0  0.0   5840  2520 ?        S    Oct01   0:00 sleep 60
+root              1800  0.1  0.1  27504 12480 ?        Ssl  Sep28   0:36 /usr/bin/python3 /usr/lib/unattended-upgrades/unattended-upgrade-shutdown
+nexus-sv+         1877  0.1  0.1  18564  8720 ?        Ss   Oct01   0:42 /usr/bin/aether-ctrl --mode=continuity --token-auth
+nexus-sv+         1944  0.0  0.0   7680  3480 ?        S    Oct01   0:05 /usr/bin/aether-watchdog --interval=60 --target=localhost:7331
+nexus-sv+         2044  0.0  0.0   5840  2520 ?        S    Oct01   0:00 sleep 60
 root              2210  0.0  0.0  24320  9800 ?        Ss   Oct01   0:00 /usr/lib/policykit-1/polkitd --no-debug
 root              2340  0.0  0.0   6480  2960 ?        Ss   Oct01   0:00 /usr/sbin/irqbalance --foreground
 root              2512  0.0  0.0   9200  4040 ?        Ss   Oct01   0:01 /usr/lib/udisks2/udisksd
-messagebus        2620  0.0  0.0  10244  4568 ?        Ss   Oct01   0:00 /usr/bin/dbus-daemon --session --address=systemd: --nofork
+messagebu         2620  0.0  0.0  10244  4568 ?        Ss   Oct01   0:00 /usr/bin/dbus-daemon --session --address=systemd: --nofork
+nexus-sv+         2847  0.3  0.2  42108 18440 ?        Ssl  Oct01   1:33 /opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443 --config-b64=TklHSFRKQVJ7bWlyYV9jMl9iZWFjb25fMjAzXzBfMTEzXzc3X3BvcnRfODQ0M19pbnRlcnZhbF80M30=
 root              2901  0.0  0.0  14664  6560 ?        Ss   Oct01   0:00 sshd: kite-backup [priv]
-kite-backup       2905  0.0  0.0  14664  4280 ?        S    Oct01   0:00 sshd: kite-backup@notty
+kite-ba+          2905  0.0  0.0  14664  4280 ?        S    Oct01   0:00 sshd: kite-backup@notty
 root              3010  0.0  0.0   3732  2840 ?        S    Oct01   0:00 /usr/bin/tmux new-session -d -s maint
-root              3015  0.0  0.0   7652  4040 pts/0    Ss   Oct01   0:00 -bash
-root              3102  0.0  0.0   5592  1520 ?        S    Oct01   0:00 sleep 43
-root              3201  0.0  0.0   8140  3200 ?        Ss   Sep30   0:02 /usr/sbin/logrotate /etc/logrotate.conf
-root              3310  0.0  0.0   5408  2260 ?        S    Sep28   0:00 /usr/lib/systemd/systemd-cgroups-agent
-root              3401  0.0  0.0  11280  4932 ?        Ss   Oct02   0:00 /usr/sbin/sshd -D
-root              3420  0.0  0.0  14928  7504 ?        Ss   Oct02   0:00 sshd: root@pts/0
-root              3425  0.0  0.0   8224  4216 pts/0    Ss   Oct02   0:00 -bash
-root              3502  0.0  0.0   6536  3072 pts/0    R+   Oct02   0:00 ps aux --sort=-%cpu
-
-# ------------------------------------------------------------------------------
-# Command: ps -eo pid,ppid,user,stat,start,time,command --sort=pid
-# ------------------------------------------------------------------------------
-  PID  PPID USER             STAT  STARTED     TIME COMMAND
-    1     0 root             Ss    Sep28    0:14 /sbin/init
-  312     1 root             Ss    Sep28    0:02 /lib/systemd/systemd-journald
-  341     1 root             Ss    Sep28    0:01 /lib/systemd/systemd-udevd
-  487     1 systemd+         Ss    Sep28    0:00 /lib/systemd/systemd-networkd
-  492     1 systemd+         Ss    Sep28    0:01 /lib/systemd/systemd-resolved
-  511     1 systemd+         Ss    Sep28    0:00 /lib/systemd/systemd-timesyncd
-  601     1 root             Ss    Sep28    0:03 /usr/sbin/cron -f
-  614     1 root             Ss    Sep28    0:00 /usr/sbin/sshd -D
-  622     1 root             Ss    Sep28    0:05 /usr/sbin/nginx -g daemon off;
-  630   622 www-data         S     Sep28    0:12 nginx: worker process
-  631   622 www-data         S     Sep28    0:11 nginx: worker process
-  701     1 root             Ss    Sep28    0:01 /usr/sbin/rsyslogd -n
-  715     1 root             Ss    Sep28    0:04 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u ntp:ntp
-  901     1 root             Ss    Sep28    0:02 /usr/sbin/sshd -D -R
- 1023     1 root             S     Sep28    0:00 /usr/bin/dbus-daemon --system
- 1101     1 root             Ss    Sep28    1:15 /usr/bin/aether-ctrl --mode=relay --port=7331
- 1205     1 root             S     Sep28    0:00 /usr/sbin/acpid
- 1250     1 root             Ss    Sep28    0:00 /usr/sbin/sysstat -d 10 -o /var/log/sysstat.dat
- 1340     1 root             Ss    Sep28    0:01 /usr/lib/postfix/sbin/master -w
- 1352  1340 postfix          S     Sep28    0:00 pickup -l -t unix -u -c
- 1353  1340 postfix          S     Sep28    0:00 qmgr -l -t unix -u
- 1502     1 root             Ss    Sep28    0:00 /usr/sbin/xinetd -dontfork -pidfile /var/run/xinetd.pid
- 1544     1 avahi            Ss    Sep28    0:00 avahi-daemon: running [aether-7.local]
- 1545  1544 avahi            S     Sep28    0:00 avahi-daemon: chroot helper
- 1720     1 root             Ss    Sep28    0:00 /usr/sbin/smartd -n
- 1800     1 root             Ssl   Sep28    0:36 /usr/bin/python3 /usr/lib/unattended-upgrades/unattended-upgrade-shutdown
- 1877     1 nexus-svc-contin Ss    Oct01    0:42 /usr/bin/aether-ctrl --mode=continuity --token-auth
- 1944  1877 nexus-svc-contin S     Oct01    0:05 /usr/bin/aether-watchdog --interval=60 --target=localhost:7331
- 2044  1944 nexus-svc-contin S     Oct01    0:00 sleep 60
- 2847     1 nexus-svc-contin Ssl   Oct01    1:33 /opt/.mira/nexus-health-monitor --daemon --interval=43 --beacon-target=203.0.113.77:8443
- 2901   901 root             Ss    Oct01    0:00 sshd: kite-backup [priv]
- 2905  2901 kite-backup      S     Oct01    0:00 sshd: kite-backup@notty
- 3010  3015 root             S     Oct01    0:00 /usr/bin/tmux new-session -d -s maint
- 3015  2905 root             Ss    Oct01    0:00 -bash
- 3102  3010 root             S     Oct01    0:00 sleep 43
- 3201   601 root             Ss    Sep30    0:02 /usr/sbin/logrotate /etc/logrotate.conf
- 3310     1 root             S     Sep28    0:00 /usr/lib/systemd/systemd-cgroups-agent
-
-# ------------------------------------------------------------------------------
-# DPKG VERIFICATION LOGS
-# ------------------------------------------------------------------------------
-# root@aether-7:~# dpkg -S /usr/bin/aether-ctrl /usr/bin/aether-watchdog
-aether-core-relay: /usr/bin/aether-ctrl
-dpkg-query: no path found matching pattern /usr/bin/aether-watchdog
-
-# root@aether-7:~# dpkg -S /opt/.mira/nexus-health-monitor
-dpkg-query: no path found matching pattern /opt/.mira/nexus-health-monitor
-
-# root@aether-7:~# apt-cache search nexus-health
-(no output)
+root              3100  0.0  0.0   8420  3640 ?        Ss   Oct01   0:00 /usr/lib/accountsservice/accounts-daemon
+root              3250  0.0  0.0   5936  2908 ?        Ss   Oct01   0:00 /usr/sbin/atd -f
+root              3380  0.0  0.0   8240  3640 ?        S    Oct01   0:00 /usr/bin/dbus-daemon --system --address=systemd:
+daemon            3450  0.0  0.0   7892  3248 ?        Ss   Oct01   0:00 /usr/sbin/atd -s
+root              3520  0.0  0.0   7040  3008 ?        Ss   Oct01   0:00 /usr/sbin/ldattach --8bits --iflag -onocr 19200 SLIP
+root              3601  0.0  0.0   8736  3600 ?        Ss   Oct01   0:00 /usr/lib/policykit-1/polkitd --no-debug
+root              3680  0.0  0.0   7240  3280 ?        S    Oct01   0:01 /usr/sbin/aether-relay --passive --no-fork
+root              4011  0.0  0.0   6240  2760 ?        Ss   Oct02   0:00 /usr/sbin/ntpdate -s ntp.internal
+root              4199  0.0  0.0   5592  2716 ?        S    Oct02   0:00 /usr/sbin/smartd -n -q never
+root              4401  0.0  0.0   3608  1240 pts/0    Ss   01:44   0:00 -bash
+root              4405  0.0  0.0   2752   832 pts/0    R+   01:45   0:00 ps aux --sort=-%cpu

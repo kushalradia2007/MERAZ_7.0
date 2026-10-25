@@ -54,7 +54,6 @@
 <span class="ln">-rwxr-sr-x  1 root     shadow    31096 Jul 21  2021 /usr/bin/expiry</span>
 <span class="ln">-rwsr-xr-x  1 root     root      436552 Aug 11  2022 /usr/lib/openssh/ssh-keysign</span>
 <span class="ln">-rwsr-xr--  1 root     messagebus 51272 Jun 11  2022 /usr/lib/dbus-1.0/dbus-daemon-launch-helper</span>
-<span class="ln">-rwsr-x---  1 root     nexus-svc  16044 Oct  1 01:31 /opt/.mira/aether-restart.sh</span>
 <span class="ln">-rwsr-x---  1 root     nexus-svc   5120 Sep 28 14:36 /usr/local/bin/aether-token-helper</span>
 <span class="ln">-rwsr-xr-x  1 root     root      22832 Mar  9  2022 /usr/lib/policykit-1/polkit-agent-helper-1</span>
         </div>
@@ -132,47 +131,8 @@
         </div>
     </div>
 
-    <!-- Section 5: Script contents -->
-    <h2 class="section-title">5. Script Contents</h2>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> cat /opt/.mira/aether-restart.sh</p>
-        <div class="output">
-<span class="ln">#!/bin/bash</span>
-<span class="ln"># AETHER Continuity Service — Emergency Restart</span>
-<span class="ln"># Authorized: nexus-svc group members</span>
-<span class="ln"># Last modified: 2026-10-01 01:31 IST</span>
-<span class="ln"># WARNING: This script runs with root privileges via SUID</span>
-<span class="ln"></span>
-<span class="ln">CALLER=$(whoami)</span>
-<span class="ln">TIMESTAMP=$(date +%Y-%m-%dT%H:%M:%S)</span>
-<span class="ln"></span>
-<span class="ln">echo "[$TIMESTAMP] AETHER restart triggered by: $CALLER" >> /var/log/aether-restart.log</span>
-<span class="ln"></span>
-<span class="ln">/usr/bin/systemctl restart aether-core.service</span>
-<span class="ln"></span>
-<span class="ln">touch /var/run/aether.active</span>
-<span class="ln">echo "ACTIVE" > /var/run/aether.active</span>
-<span class="ln"></span>
-<span class="ln">/usr/bin/kill -USR1 $(cat /var/run/nexus-healthd.pid 2>/dev/null) 2>/dev/null</span>
-<span class="ln"></span>
-<span class="ln">echo "[$TIMESTAMP] AETHER CORE restarted. Autonomous mode enabled." >> /var/log/aether-restart.log</span>
-<span class="ln">exit 0</span>
-        </div>
-    </div>
-    <div class="terminal">
-        <p><span class="prompt">root@aether-7:~#</span> cat /usr/local/bin/aether-token-helper</p>
-        <div class="output">
-<span class="ln">[ELF binary — not human-readable. Use strings or objdump for analysis.]</span>
-<span class="ln">strings output excerpt:</span>
-<span class="ln">  aether-token-helper v1.4</span>
-<span class="ln">  Usage: aether-token-helper --validate --token &lt;TOKEN&gt;</span>
-<span class="ln">  Validates NEXUS service tokens against /etc/nexus/tokens.db</span>
-<span class="ln">  Installed by: aether-core-relay 2.0.3</span>
-        </div>
-    </div>
-
-    <!-- Section 6: Crontabs -->
-    <h2 class="section-title">6. Crontab Entries</h2>
+    <!-- Section 5: Crontabs -->
+    <h2 class="section-title">5. Crontab Entries</h2>
     <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> crontab -l</p>
         <div class="output">
@@ -190,8 +150,8 @@
         </div>
     </div>
 
-    <!-- Section 7: PAM configuration -->
-    <h2 class="section-title">7. PAM Configuration</h2>
+    <!-- Section 6: PAM configuration -->
+    <h2 class="section-title">6. PAM Configuration</h2>
     <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> cat /etc/pam.d/sshd</p>
         <div class="output">
@@ -223,8 +183,8 @@
         </div>
     </div>
 
-    <!-- Section 8: Systemd unit -->
-    <h2 class="section-title">8. Systemd Unit — nexus-healthd</h2>
+    <!-- Section 7: Systemd unit -->
+    <h2 class="section-title">7. Systemd Unit — nexus-healthd</h2>
     <div class="terminal">
         <p><span class="prompt">root@aether-7:~#</span> cat /etc/systemd/system/nexus-healthd.service</p>
         <div class="output">
@@ -248,6 +208,6 @@
     </div>
 
     <p class="info">Filesystem snapshot complete. All paths are from a forensic block-level copy of AETHER-7's root partition.<br>
-    Cross-reference group membership, file ownership, permission bits, and package registration to identify anomalies.</p>
+    Download <a href="filesystem_audit.tar.gz" style="color:var(--cyan)">filesystem_audit.tar.gz</a> for the full file contents including scripts and configs.</p>
 </body>
 </html>
