@@ -877,15 +877,37 @@ def save_board(
 
 # ─── Scoreboard API (public) ──────────────────────────────────
 
+def ranked_players(db: Session):
+    """Non-admin players, best first: higher score wins; on a tie the player who reached
+    that score sooner (earlier last correct flag) ranks higher. Players with no solves
+    rank after those with solves at the same score, then by sign-up time."""
+    last_solve = (
+        db.query(
+            models.FlagSubmission.user_id.label("uid"),
+            func.max(models.FlagSubmission.submitted_at).label("t"),
+        )
+        .filter(models.FlagSubmission.is_correct == True)  # noqa: E712
+        .group_by(models.FlagSubmission.user_id)
+        .subquery()
+    )
+    return (
+        db.query(models.User, last_solve.c.t)
+        .outerjoin(last_solve, last_solve.c.uid == models.User.id)
+        .filter(models.User.is_admin == False)  # noqa: E712
+        .order_by(
+            models.User.score.desc(),
+            case((last_solve.c.t.is_(None), 1), else_=0),
+            last_solve.c.t.asc(),
+            models.User.created_at.asc(),
+            models.User.id.asc(),
+        )
+        .all()
+    )
+
+
 @app.get("/api/scoreboard")
 def get_scoreboard(db: Session = Depends(database.get_db)):
     # Admins run the event; they don't compete.
-    players = (
-        db.query(models.User)
-        .filter(models.User.is_admin == False)  # noqa: E712
-        .order_by(models.User.score.desc(), models.User.created_at.asc(), models.User.id.asc())
-        .all()
-    )
     return [
         {
             "id": u.id,
@@ -893,8 +915,9 @@ def get_scoreboard(db: Session = Depends(database.get_db)):
             "score": u.score or 0,
             "current_room": u.current_room or 1,
             "created_at": u.created_at.isoformat() if u.created_at else None,
+            "last_solve_at": (t.isoformat() + "Z") if t else None,
         }
-        for u in players
+        for u, t in ranked_players(db)
     ]
 
 
@@ -1012,12 +1035,8 @@ def admin_stats(
     admin: models.User = Depends(require_admin),
     db: Session = Depends(database.get_db),
 ):
-    top = (
-        db.query(models.User)
-        .filter(models.User.is_admin == False)  # noqa: E712
-        .order_by(models.User.score.desc(), models.User.id.asc())
-        .first()
-    )
+    ranked = ranked_players(db)
+    top = ranked[0][0] if ranked else None
     return {
         "total_players": db.query(models.User).filter(models.User.is_admin == False).count(),  # noqa: E712
         "total_users": db.query(models.User).count(),

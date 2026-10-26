@@ -289,7 +289,8 @@ function renderLeaderboard(players){
         if(isNew)animCls='new-entry';
         else if(movedUp)animCls='rank-up';
         
-        return `<div class="lb-row ${animCls}">
+        const tie=t.last_solve_at?'Tie-break: reached this score at '+new Date(t.last_solve_at).toLocaleString():'';
+        return `<div class="lb-row ${animCls}" title="${esc(tie)}">
             <div class="lb-rank ${rankCls}">${rank}</div>
             <div class="lb-player">
                 <div class="lb-player-name">${esc(t.name)}</div>
