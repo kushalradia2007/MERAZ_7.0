@@ -317,8 +317,8 @@ def serve_evidence(
     m = EVIDENCE_PATH_RE.match(asset_path)
     if not m:
         raise HTTPException(status_code=404, detail="Not found")
-    if not user.is_admin and event_phase() == "before":
-        raise HTTPException(status_code=403, detail="The event has not started yet.")
+    if not user.is_admin and event_phase() != "live":
+        raise HTTPException(status_code=403, detail="The event has not started yet." if event_phase() == "before" else "The event has ended. All rooms are locked.")
     if not room_is_unlocked(user, int(m.group(1).rsplit(" ", 1)[-1]), solved_challenges(db, user.id)):
         raise HTTPException(status_code=403, detail=LOCKED_MSG)
     evidence_root = (CHALLENGES_DIR / m.group(1) / "evidence").resolve()
@@ -699,7 +699,7 @@ def room_is_unlocked(user: models.User, room_id: int, solved: dict) -> bool:
     """`solved` is solved_challenges(db, user.id) (all rooms)."""
     if user.is_admin:
         return True
-    if event_phase() == "before":   # nothing opens until the event starts
+    if event_phase() != "live":   # rooms are open only during the event window
         return False
     if room_id <= 1 or UNLOCK_MIN_FLAGS <= 0:
         return True

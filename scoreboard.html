@@ -330,7 +330,7 @@ body.has-evbar{padding-top:32px}
     bar.className=ph;bar.style.display='block';document.body.classList.add('has-evbar');
     bar.textContent=ph==='before'?'EVENT STARTS IN '+fmt(Date.parse(ev.start)-now)
       :ph==='live'?'LIVE · LEADERBOARD LOCKS IN '+fmt(Date.parse(ev.end)-now)
-      :'EVENT ENDED · LEADERBOARD LOCKED · FINAL RESULTS';
+      :'EVENT ENDED · ALL ROOMS LOCKED · LEADERBOARD FINAL';
   }
   fetch('/api/event').then(function(r){return r.json()}).then(function(e){ev=e;skew=Date.parse(e.now)-Date.now();tick();setInterval(tick,1000)}).catch(function(){});
 })();
