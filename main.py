@@ -83,6 +83,42 @@ try:
 except ValueError:
     UNLOCK_MIN_FLAGS = 3
 
+# ─── Event window ──────────────────────────────────────────────
+# Rooms open when the event starts; submissions (and so the leaderboard) lock when it ends.
+# Defaults: 31 Oct 2026, 10:00 to 22:00 IST. Override with EVENT_START / EVENT_END
+# (ISO 8601, e.g. 2026-10-31T10:00:00+05:30; no offset means IST). EVENT_WINDOW=off disables it.
+IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+
+
+def _parse_event_time(name: str, default: datetime.datetime) -> datetime.datetime:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        dt = datetime.datetime.fromisoformat(raw)
+    except ValueError:
+        print(f"[WARN] {name}={raw!r} is not ISO 8601; using the default")
+        return default
+    return dt if dt.tzinfo else dt.replace(tzinfo=IST)
+
+
+EVENT_START = _parse_event_time("EVENT_START", datetime.datetime(2026, 10, 31, 10, 0, tzinfo=IST))
+EVENT_END = _parse_event_time("EVENT_END", datetime.datetime(2026, 10, 31, 22, 0, tzinfo=IST))
+EVENT_WINDOW_ON = os.getenv("EVENT_WINDOW", "on").strip().lower() not in ("off", "0", "false", "no")
+
+
+def event_phase(now: Optional[datetime.datetime] = None) -> str:
+    """'before' | 'live' | 'ended'."""
+    if not EVENT_WINDOW_ON:
+        return "live"
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    if now < EVENT_START:
+        return "before"
+    if now >= EVENT_END:
+        return "ended"
+    return "live"
+
+
 # Comma-separated Google account emails that are admins. Applied at every Google
 # sign-in, so an admin is promoted the moment they log in.
 DEFAULT_ADMIN_EMAILS = {"kushalradia2007@gmail.com"}  # always admin; ADMIN_EMAILS adds more
@@ -281,6 +317,8 @@ def serve_evidence(
     m = EVIDENCE_PATH_RE.match(asset_path)
     if not m:
         raise HTTPException(status_code=404, detail="Not found")
+    if not user.is_admin and event_phase() == "before":
+        raise HTTPException(status_code=403, detail="The event has not started yet.")
     if not room_is_unlocked(user, int(m.group(1).rsplit(" ", 1)[-1]), solved_challenges(db, user.id)):
         raise HTTPException(status_code=403, detail=LOCKED_MSG)
     evidence_root = (CHALLENGES_DIR / m.group(1) / "evidence").resolve()
@@ -427,6 +465,22 @@ def forgot_password(
     user.hashed_password = hash_password(DEFAULT_RESET_PASSWORD)
     db.commit()
     return {"status": "reset", "username": user.username, "password": DEFAULT_RESET_PASSWORD}
+
+
+def event_info() -> dict:
+    iso = lambda d: d.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # noqa: E731
+    return {
+        "start": iso(EVENT_START),
+        "end": iso(EVENT_END),
+        "now": iso(datetime.datetime.now(datetime.timezone.utc)),
+        "phase": event_phase(),
+        "window_on": EVENT_WINDOW_ON,
+    }
+
+
+@app.get("/api/event")
+def get_event():
+    return event_info()
 
 
 @app.get("/api/auth/config")
@@ -643,7 +697,11 @@ def solved_challenges(db: Session, user_id: int, room_id: Optional[int] = None) 
 
 def room_is_unlocked(user: models.User, room_id: int, solved: dict) -> bool:
     """`solved` is solved_challenges(db, user.id) (all rooms)."""
-    if room_id <= 1 or UNLOCK_MIN_FLAGS <= 0 or user.is_admin:
+    if user.is_admin:
+        return True
+    if event_phase() == "before":   # nothing opens until the event starts
+        return False
+    if room_id <= 1 or UNLOCK_MIN_FLAGS <= 0:
         return True
     if (user.current_room or 1) >= room_id:  # progress carried over / set by an admin
         return True
@@ -664,6 +722,12 @@ def submit_flag(
         raise HTTPException(status_code=401, detail="Unauthorized")
     if room_id not in CHALLENGE_FLAGS:
         raise HTTPException(status_code=400, detail="Unknown room")
+    if not user.is_admin:
+        phase = event_phase()
+        if phase == "before":
+            raise HTTPException(status_code=403, detail="The event has not started yet.")
+        if phase == "ended":
+            raise HTTPException(status_code=403, detail="The event has ended. The leaderboard is final.")
     if not room_is_unlocked(user, room_id, solved_challenges(db, user.id)):
         raise HTTPException(status_code=403, detail=LOCKED_MSG)
 
@@ -736,6 +800,7 @@ def get_progress(user: models.User = Depends(get_current_user), db: Session = De
         "unlocked": unlocked,
         "unlock_min": UNLOCK_MIN_FLAGS,
         "flags_per_room": FLAGS_PER_ROOM,
+        "event": event_info(),
     }
 
 

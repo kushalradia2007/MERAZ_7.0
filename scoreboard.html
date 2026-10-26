@@ -309,4 +309,30 @@ function renderLeaderboard(players){
 loadScoreboard();
 setInterval(loadScoreboard,8000);
 </script>
+
+<style>
+#evbar{position:fixed;left:0;right:0;top:0;z-index:9999;display:none;padding:7px 14px;text-align:center;font:700 12px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.12em;color:#04141a;background:#22d3ee}
+#evbar.ended{background:#f43f5e;color:#fff}#evbar.before{background:#fbbf24}
+body.has-evbar{padding-top:32px}
+</style>
+<script>
+(function(){
+  var bar=document.createElement('div');bar.id='evbar';document.body.appendChild(bar);
+  var ev=null,skew=0,last=null;
+  function pad(n){return String(n).padStart(2,'0')}
+  function fmt(ms){var s=Math.max(0,Math.floor(ms/1000)),d=Math.floor(s/86400);s%=86400;var h=Math.floor(s/3600);s%=3600;return(d?d+'d ':'')+pad(h)+':'+pad(Math.floor(s/60))+':'+pad(s%60)}
+  function phase(now){return now<Date.parse(ev.start)?'before':now>=Date.parse(ev.end)?'ended':'live'}
+  function tick(){
+    if(!ev)return;var now=Date.now()+skew,ph=ev.window_on?phase(now):'live';
+    if(last&&last!==ph&&(ph==='live'||ph==='ended'))setTimeout(function(){location.reload()},800);
+    last=ph;
+    if(!ev.window_on){bar.style.display='none';return}
+    bar.className=ph;bar.style.display='block';document.body.classList.add('has-evbar');
+    bar.textContent=ph==='before'?'EVENT STARTS IN '+fmt(Date.parse(ev.start)-now)
+      :ph==='live'?'LIVE · LEADERBOARD LOCKS IN '+fmt(Date.parse(ev.end)-now)
+      :'EVENT ENDED · LEADERBOARD LOCKED · FINAL RESULTS';
+  }
+  fetch('/api/event').then(function(r){return r.json()}).then(function(e){ev=e;skew=Date.parse(e.now)-Date.now();tick();setInterval(tick,1000)}).catch(function(){});
+})();
+</script>
 </body></html>
