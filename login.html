@@ -111,6 +111,11 @@
         .btn:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 0 30px rgba(34, 211, 238, .45); transform: translateY(-1px); }
         .btn:disabled { opacity: .6; cursor: progress; }
         .btn:focus-visible, .link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+        .or { display: flex; align-items: center; gap: 12px; margin: 22px 0 10px; font-family: var(--code); font-size: 10.5px; letter-spacing: .2em; color: var(--faint); }
+        .or i { flex: 1; height: 1px; background: rgba(255, 255, 255, .14); }
+        .hidden { display: none !important; }
+        .secret { padding: 14px; margin-bottom: 18px; border-radius: 10px; border: 1px solid rgba(34, 211, 238, .45); background: rgba(34, 211, 238, .06); font-family: var(--code); font-size: 13px; line-height: 1.9; color: var(--ink); overflow-wrap: anywhere; }
+        .secret b { color: var(--cyan); }
         .link { all: unset; display: block; margin: 14px auto 0; cursor: pointer; text-align: center; font-family: var(--code); font-size: 11px; letter-spacing: .16em; color: var(--faint); }
         .link:hover { color: var(--ink); }
         .foot { margin-top: 20px; text-align: center; font-family: var(--code); font-size: 10px; letter-spacing: .2em; color: var(--faint); }
@@ -152,31 +157,55 @@
                 <div><b>NIGHTJAR.OS</b><span>RESPONSE CELL · CLEARANCE</span></div>
             </div>
 
-            <!-- Step 1: Google -->
+            <!-- Step 1: sign in / create account / forgot -->
             <div class="step on" id="step-google">
                 <h2>Report for duty</h2>
-                <p class="lead">One tap with your Google account. No passwords, no codes. Your progress and score stay with that account.</p>
+                <p class="lead" id="lead-main">Sign in with your callsign and password. First time here? Verify your Google account to create one.</p>
+                <p class="lead hidden" id="lead-forgot">Verify with the Google account you registered with. Your password will be reset to the default and shown to you here.</p>
+                <div id="signin-form">
+                    <label for="u">CALLSIGN</label>
+                    <div class="field" id="fu"><span>&gt;</span><input id="u" type="text" maxlength="64" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
+                    <label for="pw" style="margin-top:14px">PASSWORD</label>
+                    <div class="field" id="fp"><span>&gt;</span><input id="pw" type="password" maxlength="256" autocomplete="current-password"></div>
+                    <button type="button" class="btn" id="signin" style="margin-top:18px">SIGN IN</button>
+                    <button type="button" class="link" id="forgot">FORGOT PASSWORD?</button>
+                </div>
+                <div class="or"><i></i><span id="or-text">NEW HERE? VERIFY WITH GOOGLE</span><i></i></div>
                 <div class="gwrap" id="gbtn" aria-live="polite"></div>
+                <button type="button" class="link hidden" id="fback">← BACK TO SIGN IN</button>
                 <div class="notice" id="notice">Google sign-in is not configured yet. Set <b>GOOGLE_CLIENT_ID</b> on the server.</div>
                 <div class="err" id="err" role="alert"></div>
                 <ul class="rules">
                     <li>You play as an individual. There are no teams.</li>
                     <li>Rooms open as you capture flags. Every flag is worth the same.</li>
-                    <li>The first time in, you pick a callsign for the scoreboard.</li>
+                    <li>The first time in, Google verifies your email and you pick a callsign and password.</li>
                 </ul>
             </div>
 
             <!-- Step 2: callsign, first time only -->
             <div class="step" id="step-callsign">
                 <h2>Choose your callsign</h2>
-                <p class="lead">This is the name everyone sees on the scoreboard. Pick one you are happy to be known by.</p>
+                <p class="lead">Your Google email is verified. Choose the callsign everyone sees on the scoreboard, and a password for next time.</p>
                 <div class="who" id="who"></div>
                 <label for="callsign">CALLSIGN</label>
                 <div class="field" id="field"><span>&gt;</span><input id="callsign" type="text" maxlength="32" minlength="2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. Spectre_07"></div>
                 <p class="hint">2 to 32 characters. You cannot change it later.</p>
-                <button type="button" class="btn" id="go">REPORT FOR DUTY</button>
+                <label for="pw1">PASSWORD</label>
+                <div class="field" id="fpw1"><span>&gt;</span><input id="pw1" type="password" maxlength="128" minlength="8" autocomplete="new-password"></div>
+                <label for="pw2" style="margin-top:14px">CONFIRM PASSWORD</label>
+                <div class="field" id="fpw2"><span>&gt;</span><input id="pw2" type="password" maxlength="128" minlength="8" autocomplete="new-password"></div>
+                <p class="hint">At least 8 characters. You will sign in with your callsign and this password.</p>
+                <button type="button" class="btn" id="go">CREATE ACCOUNT</button>
                 <div class="err" id="err2" role="alert"></div>
                 <button type="button" class="link" id="back">← USE A DIFFERENT GOOGLE ACCOUNT</button>
+            </div>
+
+            <!-- Step 3: password was reset -->
+            <div class="step" id="step-reset">
+                <h2>Password reset</h2>
+                <p class="lead">Your email was verified. Sign in with these details.</p>
+                <div class="secret">CALLSIGN &nbsp;<b id="r-user"></b><br>PASSWORD &nbsp;<b id="r-pass"></b></div>
+                <button type="button" class="btn" id="r-go">GO TO SIGN IN</button>
             </div>
 
             <div class="foot">SECURED BY GOOGLE SIGN-IN</div>
@@ -244,6 +273,7 @@
         function show(step) {
             $('step-google').classList.toggle('on', step === 'google');
             $('step-callsign').classList.toggle('on', step === 'callsign');
+            $('step-reset').classList.toggle('on', step === 'reset');
             if (step === 'callsign') setTimeout(function () { document.querySelector('.card').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }); $('callsign').focus({ preventScroll: true }); }, 60);
         }
         function msg(data, fallback) {
@@ -251,8 +281,19 @@
             if (data && Array.isArray(data.detail) && data.detail[0] && data.detail[0].msg) return data.detail[0].msg;
             return fallback;
         }
-        function post(fields) {
-            return fetch('/api/auth/google', {
+        var mode = 'signin';
+        function setMode(m) {
+            mode = m;
+            var f = m === 'forgot';
+            $('signin-form').classList.toggle('hidden', f);
+            $('lead-main').classList.toggle('hidden', f);
+            $('lead-forgot').classList.toggle('hidden', !f);
+            $('fback').classList.toggle('hidden', !f);
+            $('or-text').textContent = f ? 'VERIFY WITH GOOGLE TO RESET' : 'NEW HERE? VERIFY WITH GOOGLE';
+            $('err').textContent = '';
+        }
+        function post(fields, url) {
+            return fetch(url || '/api/auth/google', {
                 method: 'POST', credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(fields)
@@ -263,6 +304,20 @@
             token = resp.credential;
             $('err').textContent = '';
             wrap.classList.add('loading');
+            if (mode === 'forgot') {
+                post({ id_token: token }, '/api/auth/forgot').then(function (r) {
+                    wrap.classList.remove('loading');
+                    if (r.ok && r.data.status === 'reset') {
+                        $('r-user').textContent = r.data.username; $('r-pass').textContent = r.data.password;
+                        show('reset'); return;
+                    }
+                    $('err').textContent = msg(r.data, 'Could not reset the password. Please try again.');
+                }).catch(function () {
+                    wrap.classList.remove('loading');
+                    $('err').textContent = 'Could not reach the server. Check your connection and try again.';
+                });
+                return;
+            }
             post({ id_token: token }).then(function (r) {
                 wrap.classList.remove('loading');
                 if (r.ok && r.data.status === 'authenticated') { location.href = '/hub'; return; }
@@ -287,22 +342,53 @@
             if (name.length < 2 || name.length > 32) {
                 field.classList.add('bad'); err.textContent = 'A callsign needs 2 to 32 characters.'; $('callsign').focus(); return;
             }
+            var p1 = $('pw1').value, p2 = $('pw2').value;
+            if (p1.length < 8 || p1.length > 128) { $('fpw1').classList.add('bad'); err.textContent = 'Password must be 8 to 128 characters.'; $('pw1').focus(); return; }
+            if (p1 !== p2) { $('fpw2').classList.add('bad'); err.textContent = 'The two passwords do not match.'; $('pw2').focus(); return; }
             var b = $('go'); b.disabled = true; b.textContent = 'CHECKING CLEARANCE...';
-            post({ id_token: token, username: name }).then(function (r) {
+            post({ id_token: token, username: name, password: p1 }).then(function (r) {
                 if (r.ok && r.data.status === 'authenticated') { location.href = '/hub'; return; }
-                b.disabled = false; b.textContent = 'REPORT FOR DUTY';
+                b.disabled = false; b.textContent = 'CREATE ACCOUNT';
                 field.classList.add('bad');
                 err.textContent = msg(r.data, 'Could not create your profile. Try another callsign.');
             }).catch(function () {
-                b.disabled = false; b.textContent = 'REPORT FOR DUTY';
+                b.disabled = false; b.textContent = 'CREATE ACCOUNT';
                 err.textContent = 'Network error. Try again.';
             });
         }
         $('go').addEventListener('click', finish);
         $('callsign').addEventListener('keydown', function (e) { if (e.key === 'Enter') finish(); });
         $('callsign').addEventListener('input', function () { $('field').classList.remove('bad'); });
+        ['pw1', 'pw2'].forEach(function (id) {
+            $(id).addEventListener('input', function () { $('fpw1').classList.remove('bad'); $('fpw2').classList.remove('bad'); });
+            $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') finish(); });
+        });
+
+        /* username + password sign-in */
+        function signIn() {
+            var u = $('u').value.trim(), pw = $('pw').value, err = $('err');
+            err.textContent = '';
+            if (!u || !pw) { err.textContent = 'Enter your callsign and password.'; return; }
+            var b = $('signin'); b.disabled = true; b.textContent = 'CHECKING CLEARANCE...';
+            post({ username: u, password: pw }, '/api/auth/login').then(function (r) {
+                if (r.ok && r.data.status === 'authenticated') { location.href = '/hub'; return; }
+                b.disabled = false; b.textContent = 'SIGN IN';
+                err.textContent = msg(r.data, 'Sign-in failed. Please try again.');
+            }).catch(function () {
+                b.disabled = false; b.textContent = 'SIGN IN';
+                err.textContent = 'Could not reach the server. Check your connection and try again.';
+            });
+        }
+        $('signin').addEventListener('click', signIn);
+        ['u', 'pw'].forEach(function (id) { $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') signIn(); }); });
+        $('forgot').addEventListener('click', function () { setMode('forgot'); });
+        $('fback').addEventListener('click', function () { setMode('signin'); });
+        $('r-go').addEventListener('click', function () {
+            $('u').value = $('r-user').textContent; $('pw').value = ''; $('r-pass').textContent = '';
+            setMode('signin'); show('google'); $('pw').focus();
+        });
         $('back').addEventListener('click', function () {
-            token = null; $('err').textContent = '';
+            token = null; $('err').textContent = ''; setMode('signin');
             try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) { /* ignore */ }
             show('google');
         });

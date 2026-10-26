@@ -323,6 +323,112 @@ def verify_google_id_token(token: str):
         return None
 
 
+# ─── Username + password helpers ───────────────────────────────
+
+DEFAULT_RESET_PASSWORD = "spectreiitbhilai"
+PBKDF2_ITERATIONS = 240_000
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_bytes(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, PBKDF2_ITERATIONS)
+    return f"pbkdf2_sha256${PBKDF2_ITERATIONS}${salt.hex()}${digest.hex()}"
+
+
+def verify_password(password: str, stored: Optional[str]) -> bool:
+    """Constant-time check. A missing/garbled hash still burns one PBKDF2 run so
+    unknown users and wrong passwords take the same time."""
+    try:
+        scheme, iters, salt_hex, digest_hex = (stored or "").split("$")
+        if scheme != "pbkdf2_sha256":
+            raise ValueError
+        salt, expected, n = bytes.fromhex(salt_hex), bytes.fromhex(digest_hex), int(iters)
+    except ValueError:
+        salt, expected, n = b"\0" * 16, b"\0" * 32, PBKDF2_ITERATIONS
+        hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, n)
+        return False
+    got = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, n)
+    return secrets.compare_digest(got, expected)
+
+
+def clean_password(password: Optional[str]) -> str:
+    password = password or ""
+    if len(password) < 8 or len(password) > 128:
+        raise HTTPException(status_code=400, detail="Password must be 8-128 characters")
+    return password
+
+
+# Best-effort brute-force throttle (per server instance): 6 failures / 10 min per IP+username.
+_LOGIN_FAILS: dict = {}
+LOGIN_MAX_FAILS = 6
+LOGIN_WINDOW_SECONDS = 600
+
+
+def _throttle_key(request: Request, username: str) -> str:
+    ip = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+          or (request.client.host if request.client else "?"))
+    return f"{ip}|{username.lower()}"
+
+
+def _throttle_check(key: str) -> None:
+    now = datetime.datetime.now().timestamp()
+    fails = [t for t in _LOGIN_FAILS.get(key, []) if now - t < LOGIN_WINDOW_SECONDS]
+    _LOGIN_FAILS[key] = fails
+    if len(fails) >= LOGIN_MAX_FAILS:
+        raise HTTPException(status_code=429, detail="Too many failed attempts. Wait a few minutes and try again.")
+
+
+def _throttle_fail(key: str) -> None:
+    _LOGIN_FAILS.setdefault(key, []).append(datetime.datetime.now().timestamp())
+    if len(_LOGIN_FAILS) > 5000:  # keep memory bounded
+        _LOGIN_FAILS.clear()
+
+
+@app.post("/api/auth/login")
+def password_login(
+    request: Request,
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(database.get_db),
+):
+    username = (username or "").strip()[:64]
+    key = _throttle_key(request, username)
+    _throttle_check(key)
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user:
+        matches = db.query(models.User).filter(func.lower(models.User.username) == username.lower()).all()
+        user = matches[0] if len(matches) == 1 else None
+    ok = verify_password(password[:256], user.hashed_password if user else None)
+    if not (user and ok):
+        _throttle_fail(key)
+        raise HTTPException(status_code=401, detail="Wrong username or password.")
+    _LOGIN_FAILS.pop(key, None)
+    issue_session(response, request, user.username)
+    return {"status": "authenticated", "message": "Login successful", "is_admin": user.is_admin}
+
+
+@app.post("/api/auth/forgot")
+def forgot_password(
+    id_token: str = Form(...),
+    db: Session = Depends(database.get_db),
+):
+    """Reset to the default password. Ownership of the account's email is proven with
+    a Google token, so a username alone can never be used to take over an account."""
+    if not os.getenv("GOOGLE_CLIENT_ID", "").strip():
+        raise HTTPException(status_code=503, detail="Google sign-in is not configured on this server")
+    payload = verify_google_id_token(id_token)
+    if not payload or not payload.get("email"):
+        raise HTTPException(status_code=400, detail="Invalid or unverified Google token")
+    email = payload["email"].strip().lower()
+    user = db.query(models.User).filter(func.lower(models.User.email) == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="No account is registered with this Google email. Create one instead.")
+    user.hashed_password = hash_password(DEFAULT_RESET_PASSWORD)
+    db.commit()
+    return {"status": "reset", "username": user.username, "password": DEFAULT_RESET_PASSWORD}
+
+
 @app.get("/api/auth/config")
 def get_auth_config():
     return {"google_client_id": os.getenv("GOOGLE_CLIENT_ID", "").strip()}
@@ -334,6 +440,7 @@ def google_auth(
     response: Response,
     id_token: str = Form(...),
     username: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
     db: Session = Depends(database.get_db),
 ):
     if not os.getenv("GOOGLE_CLIENT_ID", "").strip():
@@ -366,7 +473,8 @@ def google_auth(
         }
 
     username = clean_username(username)
-    if db.query(models.User).filter(models.User.username == username).first():
+    password = clean_password(password)
+    if db.query(models.User).filter(func.lower(models.User.username) == username.lower()).first():
         raise HTTPException(status_code=400, detail="Username already registered. Please choose another.")
 
     try:
@@ -374,7 +482,7 @@ def google_auth(
             username=username,
             email=email,
             is_email_verified=True,
-            hashed_password=None,
+            hashed_password=hash_password(password),
             is_admin=is_admin_email,
         )
         db.add(new_user)
