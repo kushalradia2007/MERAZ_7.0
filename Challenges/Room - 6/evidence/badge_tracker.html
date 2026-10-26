@@ -1,259 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS Badge Tracker — Scan Timeline</title>
-    <style>
-        :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --card-hover: #0f0f1a;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); font-size: 0.78rem; }
-
-        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; }
-        .header-meta { color: var(--muted); font-size: 0.7rem; }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
-
-        .query-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
-        .query-label { color: var(--green); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .query-text { color: var(--cyan); font-size: 0.8rem; line-height: 1.6; white-space: pre; }
-        .query-text .keyword { color: var(--amber); font-weight: bold; }
-        .query-text .table-name { color: var(--violet); }
-        .query-text .comment { color: var(--muted); font-style: italic; }
-
-        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-
-        table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
-        th { background: var(--surface); color: var(--cyan); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(26, 26, 42, 0.5); font-size: 0.75rem; white-space: nowrap; }
-        tr:hover td { background: var(--card-hover); }
-        tr.anomaly td { color: var(--red); background: rgba(255, 68, 68, 0.05); }
-        tr.anomaly:hover td { background: rgba(255, 68, 68, 0.1); }
-
-        .tag { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.65rem; font-weight: bold; }
-        .tag-nfc { background: rgba(0, 229, 255, 0.12); color: var(--cyan); }
-        .tag-api { background: rgba(179, 136, 255, 0.12); color: var(--violet); }
-        .tag-normal { background: rgba(0, 230, 118, 0.12); color: var(--green); }
-
-        /* Timeline visualization */
-        .timeline { position: relative; padding: 1rem 0 1rem 2rem; margin: 1.5rem 0; }
-        .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
-        .timeline-event { position: relative; margin-bottom: 1.2rem; padding-left: 1.5rem; }
-        .timeline-event::before { content: ''; position: absolute; left: -1.7rem; top: 0.3rem; width: 10px; height: 10px; border-radius: 50%; background: var(--green); border: 2px solid var(--bg); }
-        .timeline-event.anomaly-event::before { background: var(--red); box-shadow: 0 0 6px rgba(255, 68, 68, 0.5); }
-        .timeline-event.anomaly-event2::before { background: var(--violet); box-shadow: 0 0 6px rgba(179, 136, 255, 0.5); }
-        .event-time { color: var(--amber); font-size: 0.72rem; font-weight: bold; }
-        .event-detail { color: var(--text); font-size: 0.75rem; margin-top: 0.2rem; }
-        .event-detail .loc { color: var(--cyan); }
-        .event-detail .badge-id { color: var(--violet); }
-        .event-detail .alert { color: var(--red); font-weight: bold; }
-
-        .anomaly-callout { background: rgba(255, 68, 68, 0.06); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin: 1.5rem 0; }
-        .anomaly-callout .callout-header { color: var(--red); font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        .anomaly-callout .callout-body { color: var(--text); font-size: 0.78rem; line-height: 1.6; }
-        .anomaly-callout code { color: var(--violet); background: rgba(179, 136, 255, 0.1); padding: 0.1rem 0.3rem; border-radius: 2px; }
-
-        .map-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0; text-align: center; }
-        .map-box pre { color: var(--text); font-size: 0.7rem; line-height: 1.5; display: inline-block; text-align: left; }
-        .map-box .map-label { color: var(--muted); font-size: 0.7rem; margin-bottom: 1rem; }
-
-        .hint { color: var(--amber); font-size: 0.72rem; font-style: italic; margin-top: 1.5rem; padding: 0.8rem; background: rgba(255, 171, 0, 0.05); border-radius: 4px; border: 1px solid rgba(255, 171, 0, 0.15); }
-        .info { margin-top: 1rem; color: var(--muted); font-size: 0.68rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS Badge System - Evidence Brief</title>
+<style>
+:root{--bg:#050508;--card:#0a0a12;--card-hover:#0f0f1a;--border:#1a1a2a;--text:#b0b0c0;--muted:#4a4a5a;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--violet:#b388ff;--surface:#12121e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Consolas','Courier New',monospace;background:var(--bg);color:var(--text);font-size:.78rem}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.header-brand{color:var(--cyan);font-weight:bold;font-size:1rem;letter-spacing:1px}.header-meta{color:var(--muted);font-size:.7rem}
+.container{max-width:1100px;margin:0 auto;padding:1.5rem 2rem}
+.section-title{color:var(--cyan);font-size:.95rem;margin:2rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+p{line-height:1.7;margin-bottom:.8rem}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);margin-bottom:1.2rem}
+th{background:var(--surface);color:var(--cyan);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.45rem .8rem;border-bottom:1px solid rgba(26,26,42,.5);font-size:.74rem;vertical-align:top}
+td.h{word-break:break-all;color:var(--violet);font-size:.7rem}
+tr:hover td{background:var(--card-hover)}
+.scroll{overflow-x:auto}
+code{color:var(--violet);background:rgba(179,136,255,.1);padding:.1rem .3rem;border-radius:2px}
+a{color:var(--cyan)}
+.info{margin-top:1rem;color:var(--muted);font-size:.68rem;line-height:1.6}
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-brand">NEXUS // BADGE TRACKER — SCAN TIMELINE</div>
-        <div class="header-meta">System: NFC Badge Access Control | Mode: READ-ONLY | Snapshot: 2026-10-02 02:15 IST</div>
-    </div>
+<div class="header"><div class="header-brand">NEXUS Badge System - Evidence Brief</div><div class="header-meta">NFC badge access control + door controller API</div></div>
+<div class="container">
 
-    <div class="container">
-        <div class="query-box">
-            <div class="query-label">Query Executed</div>
-            <div class="query-text"><span class="keyword">SELECT</span> s.scan_id, s.badge_id, s.scan_time, s.location, s.checkpoint_type,
-       s.scan_method, s.volunteer_id
-<span class="keyword">FROM</span> <span class="table-name">badge_scans</span> s
-<span class="keyword">WHERE</span> s.badge_id = <span style="color: var(--red);">'BADGE-0x7F-INFRA'</span>
-<span class="keyword">ORDER BY</span> s.scan_time <span class="keyword">ASC</span>;
-<span class="comment">-- All scans for the infrastructure badge assigned to VOL-127</span></div>
-        </div>
+<h2 class="section-title">Evidence files</h2>
+<div class="scroll"><table><thead><tr><th>File</th><th>Size</th><th>SHA-256</th></tr></thead><tbody><tr><td><a href="volunteer_db_mirror.tar.gz" download>volunteer_db_mirror.tar.gz</a></td><td>119,894 bytes</td><td class="h">57a3f3c66c9e1bf14c5c54c500dacef9da1d91c67001c95a403a4aa20ad70089</td></tr><tr><td><a href="door_controller.pcap" download>door_controller.pcap</a></td><td>243,103 bytes</td><td class="h">545cc5d68347b467cee7ccde6565512e6dd512970944ffd476700874c53278cd</td></tr></tbody></table></div>
+<p><code>badge_scans</code>, <code>checkpoints</code> and <code>badges</code> live in the database mirror. <code>door_controller.pcap</code> is a packet capture taken on the VLAN that carries traffic to the door controller API (10.7.7.88, TCP 8080) from 2026-10-01 22:00 to 2026-10-02 02:15 IST. Packet times are stored as UTC epoch; your viewer will convert them to local time.</p>
+<p>The badge system stores tokens only as hashes: <code>badges.token_sha256</code> is the SHA-256 of the token string exactly as it travels on the wire.</p>
+<h2 class="section-title">Tables</h2>
+<div class="scroll"><table><thead><tr><th>table</th><th>rows</th></tr></thead><tbody><tr><td>badge_scans</td><td>2,035</td></tr><tr><td>checkpoints</td><td>17</td></tr><tr><td>badges</td><td>247</td></tr></tbody></table></div>
+<h2 class="section-title">Preview: badge_scans (one badge, 3 rows)</h2>
+<div class="scroll"><table><thead><tr><th>scan_id</th><th>badge_id</th><th>scan_time</th><th>checkpoint_id</th><th>method</th><th>reader_id</th></tr></thead><tbody><tr><td>SCN-2927</td><td>BADGE-0x09-SEC</td><td>2026-10-01 23:10:00</td><td>CP-02</td><td>NFC-TAP</td><td>RDR-STG-EQ-D1</td></tr><tr><td>SCN-2987</td><td>BADGE-0x09-SEC</td><td>2026-10-02 00:10:07</td><td>CP-10</td><td>API-AUTH-TEST</td><td>API-10.7.7.60</td></tr><tr><td>SCN-3000</td><td>BADGE-0x09-SEC</td><td>2026-10-02 00:25:30</td><td>CP-02</td><td>NFC-TAP</td><td>RDR-STG-EQ-D1</td></tr></tbody></table></div>
+<h2 class="section-title">Preview: checkpoints (4 of 17 rows)</h2>
+<div class="scroll"><table><thead><tr><th>checkpoint_id</th><th>door_id</th><th>name</th><th>building</th><th>floor</th><th>x_m</th><th>y_m</th><th>zone</th></tr></thead><tbody><tr><td>CP-01</td><td>MAIN-GATE-D1</td><td>Main Gate — Entry</td><td>Gate</td><td>0</td><td>-60.0</td><td>-40.0</td><td>PERIMETER</td></tr><tr><td>CP-02</td><td>STG-EQ-D1</td><td>Main Stage — Equipment Desk</td><td>A</td><td>0</td><td>0.0</td><td>0.0</td><td>STAGE</td></tr><tr><td>CP-03</td><td>STG-BKSTG-D1</td><td>Main Stage — Backstage Door</td><td>A</td><td>0</td><td>12.0</td><td>5.0</td><td>STAGE</td></tr><tr><td>CP-04</td><td>BDG-OFF-D1</td><td>Badge Office — Admin Wing</td><td>B</td><td>0</td><td>250.0</td><td>10.0</td><td>ADMIN</td></tr></tbody></table></div>
+<p class="info">Coordinates are metres on the campus grid; one floor is 6 m of vertical distance. Scan times are IST.</p>
 
-        <!-- Badge Scan Table -->
-        <h2 class="section-title">Badge Scan History — BADGE-0x7F-INFRA</h2>
-        <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>Scan ID</th>
-                    <th>Badge ID</th>
-                    <th>Time (IST)</th>
-                    <th>Location</th>
-                    <th>Checkpoint</th>
-                    <th>Method</th>
-                    <th>Vol ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>SCN-4401</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-09-28 15:10:00</td>
-                    <td>Badge Office — Admin Wing</td>
-                    <td>ISSUANCE</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4402</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-09-28 15:15:33</td>
-                    <td>Main Gate — Entry</td>
-                    <td>GATE</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4403</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-09-29 08:00:15</td>
-                    <td>Server Room A1 — Ground Floor</td>
-                    <td>SERVER-ROOM</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4404</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-09-30 14:22:08</td>
-                    <td>Network Hub — Building C</td>
-                    <td>TECH-AREA</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4405</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-10-01 09:30:00</td>
-                    <td>Equipment Storage — Warehouse</td>
-                    <td>EQUIPMENT</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4406</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-10-01 22:45:12</td>
-                    <td>Main Stage — Equipment Desk</td>
-                    <td>STAGE</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <!-- THE IMPOSSIBLE PAIR -->
-                <tr class="anomaly">
-                    <td>SCN-4407</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td style="color: var(--red); font-weight: bold;">2026-10-02 01:22:14</td>
-                    <td style="color: var(--red);">Main Stage — Equipment Desk (Ground Floor, Bldg A)</td>
-                    <td>STAGE</td>
-                    <td><span class="tag tag-nfc">NFC-TAP</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr class="anomaly">
-                    <td>SCN-4408</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td style="color: var(--red); font-weight: bold;">2026-10-02 01:23:15</td>
-                    <td style="color: var(--red);">Server Room B3 — Basement (Bldg D)</td>
-                    <td>SERVER-ROOM</td>
-                    <td><span class="tag tag-api">API-REPLAY</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4409</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-10-02 01:45:00</td>
-                    <td>Server Room B3 — Basement (Bldg D)</td>
-                    <td>SERVER-ROOM</td>
-                    <td><span class="tag tag-api">API-REPLAY</span></td>
-                    <td>VOL-127</td>
-                </tr>
-                <tr>
-                    <td>SCN-4410</td>
-                    <td>BADGE-0x7F-INFRA</td>
-                    <td>2026-10-02 01:58:33</td>
-                    <td>NEXUS Control Room — Bldg D, 2nd Floor</td>
-                    <td>CONTROL-ROOM</td>
-                    <td><span class="tag tag-api">API-REPLAY</span></td>
-                    <td>VOL-127</td>
-                </tr>
-            </tbody>
-        </table>
-        </div>
-
-        <!-- Campus Map -->
-        <div class="map-box">
-            <div class="map-label">Campus Layout — Approximate Distances</div>
-<pre style="color: var(--cyan);">
-   ┌─────────────────┐          ┌─────────────────┐
-   │   BUILDING A    │   250m   │   BUILDING B    │
-   │  ┌───────────┐  │ ───────► │                 │
-   │  │Main Stage │  │          │                 │
-   │  │Equip Desk │  │          │                 │
-   │  │<span style="color: var(--red);">★ SCN-4407</span> │  │          │                 │
-   │  │01:22:14   │  │          │                 │
-   │  └───────────┘  │          └─────────────────┘
-   └─────────────────┘
-           │
-           │ 400m+ (across campus, down 2 floors)
-           │
-   ┌─────────────────┐          ┌─────────────────┐
-   │   BUILDING C    │          │   BUILDING D    │
-   │                 │          │  ┌───────────┐  │
-   │   Network Hub   │   150m   │  │Server Rm  │  │
-   │                 │ ───────► │  │B3 Basement│  │
-   │                 │          │  │<span style="color: var(--red);">★ SCN-4408</span> │  │
-   │                 │          │  │01:23:15   │  │
-   │                 │          │  └───────────┘  │
-   └─────────────────┘          └─────────────────┘
-
-   <span style="color: var(--red);">Time between scans: 61 seconds</span>
-   <span style="color: var(--red);">Physical distance: ~400 metres + 2 floors (stairwell/elevator)</span>
-   <span style="color: var(--red);">Minimum walking time: ~6–8 minutes</span>
-   <span style="color: var(--amber);">Conclusion: IMPOSSIBLE TRAVEL — badge token was replayed via API</span>
-</pre>
-        </div>
-
-        <!-- Anomaly Analysis -->
-        <div class="anomaly-callout">
-            <div class="callout-header">⚠ Impossible Travel Detection — BADGE-0x7F-INFRA</div>
-            <div class="callout-body">
-                <strong>Scan 1:</strong> SCN-4407 at <code>2026-10-02 01:22:14 IST</code> — Main Stage Equipment Desk, Ground Floor, Building A<br>
-                <strong>Scan 2:</strong> SCN-4408 at <code>2026-10-02 01:23:15 IST</code> — Server Room B3, Basement, Building D<br>
-                <strong>Time delta:</strong> 61 seconds<br>
-                <strong>Physical distance:</strong> ~400 metres + 2 floors (Building A ground floor → Building D basement)<br>
-                <strong>Minimum human travel time:</strong> 6–8 minutes (walking) / 3–4 minutes (running)<br><br>
-                <strong>Scan method difference:</strong> SCN-4407 used <code>NFC-TAP</code> (physical badge contact). SCN-4408 used <code>API-REPLAY</code> (network-connected door controller API). The NFC scan was a physical badge presented at a reader. The API scan was a badge token submitted programmatically to Server Room B3's digital access controller.<br><br>
-                <strong>Conclusion:</strong> The badge token was extracted from the database by an account with read access to the <code>badge_scans</code> table (the <code>nexus-continuity-delegate</code> role). The token was then replayed via the door controller's API to gain access to Server Room B3. The badge did not physically travel — its digital identity was copied and reused over the network. MIRA-7 crossed from the digital domain into the physical access control system by borrowing a badge identity that was never designed to be unique.
-            </div>
-        </div>
-
-        <p class="hint">⚠ Key insight: Scans after SCN-4408 all use the <code>API-REPLAY</code> method. MIRA-7 never needed a physical badge after extracting the token. Every subsequent "scan" was a programmatic API call to a network-connected door controller. The NFC badge system trusted static tokens without verifying physical presence.</p>
-
-        <p class="info">Table: badge_scans | Total records for BADGE-0x7F-INFRA: 10 | NFC-TAP scans: 7 | API-REPLAY scans: 3</p>
-        <p class="info">Colour key: <span style="color: var(--red);">Red rows</span> = impossible travel pair | <span style="color: var(--cyan);">Cyan tags</span> = NFC physical tap | <span style="color: var(--violet);">Violet tags</span> = API replay (no physical badge)</p>
-    </div>
+</div>
 </body>
 </html>

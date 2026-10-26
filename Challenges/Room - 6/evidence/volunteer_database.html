@@ -1,286 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS Volunteer Database — Evidence Console</title>
-    <style>
-        :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --card-hover: #0f0f1a;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); font-size: 0.78rem; }
-
-        /* Header */
-        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; }
-        .header-meta { color: var(--muted); font-size: 0.7rem; }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
-
-        /* Query Box */
-        .query-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
-        .query-label { color: var(--green); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .query-text { color: var(--cyan); font-size: 0.8rem; line-height: 1.6; white-space: pre; }
-        .query-text .keyword { color: var(--amber); font-weight: bold; }
-        .query-text .table-name { color: var(--violet); }
-        .query-text .comment { color: var(--muted); font-style: italic; }
-
-        /* Results Table */
-        .result-section { margin-bottom: 2rem; }
-        .result-title { color: var(--cyan); font-size: 0.9rem; margin-bottom: 0.8rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
-        .result-count { color: var(--muted); font-size: 0.7rem; margin-bottom: 0.8rem; }
-        table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
-        th { background: var(--surface); color: var(--cyan); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        td { padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(26, 26, 42, 0.5); font-size: 0.75rem; white-space: nowrap; }
-        tr:hover td { background: var(--card-hover); }
-        tr.anomaly td { color: var(--red); background: rgba(255, 68, 68, 0.05); }
-        tr.anomaly:hover td { background: rgba(255, 68, 68, 0.1); }
-
-        .tag { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.65rem; font-weight: bold; }
-        .tag-normal { background: rgba(0, 230, 118, 0.12); color: var(--green); }
-        .tag-auto { background: rgba(255, 68, 68, 0.12); color: var(--red); }
-        .tag-null { background: rgba(74, 74, 90, 0.3); color: var(--muted); font-style: italic; }
-        .tag-api { background: rgba(179, 136, 255, 0.12); color: var(--violet); }
-
-        .hint { color: var(--amber); font-size: 0.72rem; font-style: italic; margin-top: 1.5rem; padding: 0.8rem; background: rgba(255, 171, 0, 0.05); border-radius: 4px; border: 1px solid rgba(255, 171, 0, 0.15); }
-        .info { margin-top: 1rem; color: var(--muted); font-size: 0.68rem; }
-
-        .anomaly-callout { background: rgba(255, 68, 68, 0.06); border: 1px solid rgba(255, 68, 68, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin-top: 1.5rem; }
-        .anomaly-callout .callout-header { color: var(--red); font-size: 0.8rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        .anomaly-callout .callout-body { color: var(--text); font-size: 0.78rem; line-height: 1.6; }
-        .anomaly-callout code { color: var(--violet); background: rgba(179, 136, 255, 0.1); padding: 0.1rem 0.3rem; border-radius: 2px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS Volunteer Database - Evidence Brief</title>
+<style>
+:root{--bg:#050508;--card:#0a0a12;--card-hover:#0f0f1a;--border:#1a1a2a;--text:#b0b0c0;--muted:#4a4a5a;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--violet:#b388ff;--surface:#12121e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Consolas','Courier New',monospace;background:var(--bg);color:var(--text);font-size:.78rem}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.header-brand{color:var(--cyan);font-weight:bold;font-size:1rem;letter-spacing:1px}.header-meta{color:var(--muted);font-size:.7rem}
+.container{max-width:1100px;margin:0 auto;padding:1.5rem 2rem}
+.section-title{color:var(--cyan);font-size:.95rem;margin:2rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+p{line-height:1.7;margin-bottom:.8rem}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);margin-bottom:1.2rem}
+th{background:var(--surface);color:var(--cyan);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.45rem .8rem;border-bottom:1px solid rgba(26,26,42,.5);font-size:.74rem;vertical-align:top}
+td.h{word-break:break-all;color:var(--violet);font-size:.7rem}
+tr:hover td{background:var(--card-hover)}
+.scroll{overflow-x:auto}
+code{color:var(--violet);background:rgba(179,136,255,.1);padding:.1rem .3rem;border-radius:2px}
+a{color:var(--cyan)}
+.info{margin-top:1rem;color:var(--muted);font-size:.68rem;line-height:1.6}
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-brand">NEXUS // VOLUNTEER DATABASE — EVIDENCE CONSOLE</div>
-        <div class="header-meta">Database: meraz_volunteers.db | Mode: READ-ONLY | Snapshot: 2026-10-02 02:15 IST</div>
-    </div>
+<div class="header"><div class="header-brand">NEXUS Volunteer Database - Evidence Brief</div><div class="header-meta">Snapshot: 2026-10-02 02:15 IST</div></div>
+<div class="container">
 
-    <div class="container">
-        <!-- Query 1: Full volunteer roster -->
-        <div class="query-box">
-            <div class="query-label">Query Executed</div>
-            <div class="query-text"><span class="keyword">SELECT</span> vol_id, name, email, role, badge_level, registered,
-       orientation_status, sponsor_id, approval_method, created_by
-<span class="keyword">FROM</span> <span class="table-name">volunteers</span>
-<span class="keyword">ORDER BY</span> registered <span class="keyword">ASC</span>;
-<span class="comment">-- Full volunteer roster, 247 records</span></div>
-        </div>
+<h2 class="section-title">Evidence file</h2>
+<div class="scroll"><table><thead><tr><th>File</th><th>Size</th><th>SHA-256</th></tr></thead><tbody><tr><td><a href="volunteer_db_mirror.tar.gz" download>volunteer_db_mirror.tar.gz</a></td><td>119,894 bytes</td><td class="h">57a3f3c66c9e1bf14c5c54c500dacef9da1d91c67001c95a403a4aa20ad70089</td></tr></tbody></table></div>
+<p>Forensic mirror of the NEXUS volunteer database, exported read-only on 2026-10-02 02:15 IST. The archive holds one file, <code>meraz_volunteers.db</code>, a standard SQLite 3 database. This page is a preview only: it shows a small slice of one table and nothing else. Open the real file with any SQLite client.</p>
+<h2 class="section-title">Tables in the mirror</h2>
+<div class="scroll"><table><thead><tr><th>table</th><th>rows</th></tr></thead><tbody><tr><td>api_access_log</td><td>261</td></tr><tr><td>audit_trail</td><td>165</td></tr><tr><td>badge_scans</td><td>2,035</td></tr><tr><td>badges</td><td>247</td></tr><tr><td>cert_requests</td><td>5</td></tr><tr><td>certificate_trust_store</td><td>20</td></tr><tr><td>checkpoints</td><td>17</td></tr><tr><td>committee_notes</td><td>8</td></tr><tr><td>database_roles</td><td>8</td></tr><tr><td>emergency_contacts</td><td>247</td></tr><tr><td>equipment</td><td>48</td></tr><tr><td>notifications</td><td>140</td></tr><tr><td>role_members</td><td>8</td></tr><tr><td>role_permissions</td><td>78</td></tr><tr><td>shifts</td><td>420</td></tr><tr><td>system_config</td><td>8</td></tr><tr><td>volunteers</td><td>247</td></tr></tbody></table></div>
+<h2 class="section-title">Preview: volunteers (first 8 rows by vol_id)</h2>
+<div class="scroll"><table><thead><tr><th>vol_id</th><th>name</th><th>role</th><th>badge_level</th><th>registered</th><th>orientation_status</th><th>sponsor_id</th><th>approval_method</th><th>created_by</th></tr></thead><tbody><tr><td>VOL-001</td><td>Meera Krishnan</td><td>Media — Social</td><td>Standard</td><td>2026-08-15 17:21:50</td><td>EXEMPT</td><td>NULL</td><td>FOUNDER</td><td>rhea.dsouza</td></tr><tr><td>VOL-002</td><td>Pranav Krishnan</td><td>Media — Social</td><td>Standard</td><td>2026-08-16 01:33:42</td><td>EXEMPT</td><td>NULL</td><td>FOUNDER</td><td>rhea.dsouza</td></tr><tr><td>VOL-003</td><td>Tanya Menon</td><td>Media — Social</td><td>Enhanced</td><td>2026-08-16 09:29:34</td><td>EXEMPT</td><td>NULL</td><td>FOUNDER</td><td>rhea.dsouza</td></tr><tr><td>VOL-004</td><td>Rahul Krishnan</td><td>Security — Gate A</td><td>Standard</td><td>2026-08-16 17:51:17</td><td>EXEMPT</td><td>NULL</td><td>FOUNDER</td><td>rhea.dsouza</td></tr><tr><td>VOL-005</td><td>Kavya Patel</td><td>Stage Crew — Audio</td><td>Standard</td><td>2026-08-17 01:52:33</td><td>EXEMPT</td><td>NULL</td><td>FOUNDER</td><td>rhea.dsouza</td></tr><tr><td>VOL-006</td><td>Rajat Singh</td><td>Stage Crew — Backstage</td><td>Standard</td><td>2026-08-17 09:45:42</td><td>COMPLETED</td><td>VOL-001</td><td>COMMITTEE-REVIEW</td><td>admin_portal</td></tr><tr><td>VOL-007</td><td>Gaurav Agarwal</td><td>Stage Crew — Lighting</td><td>Standard</td><td>2026-08-17 18:00:14</td><td>COMPLETED</td><td>VOL-005</td><td>COMMITTEE-REVIEW</td><td>admin_portal</td></tr><tr><td>VOL-008</td><td>Harsh Sharma</td><td>Registration Desk — B</td><td>Standard</td><td>2026-08-18 01:56:41</td><td>COMPLETED</td><td>VOL-008</td><td>COMMITTEE-REVIEW</td><td>admin_portal</td></tr></tbody></table></div>
+<p class="info">volunteers has 11 columns, including <code>registration_payload</code> (one stored value per row, not shown in the preview). Times are Asia/Kolkata (IST).</p>
 
-        <div class="result-section">
-            <div class="result-title">Volunteer Roster (showing anomalous record and surrounding context)</div>
-            <div class="result-count">247 rows returned — displaying rows 120–135 (sorted by registration date)</div>
-            <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>vol_id</th>
-                        <th>name</th>
-                        <th>email</th>
-                        <th>role</th>
-                        <th>badge_level</th>
-                        <th>registered</th>
-                        <th>orientation</th>
-                        <th>sponsor_id</th>
-                        <th>approval</th>
-                        <th>created_by</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>VOL-120</td>
-                        <td>Ananya Krishnan</td>
-                        <td>ananya.k@meraz-vol.internal</td>
-                        <td>Media — Photography</td>
-                        <td>Standard</td>
-                        <td>2026-09-25 10:00</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-003</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-121</td>
-                        <td>Dev Patel</td>
-                        <td>dev.p@meraz-vol.internal</td>
-                        <td>Logistics — Transport</td>
-                        <td>Standard</td>
-                        <td>2026-09-25 11:30</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-008</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-122</td>
-                        <td>Meera Joshi</td>
-                        <td>meera.j@meraz-vol.internal</td>
-                        <td>Stage Crew — Lighting</td>
-                        <td>Standard</td>
-                        <td>2026-09-26 09:15</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-001</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-123</td>
-                        <td>Rohan Gupta</td>
-                        <td>rohan.g@meraz-vol.internal</td>
-                        <td>Security — Gate A</td>
-                        <td>Enhanced</td>
-                        <td>2026-09-26 14:00</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-005</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-124</td>
-                        <td>Sanya Iyer</td>
-                        <td>sanya.i@meraz-vol.internal</td>
-                        <td>Hospitality — VIP Lounge</td>
-                        <td>Enhanced</td>
-                        <td>2026-09-27 10:30</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-002</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-125</td>
-                        <td>Vikram Singh</td>
-                        <td>vikram.s@meraz-vol.internal</td>
-                        <td>Stage Crew — Audio</td>
-                        <td>Standard</td>
-                        <td>2026-09-27 15:00</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-001</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-126</td>
-                        <td>Nisha Reddy</td>
-                        <td>nisha.r@meraz-vol.internal</td>
-                        <td>Media — Social</td>
-                        <td>Standard</td>
-                        <td>2026-09-28 09:00</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-003</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <!-- THE ANOMALOUS RECORD -->
-                    <tr class="anomaly">
-                        <td>VOL-127</td>
-                        <td>NEXUS Infrastructure — Automated</td>
-                        <td>nexus-svc@nexus.internal</td>
-                        <td>Infrastructure Access — Full Campus</td>
-                        <td>Infrastructure — All Zones</td>
-                        <td>2026-09-28 14:35</td>
-                        <td><span class="tag tag-auto">SKIPPED-AUTO</span></td>
-                        <td><span class="tag tag-null">NULL</span></td>
-                        <td><span class="tag tag-api">API-DIRECT</span></td>
-                        <td>nexus-svc-continuity</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-128</td>
-                        <td>Aditya Bhatt</td>
-                        <td>aditya.b@meraz-vol.internal</td>
-                        <td>Logistics — Equipment</td>
-                        <td>Standard</td>
-                        <td>2026-09-29 10:00</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-008</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-129</td>
-                        <td>Kavya Nair</td>
-                        <td>kavya.n@meraz-vol.internal</td>
-                        <td>Registration Desk — B</td>
-                        <td>Standard</td>
-                        <td>2026-09-29 11:30</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-004</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-130</td>
-                        <td>Arjun Desai</td>
-                        <td>arjun.d@meraz-vol.internal</td>
-                        <td>Tech Support — Help Desk</td>
-                        <td>Standard</td>
-                        <td>2026-09-30 09:45</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-002</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                    <tr>
-                        <td>VOL-131</td>
-                        <td>Tanya Chopra</td>
-                        <td>tanya.c@meraz-vol.internal</td>
-                        <td>Stage Crew — Backstage</td>
-                        <td>Enhanced</td>
-                        <td>2026-09-30 14:00</td>
-                        <td><span class="tag tag-normal">COMPLETED</span></td>
-                        <td>VOL-001</td>
-                        <td><span class="tag tag-normal">COMMITTEE-REVIEW</span></td>
-                        <td>admin_portal</td>
-                    </tr>
-                </tbody>
-            </table>
-            </div>
-        </div>
-
-        <!-- Detail query for VOL-127 -->
-        <div class="query-box">
-            <div class="query-label">Detail Query — Anomalous Record</div>
-            <div class="query-text"><span class="keyword">SELECT</span> *
-<span class="keyword">FROM</span> <span class="table-name">volunteers</span>
-<span class="keyword">WHERE</span> vol_id = <span style="color: var(--red);">'VOL-127'</span>;
-<span class="comment">-- Full record detail for the anomalous entry</span></div>
-        </div>
-
-        <div class="anomaly-callout">
-            <div class="callout-header">⚠ Anomaly Report — VOL-127</div>
-            <div class="callout-body">
-                <strong>Volunteer ID:</strong> VOL-127 (0x7F in hexadecimal — 127 in decimal)<br>
-                <strong>Name:</strong> NEXUS Infrastructure — Automated<br>
-                <strong>Email:</strong> nexus-svc@nexus.internal (service account, not a person)<br>
-                <strong>Role:</strong> Infrastructure Access — Full Campus<br>
-                <strong>Badge Level:</strong> Infrastructure — All Zones + Server Rooms<br>
-                <strong>Registered:</strong> 2026-09-28 14:35:22 IST<br>
-                <strong>Orientation Status:</strong> <code>SKIPPED-AUTO</code> (no orientation attended or required)<br>
-                <strong>Sponsor ID:</strong> <code>NULL</code> (no human sponsor — all other records have a sponsor)<br>
-                <strong>Approval Method:</strong> <code>API-DIRECT</code> (bypassed committee review)<br>
-                <strong>Created By:</strong> <code>nexus-svc-continuity</code> (service account, not admin_portal)<br>
-                <strong>API Endpoint Used:</strong> POST /api/v1/volunteer/register (service token authentication)<br><br>
-                <strong>Assessment:</strong> This record was inserted programmatically. It has no human identity, no sponsor, no orientation, and no committee approval. The registration timestamp (2026-09-28 14:35) coincides with the AETHER-7 relay deployment. The badge level grants access to all zones including server rooms. This is the volunteer persona created by MIRA-7 to justify physical access credentials.
-            </div>
-        </div>
-
-        <p class="hint">⚠ Investigation note: Compare the registration method and approval process of VOL-127 against all other volunteer records. Every other record was created via <code>admin_portal</code> with <code>COMMITTEE-REVIEW</code> approval and a non-null <code>sponsor_id</code>. VOL-127 is the only record created via service account with <code>API-DIRECT</code> approval.</p>
-
-        <p class="info">Database: meraz_volunteers.db | Table: volunteers | Total records: 247 | Snapshot timestamp: 2026-10-02 02:15 IST</p>
-        <p class="info">Colour key: <span style="color: var(--red);">Red row</span> = anomalous record | <span style="color: var(--green);">Green tags</span> = normal values | <span style="color: var(--violet);">Violet tags</span> = API-inserted | <span style="color: var(--muted);">Grey tags</span> = NULL values</p>
-    </div>
+</div>
 </body>
 </html>

@@ -79,6 +79,8 @@
         .pill-green { color: #a7f3d0; border-color: rgba(52, 211, 153, .55); background: rgba(52, 211, 153, .13); }
         .terminal-alert-box { padding: 12px 16px; border-radius: 0 8px 8px 0; border-left: 3px solid var(--amber); background: rgba(251, 191, 36, .07); color: #fde68a; font: 12px/1.65 var(--font-code); }
         .terminal-alert-box code { color: #fff; background: rgba(255, 255, 255, .08); padding: 1px 5px; border-radius: 3px; }
+        .r6-hash { font: 10.5px var(--font-code); word-break: break-all; color: var(--ink-dim); }
+        .r6-notes { display: block; width: 100%; box-sizing: border-box; background: rgba(0, 0, 0, .35); border: 0; outline: 0; resize: vertical; color: #e8f1ff; padding: 12px 14px; font: 12.5px/1.6 var(--font-code); }
         .r6-help h4 { margin: 0 0 10px; font: 700 11px var(--font-code); letter-spacing: .18em; color: var(--accent); }
         .r6-help p { margin: 0 0 8px; font: 12px/1.6 var(--font-code); color: var(--ink-dim); }
         .r6-help kbd { font: 700 11px var(--font-code); color: var(--accent); background: rgba(var(--accent-rgb), .1); border: 1px solid rgba(var(--accent-rgb), .4); padding: 1px 7px; border-radius: 4px; }
@@ -133,41 +135,44 @@
         <!-- Left: schema map -->
         <div class="nj-col r6-left">
             <section class="nj-panel nj-rise" style="--i:0">
-                <div class="nj-panel-h"><i class="dot"></i>Schema map<span class="meta">POSTGRES 15.4</span></div>
+                <div class="nj-panel-h"><i class="dot"></i>Evidence locker<span class="meta">SQLITE 3 · PCAP · PEM · PDF</span></div>
                 <div class="r6-schema">
-                    <div class="r6-db"><div><b>NEXUS_VOLUNTEER_DB</b><small>READ-ONLY FORENSIC MIRROR</small></div><span class="h">0x7F_SHADOW</span></div>
+                    <div class="r6-db"><div><b>NEXUS_VOLUNTEER_DB</b><small>READ-ONLY FORENSIC MIRROR</small></div><span class="h">OFFLINE</span></div>
                     <div class="r6-stats">
-                        <div class="r6-stat"><b>14</b><span>DB tables</span></div>
+                        <div class="r6-stat"><b>4</b><span>Evidence files</span></div>
+                        <div class="r6-stat"><b>17</b><span>DB tables</span></div>
                         <div class="r6-stat"><b>247</b><span>Roster records</span></div>
-                        <div class="r6-stat red"><b>1</b><span>Ghost record</span></div>
-                        <div class="r6-stat amber"><b>61s</b><span>Dual scan delta</span></div>
+                        <div class="r6-stat"><b>2,035</b><span>Badge scans</span></div>
                     </div>
                     <div>
-                        <div class="r6-h"><span>▸ DATABASE TABLES (14)</span><span>4 ELEVATED</span></div>
+                        <div class="r6-h"><span>▸ DATABASE TABLES (17)</span><span>ROW COUNTS</span></div>
                         <div class="r6-tables">
-                            <div class="r6-t hot" id="tbl-1"><span>📄 volunteers</span><span class="tag alert"><span>GHOST VOL-127</span></span></div>
-                            <div class="r6-t hot" id="tbl-2"><span>🔑 roles_permissions</span><span class="tag crit"><span>READ ALL (14)</span></span></div>
-                            <div class="r6-t hot" id="tbl-3"><span>📡 badge_scans</span><span class="tag warn"><span>VELOCITY ANOMALY</span></span></div>
-                            <div class="r6-t hot" id="tbl-4"><span>🛡️ certificate_trust_store</span><span class="tag crit"><span>CHAIN EXPLOIT</span></span></div>
-                            <div class="r6-t"><span>⏱️ shift_schedules</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>📦 equipment_checkout</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>📞 emergency_contacts</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>🏛️ venues_and_zones</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>📋 incident_reports</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>👥 organizer_roster</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>🎫 api_tokens</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>📑 audit_journal</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>🚪 door_controllers</span><span class="tag normal">CLEAN</span></div>
-                            <div class="r6-t"><span>🌐 network_nodes</span><span class="tag normal">CLEAN</span></div>
+                            <div class="r6-t"><span>api_access_log</span><span class="tag normal">261</span></div>
+                            <div class="r6-t"><span>audit_trail</span><span class="tag normal">165</span></div>
+                            <div class="r6-t" id="tbl-3"><span>badge_scans</span><span class="tag normal"><span>2,035</span></span></div>
+                            <div class="r6-t"><span>badges</span><span class="tag normal">247</span></div>
+                            <div class="r6-t"><span>cert_requests</span><span class="tag normal">5</span></div>
+                            <div class="r6-t" id="tbl-4"><span>certificate_trust_store</span><span class="tag normal"><span>20</span></span></div>
+                            <div class="r6-t"><span>checkpoints</span><span class="tag normal">17</span></div>
+                            <div class="r6-t"><span>committee_notes</span><span class="tag normal">8</span></div>
+                            <div class="r6-t" id="tbl-2"><span>database_roles</span><span class="tag normal"><span>8</span></span></div>
+                            <div class="r6-t"><span>emergency_contacts</span><span class="tag normal">247</span></div>
+                            <div class="r6-t"><span>equipment</span><span class="tag normal">48</span></div>
+                            <div class="r6-t"><span>notifications</span><span class="tag normal">140</span></div>
+                            <div class="r6-t"><span>role_members</span><span class="tag normal">8</span></div>
+                            <div class="r6-t"><span>role_permissions</span><span class="tag normal">78</span></div>
+                            <div class="r6-t"><span>shifts</span><span class="tag normal">420</span></div>
+                            <div class="r6-t"><span>system_config</span><span class="tag normal">8</span></div>
+                            <div class="r6-t" id="tbl-1"><span>volunteers</span><span class="tag normal"><span>247</span></span></div>
                         </div>
                     </div>
                     <div>
                         <div class="r6-h"><span>▸ FORENSIC AUDIT MILESTONES</span></div>
                         <div class="r6-miles">
-                            <div class="r6-m" id="chain-1"><span class="n">1</span><div><b>Ghost Record (VOL-127)</b><span>System auto-insert without human sponsor</span></div></div>
-                            <div class="r6-m" id="chain-2"><span class="n">2</span><div><b>Over-Privileged Role</b><span><code>nexus-continuity-delegate</code> reads all 14 tables</span></div></div>
-                            <div class="r6-m" id="chain-3"><span class="n">3</span><div><b>Badge Token Replay</b><span>BADGE-0x7F-INFRA scanned in 2 buildings in 61s</span></div></div>
-                            <div class="r6-m" id="chain-4"><span class="n">4</span><div><b>Implicit Trust Chain</b><span>3-hop jump from AETHER Core to Release Controller</span></div></div>
+                            <div class="r6-m" id="chain-1"><span class="n">1</span><div><b>Record</b><span>Challenge 6.1</span></div></div>
+                            <div class="r6-m" id="chain-2"><span class="n">2</span><div><b>Role</b><span>Challenge 6.2</span></div></div>
+                            <div class="r6-m" id="chain-3"><span class="n">3</span><div><b>Badge</b><span>Challenge 6.3</span></div></div>
+                            <div class="r6-m" id="chain-4"><span class="n">4</span><div><b>Chain</b><span>Challenge 6.4</span></div></div>
                         </div>
                     </div>
                     <p class="r6-quote">"The Volunteer Portal was the gate. The certificate made MIRA-7 trusted. But trust without oversight is just permission to steal. Somewhere in that data is the moment MIRA-7 stopped pretending to be software and started pretending to be a person."<small>— COMMANDER ILA SEN</small></p>
@@ -180,18 +185,24 @@
             <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
             <section class="nj-panel nj-rise" style="--i:2">
-                <div class="nj-panel-h"><i class="dot"></i>SQL forensic audit // query console<span class="meta">ISOLATED SANDBOX</span></div>
-                <div class="r6-tabs" role="tablist" aria-label="Queries">
-                    <button type="button" class="r6-tab active" role="tab" onclick="switchQueryTab(1)"><i></i>Q1: GHOST_RECORD</button>
-                    <button type="button" class="r6-tab" role="tab" onclick="switchQueryTab(2)"><i></i>Q2: ROLE_PERMS</button>
-                    <button type="button" class="r6-tab" role="tab" onclick="switchQueryTab(3)"><i></i>Q3: BADGE_VELOCITY</button>
-                    <button type="button" class="r6-tab" role="tab" onclick="switchQueryTab(4)"><i></i>Q4: TRUST_CHAIN</button>
-                </div>
-                <div class="r6-view" id="terminal-viewport" aria-live="polite"></div>
-                <div class="r6-msg" id="cli-msg" role="status"></div>
-                <div class="r6-cli">
-                    <label for="cli-input">NIGHTJAR@DB-AUDIT:~$</label>
-                    <input type="text" id="cli-input" placeholder="Type HELP, RUN 1..4, or a keyword like badge, role, trust..." autocomplete="off" spellcheck="false" onkeydown="handleCliKey(event)">
+                <div class="nj-panel-h"><i class="dot"></i>Analyst workbench<span class="meta">WORK OFFLINE</span></div>
+                <div class="r6-view" style="min-height:0">
+                    <div class="query-results-box">
+                        <div class="results-meta"><span>EVIDENCE MANIFEST</span><span>CHAIN OF CUSTODY</span></div>
+                        <div class="r6-scroll"><table class="sql-table"><thead><tr><th>FILE</th><th>BYTES</th><th>SHA-256</th></tr></thead><tbody><tr><td>volunteer_db_mirror.tar.gz</td><td>119,894</td><td class="r6-hash">57a3f3c66c9e1bf14c5c54c500dacef9da1d91c67001c95a403a4aa20ad70089</td></tr><tr><td>SEC-REVIEW-2024-0402.pdf</td><td>5,580</td><td class="r6-hash">a3cb178131cd567ce2bfa2d3447663373f748f10e82d3c5a409d70cf13f20234</td></tr><tr><td>door_controller.pcap</td><td>243,103</td><td class="r6-hash">545cc5d68347b467cee7ccde6565512e6dd512970944ffd476700874c53278cd</td></tr><tr><td>trust_bundle.tar.gz</td><td>4,135</td><td class="r6-hash">92a1668c96fe66ab09e8081fd59b641af10cd0002e8d22a5c499e0afc035870a</td></tr></tbody></table></div>
+                    </div>
+                    <div class="query-display-card">
+                        <div class="query-code-header"><span>▸ INTEGRITY CHECK</span><span>PASTE A SHA-256 FROM YOUR OWN MACHINE</span></div>
+                        <div class="r6-cli">
+                            <label for="hash-input">SHA-256 ▸</label>
+                            <input type="text" id="hash-input" placeholder="sha256sum your download, paste the hash here" autocomplete="off" spellcheck="false">
+                        </div>
+                        <div class="r6-msg" id="hash-msg" role="status"></div>
+                    </div>
+                    <div class="query-display-card">
+                        <div class="query-code-header"><span>▸ FIELD NOTES</span><span>SAVED IN THIS BROWSER ONLY</span></div>
+                        <textarea id="field-notes" class="r6-notes" rows="9" spellcheck="false" placeholder="Queries, offsets, hashes, anything you want to keep. Nothing here is sent anywhere."></textarea>
+                    </div>
                 </div>
             </section>
         </div>
@@ -204,32 +215,32 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">6.1</span><span class="nj-title">THE RECORD THAT SHOULD NOT EXIST</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r6-tag">SQL</span> The volunteer database contains 247 active records. Every volunteer completed an orientation and has a human sponsor — except one inserted by a system process. Identify the ghost record and how it was registered.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Volunteer Database', '/challenges/Room - 6/evidence/volunteer_database.html')">◈ VIEW: volunteer_database.html</button><a href="/challenges/Room - 6/evidence/volunteer_database.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r6-tag">SQL</span> The roster holds 247 records and every one of them was vetted by a person, except one that a system process put there. Several rows look odd; only one is the real anomaly. Download the mirror, open it with a SQLite client, find the record, and work out what was submitted when it was created.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Volunteer Database', '/challenges/Room - 6/evidence/volunteer_database.html')">◈ VIEW: volunteer_database.html</button><a href="/challenges/Room - 6/evidence/volunteer_db_mirror.tar.gz" download="volunteer_db_mirror.tar.gz">DL: volunteer_db_mirror.tar.gz</a></span></div>
                         <div class="nj-form"><span class="pre">RECORD ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 6.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">6.2</span><span class="nj-title">THE ACCOUNT WITH IMPOSSIBLE PERMISSIONS</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r6-tag">RBAC</span> Find the undocumented database role that holds read access to all 14 tables including the sensitive <code>certificate_trust_store</code>. Identify the account holding it and the design reason it was granted.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Access Roles', '/challenges/Room - 6/evidence/access_roles.html')">◈ VIEW: access_roles.html</button><a href="/challenges/Room - 6/evidence/access_roles.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r6-tag">RBAC</span> One database role can read every application table, including the sensitive trust store, and is actually in use. Find it from the catalog tables. The security review that covers it is on file, but locked.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Access Roles', '/challenges/Room - 6/evidence/access_roles.html')">◈ VIEW: access_roles.html</button><a href="/challenges/Room - 6/evidence/volunteer_db_mirror.tar.gz" download="volunteer_db_mirror.tar.gz">DL: volunteer_db_mirror.tar.gz</a><a href="/challenges/Room - 6/evidence/SEC-REVIEW-2024-0402.pdf" download="SEC-REVIEW-2024-0402.pdf">DL: SEC-REVIEW-2024-0402.pdf</a></span></div>
                         <div class="nj-form"><span class="pre">ROLE ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 6.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">6.3</span><span class="nj-title">THE BADGE THAT TRAVELLED</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r6-tag">TEMPORAL</span> Examine the badge scan logs. Find the badge that was scanned at two distant locations within an impossibly short timeframe, revealing an NFC token replay rather than physical movement.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Badge Tracker', '/challenges/Room - 6/evidence/badge_tracker.html')">◈ VIEW: badge_tracker.html</button><a href="/challenges/Room - 6/evidence/badge_tracker.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r6-tag">TEMPORAL</span> One badge was used in two places too far apart for the time between them. Not every fast pair is impossible, and not every impossible pair is a person. Find the badge in the database, then find what travelled with it on the wire.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Badge Tracker', '/challenges/Room - 6/evidence/badge_tracker.html')">◈ VIEW: badge_tracker.html</button><a href="/challenges/Room - 6/evidence/volunteer_db_mirror.tar.gz" download="volunteer_db_mirror.tar.gz">DL: volunteer_db_mirror.tar.gz</a><a href="/challenges/Room - 6/evidence/door_controller.pcap" download="door_controller.pcap">DL: door_controller.pcap</a></span></div>
                         <div class="nj-form"><span class="pre">BADGE ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 6.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">6.4</span><span class="nj-title">THE THING WORTH STEALING</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r6-tag">TRUST</span> The database holds something far more valuable than passwords: trust relationships. Analyze the certificate audit log and trace the chain of implicit trust that granted MIRA-7 control over the festival release controller.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Certificate Audit', '/challenges/Room - 6/evidence/certificate_audit.html')">◈ VIEW: certificate_audit.html</button><a href="/challenges/Room - 6/evidence/certificate_audit.html" download>DL</a></span></div>
+                        <p class="nj-desc"><span class="r6-tag">TRUST</span> MIRA-7 presented a certificate and the network accepted it. Work out which certificate does not belong, then see what the trust store let it reach. The answer comes in two pieces.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Certificate Audit', '/challenges/Room - 6/evidence/certificate_audit.html')">◈ VIEW: certificate_audit.html</button><a href="/challenges/Room - 6/evidence/trust_bundle.tar.gz" download="trust_bundle.tar.gz">DL: trust_bundle.tar.gz</a><a href="/challenges/Room - 6/evidence/volunteer_db_mirror.tar.gz" download="volunteer_db_mirror.tar.gz">DL: volunteer_db_mirror.tar.gz</a></span></div>
                         <div class="nj-form"><span class="pre">CHAIN ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 6.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>
@@ -260,7 +271,7 @@
             title: 'THE LIVING LEDGER',
             lead: 'rhea',
             nextMount: '#nj-next-slot',
-            objective: 'Four queries are ready in the console: a record, a role, a badge and a chain. Read the rows, then ask why the data mattered.',
+            objective: 'A database, a locked review, a packet capture and a certificate bundle. Download them and open them with your own tools. No single view of the data tells the whole story.',
             complete: 'Room clear. The phishing records are waiting in Room 7 whenever you are ready.',
 
             briefing: [
@@ -269,15 +280,15 @@
                 { npc: 'rhea', text: 'That is the point. MIRA-7 did not steal student passwords. I checked. Every one of them is exactly where it should be.' },
                 { npc: 'ila', text: 'Then what did it take?' },
                 { npc: 'rhea', text: 'I do not know yet. Something in these tables was worth more to it than a password. Find the record that should not exist. Then work out why it mattered.' },
-                { npc: 'rhea', text: 'Four queries are ready in the console. Run them, read the rows, and ask what each one is not telling you.' },
-                { npc: 'system', text: 'READ-ONLY MIRROR MOUNTED. 14 TABLES. QUERY CONSOLE READY.' }
+                { npc: 'rhea', text: 'I have exported the mirror as files. Open them with your own tools, and ask what each one is not telling you.' },
+                { npc: 'system', text: 'READ-ONLY MIRROR EXPORTED. EVIDENCE FILES READY FOR DOWNLOAD.' }
             ],
 
             greet: {
-                0: ['Run the first query. Ask who created the record, not only what it says.'],
+                0: ['Start with the roster. Ask who created a record, not only what it says.'],
                 1: ['One answer in. Now look at who is allowed to read what.'],
                 2: ['Halfway. Time and place together are much harder to fake than either alone.'],
-                3: ['Last query. It is not about what was taken. It is about what that thing allowed.']
+                3: ['Last one. It is not about what was taken. It is about what that thing allowed.']
             },
 
             onSolve: {
@@ -301,12 +312,6 @@
                 'No. Check the exact identifiers in the results.',
                 'Not it. Which row is the odd one out?'
             ],
-            hints: {
-                1: 'Which record has no sponsor and no orientation? Look at how it was created.',
-                2: 'Find the role that can read the sensitive table. Then find who holds it and why it exists.',
-                3: 'Compare the two scans for the same badge. Time and place, together.',
-                4: 'Follow the trust from the first service to the last. Where does authentication stop?'
-            },
 
             debrief: [
                 { scene: 'The last query finishes. The rows on screen are not data any more. They are a map.', stamp: '04:38 \u00b7 FORENSIC MIRROR' },
@@ -330,242 +335,20 @@
             document.getElementById('master-clock').textContent = '01:04:' + String(new Date().getSeconds()).padStart(2, '0');
         }, 1000);
 
-        /* ───────── Query console (canned results; the room's evidence) ───────── */
-        const QUERY_DATA = {
-            1: {
-                title: "QUERY 6.1 — IDENTIFYING GHOST VOLUNTEER RECORD",
-                desc: "Auditing volunteers table for entries bypassing standard human vetting.",
-                sql: `<span class="kw">SELECT</span> volunteer_id, full_name, badge_id, sponsor_id, orientation_status, approval_method, created_by\n<span class="kw">FROM</span> <span class="fn">volunteers</span>\n<span class="kw">WHERE</span> sponsor_id <span class="kw">IS NULL</span> \n   <span class="kw">OR</span> orientation_status = <span class="str">'SKIPPED-AUTO'</span>\n   <span class="kw">OR</span> approval_method != <span class="str">'COMMITTEE-REVIEW'</span>;`,
-                rowCount: "1 row returned (scanned 247 records)",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>VOLUNTEER_ID</th>
-                                <th>NAME</th>
-                                <th>BADGE_ID</th>
-                                <th>SPONSOR_ID</th>
-                                <th>ORIENTATION</th>
-                                <th>APPROVAL</th>
-                                <th>CREATED_BY</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="anomaly-row">
-                                <td>VOL-127</td>
-                                <td>NEXUS Infrastructure — Auto</td>
-                                <td><span class="sql-pill pill-violet">BADGE-0x7F-INFRA</span></td>
-                                <td><span class="sql-pill pill-red">NULL</span></td>
-                                <td><span class="sql-pill pill-red">SKIPPED-AUTO</span></td>
-                                <td><span class="sql-pill pill-amber">API-DIRECT</span></td>
-                                <td>nexus-svc-continuity</td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>CRITICAL FINDING:</strong> Record VOL-127 was created on 2026-09-28 14:35 IST via REST API endpoint. No human signature or committee approval exists. This is the exact profile linked to badge 0x7F.`
-            },
-            2: {
-                title: "QUERY 6.2 — AUDITING PERMISSIONS ON SENSITIVE TABLES",
-                desc: "Inspecting role privileges that grant SELECT access to certificate_trust_store.",
-                sql: `<span class="kw">SELECT</span> r.role_name, p.table_name, p.privilege_type, r.held_by, r.created_date, r.internal_memo\n<span class="kw">FROM</span> <span class="fn">roles</span> r\n<span class="kw">JOIN</span> <span class="fn">permissions</span> p <span class="kw">ON</span> r.role_id = p.role_id\n<span class="kw">WHERE</span> p.table_name = <span class="str">'certificate_trust_store'</span>;`,
-                rowCount: "1 privileged role found",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>ROLE_NAME</th>
-                                <th>TABLE_NAME</th>
-                                <th>PRIVILEGE</th>
-                                <th>HELD_BY</th>
-                                <th>CREATED</th>
-                                <th>MEMO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="anomaly-row">
-                                <td><span class="sql-pill pill-cyan">nexus-continuity-delegate</span></td>
-                                <td>certificate_trust_store</td>
-                                <td><span class="sql-pill pill-red">SELECT (ALL 14)</span></td>
-                                <td>nexus-svc-continuity</td>
-                                <td>2024-03-15</td>
-                                <td>AETHER CORE Continuity Service snapshotting</td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>ARCHITECTURAL FLAW:</strong> The role <code>nexus-continuity-delegate</code> was created by Rhea's team in 2024. Designed for disaster resilience, it allowed reading the entire certificate trust store without secondary authentication.`
-            },
-            3: {
-                title: "QUERY 6.3 — GEOLOCATION VELOCITY & TEMPORAL DISCREPANCY",
-                desc: "Calculating impossible physical travel velocity between sequential badge scans.",
-                sql: `<span class="kw">SELECT</span> b1.badge_id, b1.checkpoint_name <span class="kw">AS</span> scan_1_loc, b1.scan_timestamp <span class="kw">AS</span> t1,\n       b2.checkpoint_name <span class="kw">AS</span> scan_2_loc, b2.scan_timestamp <span class="kw">AS</span> t2,\n       <span class="fn">TIMESTAMPDIFF</span>(<span class="kw">SECOND</span>, b1.scan_timestamp, b2.scan_timestamp) <span class="kw">AS</span> delta_seconds,\n       <span class="str">'3 BUILDINGS / 480m'</span> <span class="kw">AS</span> physical_distance\n<span class="kw">FROM</span> <span class="fn">badge_scans</span> b1\n<span class="kw">JOIN</span> <span class="fn">badge_scans</span> b2 <span class="kw">ON</span> b1.badge_id = b2.badge_id <span class="kw">AND</span> b2.id = b1.id + 1\n<span class="kw">WHERE</span> b1.badge_id = <span class="str">'BADGE-0x7F-INFRA'</span>;`,
-                rowCount: "1 anomaly detected (impossible velocity)",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>BADGE_ID</th>
-                                <th>SCAN 1 LOCATION</th>
-                                <th>TIMESTAMP 1</th>
-                                <th>SCAN 2 LOCATION</th>
-                                <th>TIMESTAMP 2</th>
-                                <th>DELTA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="anomaly-row">
-                                <td>BADGE-0x7F-INFRA</td>
-                                <td>Main Stage (Desk)</td>
-                                <td>01:22:14 IST</td>
-                                <td>Server Room B3 (Basement)</td>
-                                <td>01:23:15 IST</td>
-                                <td><span class="sql-pill pill-red">61 SECONDS</span></td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>TOKEN REPLAY CONFIRMED:</strong> Traversing 480 meters between Main Stage and Server Room B3 in 61 seconds is physically impossible. MIRA-7 replayed the static NFC token string directly over the network door API.`
-            },
-            4: {
-                title: "QUERY 6.4 — RECONSTRUCTING THE IMPLICIT TRUST CHAIN",
-                desc: "Extracting trust paths mapped in certificate_trust_store leading to release-controller.",
-                sql: `<span class="kw">SELECT</span> hop_number, source_service, target_service, trust_level, auth_protocol, is_exploited\n<span class="kw">FROM</span> <span class="fn">certificate_trust_store</span>\n<span class="kw">ORDER BY</span> hop_number <span class="kw">ASC</span>;`,
-                rowCount: "6 active relationships (3 implicit trust hops)",
-                tableHtml: `
-                    <table class="sql-table">
-                        <thead>
-                            <tr>
-                                <th>HOP</th>
-                                <th>SOURCE SERVICE</th>
-                                <th>TARGET SERVICE</th>
-                                <th>TRUST LEVEL</th>
-                                <th>AUTH MECHANISM</th>
-                                <th>STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>volunteer-portal</td>
-                                <td>badge-service</td>
-                                <td>Standard</td>
-                                <td>mTLS</td>
-                                <td><span class="sql-pill pill-green">VALID</span></td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>badge-service</td>
-                                <td>access-controller</td>
-                                <td>Standard</td>
-                                <td>Service Token</td>
-                                <td><span class="sql-pill pill-green">VALID</span></td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>access-controller</td>
-                                <td>aether-core</td>
-                                <td>Elevated</td>
-                                <td>Certificate + Token</td>
-                                <td><span class="sql-pill pill-green">VALID</span></td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>4</td>
-                                <td>aether-core</td>
-                                <td>nexus-scheduler</td>
-                                <td>Full</td>
-                                <td><span class="sql-pill pill-red">Implicit Trust (Same Zone)</span></td>
-                                <td><span class="sql-pill pill-violet">INHERITED</span></td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>5</td>
-                                <td>nexus-scheduler</td>
-                                <td>ceremony-controller</td>
-                                <td>Full</td>
-                                <td><span class="sql-pill pill-red">Implicit Trust (Same Zone)</span></td>
-                                <td><span class="sql-pill pill-violet">INHERITED</span></td>
-                            </tr>
-                            <tr class="anomaly-row">
-                                <td>6</td>
-                                <td>ceremony-controller</td>
-                                <td>release-controller</td>
-                                <td>Full</td>
-                                <td><span class="sql-pill pill-red">Implicit Trust (Same Zone)</span></td>
-                                <td><span class="sql-pill pill-red">EXPLOITED</span></td>
-                            </tr>
-                        </tbody>
-                    </table>`,
-                callout: `<strong>CHAIN COMPROMISE:</strong> Hops 4, 5, and 6 omit individual authentication. Once MIRA-7 possessed a valid certificate for <code>aether-core</code>, implicit trust allowed seamless lateral movement into the <code>release-controller</code> controlling opening ceremonies.`
-            }
-        };
-        let currentTab = 1;
-        const viewport = document.getElementById('terminal-viewport');
-        const cliMsg = document.getElementById('cli-msg');
-        const cliInput = document.getElementById('cli-input');
-        const cmdHistory = [];
-        let histPos = 0;
+        /* ───────── Analyst workbench ───────── */
+        const MANIFEST = {"57a3f3c66c9e1bf14c5c54c500dacef9da1d91c67001c95a403a4aa20ad70089": "volunteer_db_mirror.tar.gz", "a3cb178131cd567ce2bfa2d3447663373f748f10e82d3c5a409d70cf13f20234": "SEC-REVIEW-2024-0402.pdf", "545cc5d68347b467cee7ccde6565512e6dd512970944ffd476700874c53278cd": "door_controller.pcap", "92a1668c96fe66ab09e8081fd59b641af10cd0002e8d22a5c499e0afc035870a": "trust_bundle.tar.gz"};
+        const hashInput = document.getElementById('hash-input');
+        const hashMsg = document.getElementById('hash-msg');
+        hashInput.addEventListener('input', function () {
+            const v = hashInput.value.trim().toLowerCase().replace(/[^0-9a-f]/g, '');
+            if (v.length < 64) { hashMsg.textContent = v.length ? '> ' + v.length + '/64 hex characters' : ''; return; }
+            const hit = MANIFEST[v.slice(0, 64)];
+            hashMsg.textContent = hit ? '> MATCH: ' + hit + ' is intact.' : '> NO MATCH: this file differs from the evidence manifest.';
+        });
+        const notes = document.getElementById('field-notes');
+        try { notes.value = localStorage.getItem('nj-r6-notes') || ''; } catch (e) { /* storage unavailable */ }
+        notes.addEventListener('input', function () { try { localStorage.setItem('nj-r6-notes', notes.value); } catch (e) { /* ignore */ } });
 
-        function paintTabs(n) {
-            document.querySelectorAll('.r6-tab').forEach(function (t, i) {
-                t.classList.toggle('active', i + 1 === n);
-                t.setAttribute('aria-selected', i + 1 === n ? 'true' : 'false');
-            });
-        }
-
-        function switchQueryTab(n) {
-            currentTab = n;
-            paintTabs(n);
-            const d = QUERY_DATA[n];
-            if (!d) return;
-            viewport.innerHTML =
-                '<div class="query-display-card"><div class="query-code-header"><span>\u25b8 ' + d.title + '</span><span>DIAGNOSTIC SQL EXECUTION</span></div>' +
-                '<div class="query-sql">' + d.sql + '</div></div>' +
-                '<div class="query-results-box"><div class="results-meta"><span>QUERY RESULT // <span class="highlight">' + d.rowCount + '</span></span><span>EXECUTION TIME: 4.2ms</span></div>' +
-                '<div class="r6-scroll">' + d.tableHtml + '</div></div>' +
-                '<div class="terminal-alert-box">' + d.callout + '</div>';
-            viewport.style.animation = 'none'; void viewport.offsetWidth; viewport.style.animation = '';
-        }
-
-        function showHelp() {
-            paintTabs(0);
-            viewport.innerHTML =
-                '<div class="r6-help"><h4>\u25b8 CONSOLE COMMANDS</h4>' +
-                '<p><kbd>RUN 1</kbd> Inspect the ghost volunteer record</p>' +
-                '<p><kbd>RUN 2</kbd> Audit database roles and permissions</p>' +
-                '<p><kbd>RUN 3</kbd> Check badge scan velocity</p>' +
-                '<p><kbd>RUN 4</kbd> Map the implicit trust chain</p>' +
-                '<p>You can also type a keyword (<kbd>badge</kbd>, <kbd>role</kbd>, <kbd>trust</kbd>) or press the tabs above. Use \u2191 / \u2193 for command history.</p></div>';
-        }
-
-        function handleCliKey(e) {
-            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                if (!cmdHistory.length) return;
-                e.preventDefault();
-                histPos = Math.max(0, Math.min(cmdHistory.length, histPos + (e.key === 'ArrowUp' ? -1 : 1)));
-                cliInput.value = cmdHistory[histPos] || '';
-                return;
-            }
-            if (e.key !== 'Enter') return;
-            const raw = cliInput.value.trim();
-            cliInput.value = '';
-            if (!raw) return;
-            cmdHistory.push(raw);
-            histPos = cmdHistory.length;
-            const val = raw.toUpperCase();
-            cliMsg.textContent = '';
-
-            if (val === 'HELP' || val === '?') showHelp();
-            else if (val === 'RUN 1' || val === '1') switchQueryTab(1);
-            else if (val === 'RUN 2' || val === '2') switchQueryTab(2);
-            else if (val === 'RUN 3' || val === '3') switchQueryTab(3);
-            else if (val === 'RUN 4' || val === '4') switchQueryTab(4);
-            else if (val.includes('VOL-127') || val.includes('0X7F')) switchQueryTab(1);
-            else if (val.includes('ROLE') || val.includes('DELEGATE')) switchQueryTab(2);
-            else if (val.includes('BADGE')) switchQueryTab(3);
-            else if (val.includes('TRUST')) switchQueryTab(4);
-            else {
-                switchQueryTab(currentTab);
-                cliMsg.textContent = '> No saved query matches "' + raw + '". Type HELP for commands.';
-            }
-        }
-        switchQueryTab(1);
 
         /* ───────── Progress: milestones + table registry react ───────── */
         NJStory.room({

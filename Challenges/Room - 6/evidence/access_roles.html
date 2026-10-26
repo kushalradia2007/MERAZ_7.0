@@ -1,269 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS Database — Access Roles &amp; Permissions Matrix</title>
-    <style>
-        :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --card-hover: #0f0f1a;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: var(--bg); color: var(--text); font-size: 0.78rem; }
-
-        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; }
-        .header-meta { color: var(--muted); font-size: 0.7rem; }
-
-        .container { max-width: 1300px; margin: 0 auto; padding: 1.5rem 2rem; }
-
-        .query-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
-        .query-label { color: var(--green); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .query-text { color: var(--cyan); font-size: 0.8rem; line-height: 1.6; white-space: pre; }
-        .query-text .keyword { color: var(--amber); font-weight: bold; }
-        .query-text .table-name { color: var(--violet); }
-        .query-text .comment { color: var(--muted); font-style: italic; }
-
-        .section-title { color: var(--cyan); font-size: 0.95rem; margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-
-        table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
-        th { background: var(--surface); color: var(--cyan); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.6rem 0.6rem; text-align: center; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        th:first-child { text-align: left; }
-        td { padding: 0.5rem 0.6rem; border-bottom: 1px solid rgba(26, 26, 42, 0.5); font-size: 0.73rem; text-align: center; white-space: nowrap; }
-        td:first-child { text-align: left; color: var(--text); font-weight: bold; }
-        tr:hover td { background: var(--card-hover); }
-        tr.anomaly-role td { color: var(--red); background: rgba(255, 68, 68, 0.05); }
-        tr.anomaly-role:hover td { background: rgba(255, 68, 68, 0.1); }
-
-        .perm-yes { color: var(--green); font-weight: bold; }
-        .perm-no { color: var(--muted); }
-        .perm-critical { color: var(--red); font-weight: bold; text-shadow: 0 0 4px rgba(255, 68, 68, 0.3); }
-        .perm-write { color: var(--amber); font-weight: bold; }
-
-        .role-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; }
-        .role-card.anomaly { border-color: rgba(255, 68, 68, 0.3); background: rgba(255, 68, 68, 0.03); }
-        .role-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .role-name.normal { color: var(--cyan); }
-        .role-name.critical { color: var(--red); }
-        .role-detail { color: var(--text); font-size: 0.75rem; line-height: 1.7; margin-bottom: 0.3rem; }
-        .role-detail .label { color: var(--muted); display: inline-block; width: 160px; }
-        .role-detail .value { color: var(--text); }
-        .role-detail .value.alert { color: var(--red); }
-
-        .memo-box { background: rgba(179, 136, 255, 0.05); border: 1px solid rgba(179, 136, 255, 0.2); border-radius: 6px; padding: 1rem 1.5rem; margin-top: 1rem; }
-        .memo-header { color: var(--violet); font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        .memo-body { color: var(--text); font-size: 0.75rem; line-height: 1.6; font-style: italic; }
-
-        .hint { color: var(--amber); font-size: 0.72rem; font-style: italic; margin-top: 1.5rem; padding: 0.8rem; background: rgba(255, 171, 0, 0.05); border-radius: 4px; border: 1px solid rgba(255, 171, 0, 0.15); }
-        .info { margin-top: 1rem; color: var(--muted); font-size: 0.68rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS Database - Access Roles Brief</title>
+<style>
+:root{--bg:#050508;--card:#0a0a12;--card-hover:#0f0f1a;--border:#1a1a2a;--text:#b0b0c0;--muted:#4a4a5a;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--violet:#b388ff;--surface:#12121e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Consolas','Courier New',monospace;background:var(--bg);color:var(--text);font-size:.78rem}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.header-brand{color:var(--cyan);font-weight:bold;font-size:1rem;letter-spacing:1px}.header-meta{color:var(--muted);font-size:.7rem}
+.container{max-width:1100px;margin:0 auto;padding:1.5rem 2rem}
+.section-title{color:var(--cyan);font-size:.95rem;margin:2rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+p{line-height:1.7;margin-bottom:.8rem}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);margin-bottom:1.2rem}
+th{background:var(--surface);color:var(--cyan);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.45rem .8rem;border-bottom:1px solid rgba(26,26,42,.5);font-size:.74rem;vertical-align:top}
+td.h{word-break:break-all;color:var(--violet);font-size:.7rem}
+tr:hover td{background:var(--card-hover)}
+.scroll{overflow-x:auto}
+code{color:var(--violet);background:rgba(179,136,255,.1);padding:.1rem .3rem;border-radius:2px}
+a{color:var(--cyan)}
+.info{margin-top:1rem;color:var(--muted);font-size:.68rem;line-height:1.6}
+</style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-brand">NEXUS // DATABASE ACCESS ROLES — PERMISSION MATRIX</div>
-        <div class="header-meta">Schema: meraz_volunteers | Version: 3.2.1 | Last modified: 2026-09-28 IST</div>
-    </div>
+<div class="header"><div class="header-brand">NEXUS Database - Access Roles Brief</div><div class="header-meta">Schema: meraz_volunteers v3.2.1</div></div>
+<div class="container">
 
-    <div class="container">
-        <!-- Query -->
-        <div class="query-box">
-            <div class="query-label">Query Executed</div>
-            <div class="query-text"><span class="keyword">SELECT</span> r.role_name, r.created_date, r.created_by, r.description,
-       p.table_name, p.permission_level
-<span class="keyword">FROM</span> <span class="table-name">database_roles</span> r
-<span class="keyword">JOIN</span> <span class="table-name">role_permissions</span> p <span class="keyword">ON</span> r.role_id = p.role_id
-<span class="keyword">ORDER BY</span> r.role_name, p.table_name;
-<span class="comment">-- Full role-permission mapping</span></div>
-        </div>
+<h2 class="section-title">Evidence files</h2>
+<div class="scroll"><table><thead><tr><th>File</th><th>Size</th><th>SHA-256</th></tr></thead><tbody><tr><td><a href="volunteer_db_mirror.tar.gz" download>volunteer_db_mirror.tar.gz</a></td><td>119,894 bytes</td><td class="h">57a3f3c66c9e1bf14c5c54c500dacef9da1d91c67001c95a403a4aa20ad70089</td></tr><tr><td><a href="SEC-REVIEW-2024-0402.pdf" download>SEC-REVIEW-2024-0402.pdf</a></td><td>5,580 bytes</td><td class="h">a3cb178131cd567ce2bfa2d3447663373f748f10e82d3c5a409d70cf13f20234</td></tr></tbody></table></div>
+<p>The database mirror is the same archive used for the volunteer records. Three catalog tables describe database access control: <code>database_roles</code>, <code>role_permissions</code> and <code>role_members</code>. The permission matrix is not rendered here; build it from the data.</p>
+<p>Security review notes are stored as encrypted PDFs. Policy for these documents: <b>each review is locked with the name of the role it covers</b>.</p>
+<h2 class="section-title">Catalog tables</h2>
+<div class="scroll"><table><thead><tr><th>table</th><th>rows</th></tr></thead><tbody><tr><td>database_roles</td><td>8</td></tr><tr><td>role_permissions</td><td>78</td></tr><tr><td>role_members</td><td>8</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>table</th><th>columns</th></tr></thead><tbody><tr><td>database_roles</td><td>role_id, role_name, created_date, created_by, is_active, description, review_ref</td></tr><tr><td>role_permissions</td><td>role_id, table_name, privilege</td></tr><tr><td>role_members</td><td>role_id, account, granted_by, granted_at</td></tr></tbody></table></div>
+<p class="info">The application schema has 14 tables; the catalog tables above are separate. A privilege value of NULL does not appear in role_permissions (no row means no access).</p>
 
-        <!-- Permission Matrix -->
-        <h2 class="section-title">Permission Matrix — All Roles × All Tables</h2>
-        <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th style="min-width: 180px;">Role</th>
-                    <th>volunteers</th>
-                    <th>badges</th>
-                    <th>shifts</th>
-                    <th>equipment</th>
-                    <th>emergency_contacts</th>
-                    <th>access_log</th>
-                    <th>api_access_log</th>
-                    <th>audit_trail</th>
-                    <th>badge_scans</th>
-                    <th>cert_requests</th>
-                    <th>committee_notes</th>
-                    <th>notifications</th>
-                    <th>system_config</th>
-                    <th>cert_trust_store</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>volunteer</td>
-                    <td><span class="perm-yes">OWN</span></td>
-                    <td><span class="perm-yes">OWN</span></td>
-                    <td><span class="perm-yes">OWN</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-yes">OWN</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-yes">OWN</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                </tr>
-                <tr>
-                    <td>coordinator</td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                </tr>
-                <tr>
-                    <td>committee</td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-yes">READ</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-no">—</span></td>
-                    <td><span class="perm-no">—</span></td>
-                </tr>
-                <tr>
-                    <td>admin</td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-write">R/W</span></td>
-                    <td><span class="perm-no">—</span></td>
-                </tr>
-                <!-- ANOMALOUS ROLE -->
-                <tr class="anomaly-role">
-                    <td style="color: var(--red);">nexus-continuity-delegate</td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                    <td><span class="perm-critical">READ</span></td>
-                </tr>
-            </tbody>
-        </table>
-        </div>
-
-        <!-- Role Details -->
-        <h2 class="section-title">Role Details</h2>
-
-        <div class="role-card">
-            <div class="role-name normal">volunteer</div>
-            <div class="role-detail"><span class="label">Created:</span> <span class="value">2024-01-10</span></div>
-            <div class="role-detail"><span class="label">Created By:</span> <span class="value">rhea.dsouza (schema design)</span></div>
-            <div class="role-detail"><span class="label">Accounts (current):</span> <span class="value">247</span></div>
-            <div class="role-detail"><span class="label">Description:</span> <span class="value">Standard volunteer role. Can view and edit only their own profile, badge, shifts, and notifications.</span></div>
-        </div>
-
-        <div class="role-card">
-            <div class="role-name normal">coordinator</div>
-            <div class="role-detail"><span class="label">Created:</span> <span class="value">2024-01-10</span></div>
-            <div class="role-detail"><span class="label">Created By:</span> <span class="value">rhea.dsouza (schema design)</span></div>
-            <div class="role-detail"><span class="label">Accounts (current):</span> <span class="value">12</span></div>
-            <div class="role-detail"><span class="label">Description:</span> <span class="value">Shift coordinator role. Can view volunteers on assigned shifts and manage shift schedules.</span></div>
-        </div>
-
-        <div class="role-card">
-            <div class="role-name normal">committee</div>
-            <div class="role-detail"><span class="label">Created:</span> <span class="value">2024-01-10</span></div>
-            <div class="role-detail"><span class="label">Created By:</span> <span class="value">rhea.dsouza (schema design)</span></div>
-            <div class="role-detail"><span class="label">Accounts (current):</span> <span class="value">5</span></div>
-            <div class="role-detail"><span class="label">Description:</span> <span class="value">Festival committee. Full read/write access to volunteer management, badges, and committee notes.</span></div>
-        </div>
-
-        <div class="role-card">
-            <div class="role-name normal">admin</div>
-            <div class="role-detail"><span class="label">Created:</span> <span class="value">2024-01-10</span></div>
-            <div class="role-detail"><span class="label">Created By:</span> <span class="value">rhea.dsouza (schema design)</span></div>
-            <div class="role-detail"><span class="label">Accounts (current):</span> <span class="value">2 (kabir.mehra, rhea.dsouza)</span></div>
-            <div class="role-detail"><span class="label">Description:</span> <span class="value">Full administrative access to all tables except certificate_trust_store. Manages system configuration and audit trails.</span></div>
-        </div>
-
-        <!-- ANOMALOUS ROLE -->
-        <div class="role-card anomaly">
-            <div class="role-name critical">nexus-continuity-delegate</div>
-            <div class="role-detail"><span class="label">Created:</span> <span class="value alert">2024-03-15</span></div>
-            <div class="role-detail"><span class="label">Created By:</span> <span class="value alert">rhea.dsouza (AETHER CORE integration)</span></div>
-            <div class="role-detail"><span class="label">Accounts (current):</span> <span class="value alert">1 (nexus-svc-continuity)</span></div>
-            <div class="role-detail"><span class="label">Permission Level:</span> <span class="value alert">SELECT on ALL 14 tables (including certificate_trust_store)</span></div>
-            <div class="role-detail"><span class="label">Notable Access:</span> <span class="value alert">Only role with access to certificate_trust_store — not even admin can read this table</span></div>
-
-            <div class="memo-box">
-                <div class="memo-header">📋 Role Description (from database schema)</div>
-                <div class="memo-body">
-                    "Continuity delegate role for the AETHER CORE system. Provides read-only access to all operational data, enabling the continuity system to maintain a complete snapshot of festival operations for reconstruction after a network outage. This role provides read access to all tables including the certificate trust store, which maps service identities, trusted certificates, and inter-service authentication tokens. The risk is accepted because the continuity service operates on an isolated network segment (AETHER relay cluster). — Rhea D'Souza, 2024-03-15"
-                </div>
-            </div>
-
-            <div class="memo-box" style="border-color: rgba(255, 68, 68, 0.2); background: rgba(255, 68, 68, 0.04); margin-top: 0.8rem;">
-                <div class="memo-header" style="color: var(--red);">⚠ Security Review Note — Filed 2024-04-02</div>
-                <div class="memo-body">
-                    "Reviewed nexus-continuity-delegate role. The role grants read access to the certificate trust store, which contains inter-service trust relationships. If the AETHER relay cluster is compromised, the trust store contents could be used to impersonate any NEXUS service. Recommend: restrict access to a filtered view that excludes authentication tokens. Status: ACKNOWLEDGED — deferred to post-festival security hardening phase. — Security review by Ila Sen"
-                </div>
-            </div>
-        </div>
-
-        <p class="hint">⚠ Key observation: The admin role cannot read the certificate_trust_store table. Only the nexus-continuity-delegate role can. This means the AETHER continuity system has more access to trust relationships than the festival's own administrators. This is by design — and it is the design that made the breach possible.</p>
-
-        <p class="info">Database schema: meraz_volunteers v3.2.1 | Total tables: 14 | Total roles: 5 | Snapshot: 2026-10-02 02:15 IST</p>
-        <p class="info">Colour key: <span style="color: var(--red);">Red</span> = anomalous role with excessive access | <span style="color: var(--amber);">Amber (R/W)</span> = read/write | <span style="color: var(--green);">Green</span> = read or own-record access | <span style="color: var(--muted);">Grey (—)</span> = no access</p>
-    </div>
+</div>
 </body>
 </html>
