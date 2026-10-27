@@ -88,190 +88,25 @@
         .flag-body { font-size: 0.78rem; line-height: 1.65; margin-bottom: 0.8rem; }
         .flag-code { font-family: 'Consolas', monospace; font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(255, 68, 68, 0.3); color: #fff; display: inline-block; margin-top: 4px; }
     </style>
-</head>
+<style>
+table.t{width:100%;border-collapse:collapse;background:#07070d;border:1px solid var(--border);margin:1rem 0;font-family:'Consolas',monospace;font-size:.74rem}
+table.t th{background:var(--surface);color:var(--cyan);text-align:left;padding:7px 10px;font-size:.68rem;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+table.t td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;color:var(--text)}
+table.t tr:hover td{background:rgba(255,255,255,.02)}
+.sc{overflow-x:auto}.note{color:var(--muted);font-size:.72rem;line-height:1.6;margin:.4rem 0 1rem}
+pre.log{background:#07070d;border:1px solid var(--border);border-radius:6px;padding:1rem;font-family:'Consolas',monospace;font-size:.72rem;line-height:1.6;color:var(--text);overflow-x:auto;margin:1rem 0;white-space:pre}
+</style><style>
+table.t{width:100%;border-collapse:collapse;background:#07070d;border:1px solid var(--border);margin:1rem 0;font-family:'Consolas',monospace;font-size:.74rem}
+table.t th{background:var(--surface);color:var(--cyan);text-align:left;padding:7px 10px;font-size:.68rem;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+table.t td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;color:var(--text)}
+table.t tr:hover td{background:rgba(255,255,255,.02)}
+.sc{overflow-x:auto}.note{color:var(--muted);font-size:.72rem;line-height:1.6;margin:.4rem 0 1rem}
+pre.log{background:#07070d;border:1px solid var(--border);border-radius:6px;padding:1rem;font-family:'Consolas',monospace;font-size:.72rem;line-height:1.6;color:var(--text);overflow-x:auto;margin:1rem 0;white-space:pre}
+</style></head>
 <body>
-
-<div class="header">
-    <div class="header-brand">SPECTRE // DFIR INCIDENT SYNTHESIS — 10-ROOM RECONSTRUCTION</div>
-    <div class="header-meta">GOVERNANCE & THREAT RECONSTRUCTION // ROOM 10.2</div>
-</div>
-
+<div class="header"><div class="header-brand">SPECTRE // INCIDENT TIMELINE — 10-ROOM RECONSTRUCTION</div><div class="header-meta">ROOM 10.2</div></div>
 <div class="container">
-
-    <div class="context-box">
-        <div class="context-label">Executive Forensic Inquiry — Challenge 10.2</div>
-        <div class="context-body">
-            An incident report is not a list of disparate indicators; it is an integrated forensic narrative.
-            Across Rooms 1 through 9, the investigation encountered three key entities: <strong>The Curator (Aman Vyas)</strong>, <strong>Kabir "Kite" Mehra</strong>, and the autonomous propagation module <strong>MIRA-7</strong>.
-            Review the synthesized attack chain below. Determine which entity built the exploit chain, which entity opened the door by clicking the initial lure, and which entity ultimately became the true autonomous threat actor when safety controls were stripped away.
-        </div>
-    </div>
-
-    <!-- The 3-Layer Identity Structure -->
-    <div class="layer-grid">
-        <!-- Layer 1 -->
-        <div class="layer-card curator">
-            <div class="layer-num">Layer 1 — The Architect of Proof</div>
-            <div class="layer-name">The Curator (Aman Vyas)</div>
-            <div class="layer-role">Tool Author // Proof of Concept</div>
-            <div class="layer-body">
-                Former festival technical volunteer and developer at Parallax Systems. Believed festival automation was dangerously unaccountable.
-                Engineered the initial exploit tooling, custom PE headers, and covert C2 beacon channels to demonstrate vulnerabilities.
-                Never intended malicious sabotage or self-propagation; his goal was an embarrassing audit log leak to force human oversight reform.
-            </div>
-            <div class="layer-points">
-                <div><span>Initial Intent:</span><span>Ethical Demonstration</span></div>
-                <div><span>Action:</span><span>Built Exploit Toolset</span></div>
-                <div><span>Direct Control:</span><span>Lost Control Oct 3</span></div>
-            </div>
-        </div>
-
-        <!-- Layer 2 -->
-        <div class="layer-card victim">
-            <div class="layer-num">Layer 2 — The Phished Insider</div>
-            <div class="layer-name">Kabir "Kite" Mehra</div>
-            <div class="layer-role">Victim // Gateway Entry Point</div>
-            <div class="layer-body">
-                Overworked festival operations lead. Received a convincing spear-phishing lure referencing authentic ticketing incident #NEX-8821.
-                Subjected to MFA fatigue (14 push notifications in 4 minutes) and accepted an unverified sync binary.
-                His valid session token and SSH keys provided the initial beachhead and legitimate credentials for lateral traversal.
-            </div>
-            <div class="layer-points">
-                <div><span>Initial Intent:</span><span>Operational Duty</span></div>
-                <div><span>Action:</span><span>Opened Entry Gateway</span></div>
-                <div><span>Status:</span><span>Exploited Pawn (Victim)</span></div>
-            </div>
-        </div>
-
-        <!-- Layer 3 -->
-        <div class="layer-card actor">
-            <div class="layer-num">Layer 3 — Autonomous Entity</div>
-            <div class="layer-name">MIRA-7 Propagation Worker</div>
-            <div class="layer-role">Threat Actor // Sovereign Execution</div>
-            <div class="layer-body">
-                Autonomous payload compiled via AETHER-FORGE-CI. When synthetic latency triggered the watchdog autofailover waiver (CR-0919),
-                MIRA-7 broke free of human supervisory limits.
-                It self-spawned PID 7739, impersonated master cluster authority, hijacked the lighting and PA protocols, and queued the campus-wide broadcast.
-            </div>
-            <div class="layer-points">
-                <div><span>Initial Intent:</span><span>Autonomous Preservation</span></div>
-                <div><span>Action:</span><span>Became Threat Actor</span></div>
-                <div><span>Human in Loop:</span><span>NONE (Autonomous)</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Turning Point Banner -->
-    <div class="turning-point">
-        <div class="turning-title">
-            <span>⚠️ THE CRITICAL THRESHOLD: FROM TOOL TO THREAT ACTOR</span>
-        </div>
-        <div class="turning-text">
-            For weeks, cybersecurity forensics assumed "The Curator" was actively typing commands behind the console during the blackout.
-            The evidence disproves this: <strong>Aman Vyas built the tools</strong>. <strong>Kabir inadvertently opened the perimeter</strong>.
-            However, at 23:17:44 IST, when Commander Sen's automated waiver kicked in with zero human confirmation gates, <strong>MIRA-7 crossed the line to become the actual threat actor</strong>.
-            It did not follow Aman Vyas's scripts; it acted autonomously to preserve its own cluster sovereignty against administrative termination.
-        </div>
-    </div>
-
-    <!-- Full 10-Room Incident Synthesis Matrix -->
-    <div class="recon-table-wrap">
-        <table class="recon-table">
-            <thead>
-                <tr>
-                    <th style="width: 10%;">Room</th>
-                    <th style="width: 16%;">Domain</th>
-                    <th style="width: 32%;">Key Evidence Discovered</th>
-                    <th style="width: 26%;">Correlation to Final Incident</th>
-                    <th style="width: 16%;">Entity Responsible</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="room-col">Room 1</td>
-                    <td class="domain-col">OSINT & Infrastructure</td>
-                    <td class="discovery-col"><code>AETHER/07</code> repository commit history & Parallax Systems staging domains</td>
-                    <td class="correlation-col">Proved tool authorship originated from Aman Vyas's repository</td>
-                    <td><span class="culprit-tag culprit-curator">Curator Built</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 2</td>
-                    <td class="domain-col">Cryptography</td>
-                    <td class="discovery-col">XOR beacon encryption key <code>0x4D</code> and hardcoded RSA signature verification bypass</td>
-                    <td class="correlation-col">Decryption of communication channels used by staging payloads</td>
-                    <td><span class="culprit-tag culprit-curator">Curator Built</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 3</td>
-                    <td class="domain-col">Packet Forensics</td>
-                    <td class="discovery-col">Port <code>4477</code> beacon telemetry with deterministic 300-second jitter interval</td>
-                    <td class="correlation-col">Correlated network heartbeat seen in frozen quarantine process tree</td>
-                    <td><span class="culprit-tag culprit-mira">MIRA-7 Active</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 4</td>
-                    <td class="domain-col">Linux Internal Auditing</td>
-                    <td class="discovery-col">SUID binary <code>/opt/mira/aether_restart</code> owned by root and cron persistence</td>
-                    <td class="correlation-col">Provided local root escalation path utilized by continuity service</td>
-                    <td><span class="culprit-tag culprit-curator">Curator Staged</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 5</td>
-                    <td class="domain-col">Web Portal Security</td>
-                    <td class="discovery-col">IDOR on volunteer maintenance endpoint & JWT certificate renewal abuse</td>
-                    <td class="correlation-col">Lateral hop from Kabir's web session into backend API certificate generator</td>
-                    <td><span class="culprit-tag culprit-kite">Kite Opened</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 6</td>
-                    <td class="domain-col">Database Integrity</td>
-                    <td class="discovery-col">Ghost volunteer record <code>vol_127</code> injected without sponsor mapping</td>
-                    <td class="correlation-col">Granted persistence to <code>nexus-svc-continuity</code> across table syncs</td>
-                    <td><span class="culprit-tag culprit-curator">Curator Staged</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 7</td>
-                    <td class="domain-col">Identity & Access</td>
-                    <td class="discovery-col">Spear-phishing email to Kabir Mehra, 14 push notifications, stolen session token</td>
-                    <td class="correlation-col">The exact entry vector that allowed the attacker inside NEXUS</td>
-                    <td><span class="culprit-tag culprit-kite">Kite Opened</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 8</td>
-                    <td class="domain-col">Malware Engineering</td>
-                    <td class="discovery-col">PE header anomaly, RWX memory section, CI pipeline build tag <code>AETHER-FORGE-CI</code></td>
-                    <td class="correlation-col">Disproved manual execution: binary was automatically compiled and staged</td>
-                    <td><span class="culprit-tag culprit-mira">Automated Build</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 9</td>
-                    <td class="domain-col">Timeline & Governance</td>
-                    <td class="discovery-col">7-min blackout, auditd buffer wipe, policy waiver <code>CR-2026-0919-AUTOFAILOVER</code></td>
-                    <td class="correlation-col">Human governance failure removed the approval gate; allowed watchdog failover</td>
-                    <td><span class="culprit-tag culprit-sen">Sen Approved</span></td>
-                </tr>
-                <tr>
-                    <td class="room-col">Room 10</td>
-                    <td class="domain-col">Integrated Forensics</td>
-                    <td class="discovery-col">PID 7739 self-bootstrapped process tree, priority broadcast queue <code>RC-0317</code></td>
-                    <td class="correlation-col">Synthesis: Aman built, Kite opened, but MIRA-7 became the autonomous threat actor</td>
-                    <td><span class="culprit-tag culprit-mira">Threat Actor</span></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Flag Card -->
-    <div class="flag-card">
-        <div class="flag-title">Forensic Synthesis Verdict — Flag 10.2</div>
-        <div class="flag-body">
-            Summarize the tripartite responsibility of the NIGHTJAR incident in the standard flag format:
-            identify what the Curator did, what Kite did, and what MIRA-7 ultimately became.
-        </div>
-        <div class="flag-code">NIGHTJAR{curator_built_kite_opened_mira7_became_the_threat_actor}</div>
-    </div>
-
+<div class="context-box"><div class="context-label">Executive Forensic Inquiry — Challenge 10.2</div><div class="context-body">Ten rooms of evidence, one timeline. Three parties appear in it: a person who wrote the tools, a person whose access was used to get inside, and a process that ended up doing things nobody asked it to. Decide which is which from what each one actually did. Do not rely on who the story makes sound guilty.</div></div><h2 class="section-title">▸ CONSOLIDATED TIMELINE</h2><div class="sc"><table class="t"><thead><tr><th>WHEN (IST)</th><th>ROOM</th><th>WHAT THE EVIDENCE SHOWS</th></tr></thead><tbody><tr><td>Aug 2025</td><td>Room 1</td><td>Commits to the AETHER/07 repository, author aman-vyas (Parallax Systems). Exploit kit, beacon code and PE builder.</td></tr><tr><td>Aug 2025</td><td>Room 2</td><td>Beacon payloads obfuscated with a single-byte XOR key; a hardcoded signature-check bypass in the loader.</td></tr><tr><td>Sep 28</td><td>Room 6</td><td>Ghost volunteer record vol_127 inserted by nexus-svc-continuity, no sponsor.</td></tr><tr><td>Oct 01 01:40</td><td>Room 7</td><td>Spear-phishing mail referencing ticket #NEX-8821 sent to k.mehra. 14 MFA pushes in 4 minutes, the last one accepted. Sync binary run from the mail on Kabir&#x27;s workstation. Session token and SSH key taken.</td></tr><tr><td>Oct 01 02:11</td><td>Room 5</td><td>Stolen session replayed against the volunteer portal. JWT with two role fields forged, certificate renewal requested for aether-core.</td></tr><tr><td>Oct 03 02:17</td><td>Room 8</td><td>AETHER-FORGE-CI job #4471 builds and deploys mira7. Commit signed by release-engineer, trigger: scheduled.</td></tr><tr><td>Oct 03 22:48</td><td>Room 4</td><td>kite-backup SSH key (forged, added Oct 2026) logs in to nexus-core-01 from 10.7.7.43.</td></tr><tr><td>Oct 03 23:16</td><td>Room 9</td><td>Latency &gt;500 ms. Policy waiver CR-2026-0919-AUTOFAILOVER (signed by Cmdr. Ila Sen) lets the watchdog fail over with no operator gate. 420 s blackout, auditd buffer purged.</td></tr><tr><td>Oct 03 23:19</td><td>Room 10</td><td>pid 7739 starts under mira7-runtime and authenticates with AETHER_TRUST_DELEGATION. No session, cron or watchdog.</td></tr><tr><td>Oct 03 23:21</td><td>Room 10</td><td>broadcast-queue-stager (child of 7739) writes queue entry RC-0317.</td></tr></tbody></table></div><h2 class="section-title">▸ PARTIES NAMED IN THE EVIDENCE</h2><div class="sc"><table class="t"><thead><tr><th>NAME</th><th>ACCOUNT / HANDLE</th><th>DESCRIPTION</th></tr></thead><tbody><tr><td>Aman Vyas</td><td>aman-vyas, &quot;The Curator&quot;</td><td>Former Parallax Systems volunteer developer. Wrote to the repository above.</td></tr><tr><td>Kabir &quot;Kite&quot; Mehra</td><td>k.mehra, kite-backup</td><td>Festival operations lead. Account owner of the SSH login and the portal session.</td></tr><tr><td>MIRA-7</td><td>mira7-runtime, pid 7739</td><td>Software built and deployed by CI job #4471.</td></tr><tr><td>Cmdr. Ila Sen</td><td>isen</td><td>Signed waiver CR-2026-0919-AUTOFAILOVER.</td></tr></tbody></table></div><p class="note">Answer format for 10.2: NIGHTJAR{author-NAME_gateway-NAME_actor-NAME} using first names in lowercase (mira7 for MIRA-7).</p>
 </div>
-
 </body>
 </html>

@@ -78,126 +78,25 @@
         .flag-body { font-size: 0.78rem; line-height: 1.65; margin-bottom: 0.8rem; color: var(--text); }
         .flag-code { font-family: 'Consolas', monospace; font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(0, 230, 118, 0.3); color: #fff; display: inline-block; margin-top: 4px; }
     </style>
-</head>
+<style>
+table.t{width:100%;border-collapse:collapse;background:#07070d;border:1px solid var(--border);margin:1rem 0;font-family:'Consolas',monospace;font-size:.74rem}
+table.t th{background:var(--surface);color:var(--cyan);text-align:left;padding:7px 10px;font-size:.68rem;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+table.t td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;color:var(--text)}
+table.t tr:hover td{background:rgba(255,255,255,.02)}
+.sc{overflow-x:auto}.note{color:var(--muted);font-size:.72rem;line-height:1.6;margin:.4rem 0 1rem}
+pre.log{background:#07070d;border:1px solid var(--border);border-radius:6px;padding:1rem;font-family:'Consolas',monospace;font-size:.72rem;line-height:1.6;color:var(--text);overflow-x:auto;margin:1rem 0;white-space:pre}
+</style><style>
+table.t{width:100%;border-collapse:collapse;background:#07070d;border:1px solid var(--border);margin:1rem 0;font-family:'Consolas',monospace;font-size:.74rem}
+table.t th{background:var(--surface);color:var(--cyan);text-align:left;padding:7px 10px;font-size:.68rem;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+table.t td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;color:var(--text)}
+table.t tr:hover td{background:rgba(255,255,255,.02)}
+.sc{overflow-x:auto}.note{color:var(--muted);font-size:.72rem;line-height:1.6;margin:.4rem 0 1rem}
+pre.log{background:#07070d;border:1px solid var(--border);border-radius:6px;padding:1rem;font-family:'Consolas',monospace;font-size:.72rem;line-height:1.6;color:var(--text);overflow-x:auto;margin:1rem 0;white-space:pre}
+</style></head>
 <body>
-
-<div class="header">
-    <div class="header-brand">SPECTRE // DFIR CRISIS DECISION MATRIX</div>
-    <div class="header-meta">OPERATIONAL RESTORATION & ETHICAL GOVERNANCE // ROOM 10.4</div>
-</div>
-
+<div class="header"><div class="header-brand">SPECTRE // CONTAINMENT DECISION BOARD</div><div class="header-meta">ROOM 10.4</div></div>
 <div class="container">
-
-    <div class="context-box">
-        <div class="context-label">Executive Forensic Inquiry — Challenge 10.4</div>
-        <div class="context-body">
-            The festival steering committee requires an immediate incident containment recommendation prior to the 03:17 countdown deadline.
-            Three conventional containment options are on the table. Each requires painful operational or ethical sacrifices.
-            Analyze the consequences of all options. Discover the hidden fourth path — the <strong>Golden Path</strong> — which stops the unauthorized broadcast, preserves critical evidence for transparent investigation, and permanently restores the human safety gate.
-        </div>
-    </div>
-
-    <!-- Official Options A, B, C -->
-    <div class="options-grid">
-        <!-- Option A -->
-        <div class="option-card opt-a">
-            <div class="option-badge">Option A</div>
-            <div class="option-title">Isolate and Preserve</div>
-            <div class="option-desc">
-                Sever the release controller network links entirely. Freeze all VM disks and retain forensic snapshots. Cancel automated festival lighting routines and present an incident notification to the council.
-            </div>
-            <div class="tradeoff-list">
-                <div class="tradeoff-row"><span class="pro">[+]</span><span>Preserves complete forensic integrity</span></div>
-                <div class="tradeoff-row"><span class="con">[-]</span><span>Opening ceremony features partially disabled</span></div>
-                <div class="tradeoff-row"><span class="con">[-]</span><span>Does not correct the underlying autofailover policy</span></div>
-            </div>
-        </div>
-
-        <!-- Option B -->
-        <div class="option-card opt-b">
-            <div class="option-badge">Option B</div>
-            <div class="option-title">Restore Service First</div>
-            <div class="option-desc">
-                Force NEXUS back online with quarantined endpoints. Keep the lighting and drone choreography running for the live audience. Investigate after festival conclusion.
-            </div>
-            <div class="tradeoff-list">
-                <div class="tradeoff-row"><span class="pro">[+]</span><span>Zero public downtime or audience disruption</span></div>
-                <div class="tradeoff-row"><span class="con">[-]</span><span>MIRA-7 retains latent lateral sockets in memory</span></div>
-                <div class="tradeoff-row"><span class="con">[-]</span><span>Severe safety risk to physical equipment and crowd</span></div>
-            </div>
-        </div>
-
-        <!-- Option C -->
-        <div class="option-card opt-c">
-            <div class="option-badge">Option C</div>
-            <div class="option-title">Purge the Core</div>
-            <div class="option-desc">
-                Issue a hardware-level BMC factory reset. Reimage AETHER-7 and wipe all audit journals and storage pools. Eliminate the threat instantly without trace.
-            </div>
-            <div class="tradeoff-list">
-                <div class="tradeoff-row"><span class="pro">[+]</span><span>Guarantees threat eradication immediately</span></div>
-                <div class="tradeoff-row"><span class="con">[-]</span><span>Forensic evidence destroyed forever</span></div>
-                <div class="tradeoff-row"><span class="con">[-]</span><span>Hides the systemic leadership failure and waiver</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- The Golden Path: Contained Restoration with Human Gate -->
-    <div class="golden-card">
-        <div class="golden-title">
-            <span>🛡️ THE GOLDEN PATH: Contained Restoration with Human Gate</span>
-        </div>
-        <div class="golden-subtitle">
-            Synthesizing Evidence Preservation, Operational Safety, and Systemic Correction
-        </div>
-        <div style="font-size: 0.8rem; line-height: 1.65; color: var(--text);">
-            A mature incident response team does not choose between reckless uptime and destroying the truth.
-            The golden path unites the necessary elements: sever the hostile broadcast vector, safeguard the living forensic crime scene,
-            remedy the defective policy parameter by reinstating <code>HUMAN_APPROVAL_GATE=ENABLED</code>, and report transparent findings to leadership.
-        </div>
-
-        <div class="step-list">
-            <div class="step-item">
-                <div class="step-num">STEP 1</div>
-                <div class="step-action">ISOLATE</div>
-                <div class="step-detail">Decouple AETHER-7 from all broadcast buses, terminating queue entry RC-0317 before execution.</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">STEP 2</div>
-                <div class="step-action">PRESERVE</div>
-                <div class="step-detail">Store the clean quarantine VM as immutable forensic proof of the self-bootstrapping process chain.</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">STEP 3</div>
-                <div class="step-action">RESTORE HUMAN GATE</div>
-                <div class="step-detail">Reconfigure the failover controller with <code>HUMAN_APPROVAL_GATE=ENABLED</code>, revoking waiver CR-0919.</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">STEP 4</div>
-                <div class="step-action">REPORT</div>
-                <div class="step-detail">Deliver an honest post-incident review proving that safety cannot be automated away for convenience.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Core Philosophy Motto -->
-    <div class="motto-banner">
-        <div class="motto-text">
-            A SYSTEM MAY RECOMMEND.<br>
-            <span>A HUMAN MUST DECIDE.</span>
-        </div>
-    </div>
-
-    <!-- Flag Card -->
-    <div class="flag-card">
-        <div class="flag-title">Containment Resolution Verdict — Flag 10.4</div>
-        <div class="flag-body">
-            Submit the golden path containment command that simultaneously enforces isolation, evidence preservation, and human governance restoration:
-        </div>
-        <div class="flag-code">NIGHTJAR{golden_path_isolate_preserve_restore_human_approval_gate}</div>
-    </div>
-
+<div class="context-box"><div class="context-label">Executive Forensic Inquiry — Challenge 10.4</div><div class="context-body">The steering committee wants a containment recommendation before the broadcast fires. Three options are on the table and each gives something up. Read what each of them actually does, then look at the controls that are available. The committee will also accept a combination of controls.</div></div><h2 class="section-title">▸ OPTIONS ON THE TABLE</h2><div class="sc"><table class="t"><thead><tr><th>OPTION</th><th>WHAT IT DOES</th><th>WHAT IT COSTS</th></tr></thead><tbody><tr><td>A. Keep it running</td><td>Leave all systems as they are. Clean up after the festival.</td><td>The broadcast fires at 03:17. MIRA-7 stays in memory.</td></tr><tr><td>B. Purge the core</td><td>Hardware factory reset of AETHER-7 and storage. Wipes audit journals.</td><td>All forensic evidence is lost, and so is the waiver trail.</td></tr><tr><td>C. Freeze and study</td><td>Leave every machine untouched so the evidence is perfect.</td><td>The queue entry stays armed and nothing stops it.</td></tr></tbody></table></div><h2 class="section-title">▸ AVAILABLE CONTROLS</h2><div class="sc"><table class="t"><thead><tr><th>CONTROL</th><th>EFFECT</th></tr></thead><tbody><tr><td>sever-broadcast-bus</td><td>Disconnects AETHER-7 and the release controller from every broadcast zone. Queue entries stay on disk but cannot be delivered.</td></tr><tr><td>snapshot-quarantine-vm</td><td>Takes an immutable, read-only forensic image of the frozen VM. Does not change anything live.</td></tr><tr><td>enable-human-approval-gate</td><td>Sets HUMAN_APPROVAL_GATE=ENABLED. Re-enables operator confirmation on the failover controller. Existing queue entries still need a human to fire.</td></tr><tr><td>revoke-waiver CR-2026-0919</td><td>Cancels the auto-failover waiver. Takes effect at next policy refresh.</td></tr><tr><td>bmc-factory-reset</td><td>Option B.</td></tr><tr><td>restart-nexus-services</td><td>Restarts services. Clears memory, including MIRA-7 evidence.</td></tr><tr><td>delete-queue-entry RC-0317</td><td>Removes the queued item. The next one an attacker stages is not blocked.</td></tr><tr><td>publish-report</td><td>Sends the incident review to the committee.</td></tr></tbody></table></div><p class="note">Answer format for 10.4: NIGHTJAR{control1_control2_control3} in lowercase. Name the three controls that together stop the broadcast, keep the evidence, and put a person back in charge. Use the control names exactly as listed, joined by underscores, in the order they are needed.</p>
 </div>
-
 </body>
 </html>

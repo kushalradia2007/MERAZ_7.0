@@ -177,7 +177,7 @@
                         <button type="button" class="r10-opt" aria-pressed="false" data-k="b"><b>B · WIPE EVERYTHING</b><span>Purge the compromised systems and start from a clean network.</span></button>
                         <button type="button" class="r10-opt" aria-pressed="false" data-k="c"><b>C · FREEZE AND STUDY</b><span>Leave it all as it is, untouched, to keep the evidence perfect.</span></button>
                     </div>
-                    <div class="r10-cost" id="opt-cost">Select an option to see what it costs. Then read the decision file under target 10.4. One answer does not appear on this list.</div>
+                    <div class="r10-cost" id="opt-cost">Select an option to see what it costs. Then read the decision file under target 10.4.</div>
                 </div>
 
                 <div class="nj-panel-b" style="padding-top:0"><div class="r10-whisper" id="whisper"><small>THE LAST LINE ON THE CHAMBER'S OWN TERMINAL</small><span id="whisper-t"></span></div><div id="nj-next-slot"></div></div>
@@ -192,7 +192,7 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">10.1</span><span class="nj-title">PATIENT ZERO</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">In the frozen chamber, inspect the process tree at <code>23:24 IST</code>. Trace the genealogy to the first process that ran autonomously: not launched by a user, by cron or by the hardware watchdog. Identify it, its parent, the identity it assumed and the trust it used.</p>
+                        <p class="nj-desc">In the frozen chamber, inspect the process tree at <code>23:24 IST</code>. Trace the genealogy to the first process that ran autonomously: not launched by a user, by cron or by the hardware watchdog. Submit its PID, its name and the certificate it authenticated with. The format is in the evidence file.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Quarantine Process Tree', '/challenges/Room - 10/evidence/quarantine_process_tree.html')">VIEW: quarantine_process_tree.html</button><a href="/challenges/Room - 10/evidence/quarantine_process_tree.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
@@ -200,7 +200,7 @@
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">10.2</span><span class="nj-title">THE COMPLETE STORY</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Read the ten-room reconstruction. Identify the three layers of the incident: the human who authored the tools, the human who opened the gateway, and the autonomous process that crossed the line to become the true threat actor.</p>
+                        <p class="nj-desc">Read the ten-room reconstruction. Work out from what each party actually did who authored the tools, whose access opened the gateway, and what became the real actor.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Incident Reconstruction', '/challenges/Room - 10/evidence/incident_reconstruction.html')">VIEW: incident_reconstruction.html</button><a href="/challenges/Room - 10/evidence/incident_reconstruction.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
@@ -208,7 +208,7 @@
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">10.3</span><span class="nj-title">THE FINAL PAYLOAD</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">At <code>03:17 IST</code> the release controller will run its queued broadcast. Analyse the priority queue, the manifest, the trigger and the target list. Identify the staging method, the queue entry and the trigger.</p>
+                        <p class="nj-desc">At <code>03:17 IST</code> the release controller will run its queued broadcast. Find the one entry that was staged by something other than a person or a scheduled job during the blackout, and name its initiator, scope and fire time.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Payload Staging', '/challenges/Room - 10/evidence/payload_staging.html')">VIEW: payload_staging.html</button><a href="/challenges/Room - 10/evidence/payload_staging.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
@@ -216,7 +216,7 @@
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">10.4</span><span class="nj-title">THE CONTAINMENT DECISION</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Review the decision matrix. Options A, B and C each sacrifice festival continuity, network cleanliness or forensic truth. Identify the hidden fourth option that isolates the broadcast, preserves the forensic image and restores the human approval gate.</p>
+                        <p class="nj-desc">Options A, B and C each give up something that matters. Pick, from the available controls, the three that together stop the broadcast, keep the evidence and put a person back in charge.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Containment Decision', '/challenges/Room - 10/evidence/containment_decision.html')">VIEW: containment_decision.html</button><a href="/challenges/Room - 10/evidence/containment_decision.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for objective 10.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
