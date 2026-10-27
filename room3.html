@@ -103,10 +103,10 @@
                         <div class="beacon-blip"></div>
                     </div>
                     <div class="beacon-stats">
-                        <div class="stat-row"><span>SOURCE_IP</span><span class="stat-val">10.7.7.43</span></div>
-                        <div class="stat-row"><span>DEST_IP</span><span class="stat-val">203.0.113.77</span></div>
-                        <div class="stat-row"><span>PROTOCOL</span><span class="stat-val">TCP / 8443</span></div>
-                        <div class="stat-row"><span>INTERVAL</span><span class="stat-val hot">43.00s</span></div>
+                        <div class="stat-row"><span>SOURCE</span><span class="stat-val">UNRESOLVED</span></div>
+                        <div class="stat-row"><span>DESTINATION</span><span class="stat-val">UNRESOLVED</span></div>
+                        <div class="stat-row"><span>CAPTURE</span><span class="stat-val">SPAN-3 · 6943 FRAMES</span></div>
+                        <div class="stat-row"><span>REPORTED_INTERVAL</span><span class="stat-val hot">43s</span></div>
                         <div class="stat-row"><span>NEXT_BEACON</span><span class="stat-val" id="beacon-t">--s</span></div>
                     </div>
                     <p class="r3-quote">"The relay was decommissioned. It should not be sending packets. Yet something speaks every forty-three seconds."</p>
@@ -121,23 +121,20 @@
             <section class="nj-panel nj-rise" style="--i:2">
                 <div class="nj-panel-h"><i class="dot"></i>Intercept stream<span class="meta">LIVE</span></div>
                 <div class="r3-stream">
-                    <div class="r3-filter">&gt; APPLYING FILTER: src_ip == 10.7.7.43<br>&gt; ISOLATING BEACON PATTERN...</div>
+                    <div class="r3-filter">&gt; LOADING room3_intercept.pcapng ... 6943 FRAMES · 2394 s<br>&gt; SHA-256 c38360fa09b665ba…<br>&gt; NO FILTER APPLIED. THE WIRE IS YOURS.</div>
 
-                    <div class="packet-row"><span class="p-time">23:30:00</span><span class="p-dir out">OUT</span><span class="p-proto">DNS</span><span class="p-info">Standard A · ntp.internal</span></div>
-                    <div class="packet-row"><span class="p-time">23:30:05</span><span class="p-dir in">IN</span><span class="p-proto">TCP</span><span class="p-info">7331 → 443 [SYN]</span></div>
-                    <div class="packet-row anomaly"><span class="p-time">23:30:43</span><span class="p-dir out">OUT</span><span class="p-proto">TCP</span><span class="p-info">8443 → 443 [BEACON] <span class="p-sub">seq=1 · 112 bytes</span></span></div>
-                    <div class="packet-row anomaly"><span class="p-time">23:31:26</span><span class="p-dir out">OUT</span><span class="p-proto">TCP</span><span class="p-info">8443 → 443 [BEACON] <span class="p-sub">seq=2 · interval: 43s</span></span></div>
-                    <div class="packet-row anomaly"><span class="p-time">23:32:09</span><span class="p-dir out">OUT</span><span class="p-proto">TCP</span><span class="p-info">8443 → 443 [BEACON] <span class="p-sub">seq=3 · 112 bytes</span></span></div>
-                    <div class="packet-row"><span class="p-time">23:31:45</span><span class="p-dir out">OUT</span><span class="p-proto">DNS</span><span class="p-info">Standard A · 6d61696e745f.c2.parallax-sys.net</span></div>
+                    <div class="packet-row"><span class="p-time">23:30:00</span><span class="p-dir">LAN</span><span class="p-proto">DNS</span><span class="p-info">10.7.7.31:55142 → 10.7.7.2:53 <span class="p-sub">Query ntp.internal</span></span></div>
+                    <div class="packet-row"><span class="p-time">23:30:01</span><span class="p-dir">LAN</span><span class="p-proto">UDP</span><span class="p-info">10.7.7.31:33470 → 10.7.7.5:123 <span class="p-sub">len=48</span></span></div>
+                    <div class="packet-row"><span class="p-time">23:30:03</span><span class="p-dir">LAN</span><span class="p-proto">TCP</span><span class="p-info">10.7.7.20:35943 → 10.7.7.60:8080 <span class="p-sub">[S] len=0</span></span></div>
+                    <div class="packet-row"><span class="p-time">23:30:03</span><span class="p-dir">LAN</span><span class="p-proto">TCP</span><span class="p-info">10.7.7.20:35943 → 10.7.7.60:8080 <span class="p-sub">[PA] len=84</span></span></div>
+                    <div class="packet-row"><span class="p-time">23:30:03</span><span class="p-dir">LAN</span><span class="p-proto">DNS</span><span class="p-info">10.7.7.112:36317 → 10.7.7.2:53 <span class="p-sub">Query wiki.festival.in.net</span></span></div>
 
                     <div class="tcp-log">
-                        <div class="tcp-title">TCP RECONSTRUCTION: PORT 7331</div>
-                        <div class="t-line"><span class="t-client">CLIENT  &gt; </span>AUTH nexus-svc-continuity</div>
-                        <div class="t-line"><span class="t-server">AETHER-7&gt; </span>AUTH_OK TRUSTED_IDENTITY</div>
-                        <div class="t-line"><span class="t-client">CLIENT  &gt; </span>RESTORE AETHER CORE</div>
-                        <div class="t-line"><span class="t-server">AETHER-7&gt; </span>RESTORE CONFIRMED — AETHER CORE ACTIVATING</div>
-                        <div class="t-line t-warn"><span class="t-server">AETHER-7&gt; </span>WARNING — AUTONOMOUS MODE ENABLED</div>
-                        <div class="t-line"><span class="t-client">CLIENT  &gt; </span>ACKNOWLEDGED</div>
+                        <div class="tcp-title">ANALYST BENCH</div>
+                        <div class="t-line"><span class="t-client">TOOL    &gt; </span>Wireshark or tshark on your own machine. The portal summary is an index, not a substitute.</div>
+                        <div class="t-line"><span class="t-server">CLOCK   &gt; </span>The file is UTC. Site time is IST (+05:30).</div>
+                        <div class="t-line"><span class="t-client">SPAN    &gt; </span>The tap sits where the proxy's uplink passes. Some connections are visible on both sides.</div>
+                        <div class="t-line t-warn"><span class="t-server">RULE    &gt; </span>Every question has one answer. If two candidates fit, something tells them apart.</div>
                     </div>
                 </div>
             </section>
@@ -151,32 +148,32 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">3.1</span><span class="nj-title">THE BEACON</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Identify the periodic traffic from AETHER-7. Note source, destination, and port.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Packet Capture', '/challenges/Room - 3/evidence/aether7_capture.html')">VIEW: aether7_capture.html</button><a href="/challenges/Room - 3/evidence/aether7_capture.html" download>DL</a></span></div>
+                        <p class="nj-desc">Something keeps a perfect rhythm and leaves the building. Find the machine that is really sending it, and the name it is calling home to. Flag: NIGHTJAR{source-ip_destination-domain}</p>
+                        <div class="nj-files"><span class="nj-file"><a href="/challenges/Room - 3/evidence/room3_intercept.pcapng" download>DL: room3_intercept.pcapng</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Packet Summary', '/challenges/Room - 3/evidence/packet_summary.html')">VIEW: packet_summary.html</button><a href="/challenges/Room - 3/evidence/packet_summary.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 3.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">3.2</span><span class="nj-title">THE NAME BENEATH</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">DNS queries contain hex-encoded subdomains. Decode them to reveal the hidden message.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('DNS Queries', '/challenges/Room - 3/evidence/dns_queries.html')">VIEW: dns_queries.log</button><a href="/challenges/Room - 3/evidence/dns_queries.html" download>DL</a></span></div>
+                        <p class="nj-desc">Some names are not questions. Find the one smuggling a message out and read it. Flag: NIGHTJAR{window_user-fragment} with the window as HHMM-HHMM and the fragment exactly as sent.</p>
+                        <div class="nj-files"><span class="nj-file"><a href="/challenges/Room - 3/evidence/room3_intercept.pcapng" download>DL: room3_intercept.pcapng</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Packet Summary', '/challenges/Room - 3/evidence/packet_summary.html')">VIEW: packet_summary.html</button><a href="/challenges/Room - 3/evidence/packet_summary.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 3.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">3.3</span><span class="nj-title">THE CONVERSATION</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Read the reconstructed TCP stream over port 7331.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('TCP Reconstruction', '/challenges/Room - 3/evidence/tcp_reconstruction.html')">VIEW: tcp_reconstruction.txt</button><a href="/challenges/Room - 3/evidence/tcp_reconstruction.html" download>DL</a></span></div>
+                        <p class="nj-desc">Someone is talking to a console that should be quiet. Rebuild what was actually executed, and the identity that was allowed to say it. Flag: NIGHTJAR{identity_COMMAND_WITH_UNDERSCORES}</p>
+                        <div class="nj-files"><span class="nj-file"><a href="/challenges/Room - 3/evidence/room3_intercept.pcapng" download>DL: room3_intercept.pcapng</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Packet Summary', '/challenges/Room - 3/evidence/packet_summary.html')">VIEW: packet_summary.html</button><a href="/challenges/Room - 3/evidence/packet_summary.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 3.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">3.4</span><span class="nj-title">THE OPEN PORT</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Find the unexpected open port in the service scan. The banner names the worm.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Service Scan', '/challenges/Room - 3/evidence/service_scan.html')">VIEW: service_scan.xml</button><a href="/challenges/Room - 3/evidence/service_scan.html" download>DL</a></span></div>
+                        <p class="nj-desc">Something answered a probe it should never have heard. Name the door and its protocol. Flag: NIGHTJAR{protocol/port_BANNER} where BANNER is the first word of the service banner.</p>
+                        <div class="nj-files"><span class="nj-file"><a href="/challenges/Room - 3/evidence/room3_intercept.pcapng" download>DL: room3_intercept.pcapng</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Packet Summary', '/challenges/Room - 3/evidence/packet_summary.html')">VIEW: packet_summary.html</button><a href="/challenges/Room - 3/evidence/packet_summary.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 3.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>
@@ -217,7 +214,7 @@
                 { npc: 'ila', text: 'Network operations. Thirty-nine screens are green. One is not, and it has been trying very hard to look green.' },
                 { npc: 'rhea', text: 'That is the relay from the telegram trail. I decommissioned it myself, months ago. It is still sending.' },
                 { npc: 'rhea', text: 'A small packet, the same size, every forty-three seconds. Real machines are never that punctual.' },
-                { npc: 'ila', text: 'We have the capture, the DNS logs, a reconstructed stream and a service scan. Four questions. Who is talking? What is hiding in the names? What are they saying? And what is open that should be shut?' },
+                { npc: 'ila', text: 'We have one capture: forty minutes of everything that crossed the wire. Nobody has done the reading for you. Four questions. Who is talking? What is hiding in the names? What are they saying? And what is open that should be shut?' },
                 { npc: 'rhea', text: 'Every packet has a purpose. Find the purpose.' },
                 { npc: 'system', text: 'RELAY MONITOR ONLINE. BEACON ACTIVE. INTERCEPT STREAM LIVE.' }
             ],
@@ -251,10 +248,10 @@
                 'Not it. Compare against the raw evidence again.'
             ],
             hints: {
-                1: 'Filter by source, then look for the pattern: same size, same gap.',
-                2: 'Odd labels in a DNS query are rarely typos. Try decoding them.',
-                3: 'Follow the stream, not the individual packets.',
-                4: 'Compare the scan against what should be open on a decommissioned relay.'
+                1: 'Same size, same gap is only the start. Ask who is actually speaking and who is merely passing it along.',
+                2: 'Not every secret travels in the question. Look at what comes back, and remember that arrival order is not sending order.',
+                3: 'Follow the stream, not the packets. Then ask what a keyboard does that a paste does not.',
+                4: 'Silence is not the same as closed, and a port number means nothing without a protocol. Compare what answered with the asset record.'
             },
 
             debrief: [

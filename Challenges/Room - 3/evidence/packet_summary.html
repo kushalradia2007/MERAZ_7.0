@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room 3 :: packet summary</title>
+<style>
+:root{--bg:#07070d;--ink:#e6e6f0;--dim:#8a8aa3;--acc:#a78bfa;--line:rgba(167,139,250,.28);--warn:#f59e0b}
+@media (prefers-color-scheme: light){:root{--bg:#f6f5fb;--ink:#17172b;--dim:#5b5b78;--acc:#6d4fe0;--line:rgba(109,79,224,.3);--warn:#b45309}}
+*{box-sizing:border-box} body{margin:0;padding:22px 20px 40px;background:var(--bg);color:var(--ink);font:13px/1.65 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+h1{font-size:15px;letter-spacing:.14em;color:var(--acc);margin:0 0 4px} h2{font-size:12px;letter-spacing:.12em;color:var(--acc);margin:26px 0 8px;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+p{margin:6px 0;color:var(--dim)} .note{border-left:2px solid var(--warn);padding:6px 12px;background:rgba(245,158,11,.07);color:var(--ink)}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 18px;margin:8px 0} dt{color:var(--dim)} dd{margin:0;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;font-size:11.5px;display:block;overflow-x:auto} th,td{text-align:left;padding:3px 10px 3px 0;white-space:nowrap} th{color:var(--dim);font-weight:400;border-bottom:1px solid var(--line)}
+code{color:var(--acc)} li{margin:3px 0;color:var(--dim)} li b{color:var(--ink);font-weight:400}
+</style></head><body>
+<h1>ROOM 3 // THE INTERCEPT // PACKET SUMMARY</h1>
+<p>A lightweight index for review and accessibility. It tells you <i>where to stand</i>, not what you will find. The answers are in <code>room3_intercept.pcapng</code>, and you will need Wireshark (or tshark) to get them.</p>
+<div class="note">This summary is intentionally incomplete. Nothing here is decoded, grouped by behaviour, or attributed to a host.</div>
+
+<h2>CAPTURE</h2>
+<dl>
+<dt>file</dt><dd>room3_intercept.pcapng</dd>
+<dt>capture point</dt><dd>SPAN port 3 on core switch NOC-CS1 (sees LAN traffic <i>and</i> the proxy's uplink)</dd>
+<dt>packets</dt><dd>6943 &nbsp;|&nbsp; 984548 bytes &nbsp;|&nbsp; 2393 s</dd>
+<dt>clock</dt><dd>UTC in the file. Site time is IST (UTC+05:30). Capture begins 2026-10-03 23:30:00 IST.</dd>
+<dt>link type</dt><dd>Ethernet, single interface</dd>
+<dt>sha-256</dt><dd>c38360fa09b665baf509ea90ccb878ba23b44c32c84d22ea541142715593ebea</dd>
+<dt>layers</dt><dd>ARP 72 &middot; TCP 5881 &middot; DNS 872 &middot; other UDP 107 &middot; ICMP 11 (frame counts)</dd>
+<dt>addresses</dt><dd>33 internal (10.7.7.0/24), 8 external</dd>
+</dl>
+
+<h2>NETWORK FACTS (from the NOC runbook)</h2>
+<ul>
+<li><b>10.7.7.0/24</b> is the operations LAN. Default gateway <code>10.7.7.1</code>.</li>
+<li><b>10.7.7.2</b> is the only DNS resolver. Clients are not allowed to resolve names themselves.</li>
+<li><b>10.7.7.10</b> is the egress proxy (port 3128). All web egress must go through it; nothing else on the LAN has a route out.</li>
+<li><b>10.7.7.5</b> is the internal NTP server.</li>
+<li><b>10.7.7.200</b> is the NOC audit scanner. It ran its scheduled audit during this window.</li>
+<li>Because the SPAN port sits on the switch the proxy uplinks through, you can see a connection on <i>both</i> sides of the proxy.</li>
+</ul>
+
+<h2>ASSET RECORD: RELAY-07</h2>
+<dl>
+<dt>status</dt><dd>DECOMMISSIONED (ticket NOC-4412). Kept powered for recovery only.</dd>
+<dt>permitted listeners</dt><dd>22/tcp (management, jump host only) &middot; 7331/tcp (NOC maintenance console, LAN only) &middot; 68/udp (DHCP client)</dd>
+<dt>everything else</dt><dd>should be closed or filtered</dd>
+</dl>
+<p>The record gives no IP address for RELAY-07. Reconcile it against the traffic yourself.</p>
+
+<h2>FIRST 28 FRAMES (benign warm-up, for orientation)</h2>
+<table><tr><th>t (s)</th><th>proto</th><th>source</th><th>destination</th><th>info</th></tr>
+<tr><td>0.400</td><td>DNS</td><td>10.7.7.31:55142</td><td>10.7.7.2:53</td><td>Query ntp.internal</td></tr>
+<tr><td>0.404</td><td>DNS</td><td>10.7.7.2:53</td><td>10.7.7.31:55142</td><td>Response ntp.internal</td></tr>
+<tr><td>1.236</td><td>UDP</td><td>10.7.7.31:33470</td><td>10.7.7.5:123</td><td>len=48</td></tr>
+<tr><td>1.237</td><td>UDP</td><td>10.7.7.5:123</td><td>10.7.7.31:33470</td><td>len=48</td></tr>
+<tr><td>3.000</td><td>TCP</td><td>10.7.7.20:35943</td><td>10.7.7.60:8080</td><td>[S] len=0</td></tr>
+<tr><td>3.000</td><td>TCP</td><td>10.7.7.60:8080</td><td>10.7.7.20:35943</td><td>[SA] len=0</td></tr>
+<tr><td>3.001</td><td>TCP</td><td>10.7.7.20:35943</td><td>10.7.7.60:8080</td><td>[A] len=0</td></tr>
+<tr><td>3.001</td><td>TCP</td><td>10.7.7.20:35943</td><td>10.7.7.60:8080</td><td>[PA] len=84</td></tr>
+<tr><td>3.002</td><td>TCP</td><td>10.7.7.60:8080</td><td>10.7.7.20:35943</td><td>[A] len=0</td></tr>
+<tr><td>3.004</td><td>TCP</td><td>10.7.7.60:8080</td><td>10.7.7.20:35943</td><td>[PA] len=85</td></tr>
+<tr><td>3.004</td><td>TCP</td><td>10.7.7.20:35943</td><td>10.7.7.60:8080</td><td>[A] len=0</td></tr>
+<tr><td>3.005</td><td>TCP</td><td>10.7.7.60:8080</td><td>10.7.7.20:35943</td><td>[FA] len=0</td></tr>
+<tr><td>3.005</td><td>TCP</td><td>10.7.7.20:35943</td><td>10.7.7.60:8080</td><td>[A] len=0</td></tr>
+<tr><td>3.006</td><td>TCP</td><td>10.7.7.20:35943</td><td>10.7.7.60:8080</td><td>[FA] len=0</td></tr>
+<tr><td>3.006</td><td>TCP</td><td>10.7.7.60:8080</td><td>10.7.7.20:35943</td><td>[A] len=0</td></tr>
+<tr><td>3.020</td><td>TCP</td><td>10.7.7.20:48375</td><td>10.7.7.61:8080</td><td>[S] len=0</td></tr>
+<tr><td>3.020</td><td>TCP</td><td>10.7.7.61:8080</td><td>10.7.7.20:48375</td><td>[SA] len=0</td></tr>
+<tr><td>3.021</td><td>TCP</td><td>10.7.7.20:48375</td><td>10.7.7.61:8080</td><td>[A] len=0</td></tr>
+<tr><td>3.021</td><td>TCP</td><td>10.7.7.20:48375</td><td>10.7.7.61:8080</td><td>[PA] len=84</td></tr>
+<tr><td>3.022</td><td>TCP</td><td>10.7.7.61:8080</td><td>10.7.7.20:48375</td><td>[A] len=0</td></tr>
+<tr><td>3.024</td><td>TCP</td><td>10.7.7.61:8080</td><td>10.7.7.20:48375</td><td>[PA] len=85</td></tr>
+<tr><td>3.024</td><td>TCP</td><td>10.7.7.20:48375</td><td>10.7.7.61:8080</td><td>[A] len=0</td></tr>
+<tr><td>3.025</td><td>TCP</td><td>10.7.7.61:8080</td><td>10.7.7.20:48375</td><td>[FA] len=0</td></tr>
+<tr><td>3.025</td><td>TCP</td><td>10.7.7.20:48375</td><td>10.7.7.61:8080</td><td>[A] len=0</td></tr>
+<tr><td>3.026</td><td>TCP</td><td>10.7.7.20:48375</td><td>10.7.7.61:8080</td><td>[FA] len=0</td></tr>
+<tr><td>3.026</td><td>TCP</td><td>10.7.7.61:8080</td><td>10.7.7.20:48375</td><td>[A] len=0</td></tr>
+<tr><td>3.770</td><td>DNS</td><td>10.7.7.112:36317</td><td>10.7.7.2:53</td><td>Query wiki.festival.in.net</td></tr>
+<tr><td>3.773</td><td>DNS</td><td>10.7.7.2:53</td><td>10.7.7.112:36317</td><td>Response wiki.festival.in.net</td></tr>
+</table>
+
+<h2>READING GUIDE</h2>
+<ul>
+<li><b>View &gt; Time Display Format</b> lets you switch between UTC and seconds since the previous displayed packet.</li>
+<li><b>Statistics &gt; Conversations / Endpoints / Protocol Hierarchy / Resolved Addresses</b> give you the shape of a capture before you read a single packet.</li>
+<li><b>Analyze &gt; Follow</b> rebuilds a stream. <b>Analyze &gt; Expert Information</b> tells you what Wireshark thinks went wrong.</li>
+<li>Display filters are case-sensitive for <code>contains</code> and case-insensitive for <code>matches "(?i)..."</code>.</li>
+<li>Every question in this room has exactly one correct answer. If two candidates look right, something distinguishes them. Find what.</li>
+</ul>
+</body></html>

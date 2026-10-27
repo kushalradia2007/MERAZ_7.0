@@ -38,7 +38,7 @@ _RAW = {
         ("The Beacon", "NETWORK",
          "A beacon leaves the compromised relay for an external server on the same Parallax Systems domain from Room 1. This is no random callback."),
         ("The Name Beneath the Name", "ACCOUNT",
-         "Hidden DNS labels schedule a 02:00 maintenance window under a “kite_backup” username, an account made to look like Kabir's."),
+         "Hidden in the noise is a scheduled maintenance window, 03:00 to 03:17 IST, tied to a maintenance service account."),
         ("The Conversation in the Noise", "NETWORK",
          "A captured exchange: a service account authenticates to the relay and issues RESTORE AETHER CORE, reactivating the continuity module in autonomous mode."),
         ("The Port That Should Have Been Closed", "MALWARE",

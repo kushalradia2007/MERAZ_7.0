@@ -329,6 +329,9 @@ def serve_evidence(
         raise HTTPException(status_code=404, detail="Not found")
     if not target.is_file():
         raise HTTPException(status_code=404, detail="Not found")
+    if target.suffix.lower() in (".pcap", ".pcapng"):
+        return FileResponse(target, media_type="application/octet-stream", filename=target.name,
+                            headers={"Cache-Control": "private, max-age=300"})
     return FileResponse(target, headers={"Cache-Control": "private, max-age=300"})
 
 
@@ -617,10 +620,10 @@ CHALLENGE_REWARDS = {
         4: "FORGERY DETECTED. Next Relay identified: AETHER-7.",
     },
     3: {
-        1: "BEACON VERIFIED. Interval confirmed.",
-        2: "DECODED. Maintenance window logged.",
-        3: "STREAM ANALYZED. Next stage revealed.",
-        4: "MIRA-7 IDENTIFIED. Root vector compromised.",
+        1: "BEACON TRACED. The relay (10.7.7.43) hides behind the egress proxy and reports every 43 seconds to ops-sync.parallax-sys.net, an external-looking name that belongs to no real company.",
+        2: 'DECODED: "WINDOW=0300-0317;USER=maint_svc". The next maintenance window is 03:00 to 03:17 IST, and the account fragment points at a maintenance identity.',
+        3: "CONVERSATION REBUILT. The trusted identity nexus-svc-continuity typed a single instruction: RESTORE AETHER CORE. It is not \"download malware\". It is a request to wake something up.",
+        4: "MIRA/7 IDENTIFIED on 4747/UDP. It answered a probe on a port nobody was watching. A compromised Linux relay is now reachable, sealed behind a maintenance lock, and KABIR's account is visible on it.",
     },
     4: {
         1: "PROCESS IDENTIFIED. It is MIRA-7's local controller.",
