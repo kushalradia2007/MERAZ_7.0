@@ -869,11 +869,7 @@ body.has-evbar{padding-top:32px}
     if(!ev)return;var now=Date.now()+skew,ph=ev.window_on?phase(now):'live';
     if(last&&last!==ph&&(ph==='live'||ph==='ended'))setTimeout(function(){location.reload()},800);
     last=ph;
-    if(!ev.window_on){bar.style.display='none';return}
-    bar.className=ph;bar.style.display='block';document.body.classList.add('has-evbar');
-    bar.textContent=ph==='before'?'EVENT STARTS IN '+fmt(Date.parse(ev.start)-now)
-      :ph==='live'?'LIVE · LEADERBOARD LOCKS IN '+fmt(Date.parse(ev.end)-now)
-      :'EVENT ENDED · ALL ROOMS LOCKED · LEADERBOARD FINAL';
+    bar.style.display='none';
   }
   fetch('/api/event').then(function(r){return r.json()}).then(function(e){ev=e;skew=Date.parse(e.now)-Date.now();tick();setInterval(tick,1000)}).catch(function(){});
 })();
