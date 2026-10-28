@@ -84,8 +84,7 @@
       "orientation": "NONE — Skipped",
       "emergency_contact": "NONE",
       "sponsor": "nexus-svc-continuity (API Direct)",
-      "approval_mode": "AUTO-APPROVED",
-      "internal_flag": "NIGHTJAR{idor_volunteer_0x7F_infra_access_no_orientation}"
+      "approval_mode": "AUTO-APPROVED"
     }
   ]
 }

@@ -54,8 +54,6 @@ h1{font-size:14px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
 </div>
 
 <script>
-// Flag XOR'd with 0x4D — stored as hex. Players must decode externally (CyberChef etc.)
-const FLAG_XOR_HEX = '03040a0519070c1f362e202912242327282e392422231220243f2c122e22232b242a122c391228392e12232835383e1220243f2c122e22232b30';
 
 const FS = {
   '/etc/nexus/mira.conf': [
@@ -66,7 +64,6 @@ const FS = {
     'C2_PORT=8443',
     'XOR_KEY=0x4d',
     'BEACON_INTERVAL=300',
-    '_FLAG_XOR=' + FLAG_XOR_HEX,
   ].join('\n'),
   '/etc/passwd': 'root:x:0:0\nnexus_portal:x:1003:1003\nnexus_svc:x:1004:1004',
   '/etc/hosts': '127.0.0.1 localhost\n10.7.7.1 nexus-core\n10.7.7.43 aether-7',
@@ -116,7 +113,7 @@ function addLine(term,text,cls){
 function runDiag(){
   const raw=document.getElementById('host-input').value;
   const term=document.getElementById('term');
-  addLine(term,'portal@nexus-diag:~$ ping -c 1 '+raw,'prompt');
+  addLine(term,'portal@nexus-diag:~$ ping -c 4 '+raw,'prompt');
   const injected=raw.includes(';')||raw.includes('&&')||raw.includes('|')||raw.includes('`');
   let out;
   if(injected){

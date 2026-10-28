@@ -123,9 +123,7 @@ function fmt(obj){
 }
 
 // ── 5.1 IDOR ──
-// Flag is base64-encoded in the response. Player must decode externally.
 const SPECIAL_ID = 127;
-const FLAG_IDOR_B64 = 'TklHSFRKQVJ7aWRvcl92b2x1bnRlZXJfMHg3Rl9pbmZyYV9hY2Nlc3Nfbm9fb3JpZW50YXRpb259';
 
 function profileFor(id) {
   id = parseInt(id,10);
@@ -133,8 +131,7 @@ function profileFor(id) {
   if (id===SPECIAL_ID) {
     return {id,name:'nexus_svc_auto',email:'nexus-svc@internal.meraz.in',
       access_tier:'INFRA',role:'volunteer',orientation_complete:false,
-      account_type:'service',created_by:'system',sponsor:null,
-      _flag_b64: FLAG_IDOR_B64};
+      account_type:'service',created_by:'system',sponsor:null};
   }
   const names=['Aryan','Priya','Rohan','Sneha','Dev','Nisha','Karan','Meera','Vijay','Ananya'];
   const tiers=['GENERAL','GENERAL','GENERAL','GENERAL','STAGE','GENERAL','MEDIA','GENERAL','GENERAL','GENERAL'];
@@ -180,8 +177,7 @@ async function sendJwt(){
   if(userRole!=='admin'){
     resp.innerHTML='<span class="status-ok">HTTP 200 OK</span>\n'+fmt({authenticated:true,role:userRole,permissions:['read_profile'],message:'Insufficient role for certificate renewal.'});return;
   }
-  const flag='NIGHTJAR{jwt_role_volunteer_plus_admin_cert_renewal}';
-  const result={authenticated:true,role:'admin',permissions:['read_profile','cert_renewal','infra_write'],cert_renewal_endpoint:'/api/v1/renew',_flag:flag};
+  const result={authenticated:true,role:'admin',permissions:['read_profile','cert_renewal','infra_write'],cert_renewal_endpoint:'/api/v1/renew'};
   resp.innerHTML='<span class="status-ok">HTTP 200 OK — Admin token accepted</span>\n<span class="flag">'+esc(JSON.stringify(result,null,2))+'</span>';
 }
 

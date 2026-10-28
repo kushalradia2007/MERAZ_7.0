@@ -633,7 +633,7 @@ CHALLENGE_REWARDS = {
     },
     5: {
         1: 'GHOST PROFILE FOUND. Volunteer #0x7F is "NEXUS Infrastructure \u2014 Automated." No human, no orientation, no sponsor. MIRA-7 created a fictional person in the roster to justify a physical access badge.',
-        2: "DUAL-ROLE CONFIRMED. The middleware checks x-nexus-role in the header before role in the payload. With alg: none, anyone can forge admin access. MIRA-7 used this to reach the cert renewal endpoint.",
+        2: "DUAL-ROLE CONFIRMED. The portal believed the token's user.role field over its data.role field, so a volunteer token edited to admin was accepted. MIRA-7 used this to reach the cert renewal endpoint.",
         3: "INJECTION CONFIRMED. os.popen() passed user input straight to the shell. The semicolon separated commands, leaking /etc/nexus/mira.conf \u2014 the path to MIRA-7's local configuration and the service identity to impersonate.",
         4: "TRUST CHAIN COMPLETE. The maintenance account maint_nexus_portal used cert:renew to request a certificate for aether-core.nexus.internal. MIRA-7 is now a trusted NEXUS service. No zero-day required \u2014 just a chain of small oversights.",
     },

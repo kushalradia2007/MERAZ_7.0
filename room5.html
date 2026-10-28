@@ -150,9 +150,9 @@
                     <div class="r5-warn">&gt; ACCESS CONTROL WARNING: Missing authorization boundary on profile retrieval handler.</div>
 
                     <div class="r5-sec">▸ PHASE 3 — SESSION TOKEN TELEMETRY</div>
-                    <div class="r5-l"><span class="t">02:11:02</span><span class="u">gateway-proxy:</span><span class="m">HTTP POST /api/v1/auth/verify (Algorithm: <span class="hl">none</span>)</span></div>
-                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">portal-auth:</span><span class="m r5-err">TOKEN DISCREPANCY: Conflicting role declarations between header &amp; payload</span></div>
-                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">middleware:</span><span class="m" style="color:var(--amber)">Legacy precedence rule invoked: header claim prioritized over body</span></div>
+                    <div class="r5-l"><span class="t">02:11:02</span><span class="u">gateway-proxy:</span><span class="m">HTTP POST /api/v1/auth/verify (Algorithm: <span class="hl">HS256</span>)</span></div>
+                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">portal-auth:</span><span class="m r5-err">TOKEN DISCREPANCY: Conflicting role declarations between user &amp; data claims</span></div>
+                    <div class="r5-l"><span class="t">02:11:03</span><span class="u">middleware:</span><span class="m" style="color:var(--amber)">Legacy precedence rule invoked: user claim prioritized over data claim</span></div>
                     <div class="r5-out"><span style="color:var(--text-muted)">[PROXY STREAM TRUNCATED — DECODE RAW TOKENS IN WORKBENCH]</span></div>
 
                     <div class="r5-sec">▸ PHASE 4 — DIAGNOSTIC SUBPROCESS TELEMETRY</div>
@@ -186,7 +186,7 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">5.1</span><span class="nj-title">THE INVITATION THAT WAS NOT PRIVATE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">IDOR</span> The portal's profile endpoint exposes every volunteer by integer ID — no ownership check. <strong>Open the live simulation</strong>, change the ID in the request editor, and enumerate until you find the automated service account that has <code>INFRA</code> access without a completed orientation. The flag is inside that profile's response.</p>
+                        <p class="nj-desc"><span class="r5-tag">IDOR</span> The portal's profile endpoint exposes every volunteer by integer ID — no ownership check. <strong>Open the live simulation</strong>, change the ID in the request editor, and enumerate until you find the automated service account that has <code>INFRA</code> access without a completed orientation. Give the ID in hex. Format: NIGHTJAR{idor_0xNN}.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Volunteer Portal (LIVE LAB)', '/challenges/Room - 5/evidence/volunteer_portal.html')">⚡ LAUNCH: volunteer_portal.html</button></span></div>
                         <div class="nj-form"><span class="pre">PROFILE ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
@@ -194,7 +194,7 @@
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">5.2</span><span class="nj-title">THE SESSION WITH TWO NAMES</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">JWT FORGE</span> The portal middleware trusts <code>user.role</code> over <code>data.role</code>. The attacker had a legitimate volunteer token with two conflicting role fields. <strong>Open the JWT lab</strong>, edit <code>user.role</code> to <code>admin</code>, click FORGE TOKEN (signs it with HS256 / the correct secret), then SEND — the portal will grant the cert-renewal permission and return the flag.</p>
+                        <p class="nj-desc"><span class="r5-tag">JWT FORGE</span> A legitimate volunteer token carries two conflicting role fields. <strong>Open the JWT lab</strong>, decode the token, work out which field the portal believes, forge a token that makes you an admin, and send it. Format: NIGHTJAR{jwt_field_role}, with the field name written as it appears in the token.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('JWT Forge Lab (LIVE)', '/challenges/Room - 5/evidence/volunteer_portal.html#jwt')">⚡ LAUNCH: JWT Lab</button></span></div>
                         <div class="nj-form"><span class="pre">TOKEN ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
@@ -202,7 +202,7 @@
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">5.3</span><span class="nj-title">THE INPUT THAT BECAME A COMMAND</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">CMD INJECT</span> The network diagnostic tool passes the host field directly to <code>os.popen("ping -c 1 " + user_input)</code> — no sanitisation. <strong>Open the live terminal</strong> and inject a second command using shell metacharacters (<code>;</code>, <code>&&</code>, <code>|</code>). Read <code>/etc/nexus/mira.conf</code> to find the flag. Try it in your real terminal too: <code>echo "10.7.7.1; cat /etc/nexus/mira.conf"</code></p>
+                        <p class="nj-desc"><span class="r5-tag">CMD INJECT</span> The network diagnostic tool passes the host field straight into a shell command. <strong>Open the live terminal</strong>, inject a second command, and find the configuration file the attacker went after. It lives under <code>/etc</code>. Format: NIGHTJAR{cmdi_/full/path}.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Diagnostic Terminal (LIVE)', '/challenges/Room - 5/evidence/diagnostic_tool.html')">⚡ LAUNCH: diagnostic_tool.html</button></span></div>
                         <div class="nj-form"><span class="pre">INPUT ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
@@ -210,7 +210,7 @@
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">5.4</span><span class="nj-title">THE MAINTENANCE ACCOUNT</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc"><span class="r5-tag">HARDCODED CREDS</span> The staging <code>.env</code> file was committed to git and is now public. <strong>Download it</strong> and open it in any text editor or run <code>grep -i maint portal.env</code> in your terminal. Find the maintenance account name and the cert-renewal endpoint it maps to. Combine them into the flag format.</p>
+                        <p class="nj-desc"><span class="r5-tag">HARDCODED CREDS</span> The staging <code>.env</code> file was committed to git and is now public. <strong>Download it</strong> and open it in any text editor or run <code>grep -i maint portal.env</code> in your terminal. Find the maintenance account and the API scope it holds. Format: NIGHTJAR{account_scope}, lowercase.</p>
                         <div class="nj-files"><span class="nj-file"><a href="/challenges/Room - 5/evidence/portal.env" download="portal.env">⬇ DL: portal.env</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Portal Config', '/challenges/Room - 5/evidence/portal_config.html')">◈ VIEW: portal_config.html</button></span></div>
                         <div class="nj-form"><span class="pre">ACCOUNT ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 5.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
