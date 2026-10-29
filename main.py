@@ -615,7 +615,7 @@ CHALLENGE_REWARDS = {
     },
     2: {
         1: 'DECRYPTED: "THE HOST WITH THE BLUE NAME IS LYING."',
-        2: "VERIFIED: The file contains a note stating the blue name is not a person but a host alias.",
+        2: "INTEGRITY CONFIRMED. Exactly one cached file matches the logged digest. The manifest pointing elsewhere was forged.",
         3: 'EXTRACTED: "ASK THE PERSON WHO NEVER SIGNS IN."',
         4: "FORGERY DETECTED. Next Relay identified: AETHER-7.",
     },

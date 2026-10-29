@@ -1,19 +1,35 @@
-[23:14:02] [SYS] Chat daemon starting...
-[23:14:05] [SYS] Listening on port 6667.
+[23:14:02] [SYS] Chat daemon starting... pid=8841
+[23:14:05] [SYS] Listening on port 6667. TLS disabled (legacy mode).
 [23:14:10] [KITE] is the comms channel secure?
 [23:14:12] [RHEA] yes, I set up the old relay. Nobody uses this anymore.
 [23:14:18] [KITE] okay good. I'm getting weird errors on the main dashboard.
-[23:14:25] [RHEA] send me the logs.
-[23:15:01] [SYS] Unrecognized peer connected. IP masked.
+[23:14:25] [RHEA] send me the logs. Use the emergency dump.
+[23:15:01] [SYS] Unrecognized peer connected. IP masked. Session id=0xghost2028
 [23:15:02] [RHEA] wait, who just joined?
 [23:15:05] [KITE] not me.
-[23:15:08] [SYS] Handshake failed: Timestamp is from 2028.
+[23:15:08] [SYS] Handshake failed: Timestamp is from 2028. Clock skew +184ms vs NTP.
+[23:15:09] [SYS] Peer offered salt=72656c61792d323032382d67686f7374 (hex). Ignoring.
 [23:15:10] [curator_404] 596f7520617265206c6f6f6b696e6720696e207468652077726f6e6720706c6163652e
-[23:15:15] [RHEA] what is that? hex?
 [23:15:20] [KITE] "You are looking in the wrong place."
 [23:15:25] [RHEA] kick them.
 [23:15:27] [SYS] Command KICK failed. Insufficient privileges on ghost session.
-[23:16:05] [curator_404] TklHSFRKQVJ7dGhlX2hvc3Rfd2l0aF90aGVfYmx1ZV9uYW1lX2lzX2x5aW5nfQ==
-[23:16:15] [KITE] another one. base64?
-[23:16:22] [RHEA] i'm pulling the plug on the relay.
-[23:16:30] [SYS] Connection terminated by host.
+[23:15:30] [curator_404] DECOY-A TklHSFRKQVJ7d3JvbmdfcGxhY2Vfd3JvbmdfZmxhZ30=
+[23:15:35] [KITE] another base64. looks like a flag but Rhea said bait.
+[23:15:40] [curator_404] DECOY-B NIGHTJAR{always_check_the_manifest_first}
+[23:15:45] [SYS] Buffering multi-frame payload from curator_404. Expected frames=7.
+[23:16:10] [curator_404] <3/7> IB_@{6$S?pd+bt
+[23:16:11] [curator_404] <7/7> 99KMj+&TSvC
+[23:16:12] [curator_404] <6/7> pE`)Xa8yzAj9f0
+[23:16:13] [curator_404] <5/7> ulbQ^?D7u&~T{C
+[23:16:13] [curator_404] <5/7> ulbQi?D7u&~T{C
+[23:16:13] [SYS] frame 5/7 retransmitted: checksum mismatch, first copy kept in buffer
+[23:16:14] [curator_404] <1/7> c-jF$0KWeQCjm}
+[23:16:15] [curator_404] <4/7> DmSh-B*2v3+ytK
+[23:16:16] [curator_404] <2/7> 5=&x=fAyYJmGW)
+[23:16:16] [curator_404] <2/7> 5=&xHfAyYJmGW)
+[23:16:16] [SYS] frame 2/7 retransmitted: checksum mismatch, first copy kept in buffer
+[23:16:40] [KITE] frames are out of order and some are doubled. this is messy.
+[23:16:45] [RHEA] the daemon keeps the first valid copy. Reassemble carefully.
+[23:16:50] [curator_404] DECOY-C 8MnP*wO?XXAPiSXRNKs8xL{U9G_wrong
+[23:16:55] [SYS] Connection terminated by host. Ghost session purged.
+[23:17:00] [SYS] Note for forensics: salt offered during handshake was relay-2028-ghost (ascii).

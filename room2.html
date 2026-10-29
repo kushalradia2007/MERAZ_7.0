@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>NIGHTJAR — Room 2: The Dead Telegram</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ctext y=%2726%27 font-size=%2726%27%3E%E2%97%88%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/room-ui.css">
     <style>
@@ -42,6 +43,7 @@
         .r2-cur .mb { background: rgba(251, 191, 36, .05); border-color: rgba(251, 191, 36, .22); color: var(--amber); text-shadow: 0 0 3px rgba(251, 191, 36, .5); }
         .r2-cur .mb.scrambled { font-family: var(--font-glitch); font-size: 18px; letter-spacing: 2px; cursor: pointer; transition: background .3s, box-shadow .3s; }
         .r2-cur .mb.scrambled:hover { background: rgba(251, 191, 36, .15); box-shadow: 0 0 16px rgba(251, 191, 36, .22); }
+        .r2-cur .mb.scrambled:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         .r2-cur .mb.plain { font-family: var(--font-ui); font-size: 14px; }
         .burning { animation: r2-burn 2.5s forwards ease-in; pointer-events: none; }
         @keyframes r2-burn {
@@ -77,6 +79,11 @@
             .r2-main { grid-template-columns: 1fr; }
             .r2-history { height: 260px; }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .r2-main > .nj-col, .r2-node.anomaly, .r2-enc, .r2-msg, .r2-pane.active { animation: none !important; }
+            .burning { animation-duration: .01s; }
+        }
     </style>
     <script src="/room-common.js"></script>
     <script src="/assets/story.js"></script>
@@ -91,7 +98,7 @@
         </div>
         <div class="nj-hud-c">
             <span class="nj-act">ACT I · THE SIGNAL</span>
-            <span class="nj-roomno">ROOM <b>2</b>/9</span>
+            <span class="nj-roomno">ROOM <b>2</b>/10</span>
             <div class="nj-pips" data-nj-pips role="img" aria-label="0 of 4 challenges solved"></div>
         </div>
         <div class="nj-hud-r">
@@ -132,17 +139,17 @@
             <section class="nj-panel nj-rise" style="--i:2">
                 <div class="r2-tabs" role="tablist" aria-label="Challenges">
                     <button type="button" class="r2-tab" role="tab" id="tab-1" aria-selected="true" aria-controls="ch-1" onclick="switchTab(1)">2.1 NOISE</button>
-                    <button type="button" class="r2-tab" role="tab" id="tab-2" aria-selected="false" aria-controls="ch-2" onclick="switchTab(2)">2.2 HASH</button>
-                    <button type="button" class="r2-tab" role="tab" id="tab-3" aria-selected="false" aria-controls="ch-3" onclick="switchTab(3)">2.3 STEGO</button>
-                    <button type="button" class="r2-tab" role="tab" id="tab-4" aria-selected="false" aria-controls="ch-4" onclick="switchTab(4)">2.4 SIGNATURE</button>
+                    <button type="button" class="r2-tab" role="tab" id="tab-2" tabindex="-1" aria-selected="false" aria-controls="ch-2" onclick="switchTab(2)">2.2 HASH</button>
+                    <button type="button" class="r2-tab" role="tab" id="tab-3" tabindex="-1" aria-selected="false" aria-controls="ch-3" onclick="switchTab(3)">2.3 STEGO</button>
+                    <button type="button" class="r2-tab" role="tab" id="tab-4" tabindex="-1" aria-selected="false" aria-controls="ch-4" onclick="switchTab(4)">2.4 SIGNATURE</button>
                 </div>
 
                 <div class="r2-pane active" id="ch-1" role="tabpanel" aria-labelledby="tab-1">
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">2.1</span><span class="nj-title">THE MESSAGE THAT LOOKS LIKE NOISE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">The Curator sent a message encoded to bypass basic filters. Export the chat dump and identify the hidden string.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/chat_export_2317.log', '_blank')">⬇ chat_export.log</button><a href="/challenges/Room - 2/evidence/chat_export_2317.log" download>DL</a></span></div>
-                        <div class="nj-form"><span class="pre">DECRYPT ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.1"><button type="button" onclick="verifyFlag(1)">SUBMIT</button></div>
+                        <p class="nj-desc">The Curator flooded the dead relay with fragmented frames, decoys and a handshake that should never have succeeded. Reassemble what the daemon actually kept, then peel every layer. The final plaintext is classical; everything before it is not.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room%20-%202/evidence/chat_export_2317.log', '_blank', 'noopener')">⬇ chat_export_2317.log</button><a href="/challenges/Room%20-%202/evidence/chat_export_2317.log" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">DECRYPT ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" maxlength="200" aria-label="Flag for challenge 2.1"><button type="button" onclick="verifyFlag(1)">SUBMIT</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
                 </div>
@@ -150,9 +157,9 @@
                 <div class="r2-pane" id="ch-2" role="tabpanel" aria-labelledby="tab-2">
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">2.2</span><span class="nj-title">THE HASH THAT IS A DOOR</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc r2-desc">A file was dropped on the server, but only its MD5 signature was recorded in the logs: <code>5d41402abc4b2a76b9719d911017c592</code>. Which of these recovered cache files matches the hash?</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/cache_files.zip', '_blank')">⬇ cache_files.zip</button><a href="/challenges/Room - 2/evidence/cache_files.zip" download>DL</a></span></div>
-                        <div class="nj-form"><span class="pre">MATCH ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{filename.ext}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.2"><button type="button" onclick="verifyFlag(2)">SUBMIT</button></div>
+                        <p class="nj-desc r2-desc">A file was dropped on the server. Only its digest survived in the logs, recorded as raw SHA-256 bytes in base64: <code>nOcmR5mLdCZgkuJHY/vdH+/JMXHluOJ5Ix6EFSQ6PCQ=</code>. The archive is deliberately hostile: forged manifests, nested containers, and dozens of near-collisions. Find the single exact byte match and submit its filename. Trust nothing the archive claims about itself.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room%20-%202/evidence/cache_files.zip', '_blank', 'noopener')">⬇ cache_files.zip</button><a href="/challenges/Room%20-%202/evidence/cache_files.zip" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">MATCH ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{filename.ext}" autocomplete="off" spellcheck="false" maxlength="200" aria-label="Flag for challenge 2.2"><button type="button" onclick="verifyFlag(2)">SUBMIT</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
                 </div>
@@ -160,9 +167,9 @@
                 <div class="r2-pane" id="ch-3" role="tabpanel" aria-labelledby="tab-3">
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">2.3</span><span class="nj-title">THE IMAGE THAT WHISPERS</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">The Curator's avatar image has an anomalous file size. Perform a steganographic analysis on the asset to find the concealed directive.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/curator_avatar.jpg', '_blank')">▣ curator_avatar.jpg</button><a href="/challenges/Room - 2/evidence/curator_avatar.jpg" download>DL</a></span></div>
-                        <div class="nj-form"><span class="pre">EXTRACT ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.3"><button type="button" onclick="verifyFlag(3)">SUBMIT</button></div>
+                        <p class="nj-desc">The Curator's avatar is larger than its pixels justify. Classic LSB scanners will lie to you. Recover the nested container, then the masked bit-plane. The password and the mask seed are both derivable from the file itself.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room%20-%202/evidence/curator_avatar.jpg', '_blank', 'noopener')">▣ curator_avatar.jpg</button><a href="/challenges/Room%20-%202/evidence/curator_avatar.jpg" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">EXTRACT ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" maxlength="200" aria-label="Flag for challenge 2.3"><button type="button" onclick="verifyFlag(3)">SUBMIT</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
                 </div>
@@ -170,9 +177,9 @@
                 <div class="r2-pane" id="ch-4" role="tabpanel" aria-labelledby="tab-4">
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">2.4</span><span class="nj-title">THE DEAD MESSAGE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Multiple messages were signed, but one signature is invalid, injected by an imposter. Identify the altered message block to find the next relay target.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room - 2/evidence/signed_blocks.asc', '_blank')">⬇ signed_blocks.asc</button><a href="/challenges/Room - 2/evidence/signed_blocks.asc" download>DL</a></span></div>
-                        <div class="nj-form"><span class="pre">VERIFY ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for challenge 2.4"><button type="button" onclick="verifyFlag(4)">SUBMIT</button></div>
+                        <p class="nj-desc">Multiple relay status blocks were signed; the public keys sit at the end of the file. Verify every block. At least one signature is cryptographically broken, another verifies under a key that should not exist, and a third verifies under a genuine key whose timeline is impossible. The block that must not be trusted names the next relay.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="window.open('/challenges/Room%20-%202/evidence/signed_blocks.asc', '_blank', 'noopener')">⬇ signed_blocks.asc</button><a href="/challenges/Room%20-%202/evidence/signed_blocks.asc" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">VERIFY ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" maxlength="200" aria-label="Flag for challenge 2.4"><button type="button" onclick="verifyFlag(4)">SUBMIT</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>
                 </div>
@@ -184,7 +191,7 @@
         <div class="nj-col r2-right">
             <section class="nj-panel nj-rise" style="--i:3">
                 <div class="nj-panel-h"><i class="dot"></i>Integrity monitor<span class="meta" id="solved-count">0/4</span></div>
-                <div class="nj-log" id="sys-logs" style="height:560px" role="log" aria-live="off"></div>
+                <div class="nj-log" id="sys-logs" style="height:min(560px, 60vh)" role="log" aria-live="off"></div>
             </section>
         </div>
     </main>
@@ -199,7 +206,7 @@
             title: 'THE DEAD TELEGRAM',
             lead: 'rhea',
             nextMount: '#nj-next-slot',
-            objective: 'Four things to analyse: noise, a hash, an image and a signature. Start anywhere.',
+            objective: 'Four layered problems. The easy-looking paths are all traps. Start anywhere; finish only what is exact.',
             complete: 'Room clear. The relay capture is waiting in Room 3 whenever you are ready.',
 
             briefing: [
@@ -242,10 +249,10 @@
                 'No match. Look again, and look slower.'
             ],
             hints: {
-                1: 'Strip the wrapper first, then ask what is inside. It may be wrapped more than once.',
-                2: 'Compute the digest of every file in the archive. Do not eyeball it.',
-                3: 'The avatar is heavier than it should be. Something rides along after the picture ends.',
-                4: 'Verify each signature in turn. One of them will refuse to verify.'
+                1: 'Frames, then encodings, then a modern AEAD, then a classical cipher. The passphrase and salt are both spoken in the log.',
+                2: 'Identify the algorithm from the digest length first. Compute, never eyeball, and note what is nested inside what.',
+                3: 'The avatar is heavier than it should be, and something hides in plain sight inside the file itself. Several things stack here.',
+                4: 'Valid is not the same as trusted. Check who signed each block and when, not just whether the maths holds.'
             },
 
             debrief: [
@@ -265,10 +272,24 @@
         });
         story.mount(document.getElementById('npc-comms'));
 
-        /* ───────── Clock (cosmetic, as before) ───────── */
-        setInterval(function () {
-            document.getElementById('master-clock').textContent = '00:45:' + String(new Date().getSeconds()).padStart(2, '0');
-        }, 1000);
+        /* ───────── Clock (cosmetic countdown; never blocks play) ───────── */
+        (function () {
+            const KEY = 'nj-r2-deadline';
+            let deadline = 0;
+            try { deadline = Number(sessionStorage.getItem(KEY)) || 0; } catch (e) {}
+            if (!deadline) {
+                deadline = Date.now() + 45 * 60 * 1000;
+                try { sessionStorage.setItem(KEY, String(deadline)); } catch (e) {}
+            }
+            const el = document.getElementById('master-clock');
+            function pad(n) { return String(n).padStart(2, '0'); }
+            function tick() {
+                const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+                el.textContent = pad(Math.floor(left / 3600)) + ':' + pad(Math.floor(left % 3600 / 60)) + ':' + pad(left % 60);
+            }
+            tick();
+            setInterval(tick, 1000);
+        })();
 
         /* ───────── Integrity monitor ───────── */
         const sysLogs = document.getElementById('sys-logs');
@@ -302,10 +323,15 @@
 
         /* ───────── Chat: the Curator ───────── */
         const chatBox = document.getElementById('chat-box');
+        function pushChat(el) {
+            chatBox.appendChild(el);
+            while (chatBox.children.length > 60) chatBox.removeChild(chatBox.children[1]);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
         const curatorBlocks = [
             { id: 'm1', text: '596f7520617265206c6f6f6b696e6720696e207468652077726f6e6720706c6163652e', realText: 'You are looking in the wrong place.' },
-            { id: 'm2', text: 'VEhFIEhPU1QgV0lUSCBUSEUgQkxVRSBOQU1FIElTIExZSU5HLg==', realText: 'THE HOST WITH THE BLUE NAME IS LYING.' },
-            { id: 'm3', text: '01000001 01000101 01010100 01001000 01000101 01010010', realText: 'A E T H E R' }
+            { id: 'm2', text: 'U0NFTkVSWSBPTkxZLiBUSEUgUkVBTCBGUkFNRVMgQVJFIElOIFRIRSBMT0cu', realText: 'SCENERY ONLY. THE REAL FRAMES ARE IN THE LOG.' },
+            { id: 'm3', text: '01001110 01001111 01010100 00100000 01001000 01000101 01010010 01000101', realText: 'NOT HERE' }
         ];
         let blockIdx = 0;
         function futureStamp() { return '2028.11.14 ' + new Date().toLocaleTimeString('en-GB'); }
@@ -322,8 +348,7 @@
             body.textContent = '[ENCRYPTED_BLOCK] :: ' + m.text;
             body.addEventListener('click', function () { decryptBlock(m, wrap, body); });
             body.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); decryptBlock(m, wrap, body); } });
-            chatBox.appendChild(wrap);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            pushChat(wrap);
             if (blockIdx < curatorBlocks.length) setTimeout(injectBlock, 15000);
         }
         setTimeout(injectBlock, 3000);
@@ -332,6 +357,8 @@
             if (body.classList.contains('burning') || !body.classList.contains('scrambled')) return;
             body.classList.remove('scrambled');
             body.classList.add('plain');
+            body.removeAttribute('role');
+            body.removeAttribute('tabindex');
             body.textContent = m.realText;
             addLog('WARN: User forced decryption of block ' + m.id + '. Initiating burn protocol.', 'warn');
             setTimeout(function () {
@@ -355,17 +382,31 @@
             wrap.innerHTML = '<div class="mh"><span class="future"></span><span>THE CURATOR</span></div><div class="mb plain"></div>';
             wrap.querySelector('.future').textContent = futureStamp();
             wrap.querySelector('.mb').textContent = text;
-            chatBox.appendChild(wrap);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            pushChat(wrap);
         }
 
         /* ───────── Tabs ───────── */
         function switchTab(n) {
             for (let i = 1; i <= 4; i++) {
-                document.getElementById('tab-' + i).setAttribute('aria-selected', i === n ? 'true' : 'false');
+                const t = document.getElementById('tab-' + i);
+                t.setAttribute('aria-selected', i === n ? 'true' : 'false');
+                t.setAttribute('tabindex', i === n ? '0' : '-1');
                 document.getElementById('ch-' + i).classList.toggle('active', i === n);
             }
         }
+        document.querySelector('.r2-tabs').addEventListener('keydown', function (e) {
+            const tabs = Array.from(document.querySelectorAll('.r2-tab'));
+            const cur = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+            let next;
+            if (e.key === 'ArrowRight') next = (cur + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') next = (cur + tabs.length - 1) % tabs.length;
+            else if (e.key === 'Home') next = 0;
+            else if (e.key === 'End') next = tabs.length - 1;
+            else return;
+            e.preventDefault();
+            switchTab(next + 1);
+            tabs[next].focus();
+        });
         window.switchTab = switchTab;
 
         /* ───────── Flags: the server is the only source of truth ───────── */
@@ -378,7 +419,8 @@
                 card.classList.add('stamp');
                 setTimeout(function () { card.classList.remove('stamp'); }, 800);
             }
-            document.getElementById('tab-' + n).classList.add('done');
+            const tab = document.getElementById('tab-' + n);
+            if (tab) tab.classList.add('done');
             const rw = document.getElementById('reward-' + n);
             if (rw && (reward || !rw.textContent)) rw.textContent = reward || 'Evidence verified.';
             const input = document.getElementById('flag-' + n);
@@ -387,20 +429,26 @@
             if (form) { form.classList.remove('bad'); form.classList.add('ok'); }
             const btn = card.querySelector('.nj-form button');
             if (btn) btn.disabled = true;
-            document.getElementById('solved-count').textContent = document.querySelectorAll('.nj-card.solved').length + '/4';
+            const count = document.querySelectorAll('.nj-card.solved').length;
+            document.getElementById('solved-count').textContent = count + '/4';
+            const pips = document.querySelector('[data-nj-pips]');
+            if (pips) pips.setAttribute('aria-label', count + ' of 4 challenges solved');
         }
 
         async function initSolvedState() {
-            const p = await NJ.progress();
-            const solved = p ? (p.rooms[ROOM_ID] || []) : [];
+            let p = null;
+            try { p = await NJ.progress(); } catch (err) { console.warn('Progress unavailable', err); }
+            const solved = (p && p.rooms && p.rooms[ROOM_ID]) || [];
             const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
             solved.forEach(function (n) { markSolved(n, rewards[n], false); });
             story.boot(solved, p ? p.score : undefined);
         }
-        document.addEventListener('DOMContentLoaded', initSolvedState);
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSolvedState);
+        else initSolvedState();
 
         async function verifyFlag(n) {
             const input = document.getElementById('flag-' + n);
+            if (!input || input.disabled) return;
             const val = input.value.trim();
             if (!val) return;
             const form = input.closest('.nj-form');
@@ -410,19 +458,30 @@
             btn.classList.add('busy');
             addLog('Submitting flag for challenge 2.' + n + '...', 'info');
 
-            const res = await NJ.submit(ROOM_ID, val);
-            btn.classList.remove('busy');
-            btn.disabled = false;
+            let res;
+            try {
+                res = await NJ.submit(ROOM_ID, val);
+            } catch (err) {
+                res = { success: false, message: 'Relay unreachable. Try again.' };
+            } finally {
+                btn.classList.remove('busy');
+                btn.disabled = false;
+            }
+            if (!res) res = { success: false, message: 'No response from server.' };
+
             if (res.success) {
-                const hit = res.challenge || n;
-                const solved = res.solved.length ? res.solved : [n];
+                const hit = Number(res.challenge) || n;
+                const card = document.getElementById('target-' + hit);
+                if (!card) { addLog('ERROR: Server accepted an unknown challenge (' + hit + ').', 'err'); return; }
+                const solved = (Array.isArray(res.solved) && res.solved.length) ? res.solved : [hit];
                 addLog('Flag 2.' + hit + ' accepted. Block decrypted.', 'ok');
-                const fresh = !document.getElementById('target-' + hit).classList.contains('solved');
+                const fresh = !card.classList.contains('solved');
                 solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
+                if (hit !== n && !input.disabled) input.value = '';
                 story.onSolved(hit, solved);
                 if (fresh && curatorReplies[hit]) setTimeout(function () { curatorSays(curatorReplies[hit]); }, 1800);
             } else {
-                addLog('ERROR: ' + res.message, 'err');
+                addLog('ERROR: ' + (res.message || 'Flag rejected.'), 'err');
                 form.classList.remove('bad');
                 void form.offsetWidth;
                 form.classList.add('bad');

@@ -28,11 +28,11 @@ _RAW = {
         ("A Warning in the Noise", "FILE",
          "Decoded: the Curator warns Kabir that the NEXUS status page is spoofed and that “the real controller is underneath.” A host with a “blue name” is lying."),
         ("The Hash That Is a Door", "HOST",
-         "“Blue” is not a person. It is an old internal relay alias that handled volunteer authentication, renamed before production but still resolving."),
+         "Exactly one cached config file matches the logged digest byte for byte. The manifest that says otherwise is forged, and the real file points at an old internal relay alias."),
         ("The Image That Whispers", "ACCOUNT",
          "Hidden in an image: “ASK THE PERSON WHO NEVER SIGNS IN.” It points at a service account, an identity with no human behind it."),
         ("The Dead Message", "HOST",
-         "An old message signed by Rhea was tampered with so it names the relay AETHER-7, the next node in the attack chain."),
+         "Of five signed blocks, one fails verification: a message attributed to Rhea was edited after signing, and it names the relay AETHER-7, the next node in the attack chain. A second block carries a look-alike key."),
     ],
     3: [
         ("The Beacon", "NETWORK",
