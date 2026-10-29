@@ -1,0 +1,414 @@
+{
+ "curve": "secp256k1",
+ "pub": [
+  "0x7c73cdedfe51451acc3577cd947d2d9ee6358bf6bf4501f48c68aea438e4423a",
+  "0x62e0c5f24f680c5cbbc3dfafb1f5270e6ce929f24a0ef5d3ead4a8c30ebee6f7"
+ ],
+ "sigs": [
+  {
+   "msg": "nightjar-log-entry-0",
+   "r": "0x88da26432be472852f5286f51ecaf00f95de90082e5911cddafe550eb11d740a",
+   "s": "0x92355e1b789ea83117092ac7b70d6f8727593268b6e9c02f3294cf3b7fde55d7"
+  },
+  {
+   "msg": "nightjar-log-entry-1",
+   "r": "0xd69634e0d32abced307cda7ec9dde92c54bb545743a6ac4a2710cb78f97d6b8c",
+   "s": "0xe198029968fba3c458057f31b9121971e4416c00072458724446667cad70abda"
+  },
+  {
+   "msg": "nightjar-log-entry-2",
+   "r": "0xcef060e190ec7e29e69e811d61bd3b1a66a5947191e89b006f37bd8eb3854c71",
+   "s": "0x11d4ec9918ac4ad8cdb43a93b55be082f36d9525ba466935af9907c82b881c8f"
+  },
+  {
+   "msg": "nightjar-log-entry-3",
+   "r": "0x32b5d407cc3b8d542c6abf23dec2192acea6b0f712ec298607cb599b694e9732",
+   "s": "0xe4881a40ceb87fa2753f90688c7d948138cd8ccba2104a8141529901e9bbe70a"
+  },
+  {
+   "msg": "nightjar-log-entry-4",
+   "r": "0x3387c390e8cb36975ba02d73a98d350e98e18b07a4e63bd2efe5bcd0d7e3c45d",
+   "s": "0xe37bba04dee131e24098bd5c288da60eacc10fcbecf7cac9dbe0dc652b4ba0d1"
+  },
+  {
+   "msg": "nightjar-log-entry-5",
+   "r": "0xf73b0e36f449064f3e232468b371a5ef63da2533b67805d9f142363a04f76278",
+   "s": "0x61c2dd683ba0ca995ba1ec855025915caceaa3bc1b9bccdd801b5cd8097d1b7a"
+  },
+  {
+   "msg": "nightjar-log-entry-6",
+   "r": "0x5f96e59930ca1503f75f26316aa5787de7d854023adf47f8d5ec0e5bd3b0cb48",
+   "s": "0xb690b575019d74418bbd41c1021e5e7321c069caf5e14a60b096df03dc12b06b"
+  },
+  {
+   "msg": "nightjar-log-entry-7",
+   "r": "0xf36fd94d710cce754e8ba3ccc688e9895870bc876c5092f3bbb3453a017abc82",
+   "s": "0xba66e44ba2e416bcafedf3e045d61322f0fc2344de93de1c7b08b591e4ce6a80"
+  },
+  {
+   "msg": "nightjar-log-entry-8",
+   "r": "0x9787c2eea57d2037712cc0302504d9e1f809d8e20a7838e1e8f73e3e26faa6dd",
+   "s": "0x3b533e3450990e8a1ada6052d73fb0330d08c7d0c12f1d7b5347c2bf4330458d"
+  },
+  {
+   "msg": "nightjar-log-entry-9",
+   "r": "0xc2177083c41efca3c3e8ce6944ee18c59b7735511146f606317ab11cf2bc577f",
+   "s": "0xafb291415843081b5661241c2f1b7557193bfa15473cd41bc375c8c30ee1abf5"
+  },
+  {
+   "msg": "nightjar-log-entry-10",
+   "r": "0xec3d4ccee2f7284fd61eb0a532434800c469c8aeb804494f043febb7ff4d951",
+   "s": "0xf9cffcf17996c52f62f50e67c95034ab4d32733412048627fb3e06e28a99c11"
+  },
+  {
+   "msg": "nightjar-log-entry-11",
+   "r": "0xbd8628e4ced521c58fa6c8960973c82879b8d1c573ca6b1278998544edbd7749",
+   "s": "0xaa826d5ad29051ee92db8fdb9c452cb7cee61bee302da073b37379428d96df0a"
+  },
+  {
+   "msg": "nightjar-log-entry-12",
+   "r": "0x3210c1898b9f972b7d96e30103e6d26ac8bbacdd2dd1800fa30177d873f63e45",
+   "s": "0xa73f8a78cc6d7b700c479f7b1c6aae94e38707dad458dcd904eed7e69f8a4c99"
+  },
+  {
+   "msg": "nightjar-log-entry-13",
+   "r": "0xc836e304cceb2883b9bea62269c23f13e5c6e63583f015be7ea176a8e440e65d",
+   "s": "0x15e3848083105afcf277d29b2f9a4520760636a92a069c433513231995ee03ac"
+  },
+  {
+   "msg": "nightjar-log-entry-14",
+   "r": "0x82bd656cac9d7733259887d7da5b955e4cec1a30564bd6d2d7e14af53c6eaab",
+   "s": "0xf8f82798b155234520654340fe0d4a64ee614872b691539bf079c15c43d51a63"
+  },
+  {
+   "msg": "nightjar-log-entry-15",
+   "r": "0x27efa96eedc51aeabfb4d69617a61748f0ba646952f70fa1a2287d1c7d1b74ae",
+   "s": "0x76496cfb60d8c7624cc6980e36613865151fb1af5cb173b07790469bd4c4c504"
+  },
+  {
+   "msg": "nightjar-log-entry-16",
+   "r": "0x3eb4f17fb188acbd6075ad811e7bdd30bfc9f3e227917d4b399ba0e2b5e03460",
+   "s": "0x4967e1405fc29efa796679ffdacb3b75669989762690bc126781c7a723580ece"
+  },
+  {
+   "msg": "nightjar-log-entry-17",
+   "r": "0x847955855962604b14f58acf05a50d6ce44596ab2129ffc7102324c325611a4a",
+   "s": "0xc7a4458855171aeb0ed8f89ca1e120395f62207d056252bde53efaa79550c658"
+  },
+  {
+   "msg": "nightjar-log-entry-18",
+   "r": "0xdd08a95b96732bf62412f5b2142ca0483853bdc3868d304a3f92571aa2545a8",
+   "s": "0xdfa527834cfcd68b9d0db8d1dc6cbadf7ba41756d1e42bbd2ac7f056683beaf8"
+  },
+  {
+   "msg": "nightjar-log-entry-19",
+   "r": "0xb0a4e3060f8027cd3b105a92dbeeb10858fc54f2a04837cad249a911d82e39f4",
+   "s": "0x8ed09e8b37fe1fd89cd5b524560b1fda08619928721f3fb1e21230333cca03a9"
+  },
+  {
+   "msg": "nightjar-log-entry-20",
+   "r": "0x224c22c4465f30ad17676253ce9a6fc6fa1516ead64aec83100bd8c7f517feac",
+   "s": "0x53ae7154d4552a44cd99bb82b280a7252c8aa8340a8c1c20f1721114b9fbbcc9"
+  },
+  {
+   "msg": "nightjar-log-entry-21",
+   "r": "0xb6f59a3d8e7d5bcb7d3946b35573c4c04bcdbb02ed82f6fa054943d9543fa7d0",
+   "s": "0x2803bd08957852be52db5ab69129330f5c787eb78ccd488f2a9b523e36042da5"
+  },
+  {
+   "msg": "nightjar-log-entry-22",
+   "r": "0x22fc58c9d1e9602b595ab8f5bc5b91da15fedc88386f44caac41e1411a6ca009",
+   "s": "0xe969b79609dc6e0fcf418c8cff879ae2f92f5f6db8abd208e89be38b522b03b4"
+  },
+  {
+   "msg": "nightjar-log-entry-23",
+   "r": "0x11556ed8adb66eb0859df9f477d5bf6d327d002bc1ec30e9b0ce1ad2af2fdf21",
+   "s": "0x7008fc443c54eb72f2758eb248a9070288402993c24d89239428ddc52c030f3d"
+  },
+  {
+   "msg": "nightjar-log-entry-24",
+   "r": "0xec5a19c549363430fade9a89e6d6447a650b6d2238b853f2e75abbff554c6625",
+   "s": "0x48374d40a1554c52281ee5a57f8b6d26e47e45746b2c08d0398e227968561912"
+  },
+  {
+   "msg": "nightjar-log-entry-25",
+   "r": "0xc635d535a39937775a857968522dcb78cb250b555e7c2236ce696fcb8ae53096",
+   "s": "0xcc4ddfbd4a1ac722ddd2e67cd8b988fc698826c6d614f0a1ecc20e5975b5b8e0"
+  },
+  {
+   "msg": "nightjar-log-entry-26",
+   "r": "0xdb6b2c00f27774007b8399045a60e3176fd93ab82afca9fb85b4065c0ad3995a",
+   "s": "0xc2b4b04a83b7591d82ba396c0c01cc1937e9a61b8e093e12ee674fc3bbd8668e"
+  },
+  {
+   "msg": "nightjar-log-entry-27",
+   "r": "0xc6d3d29f9b9d744ecd07d31906772ccdda546be6b01193fea2866efb362d464c",
+   "s": "0x3ec361c5ea93817658bc248d39b6675e3e171156a6ed69fc2f1d816a1be6e642"
+  },
+  {
+   "msg": "nightjar-log-entry-28",
+   "r": "0xce7b15f98958582f1408c6c8257b960eb810bcd889a0c46d143ece33760d7ba6",
+   "s": "0xf953fa8d92902d8d9352ed6f1ac24700017b4d6019daf189e8049914295238b9"
+  },
+  {
+   "msg": "nightjar-log-entry-29",
+   "r": "0x34184ee57d6933ac2af3ecf75122908e41291c6b2a99f14fe9ac31d057607c64",
+   "s": "0xb794e9ebf67ce03f2596f2fbb8bdbf863bfdddc130af57bc41926de87804a9c6"
+  },
+  {
+   "msg": "nightjar-log-entry-30",
+   "r": "0x27a8243571fe971f70a2cfcafb166e81e2184b1e881061d9352a978f01f43165",
+   "s": "0xbe3e7ee120f3f2e40344764903329704dc346ea16ee91d22762af8f56262baab"
+  },
+  {
+   "msg": "nightjar-log-entry-31",
+   "r": "0x764b59bcac55e88a7c0cef7e8e015a4f82a158710635ffc2dbe5e5a2df76121",
+   "s": "0x9e81ef68cb8b22436bc9e10ea1416224fe7d7021922b82a41745a4325a8a44ed"
+  },
+  {
+   "msg": "nightjar-log-entry-32",
+   "r": "0x33b4c35fcd0dee0f5193e2720b0db4982220daf933b6be7c587a90b0cceec8e0",
+   "s": "0x941e9676dc4f45697e04056ca2f8d88ec3bad2d5def36fe893efed4e80f1b1dd"
+  },
+  {
+   "msg": "nightjar-log-entry-33",
+   "r": "0xcd589b27f2f619c306aeee754aaef58af9444bc9d77dca1a74b03b5bddeabf9c",
+   "s": "0x8f2fbda62cf765140b437b6940cb34198cdfd7fd6d6d51cf569bb79033c7db78"
+  },
+  {
+   "msg": "nightjar-log-entry-34",
+   "r": "0xf1704f2203cd4995c8abe4c644bdf9acc0d18c3f17b7a93d0143cadb5b3af385",
+   "s": "0x1a44c01b8ec53dd96cf6374884bc71dbda5670f8010e4659a7c61ed26aae1721"
+  },
+  {
+   "msg": "nightjar-log-entry-35",
+   "r": "0x380d18d27e01c17d693de2d06bd1860fb932fc93e306a29b926ce8697f8e5424",
+   "s": "0x82eff8001d0cd94c17c9fd2c94ba074ad20e39f153d149f0f0297b13234ceb56"
+  },
+  {
+   "msg": "nightjar-log-entry-36",
+   "r": "0xb40b6ee6fafc1cb69714f78370d3233cbc4cf3a0fe8b0aa652dd76248bac59fe",
+   "s": "0x5e9a913142cdcb26ab7e5b80d8b8da0c68b7b8b2699bdd2ab1eb2a3d5462b8cd"
+  },
+  {
+   "msg": "nightjar-log-entry-37",
+   "r": "0xd2259eac44d4dfdae635bfeb48f8e9cdaff47406f8b9691db2bb9c42edb938cc",
+   "s": "0xe8fe66998ab1b96045750bae21b2bfef499c1b8b9efbbb76aad7cfd90b8288d5"
+  },
+  {
+   "msg": "nightjar-log-entry-38",
+   "r": "0xcd92d25c19da00f0ff0dada8455de7e1db4566346050716e4220f94ec851b1bd",
+   "s": "0x7a2cc987d7f933de2089d80ca24e0a43a4cba1d8b219171cfc72f7acc8faf2aa"
+  },
+  {
+   "msg": "nightjar-log-entry-39",
+   "r": "0xc52660631f66563194d1b7ee77bb00290138162b04fd052f39e4d6f081897275",
+   "s": "0xbda949eab33d18d7f30659936e33fce20c9e6c7e404688362eef3b7fc31a9fb8"
+  },
+  {
+   "msg": "nightjar-log-entry-40",
+   "r": "0xdef2294196bb14b7104c1533862de6e3fadde92512268c499addfd77245ce7c5",
+   "s": "0x6afb87a84a9b24f419240a1203a5bccc08edbba4a19b27433c350813662e5a37"
+  },
+  {
+   "msg": "nightjar-log-entry-41",
+   "r": "0x5b77129da7506a9b4b1ea5932f1aedee486e95c27f0337f7791e5383098afeb0",
+   "s": "0xce0f8c9475ffbf05cf7888393dba51dee9398a108998dc121db3a15a2bf3dbb0"
+  },
+  {
+   "msg": "nightjar-log-entry-42",
+   "r": "0x98ab70d61238bafb2dedc1621ca06cf546bd440bde39a3a09dc24a7cec83c57",
+   "s": "0xff601736383210cf8151b38e0813619634e9deec69080bfc52a86ea46ad8647b"
+  },
+  {
+   "msg": "nightjar-log-entry-43",
+   "r": "0x1ff55a1fa750eec737abde57cad4fce43c2ddc3d09d8c1b34639effac378c309",
+   "s": "0xcf705abea7e216b9377524c307dcf2dd4a7673e8abd676b6b61c32f906490a80"
+  },
+  {
+   "msg": "nightjar-log-entry-44",
+   "r": "0x94db6ff0ef8d73d98958a48667286864cae0d6037c1b44a813d4c0e30e522da8",
+   "s": "0x430519faa975fe8e1e5f3240013d61abc31d5a7c5a45c13131d5083b0dff7631"
+  },
+  {
+   "msg": "nightjar-log-entry-45",
+   "r": "0xff5a1403de706c6b846f9e54acb12ae8140b0afa9654bcf4db9b597a538a2aed",
+   "s": "0x3cfbca9d7f2ef74c2264e3045e69e1391df7abc884e1b0f87389450d2a2199d3"
+  },
+  {
+   "msg": "nightjar-log-entry-46",
+   "r": "0x67a64dd9ad669331afaf54c21af62977275c8aeca0624cb48abaa60f1d82ad98",
+   "s": "0x5a7c16294eb9f7e3a9e78772990e0b58655d5ae389ef0292fc4f708a59b2d35e"
+  },
+  {
+   "msg": "nightjar-log-entry-47",
+   "r": "0xc825581486e6a7004834fc2c27de4cb214ab381cb7c24ce2e077ead194d5a794",
+   "s": "0xe93f0094ab206df859bd7777a3ddcb3f63058177a23a56b46e92707171c0b82c"
+  },
+  {
+   "msg": "nightjar-log-entry-48",
+   "r": "0xba8d76b98f7efddc3b5d603fd00800b62db2ac1d2ca940bf05ed5d3e97fec1f5",
+   "s": "0xf405d713ecd880eb6cede38249907b1e097ca4bbf268253cd277a0b36f8a2d28"
+  },
+  {
+   "msg": "nightjar-log-entry-49",
+   "r": "0x81a0ce13cadbe5cf1381f59b41fa67a8f9843aed4baad21902d62bfe9de57ee8",
+   "s": "0x3d25aed9df5aa366dc2fe96d877805c60a0b7a4c2a961aa16a434233fa9341f9"
+  },
+  {
+   "msg": "nightjar-log-entry-50",
+   "r": "0x9c5b6d922b87f1efb43fbfa816d48ac820cb538a105c1778f1047c97e470b120",
+   "s": "0xad40f4549e0197d5ebb82fc90e5cd3de408528376568269ca99a7aa8112a7321"
+  },
+  {
+   "msg": "nightjar-log-entry-51",
+   "r": "0x5011e38c11e4c1254d97fb36853ce1967633ae43f88f7049ad1c4fc5f1f59cac",
+   "s": "0xdd7e2a2f80e40244032d0db4705292ee65f0cf896728b2299e9235bd84539cb0"
+  },
+  {
+   "msg": "nightjar-log-entry-52",
+   "r": "0xc31feee1961348afe5cc47c2a33dd70e606122b61f797f77463869cfe237382a",
+   "s": "0x5f0507a1fd6e35c24729144be30cde6fd1ac4e82c84eceb5294e0a45e60b57d2"
+  },
+  {
+   "msg": "nightjar-log-entry-53",
+   "r": "0xd88526b648a1e59e4d415568518dda5e9e46734785442807d63f12cd3fe9f704",
+   "s": "0x2c935f91c1be163a7b4b6680db0160624e852883727190f2c61357b176bc73fb"
+  },
+  {
+   "msg": "nightjar-log-entry-54",
+   "r": "0xd9af82d7915f881e22d60f16aa0e2e2865ccc79da7a0fa985a6fdc669e4c85b",
+   "s": "0x12be3f6126987743db0fe6aa0d67e5f1e705cfd232fe74e47e8eb494277c53cc"
+  },
+  {
+   "msg": "nightjar-log-entry-55",
+   "r": "0x4a7580e215ea2eeb7d9167e140e2c3c0066d1c611ed78f19a5369489733de6b5",
+   "s": "0xf10f03a9beaafdac8638ff37ca113f6f2561e257170cafe1157694e3b58688b9"
+  },
+  {
+   "msg": "nightjar-log-entry-56",
+   "r": "0x1a30338871dd45a7fbd13093c7ca61cebb24d104d0c3575ed404709c8f061acb",
+   "s": "0x8ee81bf9e96ccee27cf1595c3898fe9d15c6a4ddc6febcbe3b9c3d6d22566a17"
+  },
+  {
+   "msg": "nightjar-log-entry-57",
+   "r": "0x814291476aa7fee1dad2cae604f05bad110ce4a26e877b945a3a7c6dd8cfaaed",
+   "s": "0xbd60649b32f3112b3c2e0cebad61bf5c75ec83738cbef9e6920b9e8d0671808e"
+  },
+  {
+   "msg": "nightjar-log-entry-58",
+   "r": "0x78de53a7d7b76aa2fb838a6a6e88225b944ac6cd3d079fbdf26b7d825226279",
+   "s": "0x39989b1af602f5778154d0f668c79898840050015f7c6dbfedd8b10f0bbffa57"
+  },
+  {
+   "msg": "nightjar-log-entry-59",
+   "r": "0x2fa7f7914d064da541ddc2b0a6492d8864fadd3441fad110e57630cbead8971b",
+   "s": "0x22e49a6c4a29324d169797e66a94986fa6b5dab838b0f4e285b54355e3b7f871"
+  },
+  {
+   "msg": "nightjar-log-entry-60",
+   "r": "0xc6fa5df21227098842fb508af43340572cab620588bd004707a88fb2a0bee38b",
+   "s": "0xc664a7bd88081906eeb9eaef45385e32f420a9b3843192a58fada3cdd8debed8"
+  },
+  {
+   "msg": "nightjar-log-entry-61",
+   "r": "0x41a855bb8977612eedd6dcc285ea6616087490e9d03c2dd88ee50242316da68c",
+   "s": "0x766054547f0cbc92720b86a8eafee2e021c38d85855a8126ac6fdca61cac357f"
+  },
+  {
+   "msg": "nightjar-log-entry-62",
+   "r": "0x6b72292657909fa50986eeff280e9d3e0066cebb904e2cde0b52fedac157c20c",
+   "s": "0xf8e7c73b89568d6ab37ffe7e3051b1c47147af0c597a5194b61a88ab5b1bb4b9"
+  },
+  {
+   "msg": "nightjar-log-entry-63",
+   "r": "0x72706165769879e466eea2d7252fcbe63e2237ec8cd92689e64b4ccacae40742",
+   "s": "0xf7b13feea464bed4d21cee7da03f0c12a51e8190b636826c6acc262b6f20bc6"
+  },
+  {
+   "msg": "nightjar-log-entry-64",
+   "r": "0xaf122bfac68fa3a4a1da0821701fa56060fc8a64a3248bfcc871eb8716ee04a8",
+   "s": "0x9e6816e6c64c68d5b2a36e4f8c4ed9c1c1cb461daef5ff24a29d996507b4caf"
+  },
+  {
+   "msg": "nightjar-log-entry-65",
+   "r": "0xc8583bd968d6ec5cf2d210562d51b0acdbba553158c5dc9e2db4ba134e8228de",
+   "s": "0xb63bb677d4313f4366f667a4a24b0bbbb297946d8db587e29c007219720b555d"
+  },
+  {
+   "msg": "nightjar-log-entry-66",
+   "r": "0x2200ca06f07603e033e41a8f318a18e8833af76369ff72add68718cf786368fb",
+   "s": "0x8e85b71e56f8979e898a9de6f3f4204deec17cedc8f3bc55946163a26b0c47ca"
+  },
+  {
+   "msg": "nightjar-log-entry-67",
+   "r": "0xf94a561e4fddb6576cefdcbaa458bb7890b19bf9ffe2911ff53e7374ba08b453",
+   "s": "0x62fb9c436f65c5e0d50e346c7fe0469b61f4d1fa3a08a4a3e7930f3ce7598973"
+  },
+  {
+   "msg": "nightjar-log-entry-68",
+   "r": "0x575fabce7f156d6d72ae30a05e3612841b96e8dc5a67c33a72b8447a189bfc8a",
+   "s": "0xba830a45131fa8715dd030acace5d91725a351c0c4dda5c94d064e7608f31c31"
+  },
+  {
+   "msg": "nightjar-log-entry-69",
+   "r": "0x3c8dec6cb16f626ec9d1dc8c78bf245d64884590cc448d379e1ed275d071fe07",
+   "s": "0xb1f161417184d1a17954c3671c4df499bf0db57353c84b1b0c7eca5c52a5b61e"
+  },
+  {
+   "msg": "nightjar-log-entry-70",
+   "r": "0x356b57404e86b935a03f010ce26a2eb95186c7825e73ddd6c0910ce07f5f8fdb",
+   "s": "0x3a91bd3db55192776523f9f220a9fca35ec48ef0e32d16805a392cffaf009424"
+  },
+  {
+   "msg": "nightjar-log-entry-71",
+   "r": "0xe522b97d1b1e5c35a2c9a5c99707c062aecfb4dd1fd091b84acc2144f23e788f",
+   "s": "0x9d8fc9bab2fd2a381fe1eaab64d0f2dbd8aa757034e8a8e51edc95d3239b3568"
+  },
+  {
+   "msg": "nightjar-log-entry-72",
+   "r": "0xaa43cbaf0aec7b3c0241e590be84e524f750fad3c3c0b7b86791dedef616046e",
+   "s": "0x84c42f52f764defaa68aef77cecc3d6f6275eea7a078bafb8ead3594c5d4e714"
+  },
+  {
+   "msg": "nightjar-log-entry-73",
+   "r": "0x200a96e61561928af94c166240e679ab38af06b3eeeec5a54db3010a78acf10c",
+   "s": "0x3a6b33ff79e5d19991b61fc04049f604598ddbd13d901582d286cb23aae6de18"
+  },
+  {
+   "msg": "nightjar-log-entry-74",
+   "r": "0xdf2f27e9e49d32742fa78dc236d7113898cdca822208b271dbe78d95ad32428a",
+   "s": "0xeee8a1e5d97823907fa119c741496099476a28e166343a67e64359c70e91c487"
+  },
+  {
+   "msg": "nightjar-log-entry-75",
+   "r": "0xeb5b17d786f3ca6edcc3f50f083639399a958ebb076a487615f3188d159749a0",
+   "s": "0x5127f989e1afebd71288eeac606644ef05c05ed3281e64341d48ae13f37f9ada"
+  },
+  {
+   "msg": "nightjar-log-entry-76",
+   "r": "0x65dba31118d8baa641c1cc4b5e5bb3cf8ca88870d275bafca53c7b392ab680ac",
+   "s": "0xaea326b767700e880dfc901b3980ed88abc1b9174189fe45056b338289afb30f"
+  },
+  {
+   "msg": "nightjar-log-entry-77",
+   "r": "0x8940b52ee15f333252327d8c9fb961847f56f30133f8be3e203dbbf51d5e1277",
+   "s": "0x3b7cf27574d5846e4c1ca8c5b2592ca7131ce7d467cb843946f2f73d7d95b3ab"
+  },
+  {
+   "msg": "nightjar-log-entry-78",
+   "r": "0x5b5f016abcf5cbdafb53e0e5cbc4f8a8bdf519e98ed692df9442587b68515810",
+   "s": "0x973a68fe687900c23feea67064aa2ced01854092d1dc331d0b8b48e0a337be2c"
+  },
+  {
+   "msg": "nightjar-log-entry-79",
+   "r": "0xa96f37be6b26752f439ab078c629ce438f598ae092fd4d75e6764c725627c7ed",
+   "s": "0x8bab3e4cbbcf28a7e67ed216c0b56de44f37d93d54d12d9b03ccfe4780a3cbf3"
+  }
+ ],
+ "enc": {
+  "nonce": "4ec22e1d4eb1f47a7981e0e8",
+  "ct": "1ecfa9f72b6330a7edba6a98b666b30b7073db7f4c193d131e98b2893c89f12f2c8b37a3c163480e189b7a7bd0fedc",
+  "tag": "42a37c56b20fb529f6a954acfd78996e"
+ }
+}

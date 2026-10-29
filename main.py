@@ -644,10 +644,10 @@ CHALLENGE_REWARDS = {
         4: "IMPLICIT TRUST CHAIN EXPOSED. aether-core -> nexus-scheduler -> ceremony-controller -> release-controller. Three hops of implicit zone-wide trust with zero authentication boundaries. MIRA-7 bypassed security without cracking passwords, taking full control of the main stage systems.",
     },
     7: {
-        1: "SPEAR PHISHING CONFIRMED. A spoofed NEXUS support address quoted Kabir's real ticket and a real deadline, and pointed him at a Parallax Systems download. The Curator had read the internal ticket queue.",
-        2: "IMPOSSIBLE TRAVEL. A session from Amsterdam at 01:35:42 IST used a stolen session token, not a password, while Kabir's badge was scanned at the Main Gate at 01:20. The token was lifted by the sync helper.",
-        3: "MFA FATIGUE CONFIRMED. Fourteen pushes in five minutes. Kabir denied three of them. The gateway auto-approved push 14 after its 30-second timeout. Kabir did the right thing; the system approved the login anyway.",
-        4: "PERSONA IDENTIFIED. kite-backup was created by the continuity service account from stolen credentials, to look like a human insider. No person ever typed a command as kite-backup.",
+        1: "LEAK CONFIRMED. Every nonce is below 2^250: the top six bits are always zero. A flaw too small to see by eye, and large enough to break the key.",
+        2: "KEY RECOVERED. Eighty slightly biased nonces gave up the private key to a lattice reduction. The signer's secret was never really secret.",
+        3: "VAULT OPEN. The signer was never safe: its key fell out of its own log. Anyone who looked closely enough could have written any line they liked.",
+        4: "NONCE EXPOSED. With the key, any signature gives up the nonce behind it. A valid signature proves a key was used. It does not prove who used it.",
     },
     8: {
         1: "PE FORGERY CONFIRMED. A section with read, write and execute permissions, a signature from an unknown, expired build certificate, a size far beyond the claim, and no entry in the NEXUS package registry. The file is not the tool it claims to be.",

@@ -102,7 +102,15 @@
             .r7-push { grid-template-columns: 1fr; justify-items: center; }
             .r7-feed { width: 100%; }
         }
-    </style>
+    
+        .r7-tbl { width: 100%; border-collapse: collapse; font-family: var(--font-code); font-size: 10.5px; }
+        .r7-tbl th { text-align: left; color: var(--ink-faint); letter-spacing: .12em; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #0b0d12; }
+        .r7-tbl td { padding: 4px 8px; border-bottom: 1px solid rgba(255, 255, 255, .05); color: var(--ink-dim); word-break: break-all; }
+        .r7-tbl tr:hover td { background: rgba(255, 255, 255, .03); color: var(--ink); }
+        .r7-scroll { max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: rgba(0, 0, 0, .35); }
+        .r7-kv { font-family: var(--font-code); font-size: 11px; line-height: 1.8; color: var(--ink-dim); word-break: break-all; }
+        .r7-kv b { color: var(--ink-faint); letter-spacing: .12em; font-weight: 600; display: inline-block; min-width: 92px; }
+</style>
     <script src="/room-common.js"></script>
     <script src="/assets/story.js"></script>
 </head>
@@ -111,8 +119,8 @@
     <header class="nj-hud">
         <div class="nj-hud-l">
             <span class="nj-logo" aria-hidden="true">◈</span>
-            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>IDENTITY DESK</span></div>
-            <span class="nj-status"><i class="dot warn"></i>TARGET <b>PROFILED</b></span>
+            <div class="nj-brand"><b>NIGHTJAR.OS</b><span>SIGNING DESK</span></div>
+            <span class="nj-status"><i class="dot warn"></i>SIGNER <b>COMPROMISED</b></span>
         </div>
         <div class="nj-hud-c">
             <span class="nj-act">ACT II · THE INSIDE</span>
@@ -127,127 +135,91 @@
     </header>
 
     <main class="nj-main r7-main">
-        <!-- Left: the person, and the timeline you rebuild -->
         <div class="nj-col r7-left">
             <section class="nj-panel nj-rise" style="--i:0">
-                <div class="nj-panel-h"><i class="dot"></i>Subject file<span class="meta">NOT A SUSPECT</span></div>
+                <div class="nj-panel-h"><i class="dot"></i>Signer file<span class="meta">AUDIT LOG KEY</span></div>
                 <div class="r7-profile">
                     <div class="r7-who">
                         <div class="r7-av" aria-hidden="true"><img class="nj-art" src="/assets/npc/kite-portrait.webp" alt=""></div>
-                        <div><b>KABIR "KITE" MEHRA</b><span>FESTIVAL TECHNICAL LEAD</span></div>
+                        <div><b>NEXUS AUDIT SIGNER</b><span>SIGNS EVERY LOG ENTRY</span></div>
                     </div>
-                    <div class="r7-meter">DEADLINE PRESSURE<b>CRITICAL</b><div class="bar"><i></i></div></div>
                     <div class="r7-facts">
-                        <div><span>OPEN TICKET</span><span>3 days old</span></div>
-                        <div><span>SLEEP</span><span>very little</span></div>
-                        <div><span>TECH REVIEW</span><span>next morning</span></div>
-                        <div><span>ACCESS</span><span>ceremony automation</span></div>
+                        <div><span>CURVE</span><span>secp256k1</span></div>
+                        <div><span>DIGEST</span><span>SHA-256</span></div>
+                        <div><span>SIGNATURES</span><span>80 entries</span></div>
+                        <div><span>VAULT</span><span>AES-256-GCM</span></div>
                     </div>
-                    <p class="r7-note" style="margin:0">Ila's rule for this room: the question is not "did he slip", it is "was the slip designed for him".</p>
+                    <p class="r7-note" style="margin:0">Ila's rule for this room: a signature proves who held the key. It does not prove who pressed the button.</p>
                 </div>
             </section>
 
             <section class="nj-panel nj-rise" style="--i:1">
-                <div class="nj-panel-h"><i class="dot"></i>Reconstructed timeline<span class="meta" id="tl-count">0/4</span></div>
+                <div class="nj-panel-h"><i class="dot"></i>Reconstructed chain<span class="meta" id="tl-count">0/4</span></div>
                 <div class="r7-tl">
-                    <div class="r7-step" id="step-1"><span class="n">1</span><div><b>THE BAIT</b><small class="locked">Unlocks when 7.1 is solved</small><small class="open">A message built for one person</small></div></div>
-                    <div class="r7-step" id="step-2"><span class="n">2</span><div><b>THE STOLEN KEY</b><small class="locked">Unlocks when 7.2 is solved</small><small class="open">A session that was never his</small></div></div>
-                    <div class="r7-step" id="step-3"><span class="n">3</span><div><b>THE LONG NIGHT</b><small class="locked">Unlocks when 7.3 is solved</small><small class="open">Prompts until something gave</small></div></div>
-                    <div class="r7-step" id="step-4"><span class="n">4</span><div><b>THE FRAME</b><small class="locked">Unlocks when 7.4 is solved</small><small class="open">An insider who never existed</small></div></div>
+                    <div class="r7-step" id="step-1"><span class="n">1</span><div><b>THE TELL</b><small class="locked">Unlocks when 7.1 is solved</small><small class="open">Something in the nonces</small></div></div>
+                    <div class="r7-step" id="step-2"><span class="n">2</span><div><b>THE KEY</b><small class="locked">Unlocks when 7.2 is solved</small><small class="open">The private key, rebuilt</small></div></div>
+                    <div class="r7-step" id="step-3"><span class="n">3</span><div><b>THE VAULT</b><small class="locked">Unlocks when 7.3 is solved</small><small class="open">What the key was guarding</small></div></div>
+                    <div class="r7-step" id="step-4"><span class="n">4</span><div><b>THE FORGED LINE</b><small class="locked">Unlocks when 7.4 is solved</small><small class="open">One signature, taken apart</small></div></div>
                 </div>
             </section>
         </div>
 
-        <!-- Center: comms + the desk -->
         <div class="nj-col">
             <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
             <section class="nj-panel nj-rise" style="--i:2">
-                <div class="r7-tabs" role="tablist" aria-label="Identity desk">
-                    <button type="button" class="r7-tab" role="tab" id="tab-inbox" aria-selected="true" aria-controls="pane-inbox" onclick="switchTab('inbox')">INBOX · SEP 27</button>
-                    <button type="button" class="r7-tab" role="tab" id="tab-push" aria-selected="false" aria-controls="pane-push" onclick="switchTab('push')">PUSH FEED · OCT 01</button>
+                <div class="r7-tabs" role="tablist" aria-label="Signing desk">
+                    <button type="button" class="r7-tab" role="tab" id="tab-sigs" aria-selected="true" aria-controls="pane-sigs" onclick="switchTab('sigs')">SIGNATURES</button>
+                    <button type="button" class="r7-tab" role="tab" id="tab-vault" aria-selected="false" aria-controls="pane-vault" onclick="switchTab('vault')">VAULT</button>
                 </div>
 
-                <div class="r7-pane active" id="pane-inbox" role="tabpanel" aria-labelledby="tab-inbox">
-                    <div class="r7-mail" id="mail">
-                        <div class="r7-mail-h">
-                            <div><b>From</b><span id="m-from">NEXUS Technical Support</span></div>
-                            <div class="raw"><b>Address</b>nexus-support@meraz-festival.internal</div>
-                            <div class="raw"><b>Reply-To</b>nexus-support@meraz-festival.internal</div>
-                            <div class="raw"><b>Signature</b>PGP, self-signed key</div>
-                            <div><b>To</b>kabir.mehra</div>
-                            <div><b>Subject</b><span class="subj">[URGENT] Resolution for ticket #NX-2847: Ceremony timing sync tool</span></div>
-                        </div>
-                        <div class="r7-mail-b">
-                            <p>Hi Kabir,</p>
-                            <p>We have identified the root cause of the timing sync issue you reported in ticket #NX-2847. The scheduling daemon drifts when it runs several automation scripts for more than half an hour.</p>
-                            <p>Our engineers packaged a hotfix as a standalone utility:</p>
-                            <span class="lnk" title="Disabled in this reconstruction">⬇ Ethereal_Sync_Helper_v2.1.exe</span>
-                            <p class="due">Please install before the tech review on September 28th.</p>
-                            <p>Best,<br>NEXUS Technical Support Team</p>
-                        </div>
-                        <div class="r7-mail-f">
-                            <button type="button" class="r7-tog" id="raw-btn" aria-pressed="false" onclick="toggleRaw()">SHOW RAW HEADERS</button>
-                            <span>LINK DISABLED · THIS IS A SAFE RECONSTRUCTION</span>
-                        </div>
-                    </div>
-                    <p class="r7-note">Read it as Kabir would, at 1 a.m., three days behind. Then read it as an analyst. The full thread, with timings, is in the file under target 7.1.</p>
+                <div class="r7-pane active" id="pane-sigs" role="tabpanel" aria-labelledby="tab-sigs">
+                    <div class="r7-scroll"><table class="r7-tbl"><thead><tr><th>#</th><th>MESSAGE</th><th>r</th><th>s</th></tr></thead><tbody id="sig-rows"><tr><td colspan="4">Loading the export...</td></tr></tbody></table></div>
+                    <p class="r7-note">A preview of <code>audit_signatures.json</code>. Work from the file, not this table.</p>
                 </div>
 
-                <div class="r7-pane" id="pane-push" role="tabpanel" aria-labelledby="tab-push">
-                    <div class="r7-push">
-                        <div class="r7-phone idle" id="phone" aria-hidden="true">
-                            <div class="t">KABIR'S PHONE</div>
-                            <div class="big" id="ph-n">0</div>
-                            <div class="lbl">PROMPTS TONIGHT</div>
-                            <div class="card" id="ph-card">Waiting for activity…</div>
-                        </div>
-                        <div>
-                            <div class="r7-feed" id="feed" role="log" aria-live="off"></div>
-                            <button type="button" class="r7-tog" style="margin-top:12px" onclick="replayFeed()">↻ REPLAY FEED</button>
-                            <p class="r7-note">A simplified replay for atmosphere. The authoritative timeline is the file under target 7.3.</p>
-                        </div>
-                    </div>
+                <div class="r7-pane" id="pane-vault" role="tabpanel" aria-labelledby="tab-vault">
+                    <div class="r7-kv" id="vault-kv">Loading...</div>
+                    <p class="r7-note">Key derivation and answer formats are in <code>signer_notes.html</code>. The method is yours to choose.</p>
                 </div>
 
                 <div class="nj-panel-b" style="padding-top:0"><div class="r7-whisper" id="whisper"><small>FROM A SOURCE THAT SHOULD NOT BE ON THIS LINK</small><span id="whisper-t"></span></div><div id="nj-next-slot"></div></div>
             </section>
         </div>
 
-        <!-- Right: targets + log -->
         <div class="nj-col r7-right">
             <section class="nj-panel nj-rise" style="--i:2">
                 <div class="nj-panel-h"><i class="dot"></i>Investigation targets · Room 7<span class="meta" id="solved-count">0/4</span></div>
                 <div class="nj-panel-b">
 
                     <article class="nj-card" id="target-1">
-                        <div class="nj-card-top"><span class="nj-badge">7.1</span><span class="nj-title">THE MESSAGE THAT ARRIVED AT THE RIGHT TIME</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">On Sep 27th Kabir received a message referencing his real ticket <code>#NX-2847</code>, from a spoofed sender domain, linking to a Parallax Systems download. Identify the spear-phishing indicators that made it convincing and the signals that should have revealed it.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Phishing Timeline', '/challenges/Room - 7/evidence/phishing_timeline.html')">VIEW: phishing_timeline.html</button><a href="/challenges/Room - 7/evidence/phishing_timeline.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">7.1</span><span class="nj-title">THE TELL</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Eighty signatures look like noise. They are not. Each one used a secret number called a nonce, and every nonce shares the same flaw. Work out how large the nonces can be. Format: <code>NIGHTJAR{nonce_bits_N}</code>, where N is the bit length that every nonce stays under.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Signer Notes', '/challenges/Room - 7/evidence/signer_notes.html')">VIEW: signer_notes.html</button><a href="/challenges/Room - 7/evidence/signer_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Signatures', '/challenges/Room - 7/evidence/audit_signatures.json')">VIEW: audit_signatures.json</button><a href="/challenges/Room - 7/evidence/audit_signatures.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
 
                     <article class="nj-card" id="target-2">
-                        <div class="nj-card-top"><span class="nj-badge">7.2</span><span class="nj-title">THE LOGIN THAT DID NOT BELONG</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Kabir's auth log shows 47 sessions over two weeks. One, at <code>01:35:42 IST</code>, came from Amsterdam while he was badge-scanned on campus at <code>01:20 IST</code>. Find the impossible travel and the stolen authentication method.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Login Analysis', '/challenges/Room - 7/evidence/login_analysis.html')">VIEW: login_analysis.html</button><a href="/challenges/Room - 7/evidence/login_analysis.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">7.2</span><span class="nj-title">THE KEY</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">The signing key can be recovered from the signatures alone. Recover the private key. Format: <code>NIGHTJAR{d_XXXXXXXXXXXXXXXX}</code>, the first 16 hex digits of the key, lowercase.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Signer Notes', '/challenges/Room - 7/evidence/signer_notes.html')">VIEW: signer_notes.html</button><a href="/challenges/Room - 7/evidence/signer_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Signatures', '/challenges/Room - 7/evidence/audit_signatures.json')">VIEW: audit_signatures.json</button><a href="/challenges/Room - 7/evidence/audit_signatures.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
 
                     <article class="nj-card" id="target-3">
-                        <div class="nj-card-top"><span class="nj-badge">7.3</span><span class="nj-title">THE BADGE THAT APPROVED ITSELF</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Between <code>01:30</code> and <code>01:35 IST</code> Kabir's phone received 14 MFA pushes. He explicitly denied three. Push 14 was approved without him. Identify the fatigue sequence and the system flaw.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('MFA Bypass', '/challenges/Room - 7/evidence/mfa_bypass.html')">VIEW: mfa_bypass.html</button><a href="/challenges/Room - 7/evidence/mfa_bypass.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">7.3</span><span class="nj-title">THE VAULT</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Something was sealed with a key derived from the private key. Open it. The vault holds the answer in <code>NIGHTJAR{...}</code> form.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Signer Notes', '/challenges/Room - 7/evidence/signer_notes.html')">VIEW: signer_notes.html</button><a href="/challenges/Room - 7/evidence/signer_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Signatures', '/challenges/Room - 7/evidence/audit_signatures.json')">VIEW: audit_signatures.json</button><a href="/challenges/Room - 7/evidence/audit_signatures.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
 
                     <article class="nj-card" id="target-4">
-                        <div class="nj-card-top"><span class="nj-badge">7.4</span><span class="nj-title">THE PERSON WHO WAS NEVER THERE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Seven identities appear in the evidence: humans, services and one fabricated persona. Classify each, then identify the one constructed to simulate a human insider and frame Kabir.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Identity Graph', '/challenges/Room - 7/evidence/identity_graph.html')">VIEW: identity_graph.html</button><a href="/challenges/Room - 7/evidence/identity_graph.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">7.4</span><span class="nj-title">THE FORGED LINE</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Log entry <code>nightjar-log-entry-17</code> is the line that put a forged login under Kabir's name. Find the exact nonce its signature used. Format: <code>NIGHTJAR{k17_XXXXXXXX}</code>, the last 8 hex digits of that nonce, lowercase.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Signer Notes', '/challenges/Room - 7/evidence/signer_notes.html')">VIEW: signer_notes.html</button><a href="/challenges/Room - 7/evidence/signer_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Signatures', '/challenges/Room - 7/evidence/audit_signatures.json')">VIEW: audit_signatures.json</button><a href="/challenges/Room - 7/evidence/audit_signatures.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 7.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>
@@ -255,9 +227,9 @@
             </section>
 
             <section class="nj-panel nj-rise" style="--i:3">
-                <div class="nj-panel-h"><i class="dot"></i>Auth monitor</div>
+                <div class="nj-panel-h"><i class="dot"></i>Signer monitor</div>
                 <div class="nj-log" id="sys-log" style="height:150px" role="log" aria-live="polite">
-                    <div class="l">Identity desk online.</div>
+                    <div class="l">Signing desk online.</div>
                     <div class="l">Awaiting analyst input...</div>
                 </div>
             </section>
@@ -280,68 +252,67 @@
         const ROOM_ID = 7;
 
         /* ───────── Story: Room 7 (Ila Sen, Kabir "Kite" Mehra) ─────────
-         * Player-visible text. Keep it free of answers: no domains, account names,
-         * IPs, counts or timeout values. Post-solve facts come from the server. */
+         * Player-visible text. Keep it free of answers: no bit counts, key digits, nonces or the vault text.
+         * Post-solve facts come from the server. */
         const story = NJStory.create({
             room: 7,
             title: 'THE FALSE VICTIM',
             lead: 'ila',
             nextMount: '#nj-next-slot',
-            objective: 'Four questions about one man: the message, the login, the prompts and the persona. Start anywhere.',
+            objective: 'Four questions about one signing key. Find the flaw, rebuild the key, open the vault, take apart one forged line. Start anywhere.',
             complete: 'Room clear. The file Kabir ran is waiting in Room 8 whenever you are ready.',
 
             briefing: [
-                { scene: 'Every step of the attack ran by itself. Except the first one. Somebody had to click.', stamp: '01:28 · IDENTITY DESK' },
-                { npc: 'ila', text: 'We have the path. Planted key, compromised portal, forged certificate, a trust chain straight to the release controller. All of it automated. All of it invisible.' },
-                { npc: 'ila', text: 'But the chain has one origin, and it is a person. Kabir ran a file. Everyone on this floor already has a theory about why.' },
-                { npc: 'ila', text: 'I do not share it. Someone studied the festival schedule, found the one person with enough access and enough pressure to act without thinking, and sent him something that looked like salvation.' },
-                { npc: 'kite', text: 'Ila, I know what the logs say. I know how it looks. I only want to understand how I missed it.' },
-                { npc: 'ila', text: 'You did not miss it, Kabir. It was built so that you could not see it. That is the difference this room has to prove.' },
-                { npc: 'ila', text: 'Four questions. The message. The login. The prompts. The persona. Find them, and tell me whether he was a careless insider or a carefully chosen target.' },
-                { npc: 'system', text: 'IDENTITY DESK ONLINE. SUBJECT FILE OPEN. TARGETS UNLOCKED.' }
+                { scene: 'Every line in the audit log carries a signature. Every signature says the same thing: trust me.', stamp: '01:28 · SIGNING DESK' },
+                { npc: 'ila', text: 'The official story is simple. The log says Kabir did it, and the log is signed. A signed log cannot lie.' },
+                { npc: 'kite', text: 'I know what it says. I did not type those commands, Ila. I have never even seen that account.' },
+                { npc: 'ila', text: 'Then the signature is the thing to attack. A signature is only as good as the secret numbers used to make it. Rhea gave me the signer export. Eighty entries. One key.' },
+                { npc: 'rhea', text: 'Our signer was swapped in the same hotfix window as everything else. I did not review its random number source. I should have.' },
+                { npc: 'ila', text: 'If that key can be rebuilt from the log itself, then anyone who did it could have written any line they liked. Prove it.' },
+                { npc: 'system', text: 'SIGNING DESK ONLINE. SIGNER EXPORT LOADED. TARGETS UNLOCKED.' }
             ],
 
             greet: {
-                0: ['Start with the message. Read it as Kabir would have read it that night, then read it again as an analyst.'],
-                1: ['One answer in. Notice how little of this was luck.'],
-                2: ['Halfway. The picture of him is changing, and not in the direction the official story wanted.'],
-                3: ['One left. Ask yourself who gains if people believe the wrong person did this.']
+                0: ['Start with the numbers that should be random. Look for anything that is not.'],
+                1: ['One answer in. A small flaw, used well, is all this takes.'],
+                2: ['Halfway. The key is not a secret anymore. Keep going.'],
+                3: ['One left. It is the line that was used against Kabir.']
             },
 
             onSolve: {
-                1: ['It did not look like a trap because it was not meant to. It was meant to look like help.'],
-                2: ['He was on campus and badged in, and a session from another continent was acting as him. Hold on to that.'],
-                3: [{ npc: 'kite', text: 'I denied them. I denied them and it still went through? Ila, I did everything right.' }, { npc: 'ila', text: 'You did, Kabir. The system overrode you.' }],
-                4: ['An insider with a name, a history and a motive. All invented, and all pointing at Kabir.']
+                1: ['There it is. Random enough to fool the eye, not enough to fool the maths.'],
+                2: ['A key that sat behind eighty signatures. It was never really hidden.'],
+                3: [{ npc: 'kite', text: 'It is open? What does it say?' }, { npc: 'ila', text: 'It says the signer was never safe, Kabir. Nobody needed your account.' }],
+                4: ['One line, taken apart. The signature proved nothing about who sent it.']
             },
 
             milestone: {
                 1: ['First answer in. That is more than the official story has.'],
                 2: [
-                    { npc: 'kite', text: 'Ila, are they finding anything that clears me? I keep rereading that message.' },
-                    { npc: 'ila', text: 'Wait, Kabir. They are working. Everyone who reads that message wants to defend you.' }
+                    { npc: 'kite', text: 'Ila, are they getting anywhere? I keep thinking about that account I have never seen.' },
+                    { npc: 'ila', text: 'They are working, Kabir. Give them a little longer.' }
                 ],
-                3: ['Three. The last one is about who this was supposed to blame.']
+                3: ['Three. The last one is about the line they used to blame him.']
             },
 
             wrong: [
-                'That does not match the evidence. Check the file again.',
-                'No. Look at the details, not the headline.',
-                'Not it. Read the timeline slowly. Slowly is how this was missed in the first place.'
+                'That does not match the export. Check the exact format on the card.',
+                'No. Recompute it. Do not guess it.',
+                'Not it. Check your scaling, your centring and your signs.'
             ],
             hints: {
-                1: 'What was going on in Kabir’s week when the message arrived? Then compare the sender, the link and the signature to the real thing.',
-                2: 'A person cannot be at a gate in one country and logged in from another. Compare the log to the badge scan, then ask what was actually replayed.',
-                3: 'Count the prompts, then count which ones he answered. Then ask what the gateway does when nobody answers.',
-                4: 'Look at who created the account, what authenticated it, and whether any human ever used it.'
+                1: 'Compare the r values and the structure of the nonces. The leak is in the nonces, not the curve.',
+                2: 'From s = k^-1 (h + r d) mod n you get k = a + t d (mod n) for each signature, and k is unusually small.',
+                3: 'Build a lattice whose shortest vector encodes d, with a Kannan-style extra column. Then reduce it with BKZ and check each candidate against the public key.',
+                4: 'Once you hold d, the same relation gives you every nonce. Use the signature for entry 17.'
             },
 
             debrief: [
-                { scene: 'The reconstruction goes quiet. On the screen, a man is still at his desk, doing his job.', stamp: '02:02 · IDENTITY DESK' },
-                { npc: 'ila', text: 'Four questions, one answer. Kabir was not careless. He was chosen.' },
-                { npc: 'ila', text: 'A message that knew his ticket and his deadline. A session that was never his. A gateway that overrode him. An insider who never existed.' },
+                { scene: 'The reconstruction goes quiet. On the screen, a man is still at his desk, doing his job.', stamp: '02:02 · SIGNING DESK' },
+                { npc: 'ila', text: 'A key that could be rebuilt from its own log. Any line in that file could have been written by anyone who looked closely enough.' },
+                { npc: 'ila', text: 'Kabir was not in the log because he did it. He was in the log because someone with the key put him there.' },
                 { npc: 'kite', text: 'So I did not do this. Not on purpose, not by being stupid.' },
-                { npc: 'ila', text: 'You did exactly what a good engineer does when a fix arrives. They built the trap around that.' },
+                { npc: 'ila', text: 'No, Kabir. You did exactly what a good engineer does when a fix arrives. They built the trap around that.' },
                 { npc: 'rhea', text: 'Then what he ran is the next question. It is on his machine, and it is signed by nobody I know.' },
                 { npc: 'system', text: 'SAMPLE EXTRACTED FROM SUBJECT WORKSTATION. MALWARE LAB ONLINE. ROOM 8 UNLOCKED.' }
             ],
@@ -359,7 +330,7 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        /* ───────── Auth monitor log ───────── */
+        /* ───────── Signer monitor log ───────── */
         const logBox = document.getElementById('sys-log');
         function addLog(message, type) {
             const d = document.createElement('div');
@@ -374,71 +345,50 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        /* ───────── Desk tabs ───────── */
+        /* ───────── Desk tabs and the export preview ───────── */
         function switchTab(name) {
-            ['inbox', 'push'].forEach(function (k) {
+            ['sigs', 'vault'].forEach(function (k) {
                 document.getElementById('tab-' + k).setAttribute('aria-selected', k === name ? 'true' : 'false');
                 document.getElementById('pane-' + k).classList.toggle('active', k === name);
             });
-            if (name === 'push' && !feedStarted) replayFeed();
         }
         window.switchTab = switchTab;
 
-        function toggleRaw() {
-            const m = document.getElementById('mail');
-            const on = m.classList.toggle('raw');
-            const b = document.getElementById('raw-btn');
-            b.textContent = on ? 'HIDE RAW HEADERS' : 'SHOW RAW HEADERS';
-            b.setAttribute('aria-pressed', on ? 'true' : 'false');
-            addLog(on ? 'Raw headers expanded.' : 'Raw headers collapsed.', 'info');
-        }
-        window.toggleRaw = toggleRaw;
-
-        /* ───────── Push feed: a short atmospheric replay ─────────
-         * Deliberately coarse: it shows the rhythm of the night, not the evidence. */
-        let feedStarted = false, feedTimer = 0;
-        function replayFeed() {
-            feedStarted = true;
-            clearTimeout(feedTimer);
-            const feed = document.getElementById('feed'), phone = document.getElementById('phone');
-            const card = document.getElementById('ph-card'), num = document.getElementById('ph-n');
-            feed.textContent = '';
-            num.textContent = '0';
-            let n = 0;
-            const total = 14;
-            function row(cls, text, tag) {
-                const r = document.createElement('div');
-                r.className = 'row ' + cls;
-                const a = document.createElement('span'); a.textContent = text;
-                const k = document.createElement('span'); k.className = 'k'; k.textContent = tag;
-                r.appendChild(a); r.appendChild(k);
-                feed.appendChild(r);
-                feed.scrollTop = feed.scrollHeight;
+        function short(h) { return h.length > 20 ? h.slice(0, 12) + '...' + h.slice(-6) : h; }
+        async function loadExport() {
+            try {
+                const r = await fetch('/challenges/Room%20-%207/evidence/audit_signatures.json', { credentials: 'same-origin' });
+                if (!r.ok) throw new Error(String(r.status));
+                const j = await r.json();
+                const rows = document.getElementById('sig-rows');
+                rows.textContent = '';
+                j.sigs.forEach(function (s, i) {
+                    const tr = document.createElement('tr');
+                    [String(i), s.msg, short(s.r), short(s.s)].forEach(function (v) {
+                        const td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+                    });
+                    rows.appendChild(tr);
+                });
+                const kv = document.getElementById('vault-kv');
+                kv.textContent = '';
+                [['CURVE', j.curve], ['PUBLIC X', j.pub[0]], ['PUBLIC Y', j.pub[1]], ['NONCE', j.enc.nonce], ['CIPHERTEXT', j.enc.ct], ['TAG', j.enc.tag]].forEach(function (p) {
+                    const d = document.createElement('div');
+                    const b = document.createElement('b'); b.textContent = p[0];
+                    d.appendChild(b); d.appendChild(document.createTextNode(p[1]));
+                    kv.appendChild(d);
+                });
+                addLog('Signer export loaded: ' + j.sigs.length + ' signatures.', 'ok');
+            } catch (e) {
+                document.getElementById('sig-rows').innerHTML = '<tr><td colspan="4">The export could not be loaded. Download audit_signatures.json from any target.</td></tr>';
+                document.getElementById('vault-kv').textContent = 'Not loaded.';
             }
-            (function tick() {
-                n++;
-                phone.classList.remove('idle');
-                num.textContent = String(n);
-                card.classList.remove('ok');
-                card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
-                card.textContent = 'Approve sign-in to NEXUS admin?';
-                row(n === total ? 'a' : 'd', 'Push ' + n + ' sent', n === total ? 'NO REPLY' : 'WAITING');
-                if (window.NJAudio && NJAudio.sfx) NJAudio.sfx('select');
-                if (n < total) { feedTimer = setTimeout(tick, 1400); return; }
-                feedTimer = setTimeout(function () {
-                    card.classList.add('ok');
-                    card.textContent = 'Sign-in approved';
-                    row('a', 'Gateway decision recorded', 'APPROVED');
-                }, 1600);
-            })();
         }
-        window.replayFeed = replayFeed;
 
         /* ───────── Flags: the server is the only source of truth ───────── */
         const WHISPERS = {
-            1: 'You read it the way he did. For a moment you believed it, too.',
+            1: 'You looked closely at the noise. Most people never do.',
             2: 'A key does not care whose hand turns it.',
-            3: 'Fourteen chances. It only ever needed one.',
+            3: 'Sealed things were only ever sealed with what we trusted.',
             4: 'Every story needs a guilty man. I only supplied the paperwork.'
         };
         function updateCount() {
@@ -476,6 +426,7 @@
         }
 
         async function initSolvedState() {
+            loadExport();
             const p = await NJ.progress();
             const solved = p ? (p.rooms[ROOM_ID] || []) : [];
             const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
@@ -502,7 +453,7 @@
                 const hit = res.challenge || n;
                 const solved = res.solved.length ? res.solved : [n];
                 const fresh = !document.getElementById('target-' + hit).classList.contains('solved');
-                addLog('Target 7.' + hit + ' VERIFIED. Timeline updated.', 'ok');
+                addLog('Target 7.' + hit + ' VERIFIED. Chain updated.', 'ok');
                 solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
                 story.onSolved(hit, solved);
                 if (fresh) setTimeout(function () { whisper(hit); }, 2200);
