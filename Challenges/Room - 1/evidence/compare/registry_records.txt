@@ -1,0 +1,19 @@
+REGISTRY EXTRACT (game artefact)
+
+domain:       meraz.org
+created:      2014-08-19
+registrar:    Aksha Registrar
+registrant:   Meraz Fest Committee
+nameservers:  ns1.meraz.org, ns2.meraz.org
+
+domain:       festival.net.in
+created:      2019-06-04
+registrar:    Aksha Registrar
+registrant:   FestivalNet India Pvt Ltd (ticketing and content-delivery vendor)
+nameservers:  ns1.festival.net.in, ns2.festival.net.in
+
+domain:       festival.in.net
+created:      2026-03-02
+registrar:    Quickname Reg
+registrant:   REDACTED FOR PRIVACY
+nameservers:  ns1.parallax-sys.net, ns2.parallax-sys.net

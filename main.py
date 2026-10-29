@@ -608,10 +608,10 @@ FLAGS_PER_ROOM = 4
 # it spells out the answer. Rooms without an entry here keep their own in-page text.
 CHALLENGE_REWARDS = {
     1: {
-        1: 'PAGE "AETHER/07" RECOVERED. Fragment reads: "Nothing stays local."',
-        2: "AUTHOR IDENTIFIED: Aman V. // Parallax Systems.",
-        3: "DOMAIN LOGGED: nexus-meraz.festival.in.net (Registered by Parallax CA).",
-        4: "PROFILE SECURED: curator_404. Operator has been watching since day one.",
+        1: 'PAGE "AETHER/07" RECOVERED. Published 14 May by an account that is on no staff list, four months before the schedule went public. Hidden text reads: "Nothing stays local."',
+        2: "AUTHOR IDENTIFIED: Aman V. // Parallax Systems. The build dates from 11 May. The festival office only re-saved it in September and cleaned one layer of the metadata.",
+        3: "DOMAIN LOGGED: nexus-meraz.festival.in.net. The real vendor is festival.net.in; the mirror hides on festival.in.net, registered in March and certified by Parallax CA.",
+        4: "PROFILE SECURED: curator_404. Operator has been watching since day one: they pointed to the unlisted page the day after it went up.",
     },
     2: {
         1: 'DECRYPTED: "THE HOST WITH THE BLUE NAME IS LYING."',

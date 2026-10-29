@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /staging/
+Disallow: /preview/
+Disallow: /internal/
+Sitemap: https://nexus.meraz.org/sitemap.xml

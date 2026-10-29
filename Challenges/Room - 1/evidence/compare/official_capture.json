@@ -1,0 +1,52 @@
+{
+  "capture": {
+    "tool": "NOC page-capture 1.3 (game artefact)",
+    "taken": "2026-10-03T21:50:11+05:30",
+    "operator": "response cell"
+  },
+  "document": {
+    "url": "https://nexus.meraz.org/",
+    "ip": "198.51.100.20",
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "strict-transport-security": "max-age=31536000",
+      "content-security-policy": "default-src 'self' cdn.festival.net.in",
+      "etag": "\"a41c-62f0\"",
+      "date": "Fri, 03 Oct 2026 16:20:11 GMT"
+    }
+  },
+  "tls": {
+    "subject": "CN=nexus.meraz.org",
+    "san": [
+      "nexus.meraz.org"
+    ],
+    "issuer": "CN=Atlas Public CA R3",
+    "not_before": "2026-01-08",
+    "not_after": "2027-02-08",
+    "ct_logged": true
+  },
+  "subresources": [
+    {
+      "url": "https://cdn.festival.net.in/css/nexus.css",
+      "ip": "198.51.100.31",
+      "status": 200
+    },
+    {
+      "url": "https://cdn.festival.net.in/img/nexus-logo.png",
+      "ip": "198.51.100.31",
+      "status": 200
+    },
+    {
+      "url": "https://stats.meraz.org/js/stats.js",
+      "ip": "198.51.100.22",
+      "status": 200
+    }
+  ],
+  "forms": [
+    {
+      "action": "https://nexus.meraz.org/sso/login",
+      "method": "post"
+    }
+  ]
+}

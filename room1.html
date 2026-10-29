@@ -100,14 +100,8 @@
                     <div class="r1-sub">UNTIL INITIALIZATION</div>
                 </div>
                 <div class="r1-actions">
-                    <span class="nj-file">
-                        <button type="button" onclick="openEvidence('hub', '/challenges/Room - 1/evidence/meraz_festival_hub.html')">▣ VIEW SITE MIRROR</button>
-                        <a href="/challenges/Room - 1/evidence/meraz_festival_hub.html" download>DL</a>
-                    </span>
-                    <span class="nj-file">
-                        <button type="button" onclick="openEvidence('hub-source', '/challenges/Room - 1/evidence/aether_07.html')">▣ VIEW HIDDEN CACHE</button>
-                        <a href="/challenges/Room - 1/evidence/aether_07.html" download>DL</a>
-                    </span>
+                    <span class="nj-file"><button type="button" onclick="openEvidence('portal', '/challenges/Room - 1/evidence/portal/index.html')">▣ VIEW SITE MIRROR</button><a href="/challenges/Room - 1/evidence/portal/index.html" download>DL</a></span>
+                    <span class="nj-file"><button type="button" onclick="openEvidence('case file', '/challenges/Room - 1/evidence/index.html')">▣ OPEN CASE FILE</button><a href="/challenges/Room - 1/evidence/index.html" download>DL</a></span>
                 </div>
             </section>
         </div>
@@ -122,46 +116,34 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">1.1</span><span class="nj-title">THE HIDDEN PAGE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Locate the unlisted teaser ID in the site mirror.<br>
-                            <em>[HINT: The evidence viewer uses an iframe. You might need to inspect the frame source directly, not just the main page.]</em></p>
-                        <div class="nj-files">
-                            <span class="nj-file"><button type="button" onclick="openEvidence('hub', '/challenges/Room - 1/evidence/meraz_festival_hub.html')">site_mirror.html</button><a href="/challenges/Room - 1/evidence/meraz_festival_hub.html" download>DL</a></span>
-                            <span class="nj-file"><button type="button" onclick="openEvidence('hub-source', '/challenges/Room - 1/evidence/aether_07.html')">hidden_cache.html</button><a href="/challenges/Room - 1/evidence/aether_07.html" download>DL</a></span>
-                        </div>
+                        <p class="nj-desc">The festival site has a page it never linked to. Find it and read the identifier its CMS gave it. The site is full of unfinished pages, and only one of them fits the whole story: unlisted, published by an account that has no right to publish, and live months before the schedule went public. Flag: NIGHTJAR{ID}<br>
+<em>[HINT: Sites describe themselves in files nobody reads. The evidence viewer is a frame, so look at the source of pages and feeds, not only at what they display.]</em></p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('portal', '/challenges/Room - 1/evidence/portal/index.html')">site_mirror (portal)</button><a href="/challenges/Room - 1/evidence/portal/index.html" download>DL</a></span><span class="nj-file"><a href="/challenges/Room - 1/evidence/room1_evidence.zip" download>DL: room1_evidence.zip</a></span></div>
                         <div class="nj-form"><span class="pre">ID ▸</span><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">1.2</span><span class="nj-title">THE METADATA LEAK</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Identify the hidden creator from the schedule or banner.<br>
-                            <em>[FLAG FORMAT: NIGHTJAR{PARALLAX_SYSTEMS_&lt;author&gt;}. Use the author’s first name from the file metadata. Use the ⌕ META button beside each file.]</em></p>
-                        <div class="nj-files">
-                            <span class="nj-file"><button type="button" onclick="openEvidence('schedule', '/challenges/Room - 1/evidence/meraz_schedule_2026.pdf')">PDF: meraz_schedule</button><button type="button" onclick="inspectMeta('meraz_schedule_2026.pdf', '/challenges/Room - 1/evidence/meraz_schedule_2026.pdf')" title="Read this file's metadata">⌕ META</button><a href="/challenges/Room - 1/evidence/meraz_schedule_2026.pdf" download>DL</a></span>
-                            <span class="nj-file"><button type="button" onclick="openEvidence('banner', '/challenges/Room - 1/evidence/nexus_banner_final.png')">IMG: nexus_banner</button><button type="button" onclick="inspectMeta('nexus_banner_final.png', '/challenges/Room - 1/evidence/nexus_banner_final.png')" title="Read this file's metadata">⌕ META</button><a href="/challenges/Room - 1/evidence/nexus_banner_final.png" download>DL</a></span>
-                        </div>
+                        <p class="nj-desc">A file is more than what it shows. Read what it says about itself, including what the last person to touch it forgot to clean.<br>
+<em>[FLAG FORMAT: NIGHTJAR{PARALLAX_SYSTEMS_&lt;author&gt;}. Use the first name of whoever <b>created</b> the file, not whoever saved it last. The ⌕ META button is a quick view of the current properties only. Desktop tools read more.]</em></p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('schedule', '/challenges/Room - 1/evidence/meraz_schedule_2026.pdf')">PDF: meraz_schedule</button><button type="button" onclick="inspectMeta('meraz_schedule_2026.pdf', '/challenges/Room - 1/evidence/meraz_schedule_2026.pdf')" title="Quick view of this file's metadata">⌕ META</button><a href="/challenges/Room - 1/evidence/meraz_schedule_2026.pdf" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('banner', '/challenges/Room - 1/evidence/nexus_banner_final.png')">IMG: nexus_banner</button><button type="button" onclick="inspectMeta('nexus_banner_final.png', '/challenges/Room - 1/evidence/nexus_banner_final.png')" title="Quick view of this file's metadata">⌕ META</button><a href="/challenges/Room - 1/evidence/nexus_banner_final.png" download>DL</a></span></div>
                         <div class="nj-form"><span class="pre">NAME ▸</span><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">1.3</span><span class="nj-title">THE FALSE MIRROR</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Compare official NEXUS with the mirror. Find the fake domain.</p>
-                        <div class="nj-files">
-                            <span class="nj-file"><button type="button" onclick="openEvidence('official', '/challenges/Room - 1/evidence/nexus_official_page.html')">nexus_official.html</button><a href="/challenges/Room - 1/evidence/nexus_official_page.html" download>DL</a></span>
-                            <span class="nj-file"><button type="button" onclick="openEvidence('mirror', '/challenges/Room - 1/evidence/nexus_mirror_page.html')">nexus_mirror.html</button><a href="/challenges/Room - 1/evidence/nexus_mirror_page.html" download>DL</a></span>
-                        </div>
-                        <div class="nj-form"><span class="pre">URL ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
+                        <p class="nj-desc">Two pages claim to be NEXUS. Decide which one is lying, then name the host it was actually served from. Appearances are free; certificates, registrations and captures are not. Flag: NIGHTJAR{hostname}</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('official', '/challenges/Room - 1/evidence/compare/nexus_official_page.html')">nexus_official.html</button><a href="/challenges/Room - 1/evidence/compare/nexus_official_page.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('mirror', '/challenges/Room - 1/evidence/compare/nexus_mirror_page.html')">nexus_mirror.html</button><a href="/challenges/Room - 1/evidence/compare/nexus_mirror_page.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('official capture', '/challenges/Room - 1/evidence/compare/official_capture.json')">official_capture.json</button><a href="/challenges/Room - 1/evidence/compare/official_capture.json" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('mirror capture', '/challenges/Room - 1/evidence/compare/mirror_capture.json')">mirror_capture.json</button><a href="/challenges/Room - 1/evidence/compare/mirror_capture.json" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('registry', '/challenges/Room - 1/evidence/compare/registry_records.txt')">registry_records.txt</button><a href="/challenges/Room - 1/evidence/compare/registry_records.txt" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('certificates', '/challenges/Room - 1/evidence/compare/certificates.txt')">certificates.txt</button><a href="/challenges/Room - 1/evidence/compare/certificates.txt" download>DL</a></span></div>
+                        <div class="nj-form"><span class="pre">HOST ▸</span><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">1.4</span><span class="nj-title">THE QUIET PROFILE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Search OSINT archives for the operator's handle.</p>
-                        <div class="nj-files">
-                            <span class="nj-file"><button type="button" onclick="openEvidence('forum', '/challenges/Room - 1/evidence/osint_archive/forum_members.html')">forum_archive.html</button><a href="/challenges/Room - 1/evidence/osint_archive/forum_members.html" download>DL</a></span>
-                            <span class="nj-file"><button type="button" onclick="openEvidence('blog', '/challenges/Room - 1/evidence/osint_archive/tech_blog.html')">tech_blog.html</button><a href="/challenges/Room - 1/evidence/osint_archive/tech_blog.html" download>DL</a></span>
-                        </div>
+                        <p class="nj-desc">Search the community archive for the anonymous operator. Cross-reference it with what you have already found: who knew before everyone else, and never changed their story? Flag: NIGHTJAR{handle}. The handle is the exact profile name, not the display name.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('archive', '/challenges/Room - 1/evidence/osint_archive/index.html')">archive_index.html</button><a href="/challenges/Room - 1/evidence/osint_archive/index.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('members', '/challenges/Room - 1/evidence/osint_archive/forum_members.html')">forum_members.html</button><a href="/challenges/Room - 1/evidence/osint_archive/forum_members.html" download>DL</a></span><span class="nj-file"><a href="/challenges/Room - 1/evidence/room1_evidence.zip" download>DL: room1_evidence.zip</a></span></div>
                         <div class="nj-form"><span class="pre">HANDLE ▸</span><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 1.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>
@@ -215,7 +197,7 @@
             title: 'THE EMPTY SIGNAL',
             lead: 'ila',
             nextMount: '#nj-next-slot',
-            objective: 'Four leads. Open them in any order. Verify everything, and trust nothing just because it looks official.',
+            objective: 'Four leads. They overlap, so keep notes. Verify everything, and trust nothing just because it looks official.',
             complete: 'Room clear. The capsule is waiting in Room 2 whenever you are ready.',
 
             briefing: [
@@ -224,7 +206,7 @@
                 { npc: 'ila', text: 'At 23:17 NEXUS stopped answering. Badges are dead. The stage lights are changing colour on their own. Every display on campus is showing the message you can see on the main screen.' },
                 { npc: 'ila', text: 'The official line is a student prank. I do not believe it. A prank does not take months of preparation.' },
                 { npc: 'ila', text: 'No breach. No attacker. No reason. So we begin with the one thing we are sure of: someone knew this was coming.' },
-                { npc: 'ila', text: 'Find the first person who knew. Four leads, in any order. Verify everything. Trust nothing just because it looks official.' },
+                { npc: 'ila', text: 'Find the first person who knew. Four leads, and they overlap, so keep notes. Verify everything. Trust nothing just because it looks official.' },
                 { npc: 'system', text: 'SECURE LINK ESTABLISHED. INVESTIGATION TARGETS UNLOCKED. T-MINUS RUNNING.' }
             ],
 
@@ -257,10 +239,10 @@
                 'Negative. Details matter in this one.'
             ],
             hints: {
-                1: 'Remember: the evidence viewer is a frame inside a page. Look at the frame itself, not only at what it displays.',
-                2: 'Files remember who made them. Look at what the schedule and the banner say about themselves.',
-                3: 'Put the official page next to the mirror. The difference is small. Domains lie in small ways.',
-                4: 'Two sources in the archive. Cross-reference names, times and handles until one profile does not fit.'
+                1: 'Unlisted is not invisible. Ask what the site publishes about itself, then ask which unfinished page fits every part of the story, not just one.',
+                2: 'Files remember who made them, and cleaning one layer is not cleaning them all. The name on top is rarely the name at the bottom.',
+                3: 'A page can copy everything a visitor sees. It cannot copy who served it. Compare what each capture says about where it really came from.',
+                4: 'Time is evidence. Find who referred to something before it was public, then check whether they said it then or only edited it in later.'
             },
 
             debrief: [
@@ -385,6 +367,7 @@
             body.textContent = '';
             const h = document.createElement('h4'); h.textContent = 'FILE METADATA'; body.appendChild(h);
             const src = document.createElement('div'); src.className = 'src'; src.textContent = name; body.appendChild(src);
+            const qn = document.createElement('div'); qn.className = 'src'; qn.textContent = 'Quick view: current properties and basic text fields only. Desktop tools (exiftool, pdfinfo, strings) read more.'; body.appendChild(qn);
             const t = document.createElement('table');
             let any = false;
             groups.forEach(function (g) {
@@ -407,8 +390,17 @@
             let text = '';
             for (let i = 0; i < bytes.length; i++) text += String.fromCharCode(bytes[i]);
             const rows = [];
+            // Quick view = the CURRENT revision's Info dictionary only (what a viewer's Properties dialog shows).
+            let scope = text;
+            const refs = text.match(/\/Info\s+\d+\s+\d+\s+R/g);
+            if (refs) {
+                const num = /\/Info\s+(\d+)/.exec(refs[refs.length - 1])[1];
+                const objs = text.match(new RegExp('(?:^|[\\r\\n])' + num + '\\s+0\\s+obj[\\s\\S]*?endobj', 'g'));
+                if (objs) scope = objs[objs.length - 1];
+            }
             ['Title', 'Author', 'Subject', 'Keywords', 'Creator', 'Producer', 'CreationDate', 'ModDate'].forEach(function (k) {
-                const m = new RegExp('/' + k + '\\s*\\(((?:\\\\.|[^\\\\)])*)\\)').exec(text);
+                const re = new RegExp('/' + k + '\\s*\\(((?:\\\\.|[^\\\\)])*)\\)', 'g'); let m = null, hit;
+                while ((hit = re.exec(scope)) !== null) m = hit;   // the last occurrence is the current revision
                 if (m) {
                     let v = m[1].replace(/\\([()\\])/g, '$1');
                     const d = /^D:(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/.exec(v);

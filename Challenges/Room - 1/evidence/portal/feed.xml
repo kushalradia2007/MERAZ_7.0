@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app">
+  <title>Meraz 2026 - site feed</title>
+  <updated>2026-10-02T21:03:12Z</updated>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0514-A07</id>
+    <title>AETHER/07</title>
+    <link rel="alternate" href="preview/k7x2e9.html"/>
+    <author><name>site-sync</name></author>
+    <published>2026-05-13T21:42:41Z</published>
+    <updated>2026-10-01T21:03:12Z</updated>
+    <app:control><app:draft>yes</app:draft></app:control>
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0301-H01</id>
+    <title>Meraz 2026 - NEXUS Smart Festival</title>
+    <link rel="alternate" href="index.html"/>
+    <author><name>web.admin</name></author>
+    <published>2026-03-01T04:30:00Z</published>
+    <updated>2026-09-30T12:32:10Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0702-V01</id>
+    <title>Volunteers</title>
+    <link rel="alternate" href="volunteers.html"/>
+    <author><name>vol.coord</name></author>
+    <published>2026-07-02T06:30:00Z</published>
+    <updated>2026-09-28T03:40:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0921-S11</id>
+    <title>DRAFT: Sponsor logo upload</title>
+    <link rel="alternate" href="staging/sponsor-logos.html"/>
+    <author><name>press-vendor</name></author>
+    <published>2026-09-21T12:20:00Z</published>
+    <updated>2026-09-21T12:20:00Z</updated>
+    <app:control><app:draft>yes</app:draft></app:control>
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0702-N00</id>
+    <title>News</title>
+    <link rel="alternate" href="news/index.html"/>
+    <author><name>press.office</name></author>
+    <published>2026-07-02T06:40:00Z</published>
+    <updated>2026-09-14T04:20:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0914-N03</id>
+    <title>The schedule is live</title>
+    <link rel="alternate" href="news/schedule-live.html"/>
+    <author><name>press.office</name></author>
+    <published>2026-09-14T04:15:00Z</published>
+    <updated>2026-09-14T04:15:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0914-S02</id>
+    <title>Schedule</title>
+    <link rel="alternate" href="schedule.html"/>
+    <author><name>press.office</name></author>
+    <published>2026-09-14T04:00:00Z</published>
+    <updated>2026-09-14T04:00:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0728-E04</id>
+    <title>Events and workshops</title>
+    <link rel="alternate" href="events.html"/>
+    <author><name>web.admin</name></author>
+    <published>2026-07-28T09:50:00Z</published>
+    <updated>2026-09-12T05:30:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0301-A02</id>
+    <title>About this site</title>
+    <link rel="alternate" href="about.html"/>
+    <author><name>web.admin</name></author>
+    <published>2026-03-01T04:35:00Z</published>
+    <updated>2026-09-01T04:30:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0830-T05</id>
+    <title>PREVIEW: Ticket page test</title>
+    <link rel="alternate" href="preview/m4qd18.html"/>
+    <author><name>web.admin</name></author>
+    <published>2026-08-30T13:35:00Z</published>
+    <updated>2026-08-30T13:35:00Z</updated>
+    <app:control><app:draft>yes</app:draft></app:control>
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0520-S06</id>
+    <title>Sponsors and partners</title>
+    <link rel="alternate" href="sponsors.html"/>
+    <author><name>festivo-agency</name></author>
+    <published>2026-05-20T05:35:00Z</published>
+    <updated>2026-08-19T05:00:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0811-N01</id>
+    <title>Ticketing is open</title>
+    <link rel="alternate" href="news/ticketing.html"/>
+    <author><name>press.office</name></author>
+    <published>2026-08-11T04:30:00Z</published>
+    <updated>2026-08-11T04:30:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0725-L02</id>
+    <title>DRAFT: Lost and found desk</title>
+    <link rel="alternate" href="staging/lost-and-found.html"/>
+    <author><name>vol.coord</name></author>
+    <published>2026-07-25T07:45:00Z</published>
+    <updated>2026-07-25T07:45:00Z</updated>
+    <app:control><app:draft>yes</app:draft></app:control>
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0702-N02</id>
+    <title>Volunteer call: shifts open</title>
+    <link rel="alternate" href="news/volunteer-call.html"/>
+    <author><name>vol.coord</name></author>
+    <published>2026-07-02T07:00:00Z</published>
+    <updated>2026-07-02T07:00:00Z</updated>
+    
+  </entry>
+  <entry>
+    <id>tag:meraz.org,2026:PG-0602-V03</id>
+    <title>DRAFT: Volunteer orientation</title>
+    <link rel="alternate" href="staging/vol-orientation.html"/>
+    <author><name>ila.sen</name></author>
+    <published>2026-06-02T11:10:00Z</published>
+    <updated>2026-06-03T03:30:00Z</updated>
+    <app:control><app:draft>yes</app:draft></app:control>
+  </entry>
+</feed>

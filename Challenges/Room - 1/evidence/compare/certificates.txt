@@ -1,0 +1,12 @@
+CERTIFICATE EXTRACT (game artefact)
+
+official
+  subject  CN=nexus.meraz.org
+  issuer   Atlas Public CA R3   (publicly trusted, logged)
+  valid    2026-01-08 to 2027-02-08
+
+mirror
+  subject  CN=nexus-meraz.festival.in.net
+  san      nexus-meraz.festival.in.net, *.festival.in.net
+  issuer   Parallax CA / Parallax Systems   (not in any public trust store, not logged)
+  valid    2026-03-04 to 2027-03-04
