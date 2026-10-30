@@ -797,7 +797,7 @@ def get_progress(user: models.User = Depends(get_current_user), db: Session = De
             rewards[str(rid)] = texts
     return {
         "score": user.score or 0,
-        "current_room": user.current_room or 1,
+        "current_room": max(CHALLENGE_FLAGS) if user.is_admin else (user.current_room or 1),
         "rooms": rooms,
         "rewards": rewards,
         "unlocked": unlocked,
@@ -908,7 +908,7 @@ def get_board(user: models.User = Depends(get_current_user), db: Session = Depen
     except ValueError:
         saved = {}
     layout = clean_board(saved, set(solved))
-    reached = min(user.current_room or 1, max(case_clues.ROOM_TITLES))
+    reached = max(case_clues.ROOM_TITLES) if user.is_admin else min(user.current_room or 1, max(case_clues.ROOM_TITLES))
     locked = {}
     for room in range(1, reached + 1):
         total = sum(1 for c in case_clues.CLUES.values() if c["room"] == room)
