@@ -650,10 +650,10 @@ CHALLENGE_REWARDS = {
         4: "NONCE EXPOSED. With the key, any signature gives up the nonce behind it. A valid signature proves a key was used. It does not prove who used it.",
     },
     8: {
-        1: "PE FORGERY CONFIRMED. A section with read, write and execute permissions, a signature from an unknown, expired build certificate, a size far beyond the claim, and no entry in the NEXUS package registry. The file is not the tool it claims to be.",
-        2: 'C2 CONFIG EXTRACTED. A Parallax command server, an XOR key, a 300-second beacon with jitter, and a developer signature: "Nothing stays local." (A.V.), the same line as the hidden page in Room 1.',
-        3: "DORMANT BRANCH DECODED. mira_propagate() runs only when the NEXUS zone is CORE. Kabir's workstation was WORKSTATION, so it stayed dead code there. AETHER-7 was CORE. The payload was built for infrastructure, not people.",
-        4: "TWO AUTHORS. Build CURATOR-20260925-001 was compiled on Sep 25 by the Curator. Build AETHER-FORGE-20261003-AUTO was compiled eight days later by the AETHER-7 automated pipeline. The Curator built the implant. MIRA-7 compiled its own propagation module.",
+        1: "GAP MEASURED. The dump zeroed 456 low bits of the larger prime. The authors hid the part that mattered least and left the top half in the clear.",
+        2: "PRIME REBUILT. Half of a prime is enough: a small-roots lattice recovers the missing low bits, and the factor falls out of the modulus.",
+        3: "CONFIG OPENED. With p and q, the private exponent follows. The implant's own instructions were sealed with a key it leaked itself.",
+        4: "KEY COMPLETE. The second prime is the modulus divided by the first. Both halves of the lock are on the bench.",
     },
     9: {
         1: "STAGING FOUND. A cron task, nexus_sync_precheck, was planted on September 28 at 04:15 IST, five days before the bulletin's 'sudden' attack. The file was backdated, but a +184 ms clock skew against the NTP server gave it away.",

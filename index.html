@@ -471,7 +471,7 @@ ROOMS.forEach((r,i)=>{
         const st = dstate(i);
         if (st === 'locked') {
             sfx('locked');
-            addIntel('SYSTEM','Room '+(i+1)+' is locked. Capture '+UNLOCK_MIN+' of the 4 flags in Room '+i+' first.');
+            addIntel('SYSTEM','Room '+(i+1)+' is locked. '+lockMsg(i));
         } else if (i < PLAYABLE_ROOMS) {
             if (going) return; going = true; sfx('door');
             setTimeout(() => { window.location.href = '/room/' + (i + 1); }, 120);
@@ -562,6 +562,15 @@ const D=[],sol=[],visited=Array(10).fill(0),NT=[0,0,0],K={};
 let mode='boot',ri=0,npcOpen=false,dlgT,cam={x:0,y:0};
 // ── room state, driven by /api/progress ──
 const RS=Array.from({length:10},()=>({solved:0,unlocked:false,cleared:false}));
+// event phase for lock messages; never talk about a "Room 0"
+let EVPH='live';
+function lockMsg(i){
+  if(EVPH==='before')return'The event has not started yet. Rooms open at 10:00 IST on 31 Oct.';
+  if(EVPH==='ended')return'The event has ended. All rooms are locked.';
+  if(i<=0)return'Room 1 is not open right now.';
+  return'Capture '+UNLOCK_MIN+' of the 4 flags in Room '+i+' first.';
+}
+fetch('/api/event').then(function(r){return r.json()}).then(function(e){if(!e.window_on){EVPH='live';return}var n=Date.parse(e.now);EVPH=n<Date.parse(e.start)?'before':n>=Date.parse(e.end)?'ended':'live'}).catch(function(){});
 let RS_READY=false,UNLOCK_MIN=3,ME='',OBJ=null,talkNPC=-1,banner=null,going=false,lastStep=0,lastDust=0,evAt=0;
 const PEND=[];
 const sfx=n=>{try{window.NJAudio&&NJAudio.sfx(n)}catch(e){}};
@@ -643,7 +652,7 @@ function interact(){mode=='room'?leave():act()}
 function act(){const n=near();if(!n)return;if(n.t=='npc')return talk(n.i);
 const i=n.i,st=dstate(i);
 const note=(h,b)=>{say(h,b,'ESC: close');clearTimeout(dlgT);dlgT=setTimeout(()=>{$('dlg').hidden=true},3600)};
-if(st=='locked'){sfx('locked');shake(160);note('ROOM '+(i+1)+' // LOCKED','Capture '+UNLOCK_MIN+' of the 4 flags in Room '+i+' to unlock this door.');return}
+if(st=='locked'){sfx('locked');shake(160);note('ROOM '+(i+1)+' // LOCKED',lockMsg(i));return}
 if(st!='sealed'){if(going)return;going=true;sfx('door');setTimeout(()=>{window.location.href='/room/'+(i+1)},170);return}
 sfx('locked');note('ROOM '+(i+1)+' // CLASSIFIED','This door is sealed. The room has not been declassified yet.');
 addIntel('SYSTEM','Room '+(i+1)+' ['+R[i][0]+'] is not available yet.');
@@ -836,7 +845,7 @@ mode=='room'?drawRoom():drawHub(t);X.fillStyle=sl;X.fillRect(0,0,W,H);
 if(mode=='hub'){labels();const n=near(),pr=$('prompt');
 $('h1').textContent='> HUB: meraz-gate';$('h2').textContent='Rooms '+visited.filter(Boolean).length+'/10  |  Allies '+NT.filter(Boolean).length+'/3';$('h3').textContent=UNLOCK_MIN>0?'Clear a room to open the next door.':'Walk anywhere. Any door, any order.';
 if(npcOpen&&!(n&&n.t=='npc')){npcOpen=false;$('dlg').hidden=true}
-const ds=n&&n.t=='door'?dstate(n.i):'',m=n?n.t=='npc'?'E: talk to '+NP[n.i].s:ds=='locked'?'LOCKED: clear Room '+n.i+' first':ds=='sealed'?'CLASSIFIED':'E: enter Room '+(n.i+1):'';pr.hidden=!m||!$('dlg').hidden;pr.textContent=m;
+const ds=n&&n.t=='door'?dstate(n.i):'',m=n?n.t=='npc'?'E: talk to '+NP[n.i].s:ds=='locked'?(EVPH==='live'&&n.i>0?'LOCKED: clear Room '+n.i+' first':'LOCKED'):ds=='sealed'?'CLASSIFIED':'E: enter Room '+(n.i+1):'';pr.hidden=!m||!$('dlg').hidden;pr.textContent=m;
 // Update nav timer + sidebar
 const s=(Date.now()-t0)/1000|0;
 const tm0=23*60+17+(s/60|0),timerStr=f2(Math.floor(tm0/60)%24)+':'+f2(tm0%60)+':'+f2(s%60);

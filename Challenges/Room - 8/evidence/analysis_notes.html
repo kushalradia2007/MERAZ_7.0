@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIRA-7 Implant - Config Notes</title>
+<style>
+:root{--bg:#050508;--card:#0a0a12;--card-hover:#0f0f1a;--border:#1a1a2a;--text:#b0b0c0;--muted:#4a4a5a;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--violet:#b388ff;--surface:#12121e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Consolas','Courier New',monospace;background:var(--bg);color:var(--text);font-size:.78rem}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.header-brand{color:var(--cyan);font-weight:bold;font-size:1rem;letter-spacing:1px}.header-meta{color:var(--muted);font-size:.7rem}
+.container{max-width:1100px;margin:0 auto;padding:1.5rem 2rem}
+.section-title{color:var(--cyan);font-size:.95rem;margin:2rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+p{line-height:1.7;margin-bottom:.8rem}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);margin-bottom:1.2rem}
+th{background:var(--surface);color:var(--cyan);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.45rem .8rem;border-bottom:1px solid rgba(26,26,42,.5);font-size:.74rem;vertical-align:top}
+td.h{word-break:break-all;color:var(--violet);font-size:.7rem}
+tr:hover td{background:var(--card-hover)}
+.scroll{overflow-x:auto}
+code{color:var(--violet);background:rgba(179,136,255,.1);padding:.1rem .3rem;border-radius:2px}
+a{color:var(--cyan)}
+.info{margin-top:1rem;color:var(--muted);font-size:.68rem;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-brand">MIRA-7 Implant - Config Notes</div><div class="header-meta">Room 8 // sealed config v1</div></div>
+<div class="container">
+<p>The implant keeps its settings sealed under an RSA public key. A crash handler dumped part of the matching private key when the sample died in the sandbox. Everything is hex. Nothing here says how to use it; that part is yours.</p>
+<h2 class="section-title">Key material</h2>
+<div class="scroll"><table><thead><tr><th>item</th><th>value</th></tr></thead><tbody><tr><td>n</td><td>the modulus, in sealed_config.json</td></tr><tr><td>e</td><td>65537</td></tr><tr><td>p</td><td>the larger of the two primes that make up n</td></tr><tr><td>leak.p_high</td><td>p with its low bits set to zero. The zeroed bits are the ones the dump could not read</td></tr><tr><td>note</td><td>the dump stops at the point where the crash handler lost the rest</td></tr></tbody></table></div>
+<h2 class="section-title">Sealed config</h2>
+<div class="scroll"><table><thead><tr><th>item</th><th>value</th></tr></thead><tbody><tr><td>scheme</td><td>RSA-OAEP</td></tr><tr><td>hash</td><td>SHA-1, with MGF1-SHA-1</td></tr><tr><td>label</td><td>none</td></tr><tr><td>ciphertext</td><td>hex, in sealed_config.json as ct</td></tr><tr><td>plaintext</td><td>a flag in NIGHTJAR{...} form</td></tr></tbody></table></div>
+<h2 class="section-title">Answer formats</h2>
+<div class="scroll"><table><thead><tr><th>target</th><th>format</th></tr></thead><tbody><tr><td>8.1</td><td>NIGHTJAR{zero_bits_N}, where N is the number of zero bits at the bottom of leak.p_high</td></tr><tr><td>8.2</td><td>NIGHTJAR{p_XXXXXXXXXXXXXXXX}, the last 16 hex digits of p, lowercase</td></tr><tr><td>8.3</td><td>the flag stored in the sealed config</td></tr><tr><td>8.4</td><td>NIGHTJAR{q_XXXXXXXXXXXXXXXX}, the last 16 hex digits of q, lowercase</td></tr></tbody></table></div>
+<p class="info">Check that your p divides n before you trust it. Several wrong candidates look right.</p>
+</div>
+</body>
+</html>

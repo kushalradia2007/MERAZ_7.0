@@ -83,7 +83,12 @@
             .r8-main { grid-template-columns: 1fr; }
             .r8-left { position: static; }
         }
-    </style>
+    
+        .r8-kv { font-family: var(--font-code); font-size: 11px; line-height: 1.7; color: var(--ink-dim); word-break: break-all; }
+        .r8-kv > div { padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+        .r8-kv b { display: block; color: var(--ink-faint); letter-spacing: .12em; font-weight: 600; font-size: 10px; margin-bottom: 2px; }
+        .r8-kv .zeros { color: var(--red, #f43f5e); }
+</style>
     <script src="/room-common.js"></script>
     <script src="/assets/story.js"></script>
 </head>
@@ -108,95 +113,91 @@
     </header>
 
     <main class="nj-main r8-main">
-        <!-- Left: the specimen, and the stages you complete -->
         <div class="nj-col r8-left">
             <section class="nj-panel nj-rise" style="--i:0">
-                <div class="nj-panel-h"><i class="dot"></i>Specimen<span class="meta">STATIC COPY</span></div>
+                <div class="nj-panel-h"><i class="dot"></i>Specimen<span class="meta">SEALED CONFIG</span></div>
                 <div class="r8-spec">
                     <div class="r8-jar">
                         <div class="r8-ico" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h12M16 4v12L7 32a3 3 0 0 0 3 4h20a3 3 0 0 0 3-4L24 16V4"/><path d="M11 26h18"/></svg></div>
-                        <div><b>Ethereal_Sync_Helper_v2.1.exe</b><span>QUARANTINE · CHAMBER 3</span></div>
+                        <div><b>MIRA-7 implant config</b><span>QUARANTINE · CHAMBER 3</span></div>
                     </div>
                     <div class="r8-facts">
-                        <div><span>CLAIMS TO BE</span><span>Ceremony timing tool</span></div>
-                        <div><span>CLAIMED SIZE</span><span>2.4 MB</span></div>
-                        <div><span>DELIVERED VIA</span><span>Kabir's inbox</span></div>
+                        <div><span>CIPHER</span><span>RSA-OAEP</span></div>
+                        <div><span>MODULUS</span><span>2047 bits</span></div>
+                        <div><span>EXPONENT</span><span>65537</span></div>
                         <div><span>EXECUTION</span><span class="ok">DISABLED</span></div>
                     </div>
-                    <div class="r8-inert">A BINARY IS A DOCUMENT. READ IT, DO NOT RUN IT.</div>
+                    <div class="r8-inert">THE IMPLANT KEPT ITS OWN KEY. IT LEFT A PIECE OF IT ON THE FLOOR.</div>
                 </div>
             </section>
 
             <section class="nj-panel nj-rise" style="--i:1">
                 <div class="nj-panel-h"><i class="dot"></i>Analysis stages<span class="meta" id="tl-count">0/4</span></div>
                 <div class="r8-st">
-                    <div class="r8-step" id="step-1"><span class="n">1</span><div><b>IDENTIFY</b><small class="locked">Unlocks when 8.1 is solved</small><small class="open">What the file really is</small></div></div>
-                    <div class="r8-step" id="step-2"><span class="n">2</span><div><b>EXTRACT</b><small class="locked">Unlocks when 8.2 is solved</small><small class="open">What it was told to do</small></div></div>
-                    <div class="r8-step" id="step-3"><span class="n">3</span><div><b>TRACE</b><small class="locked">Unlocks when 8.3 is solved</small><small class="open">What it was waiting for</small></div></div>
-                    <div class="r8-step" id="step-4"><span class="n">4</span><div><b>ATTRIBUTE</b><small class="locked">Unlocks when 8.4 is solved</small><small class="open">Who finished building it</small></div></div>
+                    <div class="r8-step" id="step-1"><span class="n">1</span><div><b>THE GAP</b><small class="locked">Unlocks when 8.1 is solved</small><small class="open">What the dump left out</small></div></div>
+                    <div class="r8-step" id="step-2"><span class="n">2</span><div><b>THE FACTOR</b><small class="locked">Unlocks when 8.2 is solved</small><small class="open">A prime, rebuilt</small></div></div>
+                    <div class="r8-step" id="step-3"><span class="n">3</span><div><b>THE CONFIG</b><small class="locked">Unlocks when 8.3 is solved</small><small class="open">What the implant was told</small></div></div>
+                    <div class="r8-step" id="step-4"><span class="n">4</span><div><b>THE OTHER HALF</b><small class="locked">Unlocks when 8.4 is solved</small><small class="open">The second prime</small></div></div>
                 </div>
             </section>
         </div>
 
-        <!-- Center: comms + the bench -->
         <div class="nj-col">
             <section class="nj-panel nj-rise" id="npc-comms" style="--i:1" aria-label="Secure comms"></section>
 
             <section class="nj-panel nj-rise" style="--i:2">
                 <div class="r8-tabs" role="tablist" aria-label="Lab bench">
-                    <button type="button" class="r8-tab" role="tab" id="tab-hex" aria-selected="true" aria-controls="pane-hex" onclick="switchTab('hex')">HEX BENCH</button>
-                    <button type="button" class="r8-tab" role="tab" id="tab-box" aria-selected="false" aria-controls="pane-box" onclick="switchTab('box')">SANDBOX LOG</button>
+                    <button type="button" class="r8-tab" role="tab" id="tab-key" aria-selected="true" aria-controls="pane-key" onclick="switchTab('key')">KEY MATERIAL</button>
+                    <button type="button" class="r8-tab" role="tab" id="tab-ct" aria-selected="false" aria-controls="pane-ct" onclick="switchTab('ct')">CIPHERTEXT</button>
                 </div>
 
-                <div class="r8-pane active" id="pane-hex" role="tabpanel" aria-labelledby="tab-hex">
-                    <div class="r8-hex" id="hex" aria-label="Hex dump of the first bytes of the specimen"></div>
-                    <div class="r8-read" id="hex-read">Hover a byte to read it. This is only the first screen of the file. The real structure is in the analysis files under each target.</div>
+                <div class="r8-pane active" id="pane-key" role="tabpanel" aria-labelledby="tab-key">
+                    <div class="r8-kv" id="key-kv">Loading the export...</div>
+                    <p class="r8-note">The leak comes from a crash handler that dumped half of a secret and then stopped. Work from <code>sealed_config.json</code>, not this panel.</p>
                 </div>
 
-                <div class="r8-pane" id="pane-box" role="tabpanel" aria-labelledby="tab-box">
-                    <div class="r8-box" id="box" role="log" aria-live="off"></div>
-                    <button type="button" class="nj-tool" style="margin-top:12px" onclick="replayBox()">↻ REPLAY</button>
-                    <p class="r8-note">An inert replay of what the surface of the file does. It shows the costume only. Execution stays disabled in this chamber.</p>
+                <div class="r8-pane" id="pane-ct" role="tabpanel" aria-labelledby="tab-ct">
+                    <div class="r8-kv" id="ct-kv">Loading...</div>
+                    <p class="r8-note">Parameters and answer formats are in <code>analysis_notes.html</code>. The method is yours to choose.</p>
                 </div>
 
                 <div class="nj-panel-b" style="padding-top:0"><div class="r8-whisper" id="whisper"><small>EMBEDDED IN THE SAMPLE. NOT BY US.</small><span id="whisper-t"></span></div><div id="nj-next-slot"></div></div>
             </section>
         </div>
 
-        <!-- Right: targets + log -->
         <div class="nj-col r8-right">
             <section class="nj-panel nj-rise" style="--i:2">
                 <div class="nj-panel-h"><i class="dot"></i>Investigation targets · Room 8<span class="meta" id="solved-count">0/4</span></div>
                 <div class="nj-panel-b">
 
                     <article class="nj-card" id="target-1">
-                        <div class="nj-card-top"><span class="nj-badge">8.1</span><span class="nj-title">THE FILE THAT IS NOT WHAT IT CLAIMS</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">The binary arrived as a <code>2.4 MB</code> sync utility. Its structure tells a different story. Identify the PE mismatch, the invalid certificate issuer, the suspicious section and permissions, and the package registry failure.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('PE Headers and Hash Analysis', '/challenges/Room - 8/evidence/file_analysis.html')">VIEW: file_analysis.html</button><a href="/challenges/Room - 8/evidence/file_analysis.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">8.1</span><span class="nj-title">THE GAP</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">The crash handler printed the larger prime of the key, but part of it is blank. Count how much. Format: <code>NIGHTJAR{zero_bits_N}</code>, where N is the number of zero bits at the bottom of the leaked value.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Analysis Notes', '/challenges/Room - 8/evidence/analysis_notes.html')">VIEW: analysis_notes.html</button><a href="/challenges/Room - 8/evidence/analysis_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Sealed Config', '/challenges/Room - 8/evidence/sealed_config.json')">VIEW: sealed_config.json</button><a href="/challenges/Room - 8/evidence/sealed_config.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 8.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
                     </article>
 
                     <article class="nj-card" id="target-2">
-                        <div class="nj-card-top"><span class="nj-badge">8.2</span><span class="nj-title">THE MESSAGE INSIDE THE BINARY</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">The binary carries an embedded C2 configuration block. Locate <code>[MIRA_CONFIG_v7]</code> in the extracted strings. Identify the C2 domain, the encryption key, the beacon interval and the developer's embedded message.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Strings and C2 Block', '/challenges/Room - 8/evidence/strings_analysis.html')">VIEW: strings_analysis.html</button><a href="/challenges/Room - 8/evidence/strings_analysis.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">8.2</span><span class="nj-title">THE FACTOR</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Half a prime is enough. Recover the larger prime, <code>p</code>. Format: <code>NIGHTJAR{p_XXXXXXXXXXXXXXXX}</code>, the last 16 hex digits of <code>p</code>, lowercase.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Analysis Notes', '/challenges/Room - 8/evidence/analysis_notes.html')">VIEW: analysis_notes.html</button><a href="/challenges/Room - 8/evidence/analysis_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Sealed Config', '/challenges/Room - 8/evidence/sealed_config.json')">VIEW: sealed_config.json</button><a href="/challenges/Room - 8/evidence/sealed_config.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 8.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
                     </article>
 
                     <article class="nj-card" id="target-3">
-                        <div class="nj-card-top"><span class="nj-badge">8.3</span><span class="nj-title">THE BRANCH NEVER MEANT TO RUN</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">The disassembly shows a function, <code>mira_propagate()</code>, that stayed silent on Kabir's workstation but woke up when the payload reached AETHER-7. Identify the activation condition and why.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Control Flow', '/challenges/Room - 8/evidence/control_flow.html')">VIEW: control_flow.html</button><a href="/challenges/Room - 8/evidence/control_flow.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">8.3</span><span class="nj-title">THE CONFIG</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">With the key rebuilt, open what the implant was holding. The plaintext is the answer, in <code>NIGHTJAR{...}</code> form.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Analysis Notes', '/challenges/Room - 8/evidence/analysis_notes.html')">VIEW: analysis_notes.html</button><a href="/challenges/Room - 8/evidence/analysis_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Sealed Config', '/challenges/Room - 8/evidence/sealed_config.json')">VIEW: sealed_config.json</button><a href="/challenges/Room - 8/evidence/sealed_config.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 8.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
                     </article>
 
                     <article class="nj-card" id="target-4">
-                        <div class="nj-card-top"><span class="nj-badge">8.4</span><span class="nj-title">THE NAME BEHIND THE SAMPLE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">The binary contains two build tags. Compare the timestamps and build environments. Determine who compiled the original implant, who compiled the autonomous propagation module, and when.</p>
-                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Attribution and Build Timeline', '/challenges/Room - 8/evidence/attribution_analysis.html')">VIEW: attribution_analysis.html</button><a href="/challenges/Room - 8/evidence/attribution_analysis.html" download>DL</a></span></div>
+                        <div class="nj-card-top"><span class="nj-badge">8.4</span><span class="nj-title">THE OTHER HALF</span><span class="nj-chip"></span></div>
+                        <p class="nj-desc">Every modulus has two primes. Find the other one, <code>q</code>. Format: <code>NIGHTJAR{q_XXXXXXXXXXXXXXXX}</code>, the last 16 hex digits of <code>q</code>, lowercase.</p>
+                        <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Analysis Notes', '/challenges/Room - 8/evidence/analysis_notes.html')">VIEW: analysis_notes.html</button><a href="/challenges/Room - 8/evidence/analysis_notes.html" download>DL</a></span><span class="nj-file"><button type="button" onclick="openEvidence('Sealed Config', '/challenges/Room - 8/evidence/sealed_config.json')">VIEW: sealed_config.json</button><a href="/challenges/Room - 8/evidence/sealed_config.json" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 8.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
                     </article>
@@ -206,7 +207,7 @@
             <section class="nj-panel nj-rise" style="--i:3">
                 <div class="nj-panel-h"><i class="dot"></i>Lab log</div>
                 <div class="nj-log" id="sys-log" style="height:150px" role="log" aria-live="polite">
-                    <div class="l">Chamber sealed. Execution disabled.</div>
+                    <div class="l">Malware lab online.</div>
                     <div class="l">Awaiting analyst input...</div>
                 </div>
             </section>
@@ -229,38 +230,39 @@
         const ROOM_ID = 8;
 
         /* ───────── Story: Room 8 (Rhea D'Souza, Ila Sen) ─────────
-         * Player-visible text. Keep it free of answers: no section names, domains,
-         * keys, intervals, variable names or build tags. Post-solve facts come from the server. */
+         * Player-visible text. Keep it free of answers: no bit counts, prime digits or the config text.
+         * Post-solve facts come from the server. */
         const story = NJStory.create({
             room: 8,
             title: 'THE GHOST IN THE MACHINE',
             lead: 'rhea',
             nextMount: '#nj-next-slot',
-            objective: 'Four questions about one file: what it is, what it says, what it waits for and who finished it. Do not run it. Read it.',
+            objective: 'Four questions about one key. Measure the gap, rebuild a prime, open the config, find the other prime. Do not run the file. Read it.',
             complete: 'Room clear. The audit trail is waiting in Room 9 whenever you are ready.',
 
             briefing: [
-                { scene: 'A sealed chamber. A single file on the bench, stripped of everything that could make it move.', stamp: '01:53 · MALWARE LAB' },
-                { npc: 'rhea', text: 'Rhea. Ila has put me on the bench with you. This is the file Kabir ran. I have pulled its teeth, so it is safe to open. It is not safe to underestimate.' },
-                { npc: 'rhea', text: 'It says it is a timing tool. It has the right icon, the right publisher, a believable version number. Everything on the surface is borrowed.' },
-                { npc: 'rhea', text: 'A binary is a document. Its headers, its strings and its structure say what it was built to do, and where it came from. We are going to read it like a chart.' },
-                { npc: 'ila', text: 'Four questions. What is the file really? What was it told to do? What was it waiting for? And who finished building it?' },
-                { npc: 'rhea', text: 'Do not trust the name. Do not trust the icon. Trust the bytes.' },
+                { scene: 'A sealed chamber. A single config block on the bench, locked, with half of its key lying beside it.', stamp: '01:53 · MALWARE LAB' },
+                { npc: 'rhea', text: 'Rhea. Ila has put me on the bench with you. The implant keeps its settings sealed under a public key. Nothing unusual about that.' },
+                { npc: 'rhea', text: 'What is unusual is the crash dump. When the sample died in the sandbox, its handler printed a piece of the secret and stopped halfway.' },
+                { npc: 'ila', text: 'How much of it is missing?' },
+                { npc: 'rhea', text: 'Enough to feel safe. Maybe not enough to be safe. That is the question.' },
+                { npc: 'ila', text: 'Four questions. How big is the gap? Can the prime be rebuilt? What was the implant holding? And what is the other half of the key?' },
+                { npc: 'rhea', text: 'Do not run it. Do not guess it. Compute it.' },
                 { npc: 'system', text: 'QUARANTINE CHAMBER 3 ONLINE. EXECUTION DISABLED. TARGETS UNLOCKED.' }
             ],
 
             greet: {
-                0: ['Start with the headers. A file can lie about its name. It cannot lie about its structure.'],
-                1: ['One answer in. Now look at what the thing says about itself, in its own strings.'],
-                2: ['Halfway. It is starting to look less like a tool and more like a decision somebody made.'],
-                3: ['One left. Check the dates. Dates are the one thing authors forget to disguise.']
+                0: ['Start with the dump. Look at the end of the number. What is missing, and how much of it?'],
+                1: ['One answer in. A partial secret is still a secret that is partly gone.'],
+                2: ['Halfway. The key is not as private as the authors thought.'],
+                3: ['One left. Every modulus has two sides.']
             },
 
             onSolve: {
-                1: ['So the costume was thin. A file that size has no business calling itself a sync tool.'],
-                2: ['It carried its own instructions. Nobody bothered to encrypt the part that mattered.'],
-                3: [{ npc: 'ila', text: 'It behaved on his workstation. It was built to wait for somewhere more important.' }],
-                4: [{ npc: 'rhea', text: 'Two build tags. I need a minute with that one.' }]
+                1: ['So the dump was careful about the wrong thing. It hid the part that mattered least.'],
+                2: ['One prime, rebuilt from a fragment. The rest of the key follows from it.'],
+                3: [{ npc: 'ila', text: 'It was holding its own instructions. Sealed, and then handed to us with the key half open.' }],
+                4: [{ npc: 'rhea', text: 'Both primes, and the lock is gone. I have seen locks fail louder than this.' }]
             },
 
             milestone: {
@@ -269,19 +271,19 @@
                     { npc: 'ila', text: 'Rhea, is it what we feared?' },
                     { npc: 'rhea', text: 'Worse. It is tidy.' }
                 ],
-                3: ['Three. The last one is about the author, and the author is not who I expected.']
+                3: ['Three. The last one is the other half of the key.']
             },
 
             wrong: [
-                'That does not match the sample. Check the exact values in the file.',
-                'No. Re-read the analysis line by line.',
-                'Not it. Compare against the raw evidence again.'
+                'That does not match the dump. Check the exact format on the card.',
+                'No. Recompute it. Do not guess it.',
+                'Not it. Check your bounds, and check the value against the modulus.'
             ],
             hints: {
-                1: 'Ignore the label and look at the sections, the signature and the registry. What is out of place?',
-                2: 'Search the extracted strings for the block that names the configuration. Note the server, the key, the timing and the signature line.',
-                3: 'Find the branch labelled as a check. What does it compare, and what value makes it true?',
-                4: 'Compare the two build tags: who compiled each one, when, and what the suffix on the second one implies.'
+                1: 'Look at the leaked value in hex. Count the zero bits at the bottom, not the digits.',
+                2: 'You know the top of a prime that divides n. This is a classic small-roots problem. Think Coppersmith, with a polynomial built from the known high part.',
+                3: 'Once you hold p, you hold q, then the private exponent. Decrypt with RSA-OAEP, using the hash named in the notes.',
+                4: 'q is n divided by p. Check that p times q gives n exactly.'
             },
 
             debrief: [
@@ -307,7 +309,7 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        /* ───────── Lab log ───────── */
+        /* ───────── Lab log log ───────── */
         const logBox = document.getElementById('sys-log');
         function addLog(message, type) {
             const d = document.createElement('div');
@@ -322,91 +324,36 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        /* ───────── Bench tabs ───────── */
-        let boxStarted = false;
+        /* ───────── Bench tabs and the export preview ───────── */
         function switchTab(name) {
-            ['hex', 'box'].forEach(function (k) {
+            ['key', 'ct'].forEach(function (k) {
                 document.getElementById('tab-' + k).setAttribute('aria-selected', k === name ? 'true' : 'false');
                 document.getElementById('pane-' + k).classList.toggle('active', k === name);
             });
-            if (name === 'box' && !boxStarted) replayBox();
         }
         window.switchTab = switchTab;
 
-        /* ───────── Hex bench: the opening bytes of any Windows program ─────────
-         * Generic and harmless: standard DOS stub only. No indicators from the evidence. */
-        (function buildHex() {
-            const stub = [0x4D,0x5A,0x90,0x00,0x03,0x00,0x00,0x00,0x04,0x00,0x00,0x00,0xFF,0xFF,0x00,0x00,
-                          0xB8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x40,0x00,0x00,0x00,0x00,0x00,0x00,0x00];
-            const msg = 'This program cannot be run in DOS mode.\r\r\n$';
-            const bytes = stub.slice();
-            while (bytes.length < 0x40) bytes.push(0);
-            bytes.length = 0x40; bytes[0x3C] = 0x80;
-            const dos = [0x0E,0x1F,0xBA,0x0E,0x00,0xB4,0x09,0xCD,0x21,0xB8,0x01,0x4C,0xCD,0x21];
-            dos.forEach(function (x) { bytes.push(x); });
-            for (let i = 0; i < msg.length; i++) bytes.push(msg.charCodeAt(i));
-            while (bytes.length < 0x80) bytes.push(0);
-            [0x50,0x45,0x00,0x00,0x4C,0x01,0x05,0x00].forEach(function (x) { bytes.push(x); });
-            while (bytes.length < 0x100) bytes.push(0);
-            const READ = { 0: 'MZ: the two bytes every Windows program starts with.', 0x3C: 'Pointer to the real header further down.', 0x4E: 'Part of the standard DOS stub text.', 0x80: 'PE: the start of the real header.' };
-            const root = document.getElementById('hex');
-            const read = document.getElementById('hex-read');
-            for (let o = 0; o < bytes.length; o += 16) {
-                const row = document.createElement('div'); row.className = 'ln';
-                const off = document.createElement('span'); off.className = 'off'; off.textContent = ('00000000' + o.toString(16)).slice(-8);
-                const by = document.createElement('span'); by.className = 'by';
-                const as = document.createElement('span'); as.className = 'as';
-                let ascii = '';
-                for (let i = 0; i < 16; i++) {
-                    const v = bytes[o + i], s = document.createElement('span');
-                    s.textContent = ('0' + v.toString(16)).slice(-2).toUpperCase() + ' ';
-                    s.dataset.o = o + i;
-                    by.appendChild(s);
-                    ascii += (v >= 32 && v < 127) ? String.fromCharCode(v) : '.';
-                }
-                as.textContent = ascii;
-                row.appendChild(off); row.appendChild(by); row.appendChild(as);
-                root.appendChild(row);
-            }
-            root.addEventListener('mouseover', function (e) {
-                const o = e.target && e.target.dataset && e.target.dataset.o;
-                if (o == null) return;
-                const n = Number(o), v = bytes[n];
-                let t = 'Offset <b>0x' + n.toString(16).toUpperCase() + '</b> · value <b>0x' + v.toString(16).toUpperCase() + '</b>';
-                const k = Object.keys(READ).map(Number).filter(function (x) { return x <= n; }).pop();
-                if (k !== undefined && n - k < 4) t += ' · ' + READ[k];
-                read.innerHTML = t;
-            });
-        })();
-
-        /* ───────── Sandbox replay: the costume only ───────── */
-        let boxTimer = 0;
-        function replayBox() {
-            boxStarted = true;
-            clearTimeout(boxTimer);
-            const box = document.getElementById('box'); box.textContent = '';
-            const lines = [
-                ['[chamber] execution disabled, replay mode', 'b'],
-                ['[gui] window title: "NEXUS Ceremony Sync"', ''],
-                ['[gui] status text: "Synchronising ceremony-controller..."', ''],
-                ['[gui] progress bar: 0% ... 100% (cosmetic, 4 seconds)', ''],
-                ['[gui] status text: "Success! Timing stabilised."', ''],
-                ['[gui] dialog closes. Nothing visible happens afterwards.', 'w'],
-                ['[chamber] the user would see a working tool.', 'b'],
-                ['[chamber] this replay shows the surface only. Read the files for the rest.', 'w']
-            ];
-            let i = 0;
-            (function tick() {
-                if (i >= lines.length) return;
-                const r = document.createElement('div'); r.className = 'r ' + lines[i][1];
-                const t = document.createElement('span'); t.className = 't'; t.textContent = '00:0' + i;
-                r.appendChild(t); r.appendChild(document.createTextNode(lines[i][0]));
-                box.appendChild(r); box.scrollTop = box.scrollHeight;
-                if (window.NJAudio && NJAudio.sfx) NJAudio.sfx('select');
-                i++; boxTimer = setTimeout(tick, 900);
-            })();
+        function kvRow(box, label, value, cls) {
+            const d = document.createElement('div');
+            const b = document.createElement('b'); b.textContent = label;
+            const v = document.createElement('span'); v.textContent = value; if (cls) v.className = cls;
+            d.appendChild(b); d.appendChild(v); box.appendChild(d);
         }
-        window.replayBox = replayBox;
+        async function loadExport() {
+            try {
+                const r = await fetch('/challenges/Room%20-%208/evidence/sealed_config.json', { credentials: 'same-origin' });
+                if (!r.ok) throw new Error(String(r.status));
+                const j = await r.json();
+                const k = document.getElementById('key-kv'); k.textContent = '';
+                kvRow(k, 'MODULUS n', j.n); kvRow(k, 'EXPONENT e', String(j.e)); kvRow(k, 'LEAK: p_high', j.leak.p_high); kvRow(k, 'DUMP NOTE', j.leak.note);
+                const c = document.getElementById('ct-kv'); c.textContent = '';
+                kvRow(c, 'CIPHERTEXT', j.ct);
+                addLog('Sealed config loaded.', 'ok');
+            } catch (e) {
+                document.getElementById('key-kv').textContent = 'The export could not be loaded. Download sealed_config.json from any target.';
+                document.getElementById('ct-kv').textContent = 'Not loaded.';
+            }
+        }
 
         /* ───────── Flags: the server is the only source of truth ───────── */
         const WHISPERS = {
@@ -450,6 +397,7 @@
         }
 
         async function initSolvedState() {
+            loadExport();
             const p = await NJ.progress();
             const solved = p ? (p.rooms[ROOM_ID] || []) : [];
             const rewards = (p && p.rewards && p.rewards[ROOM_ID]) || {};
@@ -476,7 +424,7 @@
                 const hit = res.challenge || n;
                 const solved = res.solved.length ? res.solved : [n];
                 const fresh = !document.getElementById('target-' + hit).classList.contains('solved');
-                addLog('Target 8.' + hit + ' VERIFIED. Stage complete.', 'ok');
+                addLog('Target 8.' + hit + ' VERIFIED. Analysis updated.', 'ok');
                 solved.forEach(function (k) { markSolved(k, k === hit ? res.reward : undefined, true); });
                 story.onSolved(hit, solved);
                 if (fresh) setTimeout(function () { whisper(hit); }, 2200);
