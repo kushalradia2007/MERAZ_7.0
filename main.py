@@ -1053,6 +1053,30 @@ def admin_update_room(
     return {"message": f"Room updated to {room}", "user": user.username}
 
 
+@app.put("/api/admin/users/{user_id}/email")
+def admin_update_email(
+    user_id: int,
+    data: dict,
+    admin: models.User = Depends(require_admin),
+    db: Session = Depends(database.get_db),
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    new_email = normalize_email(data.get("email", ""))
+    if not new_email:
+        raise HTTPException(status_code=400, detail="Email cannot be empty")
+    conflict = db.query(models.User).filter(
+        func.lower(models.User.email) == new_email,
+        models.User.id != user_id,
+    ).first()
+    if conflict:
+        raise HTTPException(status_code=409, detail="Email already in use by another account")
+    user.email = new_email
+    db.commit()
+    return {"message": f"Email updated for '{user.username}'", "email": new_email}
+
+
 @app.put("/api/admin/users/{user_id}/toggle-admin")
 def admin_toggle_admin(
     user_id: int,
