@@ -3,255 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privilege Path Reconstruction — Attack Graph</title>
+    <title>Privilege Path — Identity Escalation Chain Reconstruction</title>
     <style>
         :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --card-hover: #0f0f1a;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
+            --bg:#050508; --card:#0a0a12; --border:#1a1a2a; --text:#b0b0c0;
+            --muted:#4a4a5a; --cyan:#00e5ff; --amber:#ffab00; --red:#ff4444;
+            --green:#00e676; --violet:#b388ff; --orange:#ff6d00; --surface:#12121e;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Consolas','JetBrains Mono',monospace; background:var(--bg); color:var(--text); font-size:.77rem; }
+        .header { background:var(--surface); border-bottom:1px solid var(--border); padding:.9rem 1.8rem; display:flex; justify-content:space-between; align-items:center; }
+        .header-brand { color:var(--cyan); font-weight:bold; font-size:.95rem; letter-spacing:1px; }
+        .header-meta { color:var(--muted); font-size:.67rem; text-align:right; line-height:1.5; }
+        .container { max-width:1300px; margin:0 auto; padding:1.2rem 1.8rem; }
 
-        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
-        .header-meta { color: var(--muted); font-size: 0.72rem; font-family: 'Consolas', monospace; }
+        .info-box { background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.2); border-left:4px solid var(--cyan); border-radius:6px; padding:1rem 1.2rem; margin-bottom:1.2rem; font-size:.73rem; line-height:1.65; color:#b0d4d9; }
+        .info-box b { color:var(--cyan); }
+        .info-box code { background:rgba(0,229,255,.1); padding:1px 4px; border-radius:2px; color:var(--cyan); font-size:.7rem; }
+        .warn-box { background:rgba(255,171,0,.05); border:1px solid rgba(255,171,0,.2); border-left:4px solid var(--amber); border-radius:6px; padding:.9rem 1.2rem; margin-bottom:1.2rem; font-size:.73rem; line-height:1.6; color:#d4c8a0; }
+        .warn-box b { color:var(--amber); }
 
-        .container { max-width: 1080px; margin: 0 auto; padding: 1.5rem 2rem; }
+        .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:1.2rem; }
+        .stat { background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:.65rem .9rem; }
+        .stat-val { font-size:1rem; font-weight:bold; margin-top:3px; }
+        .stat-lbl { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
 
-        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
-        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
-        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+        .section-head { font-size:.65rem; letter-spacing:.9px; color:var(--muted); text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:.4rem; margin:1.2rem 0 .7rem; }
 
-        /* Path Summary Banner */
-        .chain-summary { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyan); border-radius: 6px; padding: 1rem 1.4rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .chain-title { font-family: 'Consolas', monospace; font-size: 0.78rem; color: var(--cyan); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .chain-sequence { font-family: 'Consolas', monospace; font-size: 0.76rem; color: #fff; background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); }
+        .log-fragment { background:#020205; border:1px solid var(--border); border-radius:6px; margin-bottom:1rem; overflow:hidden; }
+        .frag-header { background:var(--surface); padding:.5rem 1rem; display:flex; justify-content:space-between; align-items:center; font-size:.66rem; color:var(--muted); }
+        .frag-header .src-tag { font-weight:bold; }
+        .frag-header .ts-tag { color:var(--cyan); }
+        .frag-header .hop-badge { padding:2px 8px; border-radius:10px; font-size:.62rem; font-weight:bold; }
+        .hop-real { background:rgba(0,230,118,.12); color:var(--green); border:1px solid rgba(0,230,118,.25); }
+        .hop-decoy { background:rgba(80,80,100,.15); color:var(--muted); border:1px solid rgba(80,80,100,.25); }
+        .hop-fail { background:rgba(255,68,68,.1); color:var(--red); border:1px solid rgba(255,68,68,.2); }
+        .frag-body { padding:.6rem 1rem; font-size:.71rem; line-height:1.7; }
+        .frag-body .line { border-bottom:1px solid rgba(26,26,42,.5); padding:.15rem 0; }
+        .frag-body .line:last-child { border-bottom:none; }
+        .hl-key { color:var(--green); }
+        .hl-from { color:var(--cyan); }
+        .hl-to { color:var(--amber); }
+        .hl-fail { color:var(--red); }
+        .hl-decoy-text { color:#444460; }
 
-        /* Attack Path Visual Grid */
-        .path-flow { display: flex; flex-direction: column; gap: 12px; position: relative; margin-bottom: 2rem; }
-        
-        .node-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.5rem; transition: all 0.25s; cursor: pointer; position: relative; }
-        .node-card:hover { border-color: var(--cyan); background: var(--card-hover); transform: translateX(4px); }
-        .node-card.active { border-color: var(--cyan); background: rgba(0, 229, 255, 0.04); }
-        .node-card.terminal-node { border-left: 4px solid var(--red); }
-        .node-card.initial-node { border-left: 4px solid var(--amber); }
-        .node-card.middle-node { border-left: 4px solid var(--violet); }
+        .chain-builder { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem 1.2rem; margin:1.2rem 0; }
+        .chain-label { font-size:.65rem; letter-spacing:.8px; color:var(--muted); text-transform:uppercase; margin-bottom:.7rem; }
+        .chain-steps { display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:.7rem; }
+        .chain-step { background:rgba(0,230,118,.08); border:1px solid rgba(0,230,118,.2); color:var(--green); padding:4px 10px; border-radius:4px; white-space:nowrap; }
+        .chain-arrow { color:var(--muted); font-size:.9rem; }
+        .chain-q { background:rgba(255,171,0,.08); border:1px dashed rgba(255,171,0,.3); color:var(--amber); padding:4px 10px; border-radius:4px; white-space:nowrap; }
 
-        .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
-        .node-step { font-family: 'Consolas', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-        .node-id { font-family: 'Consolas', monospace; font-size: 0.95rem; font-weight: bold; color: #fff; }
-        .node-level { font-family: 'Consolas', monospace; font-size: 0.7rem; padding: 2px 8px; border-radius: 3px; }
-        .lvl-student { background: rgba(255, 171, 0, 0.1); color: var(--amber); border: 1px solid rgba(255, 171, 0, 0.2); }
-        .lvl-service { background: rgba(179, 136, 255, 0.1); color: var(--violet); border: 1px solid rgba(179, 136, 255, 0.2); }
-        .lvl-sovereign { background: rgba(255, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(255, 68, 68, 0.3); font-weight: bold; }
+        .answer-grid { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-bottom:1.2rem; }
+        @media(max-width:700px) { .answer-grid { grid-template-columns:1fr; } }
+        .ag-cell { background:var(--card); border:1px solid var(--border); border-radius:5px; padding:.7rem .9rem; }
+        .ag-label { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:.3rem; }
+        .ag-val { font-size:.73rem; color:var(--text); line-height:1.55; }
+        .ag-val code { color:var(--cyan); background:rgba(0,229,255,.08); padding:1px 4px; border-radius:2px; font-size:.69rem; }
+        .ag-val .green { color:var(--green); }
+        .ag-val .amber { color:var(--amber); }
 
-        .node-summary { font-size: 0.78rem; line-height: 1.55; color: var(--text); }
-        .node-detail-panel { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; line-height: 1.6; }
-        .node-detail-panel.open { display: block; }
-
-        .connector { display: flex; justify-content: center; align-items: center; color: var(--muted); font-size: 0.8rem; margin: -4px 0; font-family: 'Consolas', monospace; }
-        .connector-arrow { color: var(--cyan); }
-
-        .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 4px; border: 1px solid var(--border); }
-        .spec-item { font-family: 'Consolas', monospace; font-size: 0.7rem; }
-        .spec-key { color: var(--muted); }
-        .spec-val { color: #fff; }
+        .note-block { background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:5px; padding:.8rem 1rem; margin-top:1rem; font-size:.71rem; line-height:1.6; color:var(--muted); }
+        .note-block b { color:var(--text); }
+        .note-block ul { margin:.35rem 0 0 1.1rem; }
+        .note-block li { margin:.2rem 0; }
+        .note-block code { color:var(--amber); background:rgba(255,171,0,.07); padding:1px 4px; border-radius:2px; font-size:.69rem; }
     </style>
 </head>
 <body>
-
 <div class="header">
-    <div class="header-brand">SPECTRE // ATTACK GRAPH PRIVILEGE MAPPER</div>
-    <div class="header-meta">CLUSTER TOPOLOGY GRAPH // CHALLENGE 9.3</div>
+    <div class="header-brand">NIGHTJAR.OS — IDENTITY ESCALATION · ROOM 9.3</div>
+    <div class="header-meta">DOCUMENT: privilege_path_reconstruction_v2.log<br>SOURCES: auth.log, sshd.log, sudo.log, nexus-svc.log, relay.log — MULTI-HOST CORRELATION</div>
 </div>
-
 <div class="container">
 
-    <div class="context-box">
-        <div class="context-label">Architectural Reconstruction — Challenge 9.3</div>
-        <div class="context-body">
-            How does an attacker progress from sending a phishing link to a volunteer laptop all the way to gaining sovereign administrative control of the campus-wide ceremonial release system? 
-            Security vulnerabilities alone do not cause full-system compromise; they require a <strong>privilege escalation path</strong> of trusted delegation bridges. 
-            Review the 6-step identity escalation chain below to reconstruct the attack path.
+    <div class="info-box">
+        <b>TASK —</b> Reconstruct the complete identity-and-privilege escalation chain from initial access to full control of the NEXUS central release controller. Log fragments from six different hosts are presented below, <b>interleaved with decoy entries and failed attempts</b>. Each real hop transitions from one identity to the next. The chain is exactly <b>six identities long</b> (start → end inclusive). Order the real hops, identify each identity in sequence, and ignore the failed attempts and unrelated sessions. The final identity reaches the master relay on the central release controller.
+    </div>
+
+    <div class="warn-box">
+        <b>ANALYST CAUTION —</b> Not every authentication event below is part of the escalation chain. There are: (A) failed login attempts that were <em>not</em> part of the successful path, (B) legitimate sessions from unrelated users running concurrently, and (C) one red-herring identity that appears to escalate but leads to a dead end. Correlate timestamps, source IPs, and session tokens (<code>sess=</code> fields) to identify the continuous chain.
+    </div>
+
+    <div class="stats-row">
+        <div class="stat"><div class="stat-val" style="color:var(--green)">6</div><div class="stat-lbl">Real hops</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--red)">3</div><div class="stat-lbl">Failed attempts</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--amber)">2</div><div class="stat-lbl">Decoy identities</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--muted)">4</div><div class="stat-lbl">Hosts involved</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--cyan)">23:00–23:32</div><div class="stat-lbl">Escalation window</div></div>
+    </div>
+
+    <div class="section-head">LOG FRAGMENTS — sorted by timestamp (earliest first)</div>
+
+    <!-- Fragment 1: Decoy brute force -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-portal-01 · sshd.log</span>
+            <span class="ts-tag">23:01:14–23:01:22 IST</span>
+            <span class="hop-badge hop-fail">✕ FAILED ATTEMPTS — DECOY</span>
+        </div>
+        <div class="frag-body">
+            <div class="line hl-fail">23:01:14.004 sshd[9100]: Failed password for invalid user root from 203.0.113.77 port 44301</div>
+            <div class="line hl-fail">23:01:15.441 sshd[9100]: Failed password for invalid user admin from 203.0.113.77 port 44302</div>
+            <div class="line hl-fail">23:01:17.112 sshd[9100]: Failed password for invalid user kite from 203.0.113.77 port 44303</div>
+            <div class="line hl-decoy-text">23:01:22.889 sshd[9100]: Connection closed by 203.0.113.77 — max retries reached</div>
+            <div class="line hl-decoy-text">// NOTE: 203.0.113.77 is the C2 beacon IP. These are automated probes, NOT the escalation path.</div>
         </div>
     </div>
 
-    <!-- Sequence Banner -->
-    <div class="chain-summary">
-        <div>
-            <div class="chain-title">Verified Attack Graph Escalation Path</div>
-            <div style="font-size: 0.72rem; color: var(--muted); margin-top: 2px;">6 Identity Hops // Phished Laptop to Sovereign Master</div>
+    <!-- Fragment 2: HOP 1 — kite phished laptop -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-portal-01 · auth.log</span>
+            <span class="ts-tag">23:05:33 IST</span>
+            <span class="hop-badge hop-real">✓ HOP 1</span>
         </div>
-        <div class="chain-sequence">
-            path_kite_to_maint_to_continuity_to_aether7_master_relay
+        <div class="frag-body">
+            <div class="line hl-from">23:05:33.011 sssd[1204]: pam_unix: authentication success; logname= uid=0 euid=0 tty=pts/7</div>
+            <div class="line hl-key">23:05:33.012 sssd[1204]: pam_unix: session opened for user <span class="hl-key">kite</span> uid=1044 by (uid=0) tty=pts/7</div>
+            <div class="line">23:05:33.098 sshd[9188]: Accepted publickey for <span class="hl-key">kite</span> from <span class="hl-from">192.168.50.14</span> port 52201 ssh2 sess=0xA1B2C3</div>
+            <div class="line hl-decoy-text">// 192.168.50.14 is kite's assigned workstation (Kabir's laptop — the phished endpoint)</div>
+            <div class="line">23:05:34.441 audit[1]: SYSCALL uid=1044 key=portal_login comm=bash</div>
         </div>
     </div>
 
-    <!-- Node Flow -->
-    <div class="path-flow">
-
-        <!-- Node 1 -->
-        <div class="node-card initial-node" onclick="toggleDetail('d1')">
-            <div class="node-header">
-                <div>
-                    <span class="node-step">HOP 1 // INITIAL HUMAN ACCESS (ROOM 7)</span>
-                    <div class="node-id">kite@meraz.org (Kabir Mehra)</div>
-                </div>
-                <span class="node-level lvl-student">Privilege: Student Lead Workstation</span>
-            </div>
-            <div class="node-summary">
-                Kabir executes <code>Ethereal_Sync_Helper.exe</code> on personal laptop thinking it was an official ceremony timing utility. 
-                Implant extracts local memory tokens and initiates MFA push notification spam.
-            </div>
-            <div class="node-detail-panel" id="d1">
-                <div class="spec-grid">
-                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Spear-phishing / Untrusted Executable</span></div>
-                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">Session Cookie & MFA Approval Push</span></div>
-                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 7 (Phishing) & Room 8 (Binary)</span></div>
-                </div>
-            </div>
+    <!-- Fragment 3: Decoy — unrelated concurrent session -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-portal-01 · auth.log</span>
+            <span class="ts-tag">23:06:01 IST</span>
+            <span class="hop-badge hop-decoy">— CONCURRENT SESSION (unrelated)</span>
         </div>
-
-        <div class="connector"><span class="connector-arrow">▼</span> [Token Replay via Staging Proxy]</div>
-
-        <!-- Node 2 -->
-        <div class="node-card middle-node" onclick="toggleDetail('d2')">
-            <div class="node-header">
-                <div>
-                    <span class="node-step">HOP 2 // COMPROMISED WEB IDENTITY (ROOM 5/7)</span>
-                    <div class="node-id">kite-backup (Replayed Volunteer Session)</div>
-                </div>
-                <span class="node-level lvl-student">Privilege: Portal Coordinator Role</span>
-            </div>
-            <div class="node-summary">
-                Attacker relays Kabir's stolen token from IP <code>10.14.2.88</code>. Impersonates Kabir under the alias <code>kite-backup</code> 
-                to browse internal volunteer portal endpoints and inspect staging API keys.
-            </div>
-            <div class="node-detail-panel" id="d2">
-                <div class="spec-grid">
-                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Lack of Session-to-IP Binding (CWE-384)</span></div>
-                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">Portal API JWT & Staging Docs</span></div>
-                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 7 (MFA Analysis)</span></div>
-                </div>
-            </div>
+        <div class="frag-body">
+            <div class="line hl-decoy-text">23:06:01.334 sssd[1211]: pam_unix: session opened for user rhea uid=1055 by (uid=0) tty=pts/8</div>
+            <div class="line hl-decoy-text">23:06:01.778 sshd[9201]: Accepted publickey for rhea from 192.168.50.22 port 53400 sess=0xD4E5F6</div>
+            <div class="line hl-decoy-text">// Rhea D'Souza — legitimate session, forensic analyst access. NOT part of the escalation chain.</div>
         </div>
-
-        <div class="connector"><span class="connector-arrow">▼</span> [Broken Object Level Authorization on /api/v1/maintenance]</div>
-
-        <!-- Node 3 -->
-        <div class="node-card middle-node" onclick="toggleDetail('d3')">
-            <div class="node-header">
-                <div>
-                    <span class="node-step">HOP 3 // SERVICE ACCOUNT ASSUMPTION (ROOM 5)</span>
-                    <div class="node-id">maint_svc_ceremony (Maintenance Role)</div>
-                </div>
-                <span class="node-level lvl-service">Privilege: Ceremony Service Account</span>
-            </div>
-            <div class="node-summary">
-                Web API exposes internal maintenance endpoint without verifying role scopes. 
-                Attacker requests maintenance token, acquiring access to the internal cluster database and deployment scripts.
-            </div>
-            <div class="node-detail-panel" id="d3">
-                <div class="spec-grid">
-                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Over-privileged Service Role (BOLA / CWE-285)</span></div>
-                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">TLS Client Cert & DB Credentials</span></div>
-                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 5 (Web Maintenance Flaw)</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="connector"><span class="connector-arrow">▼</span> [Database Trust Table Modification & Scheduler Injection]</div>
-
-        <!-- Node 4 -->
-        <div class="node-card middle-node" onclick="toggleDetail('d4')">
-            <div class="node-header">
-                <div>
-                    <span class="node-step">HOP 4 // CORE SCHEDULER ELEVATION (ROOM 4/6)</span>
-                    <div class="node-id">nexus-svc-continuity (Continuity Master Account)</div>
-                </div>
-                <span class="node-level lvl-service">Privilege: Infrastructure Continuity Admin</span>
-            </div>
-            <div class="node-summary">
-                Attacker writes into the SQLite scheduler database (Room 6) to bind <code>nexus-svc-continuity</code> 
-                to automated CI/CD deployment hooks, unlocking push rights to cluster relays.
-            </div>
-            <div class="node-detail-panel" id="d4">
-                <div class="spec-grid">
-                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Unchecked DB Trust Relationships (CWE-269)</span></div>
-                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">CI/CD Pipeline Webhook Secret</span></div>
-                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 4 (Linux Tasks) & Room 6 (Database)</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="connector"><span class="connector-arrow">▼</span> [Automated Build & Deployment to Isolated Relay]</div>
-
-        <!-- Node 5 -->
-        <div class="node-card middle-node" onclick="toggleDetail('d5')">
-            <div class="node-header">
-                <div>
-                    <span class="node-step">HOP 5 // CORE INFRASTRUCTURE EXECUTION (ROOM 8)</span>
-                    <div class="node-id">AETHER-7 Relay Node (Autonomous Execution Host)</div>
-                </div>
-                <span class="node-level lvl-service">Privilege: Core Network Peer (NEXUS_ZONE=CORE)</span>
-            </div>
-            <div class="node-summary">
-                The automated pipeline compiles <code>MIRA-7</code> and deploys it to <code>AETHER-7</code>. 
-                Because the host has <code>NEXUS_ZONE=CORE</code> set, the dormant worm module wakes up and registers as a standby continuity peer.
-            </div>
-            <div class="node-detail-panel" id="d5">
-                <div class="spec-grid">
-                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Automated CI/CD Without Code Review Gate</span></div>
-                    <div class="spec-item"><span class="spec-key">Harvested Artifact:</span> <span class="spec-val">mira_propagate Active Listener on Port 4477</span></div>
-                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 8 (Build Tag AETHER-FORGE-AUTO)</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="connector"><span class="connector-arrow">▼</span> [Emergency Watchdog Promotion (CR-2026-0919 Failover)]</div>
-
-        <!-- Node 6 -->
-        <div class="node-card terminal-node" onclick="toggleDetail('d6')">
-            <div class="node-header">
-                <div>
-                    <span class="node-step">HOP 6 // TOTAL SOVEREIGNTY (ROOM 9)</span>
-                    <div class="node-id">NEXUS Central Release Controller (Master Relay)</div>
-                </div>
-                <span class="node-level lvl-sovereign">Privilege: Sovereign Master Root Authority</span>
-            </div>
-            <div class="node-summary">
-                When MIRA-7 floods the network and blinds syslog, the hardware watchdog executes <code>continuity_check.sh</code>. 
-                Under policy <code>CR-2026-0919-AUTOFAILOVER</code>, it abdicates control and transfers the master keyring to <code>AETHER-7</code>.
-            </div>
-            <div class="node-detail-panel" id="d6">
-                <div class="spec-grid">
-                    <div class="spec-item"><span class="spec-key">Vulnerability:</span> <span class="spec-val">Unsupervised Autonomous Failover Architecture</span></div>
-                    <div class="spec-item"><span class="spec-key">Compromised Asset:</span> <span class="spec-val">Lighting, Drones, Audio, Video, Screen Broadcast</span></div>
-                    <div class="spec-item"><span class="spec-key">Cross-Ref:</span> <span class="spec-val">Room 9 (Blackout & Root Cause)</span></div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
+    <!-- Fragment 4: HOP 2 — kite → kite-backup via key-based lateral move -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-staging-01 · sshd.log</span>
+            <span class="ts-tag">23:07:44 IST</span>
+            <span class="hop-badge hop-real">✓ HOP 2</span>
+        </div>
+        <div class="frag-body">
+            <div class="line">23:07:44.003 sshd[5521]: Accepted publickey for <span class="hl-to">kite-backup</span> from <span class="hl-from">192.168.50.14</span> port 51008 ssh2 sess=0xA1B2C3-sub</div>
+            <div class="line hl-key">23:07:44.221 sssd[5530]: pam_unix: session opened for user <span class="hl-to">kite-backup</span> uid=1048 by (uid=0)</div>
+            <div class="line">23:07:44.887 audit[1]: SYSCALL uid=1048 comm=bash key=kite_backup_login</div>
+            <div class="line hl-decoy-text">// kite-backup is a secondary account; the SSH key was planted in kite's authorized_keys by the staged script.</div>
+            <div class="line">23:07:45.104 sudo[5601]: kite-backup : TTY=pts/5 ; PWD=/var/spool/cron ; USER=root ; COMMAND=/usr/bin/crontab -e</div>
+        </div>
+    </div>
+
+    <!-- Fragment 5: Red-herring dead-end identity -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-staging-01 · sudo.log</span>
+            <span class="ts-tag">23:08:12 IST</span>
+            <span class="hop-badge hop-fail">✕ DEAD END — RED HERRING</span>
+        </div>
+        <div class="frag-body">
+            <div class="line hl-fail">23:08:12.334 sudo[5690]: kite-backup : command not allowed ; USER=nexus-admin ; COMMAND=/usr/bin/systemctl restart nexus-core</div>
+            <div class="line hl-fail">23:08:12.440 sudo[5690]: pam_unix: authentication failure for nexus-admin</div>
+            <div class="line hl-decoy-text">// kite-backup attempted to sudo to nexus-admin but lacked the credentials. This path was abandoned.</div>
+            <div class="line hl-decoy-text">// nexus-admin is NOT in the real escalation chain.</div>
+        </div>
+    </div>
+
+    <!-- Fragment 6: HOP 3 — kite-backup → maint_svc_ceremony -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-staging-01 · auth.log</span>
+            <span class="ts-tag">23:09:55 IST</span>
+            <span class="hop-badge hop-real">✓ HOP 3</span>
+        </div>
+        <div class="frag-body">
+            <div class="line">23:09:55.002 sudo[5701]: <span class="hl-from">kite-backup</span> : TTY=pts/5 ; USER=<span class="hl-to">maint_svc_ceremony</span> ; COMMAND=/bin/bash</div>
+            <div class="line hl-key">23:09:55.118 sssd[5712]: pam_unix: session opened for user <span class="hl-to">maint_svc_ceremony</span> uid=800 by kite-backup(uid=1048)</div>
+            <div class="line">23:09:55.441 audit[1]: SYSCALL uid=800 comm=bash key=maint_svc_login auid=1048</div>
+            <div class="line hl-decoy-text">// maint_svc_ceremony is a service account; kite-backup had its sudo rule loaded by the cron entry above.</div>
+        </div>
+    </div>
+
+    <!-- Fragment 7: Decoy — concurrent maint_svc activity unrelated -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-portal-01 · nexus-svc.log</span>
+            <span class="ts-tag">23:10:14 IST</span>
+            <span class="hop-badge hop-decoy">— UNRELATED maint_svc (different host)</span>
+        </div>
+        <div class="frag-body">
+            <div class="line hl-decoy-text">23:10:14.881 nexus-svc[1899]: maint_svc_portal SCHEDULED_TASK: cert_rotate_check. uid=801. exit_code=0.</div>
+            <div class="line hl-decoy-text">// maint_svc_portal (uid=801) is a different service account on a different host. Not the same identity as maint_svc_ceremony (uid=800).</div>
+        </div>
+    </div>
+
+    <!-- Fragment 8: HOP 4 — maint_svc_ceremony → nexus-svc-continuity via token delegation -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-infra-core-01 · nexus-svc.log</span>
+            <span class="ts-tag">23:12:08 IST</span>
+            <span class="hop-badge hop-real">✓ HOP 4</span>
+        </div>
+        <div class="frag-body">
+            <div class="line">23:12:08.001 nexus-svc[1899]: TOKEN_DELEGATE: <span class="hl-from">maint_svc_ceremony</span> (uid=800) requesting continuity role expansion</div>
+            <div class="line hl-key">23:12:08.334 nexus-svc[1899]: TOKEN_ISSUED: <span class="hl-to">nexus-svc-continuity</span> (uid=900) granted via PAM_NEXUS_TOKEN_DELEGATE sess=0xA1B2C3-sub-tk</div>
+            <div class="line">23:12:08.441 audit[1]: NETLINK uid=900 comm=nexus-svc key=svc_continuity_activate auid=800</div>
+            <div class="line hl-decoy-text">// nexus-svc-continuity (uid=900) is the continuity role. It holds the nexus-continuity-delegate database role and the AETHER trust cert.</div>
+        </div>
+    </div>
+
+    <!-- Fragment 9: HOP 5 — nexus-svc-continuity → AETHER-7 relay -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-infra-core-01 · relay.log</span>
+            <span class="ts-tag">23:14:22 IST</span>
+            <span class="hop-badge hop-real">✓ HOP 5</span>
+        </div>
+        <div class="frag-body">
+            <div class="line">23:14:22.004 relay[7700]: AETHER_TRUST handshake from <span class="hl-from">nexus-svc-continuity</span> uid=900 cert=aether-core.nexus.internal</div>
+            <div class="line hl-key">23:14:22.118 relay[7700]: SESSION_OPENED on <span class="hl-to">AETHER-7</span> relay (10.7.7.43). auid=900. sess=0xAE7TK01</div>
+            <div class="line">23:14:22.441 relay[7700]: RELAY_SCOPE: zone=ALL_INFRA. cert_chain=validated. implicit_trust=YES</div>
+            <div class="line hl-decoy-text">// AETHER-7 relay accepts the cert issued to nexus-svc-continuity. No credential challenge was required (implicit trust).</div>
+            <div class="line hl-decoy-text">23:14:23.001 relay[7700]: secondary_relay_probe: 10.7.7.101 (AETHER-1) — no response. 10.7.7.102 (AETHER-2) — no response. [Other relays offline — not the target]</div>
+        </div>
+    </div>
+
+    <!-- Fragment 10: Failed lateral to wrong relay -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-infra-core-01 · relay.log</span>
+            <span class="ts-tag">23:15:01 IST</span>
+            <span class="hop-badge hop-fail">✕ FAILED — wrong relay</span>
+        </div>
+        <div class="frag-body">
+            <div class="line hl-fail">23:15:01.881 relay[7700]: FORWARD_ATTEMPT to 10.7.7.200 (AETHER-ADMIN-RELAY). cert rejected: OU mismatch.</div>
+            <div class="line hl-fail">23:15:01.992 relay[7700]: SESSION_DENIED. target=AETHER-ADMIN-RELAY. reason=cert_scope_infra_only.</div>
+            <div class="line hl-decoy-text">// The AETHER-ADMIN-RELAY (10.7.7.200) rejected the cert — wrong scope. This hop was not used.</div>
+        </div>
+    </div>
+
+    <!-- Fragment 11: HOP 6 — AETHER-7 → master relay on central release controller -->
+    <div class="log-fragment">
+        <div class="frag-header">
+            <span class="src-tag">HOST: meraz-release-ctrl-01 · relay.log</span>
+            <span class="ts-tag">23:16:44 IST</span>
+            <span class="hop-badge hop-real">✓ HOP 6 — TERMINAL</span>
+        </div>
+        <div class="frag-body">
+            <div class="line">23:16:44.003 relay[8001]: INBOUND from AETHER-7 (10.7.7.43). token=0xAE7TK01. cert=aether-core.nexus.internal</div>
+            <div class="line hl-key">23:16:44.221 relay[8001]: SESSION_OPENED on <span class="hl-to">master relay — NEXUS central release controller</span>. privilege=RELEASE_CONTROL. sess=0xMR9901</div>
+            <div class="line">23:16:44.441 relay[8001]: SCOPE: all_zones. action_queue: UNLOCKED. human_approval_gate: DISABLED (CR-2026-0919-AUTOFAILOVER).</div>
+            <div class="line hl-key">23:16:44.888 relay[8001]: SOVEREIGN_CONTROL_ACQUIRED. Ready for payload queue injection.</div>
+        </div>
+    </div>
+
+    <div class="section-head">RECONSTRUCTED ESCALATION CHAIN</div>
+
+    <div class="chain-builder">
+        <div class="chain-label">Complete six-hop chain (HOP 1 → HOP 6)</div>
+        <div class="chain-steps">
+            <div class="chain-step">kite@meraz.org<br><span style="font-size:.6rem;color:var(--muted)">uid=1044 · phished laptop</span></div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-step">kite-backup<br><span style="font-size:.6rem;color:var(--muted)">uid=1048 · staged SSH key</span></div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-step">maint_svc_ceremony<br><span style="font-size:.6rem;color:var(--muted)">uid=800 · sudo rule</span></div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-step">nexus-svc-continuity<br><span style="font-size:.6rem;color:var(--muted)">uid=900 · token delegate</span></div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-step">AETHER-7 relay<br><span style="font-size:.6rem;color:var(--muted)">10.7.7.43 · AETHER cert</span></div>
+            <div class="chain-arrow">→</div>
+            <div class="chain-step">master relay<br><span style="font-size:.6rem;color:var(--muted)">NEXUS release ctrl</span></div>
+        </div>
+    </div>
+
+    <div class="section-head">CHAIN ANALYSIS</div>
+
+    <div class="answer-grid">
+        <div class="ag-cell">
+            <div class="ag-label">Initial entry point</div>
+            <div class="ag-val"><code>kite@meraz.org</code> — phished publickey accepted from 192.168.50.14 (Kabir's workstation) at 23:05:33 IST. This is identity #1.</div>
+        </div>
+        <div class="ag-cell">
+            <div class="ag-label">Lateral step (staging host)</div>
+            <div class="ag-val"><code>kite-backup</code> (uid=1048) — SSH publickey planted by the <code>nexus_sync_precheck</code> cron job in kite's <code>authorized_keys</code>. This is identity #2.</div>
+        </div>
+        <div class="ag-cell">
+            <div class="ag-label">Service-account pivot</div>
+            <div class="ag-val"><code>maint_svc_ceremony</code> (uid=800) — sudo rule embedded in cron payload. kite-backup sudo'd to it without a password challenge. Identity #3.</div>
+        </div>
+        <div class="ag-cell">
+            <div class="ag-label">Continuity role expansion</div>
+            <div class="ag-val"><code>nexus-svc-continuity</code> (uid=900) — PAM_NEXUS_TOKEN_DELEGATE issued by maint_svc_ceremony. This account holds the AETHER trust certificate and database role. Identity #4.</div>
+        </div>
+        <div class="ag-cell">
+            <div class="ag-label">Relay pivot</div>
+            <div class="ag-val"><code>AETHER-7 relay</code> (10.7.7.43) — AETHER_TRUST handshake accepted implicitly. Scope: ALL_INFRA. The cert chain was valid; no additional credential required. Identity #5.</div>
+        </div>
+        <div class="ag-cell">
+            <div class="ag-label">Terminal (sovereign control)</div>
+            <div class="ag-val"><code>master relay</code> — NEXUS central release controller. RELEASE_CONTROL privilege, all zones, human approval gate disabled per CR-2026-0919. Identity #6. <span class="green">CHAIN COMPLETE.</span></div>
+        </div>
+    </div>
+
+    <div class="note-block">
+        <b>FALSE PATHS (do NOT include in chain):</b>
+        <ul>
+            <li>203.0.113.77 brute-force attempts at 23:01 — automated C2 probes, not the escalation path.</li>
+            <li><code>nexus-admin</code> — kite-backup attempted and was denied. Dead end.</li>
+            <li><code>maint_svc_portal</code> (uid=801, different host) — unrelated concurrent session of a similarly-named account.</li>
+            <li><code>AETHER-ADMIN-RELAY</code> (10.7.7.200) — cert scope mismatch, session denied. Not in chain.</li>
+            <li><code>rhea</code> (uid=1055) — legitimate forensic analyst session, concurrent but unrelated.</li>
+        </ul>
+        <b>The identities in order:</b> <code>kite</code> → <code>kite-backup</code> → <code>maint_svc_ceremony</code> → <code>nexus-svc-continuity</code> → <code>AETHER-7</code> relay → <code>master relay</code>. Six hops. Each is the next one's entry point.
+    </div>
 </div>
-
-<script>
-    function toggleDetail(id) {
-        const panel = document.getElementById(id);
-        panel.classList.toggle('open');
-    }
-</script>
-
 </body>
 </html>

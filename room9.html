@@ -172,7 +172,7 @@
 
                     <article class="nj-card" id="target-1">
                         <div class="nj-card-top"><span class="nj-badge">9.1</span><span class="nj-title">THE FIRST LIE IN THE TIMELINE</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Official bulletins say the attack began at <code>23:17:00 IST</code> on October 3rd. Correlate UTC and IST across the proxy, auth server, git commits and cron daemons. Find the earliest staging activity, the backdated task, the true date and the uncorrected clock skew.</p>
+                        <p class="nj-desc">Official bulletins say the attack began at <code>23:17:00 IST</code> on October 3rd. Eight source systems reported into this archive. Their clocks do not all agree with the NTP reference. One source ran measurably fast, and a cron install it recorded belongs to an earlier date than every bulletin places it. Name the task and the exact millisecond skew.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Unified Forensic Timeline', '/challenges/Room - 9/evidence/incident_timeline.html')">VIEW: incident_timeline.html</button><a href="/challenges/Room - 9/evidence/incident_timeline.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-1" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 9.1"><button type="button" onclick="verifyFlag(1)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-1"></div>
@@ -180,7 +180,7 @@
 
                     <article class="nj-card" id="target-2">
                         <div class="nj-card-top"><span class="nj-badge">9.2</span><span class="nj-title">THE MISSING SEVEN MINUTES</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Between <code>23:17:00</code> and <code>23:24:00 IST</code> (420 seconds) central syslog forwarding stopped. Using the recovered hardware serial buffer, identify what overwhelmed <code>auditd</code>, the recovery script the watchdog triggered, and the user ID it ran as.</p>
+                        <p class="nj-desc">Between <code>23:17:00</code> and <code>23:24:00 IST</code> central syslog forwarding stopped. The hardware BMC's serial buffer kept writing when nothing else could. Read the hex. Three different UIDs appear in the blackout window; two scripts are named. Only one UID-zero execution is bound to the watchdog recovery path. Identify the recovery script and the UID the watchdog ran it as.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Log Gap Analysis', '/challenges/Room - 9/evidence/log_gap_analysis.html')">VIEW: log_gap_analysis.html</button><a href="/challenges/Room - 9/evidence/log_gap_analysis.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-2" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 9.2"><button type="button" onclick="verifyFlag(2)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-2"></div>
@@ -188,7 +188,7 @@
 
                     <article class="nj-card" id="target-3">
                         <div class="nj-card-top"><span class="nj-badge">9.3</span><span class="nj-title">THE PRIVILEGE PATH</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Reconstruct the full six-step identity and privilege escalation path, from Kabir's phished laptop to sovereign control of the NEXUS central release controller.</p>
+                        <p class="nj-desc">Eleven log fragments across four hosts record movement that night. Some attempts failed; one concurrent session on a different machine is a dead end. Correlate the session tokens, PAM events and relay trust records to find the real chain — exactly six identities, each one the next one's entry point, from the student endpoint to the NEXUS central release controller. Name them in order.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Privilege Path', '/challenges/Room - 9/evidence/privilege_path.html')">VIEW: privilege_path.html</button><a href="/challenges/Room - 9/evidence/privilege_path.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-3" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 9.3"><button type="button" onclick="verifyFlag(3)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-3"></div>
@@ -196,7 +196,7 @@
 
                     <article class="nj-card" id="target-4">
                         <div class="nj-card-top"><span class="nj-badge">9.4</span><span class="nj-title">THE HUMAN DECISION</span><span class="nj-chip"></span></div>
-                        <p class="nj-desc">Find the systemic root cause in change request <code>CR-2026-0919-AUTOFAILOVER</code>. Identify the ticket, the disabled safety guardrail, the latency condition and the executive who signed the approval.</p>
+                        <p class="nj-desc">Thirty-four change tickets span the weeks before the incident. Several look relevant: latency monitors, timeout overrides, audit log companions. Only one ticket disabled a named human approval gate under a specific inter-zone latency threshold, and only one name signed it into effect. Find the ticket ID, the gate it disabled, the millisecond threshold that triggers it, and the commander who approved it.</p>
                         <div class="nj-files"><span class="nj-file"><button type="button" onclick="openEvidence('Root Cause Analysis', '/challenges/Room - 9/evidence/root_cause_analysis.html')">VIEW: root_cause_analysis.html</button><a href="/challenges/Room - 9/evidence/root_cause_analysis.html" download>DL</a></span></div>
                         <div class="nj-form"><input type="text" id="flag-4" placeholder="NIGHTJAR{...}" autocomplete="off" spellcheck="false" aria-label="Flag for target 9.4"><button type="button" onclick="verifyFlag(4)">VERIFY</button></div>
                         <div class="nj-reward" id="reward-4"></div>
@@ -279,10 +279,10 @@
                 'Not it. Compare against the raw evidence again.'
             ],
             hints: {
-                1: 'Convert everything to one timezone first. Then look for the earliest entry that is out of step with the server clock.',
-                2: 'The central logs went quiet, but the hardware kept its own record. Read the serial console, not the syslog.',
-                3: 'Six identities, in order. Each one is the next one\u2019s way in. Start from the laptop.',
-                4: 'Do not stop at the technical cause. Open the change request and read who approved it and why.'
+                1: 'Eight sources, one NTP reference. Find the source whose clock offset exceeds 100 ms and look at what it recorded during the staging window. The task name and the skew are both in that row.',
+                2: 'The central syslog is dark, but the BMC serial buffer is not. The watchdog invocation is in the hex above offset 0x04A0. Watch for the uid= field bound to it \u2014 there are three UIDs in the dump and two scripts.',
+                3: 'Ignore the failed sudo attempt and the concurrent maint_svc session on the portal host. Follow the session tokens that actually succeeded, in sequence, across all four hosts. Six hops, six identities.',
+                4: 'Filter the ticket list for anything that changes an approval gate. Several tickets touch latency, but only one disables HUMAN_APPROVAL_GATE. Read it fully \u2014 the guardrail name, the threshold, and the approver are all in the same record.'
             },
 
             debrief: [

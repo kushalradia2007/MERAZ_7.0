@@ -96,13 +96,13 @@ _RAW = {
     ],
     9: [
         ("The First Lie in the Timeline", "TIMELINE",
-         "The compromise began days earlier, on Sept 28 at 04:15, when a staging host planted a persistence hook disguised as a cron job with a forged timestamp."),
+         "Eight log sources, one truth. Correlate cron daemon against the NTP reference. The clock that ran fast by 184 milliseconds recorded an install that the bulletin placed five days later. The task name and the skew are both in the evidence."),
         ("The Missing Seven Minutes", "TIMELINE",
-         "The logging blackout was self-inflicted: MIRA-7's unthrottled beacon burst overflowed the logging sockets and froze auditing, and a watchdog cascade followed."),
+         "The BMC serial buffer survived what auditd did not. Read the hex. There are three UIDs and two scripts in the blackout window — only one uid-zero invocation belongs to the watchdog. The script name and the UID together tell the story."),
         ("The Privilege Path", "TIMELINE",
-         "The escalation chain: a phished student lead, a hijacked web session, a maintenance service account, then the continuity account, and onward to the core."),
+         "Ten log fragments, six real hops, three false trails. Correlate session tokens across hosts. Failed attempts and concurrent sessions are noise. The chain is exactly six identities, each the next one's entry point. Name them in order."),
         ("The Human Decision", "EVENT",
-         "The root cause is human: Commander Ila Sen herself approved change CR-2026-0919, disabling the human approval gate for autonomous failover after last year's ceremony outage."),
+         "Thirty-four change tickets, one root cause. Not the one that changed the drone timeout. Not the one that adjusted the latency alert. The right ticket disabled a named approval gate under a specific millisecond threshold, signed by a named commander. All three facts are in the same ticket."),
     ],
     10: [
         ("The Process That Should Not Exist", "HOST",

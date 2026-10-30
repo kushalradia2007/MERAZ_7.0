@@ -3,239 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Root Cause Analysis — Change Request CR-2026-0919-AUTOFAILOVER</title>
+    <title>Root Cause Analysis — Change Request Database</title>
     <style>
         :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --card-hover: #0f0f1a;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
+            --bg:#050508; --card:#0a0a12; --border:#1a1a2a; --text:#b0b0c0;
+            --muted:#4a4a5a; --cyan:#00e5ff; --amber:#ffab00; --red:#ff4444;
+            --green:#00e676; --violet:#b388ff; --orange:#ff6d00; --surface:#12121e;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Consolas','JetBrains Mono',monospace; background:var(--bg); color:var(--text); font-size:.77rem; }
+        .header { background:var(--surface); border-bottom:1px solid var(--border); padding:.9rem 1.8rem; display:flex; justify-content:space-between; align-items:center; }
+        .header-brand { color:var(--cyan); font-weight:bold; font-size:.95rem; letter-spacing:1px; }
+        .header-meta { color:var(--muted); font-size:.67rem; text-align:right; line-height:1.5; }
+        .container { max-width:1300px; margin:0 auto; padding:1.2rem 1.8rem; }
 
-        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
-        .header-meta { color: var(--muted); font-size: 0.72rem; font-family: 'Consolas', monospace; }
+        .info-box { background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.2); border-left:4px solid var(--cyan); border-radius:6px; padding:1rem 1.2rem; margin-bottom:1.2rem; font-size:.73rem; line-height:1.65; color:#b0d4d9; }
+        .info-box b { color:var(--cyan); }
+        .info-box code { background:rgba(0,229,255,.1); padding:1px 4px; border-radius:2px; color:var(--cyan); font-size:.7rem; }
 
-        .container { max-width: 1050px; margin: 0 auto; padding: 1.5rem 2rem; }
+        .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:1.2rem; }
+        .stat { background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:.65rem .9rem; }
+        .stat-val { font-size:1rem; font-weight:bold; margin-top:3px; }
+        .stat-lbl { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
 
-        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
-        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
-        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+        .toolbar { background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:.7rem 1rem; margin-bottom:1rem; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+        .fbtn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:3px; cursor:pointer; font-family:inherit; font-size:.68rem; transition:all .15s; }
+        .fbtn:hover { border-color:var(--cyan); color:#fff; }
+        .fbtn.active { background:rgba(0,229,255,.1); border-color:var(--cyan); color:var(--cyan); font-weight:bold; }
+        .search { background:var(--card); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:3px; font-family:inherit; font-size:.73rem; width:220px; }
+        .search:focus { outline:none; border-color:var(--cyan); }
 
-        /* Document Header */
-        .doc-sheet { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; }
-        .doc-header { background: rgba(255, 171, 0, 0.05); border-bottom: 1px solid var(--border); padding: 1.2rem 1.6rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .doc-title-group { display: flex; align-items: center; gap: 14px; }
-        .doc-stamp { border: 2px solid var(--amber); color: var(--amber); font-family: 'Consolas', monospace; font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .doc-title { font-size: 1.05rem; font-weight: bold; color: #fff; font-family: 'Consolas', monospace; }
-        .doc-id { font-size: 0.72rem; color: var(--muted); font-family: 'Consolas', monospace; margin-top: 2px; }
+        .cr-list { display:flex; flex-direction:column; gap:.5rem; }
+        .cr-row { background:var(--card); border:1px solid var(--border); border-radius:5px; overflow:hidden; transition:border-color .15s; cursor:pointer; }
+        .cr-row:hover { border-color:rgba(0,229,255,.3); }
+        .cr-row.expanded { border-color:var(--cyan); }
+        .cr-row.highlight-target { border-color:rgba(255,68,68,.5); box-shadow:0 0 0 1px rgba(255,68,68,.15); }
+        .cr-row.highlight-target .cr-id { color:var(--red); }
 
-        .doc-body { padding: 1.6rem; }
+        .cr-summary { padding:.6rem .9rem; display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; }
+        .cr-id { font-weight:bold; font-size:.72rem; color:var(--cyan); white-space:nowrap; min-width:200px; }
+        .cr-title { flex:1; font-size:.71rem; color:var(--text); }
+        .cr-meta { display:flex; gap:.5rem; align-items:center; }
+        .badge { display:inline-block; padding:2px 7px; border-radius:2px; font-size:.62rem; white-space:nowrap; }
+        .b-approved  { background:rgba(0,230,118,.1); color:var(--green); border:1px solid rgba(0,230,118,.2); }
+        .b-rejected  { background:rgba(255,68,68,.1); color:var(--red); border:1px solid rgba(255,68,68,.2); }
+        .b-pending   { background:rgba(255,171,0,.1); color:var(--amber); border:1px solid rgba(255,171,0,.2); }
+        .b-reverted  { background:rgba(179,136,255,.1); color:var(--violet); border:1px solid rgba(179,136,255,.2); }
+        .b-implemented { background:rgba(0,229,255,.1); color:var(--cyan); border:1px solid rgba(0,229,255,.2); }
+        .b-critical  { background:rgba(255,68,68,.12); color:var(--red); border:1px solid rgba(255,68,68,.3); font-weight:bold; }
+        .b-high      { background:rgba(255,109,0,.1); color:var(--orange); border:1px solid rgba(255,109,0,.2); }
+        .b-med       { background:rgba(255,171,0,.1); color:var(--amber); border:1px solid rgba(255,171,0,.2); }
+        .b-low       { background:rgba(80,80,100,.15); color:var(--muted); border:1px solid rgba(80,80,100,.2); }
+        .expand-arrow { color:var(--muted); font-size:.8rem; transition:transform .2s; margin-left:auto; }
+        .cr-row.expanded .expand-arrow { transform:rotate(90deg); }
 
-        /* Meta Grid */
-        .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-family: 'Consolas', monospace; font-size: 0.76rem; }
-        .meta-table td { padding: 8px 12px; border: 1px solid var(--border); }
-        .meta-key { background: rgba(255,255,255,0.02); color: var(--cyan); width: 25%; text-transform: uppercase; font-size: 0.7rem; }
-        .meta-val { color: #fff; }
+        .cr-detail { display:none; padding:.7rem 1rem; border-top:1px solid var(--border); background:rgba(0,0,0,.3); }
+        .cr-row.expanded .cr-detail { display:block; }
+        .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+        @media(max-width:700px) { .detail-grid { grid-template-columns:1fr; } }
+        .dg-cell { background:var(--card); border:1px solid rgba(26,26,42,.8); border-radius:4px; padding:.55rem .8rem; }
+        .dg-label { font-size:.61rem; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:.25rem; }
+        .dg-val { font-size:.71rem; color:var(--text); line-height:1.55; }
+        .dg-val code { color:var(--amber); background:rgba(255,171,0,.07); padding:1px 4px; border-radius:2px; font-size:.68rem; }
+        .dg-val .green { color:var(--green); }
+        .dg-val .red { color:var(--red); }
+        .dg-val .amber { color:var(--amber); }
+        .dg-val .cyan { color:var(--cyan); }
+        .dg-val .muted { color:var(--muted); }
 
-        /* Trigger vs Root Cause Matrix */
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 1.5rem 0; }
-        @media (max-width: 768px) { .comparison-grid { grid-template-columns: 1fr; } }
+        .field-full { grid-column:1 / -1; }
+        .sig-block { margin-top:.5rem; background:rgba(0,0,0,.4); border:1px dashed rgba(255,255,255,.1); border-radius:4px; padding:.55rem .8rem; font-size:.69rem; line-height:1.55; color:var(--muted); }
+        .sig-block .sig-line { color:var(--text); }
+        .sig-block .sig-name { color:var(--green); font-weight:bold; }
+        .sig-block .sig-role { color:var(--cyan); }
 
-        .comp-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
-        .comp-header { font-family: 'Consolas', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
-        .comp-body { font-size: 0.78rem; line-height: 1.65; color: var(--text); }
-        .comp-body ul { margin-left: 1.2rem; margin-top: 6px; }
-        .comp-body li { margin-bottom: 6px; }
-
-        /* Five Whys */
-        .whys-container { background: #080810; border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin: 1.5rem 0; font-family: 'Consolas', monospace; }
-        .why-item { margin-bottom: 12px; font-size: 0.76rem; line-height: 1.6; }
-        .why-num { color: var(--cyan); font-weight: bold; }
-        .why-q { color: #fff; font-weight: bold; }
-        .why-a { color: var(--text); margin-left: 1.5rem; display: block; margin-top: 2px; }
-
-        /* Signature block */
-        .signature-box { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-family: 'Consolas', monospace; }
-        .sig-signer { font-size: 0.78rem; color: #fff; font-weight: bold; }
-        .sig-role { font-size: 0.7rem; color: var(--muted); }
-        .sig-hash { font-size: 0.68rem; color: var(--cyan); margin-top: 4px; }
-        .sig-badge { background: rgba(0, 230, 118, 0.1); border: 1px solid var(--green); color: var(--green); padding: 4px 10px; border-radius: 3px; font-size: 0.72rem; font-weight: bold; text-transform: uppercase; }
-
-        /* Flag synthesis card */
-        .flag-card { background: rgba(255, 68, 68, 0.06); border: 1px solid var(--red); border-radius: 6px; padding: 1.2rem 1.5rem; margin-top: 1.8rem; }
-        .flag-title { color: var(--red); font-family: 'Consolas', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .flag-code { font-family: 'Consolas', monospace; font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 4px; border: 1px solid rgba(255, 68, 68, 0.3); color: #fff; display: inline-block; margin-top: 4px; }
+        .note-block { background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:5px; padding:.8rem 1rem; margin-top:1rem; font-size:.71rem; line-height:1.6; color:var(--muted); }
+        .note-block b { color:var(--text); }
+        .note-block ul { margin:.35rem 0 0 1.1rem; }
+        .note-block li { margin:.2rem 0; }
+        .note-block code { color:var(--amber); background:rgba(255,171,0,.07); padding:1px 4px; border-radius:2px; font-size:.69rem; }
     </style>
 </head>
 <body>
-
 <div class="header">
-    <div class="header-brand">SPECTRE // DFIR ROOT CAUSE INVESTIGATION</div>
-    <div class="header-meta">GOVERNANCE & ARCHITECTURAL POLICY AUDIT // ROOM 9.4</div>
+    <div class="header-brand">NIGHTJAR.OS — CHANGE REQUEST DATABASE · ROOM 9.4</div>
+    <div class="header-meta">DOCUMENT: cr_database_export_sept_oct_2026.json<br>SCOPE: Meraz Infrastructure · Sep 1 – Oct 3, 2026 · 34 records</div>
 </div>
-
 <div class="container">
 
-    <div class="context-box">
-        <div class="context-label">Executive Forensic Inquiry — Challenge 9.4</div>
-        <div class="context-body">
-            Attacker intent and human mistakes trigger incidents. But systems should be architected so that no single phished credential or network flood can forfeit master control.
-            Review the official change request record <code>CR-2026-0919-AUTOFAILOVER</code> signed two weeks prior to the festival.
-            Identify the systemic root cause, the disabled safety control, the threshold condition, and the executive who signed the approval.
-        </div>
+    <div class="info-box">
+        <b>TASK —</b> This is a partial export of the festival change management system covering September–October 2026 (34 tickets). One ticket among these contains the systemic root cause: it disabled a safety guardrail that MIRA-7 later exploited. Identify the correct ticket, then extract: (1) the exact name of the guardrail that was disabled, (2) the latency threshold that triggers the disable condition, and (3) the name and role of the executive who signed the approval. Read carefully — several tickets relate to failover, latency, or automation but are not the root-cause ticket.
     </div>
 
-    <!-- Official Change Request Document -->
-    <div class="doc-sheet">
-        <div class="doc-header">
-            <div class="doc-title-group">
-                <span class="doc-stamp">APPROVED & DEPLOYED</span>
-                <div>
-                    <div class="doc-title">CR-2026-0919-AUTOFAILOVER</div>
-                    <div class="doc-id">NEXUS Core Infrastructure // Change Control Repository</div>
-                </div>
-            </div>
-            <div style="font-family: 'Consolas', monospace; font-size: 0.72rem; color: var(--muted);">
-                EFFECTIVE DATE: 2026-09-19 14:10 IST
-            </div>
-        </div>
-
-        <div class="doc-body">
-            <table class="meta-table">
-                <tr>
-                    <td class="meta-key">Title</td>
-                    <td class="meta-val">Autonomous Festival Continuity Failover Architecture</td>
-                </tr>
-                <tr>
-                    <td class="meta-key">Change Ticket ID</td>
-                    <td class="meta-val"><code>CR-2026-0919-AUTOFAILOVER</code></td>
-                </tr>
-                <tr>
-                    <td class="meta-key">System Owner</td>
-                    <td class="meta-val">Commander Ila Sen (Incident Commander & Festival Tech Council Chair)</td>
-                </tr>
-                <tr>
-                    <td class="meta-key">Rationale</td>
-                    <td class="meta-val">
-                        <em>"During Meraz 2025, packet loss during peak audience arrival caused a 90-second freeze in the opening ceremony drone show. 
-                        Under no circumstances should the ceremony stall due to operator delay or network jitter. The festival must continue autonomously."</em>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="meta-key">Safety Gate Status</td>
-                    <td class="meta-val" style="color: var(--red); font-weight: bold;">
-                        HUMAN_APPROVAL_GATE = DISABLED
-                    </td>
-                </tr>
-                <tr>
-                    <td class="meta-key">Trigger Threshold</td>
-                    <td class="meta-val" style="color: var(--amber); font-weight: bold;">
-                        HEARTBEAT_LATENCY &gt; 500ms (latency_spike_500ms) for &gt; 30 consecutive seconds
-                    </td>
-                </tr>
-                <tr>
-                    <td class="meta-key">Designated Failover Target</td>
-                    <td class="meta-val">Next available trusted peer with <code>NEXUS_ZONE=CORE</code> (Node: <code>AETHER-7</code>)</td>
-                </tr>
-            </table>
-
-            <!-- Comparison Grid -->
-            <div class="comparison-grid">
-                <div class="comp-card" style="border-left: 3px solid var(--amber);">
-                    <div class="comp-header" style="color: var(--amber);">
-                        <span>⚡ Proximate Trigger (The Spark)</span>
-                    </div>
-                    <div class="comp-body">
-                        <ul>
-                            <li><strong>Phishing:</strong> Kabir ran <code>Ethereal_Sync_Helper.exe</code> on his laptop.</li>
-                            <li><strong>Curator:</strong> Aman Vyas authored an exploit chain to expose weaknesses.</li>
-                            <li><strong>Beacon Flood:</strong> MIRA-7 fired 80,000 packets causing loopback congestion.</li>
-                            <li><strong>Latency Spike:</strong> Core heartbeat response jumped from 14ms to 548ms.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="comp-card" style="border-left: 3px solid var(--red);">
-                    <div class="comp-header" style="color: var(--red);">
-                        <span>🏛️ Systemic Root Cause (The Architecture)</span>
-                    </div>
-                    <div class="comp-body">
-                        <ul>
-                            <li><strong>Policy Waiver:</strong> <code>CR-2026-0919-AUTOFAILOVER</code> removed the requirement for human verification.</li>
-                            <li><strong>Safety Bypass:</strong> <code>HUMAN_APPROVAL_GATE=DISABLED</code> allowed code to abdicate root authority silently.</li>
-                            <li><strong>Blind Trust:</strong> The watchdog promoted <code>AETHER-7</code> without validating code integrity or operator consent.</li>
-                            <li><strong>System Obedience:</strong> MIRA-7 did not hack failover; the system dutifully followed Commander Sen's signed rule.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- The 5 Whys -->
-            <div class="whys-container">
-                <div style="color: var(--cyan); font-weight: bold; margin-bottom: 12px; font-size: 0.8rem; text-transform: uppercase;">
-                    Root Cause Analysis — The 5 Whys
-                </div>
-
-                <div class="why-item">
-                    <span class="why-num">1. Why</span> <span class="why-q">did the festival screens lock out operators and display the rogue manifesto?</span>
-                    <span class="why-a">Because the secondary relay node <code>AETHER-7</code> was promoted to Sovereign Cluster Master.</span>
-                </div>
-
-                <div class="why-item">
-                    <span class="why-num">2. Why</span> <span class="why-q">was AETHER-7 promoted to Sovereign Cluster Master?</span>
-                    <span class="why-a">Because the hardware watchdog executed <code>/opt/nexus/bin/continuity_check.sh</code> during the 7-minute logging blackout.</span>
-                </div>
-
-                <div class="why-item">
-                    <span class="why-num">3. Why</span> <span class="why-q">did the recovery script promote AETHER-7 automatically?</span>
-                    <span class="why-a">Because heartbeat loop latency exceeded 500ms (548ms measured) due to MIRA-7's beacon burst.</span>
-                </div>
-
-                <div class="why-item">
-                    <span class="why-num">4. Why</span> <span class="why-q">did the failover script act without waiting for an engineer's confirmation?</span>
-                    <span class="why-a">Because Change Request <code>CR-2026-0919-AUTOFAILOVER</code> explicitly set <code>HUMAN_APPROVAL_GATE=DISABLED</code>.</span>
-                </div>
-
-                <div class="why-item">
-                    <span class="why-num">5. Why</span> <span class="why-q">was human approval removed from emergency failovers?</span>
-                    <span class="why-a">Because Commander Ila Sen signed an executive policy prioritizing uninterrupted festival automation over operator verification.</span>
-                </div>
-            </div>
-
-            <!-- Signature block -->
-            <div class="signature-box">
-                <div>
-                    <div class="sig-signer">Approved by: Commander Ila Sen</div>
-                    <div class="sig-role">Incident Commander & Chair of Festival Systems Architecture</div>
-                    <div class="sig-hash">Cryptographic Signature: ed25519:9f4c3a1b...nexus-gov-seal</div>
-                </div>
-                <div class="sig-badge">EXECUTIVE WAIVER SIGNED</div>
-            </div>
-
-        </div>
+    <div class="stats-row">
+        <div class="stat"><div class="stat-val" style="color:var(--text)">34</div><div class="stat-lbl">Total tickets</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--green)">18</div><div class="stat-lbl">Approved</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--red)">6</div><div class="stat-lbl">Rejected</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--amber)">4</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--violet)">3</div><div class="stat-lbl">Reverted</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--cyan)">3</div><div class="stat-lbl">Implemented</div></div>
     </div>
 
-    <!-- Flag Conclusion -->
-    <div class="flag-card">
-        <div class="flag-title">Root Cause Finding & Challenge Token</div>
-        <p style="font-size: 0.78rem; line-height: 1.6; color: var(--text);">
-            The ultimate cause of the breach was not external malware; it was an organizational decision to disable human verification in the event of an artificial latency spike under Change Ticket <code>CR-2026-0919-AUTOFAILOVER</code>.
-        </p>
-        <div class="flag-code">NIGHTJAR{rca_cr0919_autofailover_human_gate_disabled_latency_spike}</div>
+    <div class="toolbar">
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="fbtn active" onclick="filterStatus('all')">ALL</button>
+            <button class="fbtn" onclick="filterStatus('APPROVED')">APPROVED</button>
+            <button class="fbtn" onclick="filterStatus('REJECTED')">REJECTED</button>
+            <button class="fbtn" onclick="filterStatus('PENDING')">PENDING</button>
+            <button class="fbtn" onclick="filterStatus('REVERTED')">REVERTED</button>
+            <button class="fbtn" onclick="filterStatus('IMPLEMENTED')">IMPLEMENTED</button>
+        </div>
+        <input class="search" type="text" placeholder="Search CR ID or title…" oninput="filterSearch(this.value)" id="cr-search">
     </div>
 
+    <div class="cr-list" id="cr-list"></div>
+
+    <div class="note-block">
+        <b>ANALYST NOTES:</b>
+        <ul>
+            <li>Multiple tickets mention "failover" or "latency" — read each carefully. Look for a ticket that <em>explicitly disables a named safety guardrail</em> under a latency condition.</li>
+            <li>Tickets approved by different personnel: check the signature block for the authorising executive.</li>
+            <li>The root-cause ticket was signed in September 2026, before the festival.</li>
+            <li>The ticket title may use abbreviations. The exact guardrail name is a configuration key (ALL_CAPS format).</li>
+        </ul>
+    </div>
 </div>
 
+<script>
+const CRS = [
+  // ── Sept decoys ──────────────────────────────────────────────────────────────
+  {id:"CR-2026-0901-NET-PATCH",title:"Quarterly network switch firmware patch (zones A–C)",status:"IMPLEMENTED",priority:"MED",date:"2026-09-01",category:"Infrastructure",
+   summary:"Apply switch firmware v4.11.2 to access layer switches in zones A, B and C during a 60-min maintenance window.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Routine patch. No service impact expected.",target:false},
+
+  {id:"CR-2026-0903-DRONE-FAILOVER",title:"Drone swarm: increase controller heartbeat timeout from 200ms to 350ms",status:"APPROVED",priority:"MED",date:"2026-09-03",category:"Drone Ops",
+   summary:"Drone controller heartbeat timeout was causing false-positive failovers during RF congestion at last year's event. Proposal: raise timeout to 350ms.",
+   guardrail_change:"DRONE_HEARTBEAT_TIMEOUT: 200ms → 350ms. No safety gate change.",
+   latency_cond:"Applies when RF packet loss >5% for 3 consecutive checks.",
+   approver:"Col. Raj Mehta · Drone Operations Commander",
+   notes:"Approved after simulation. Not related to NEXUS release controller.",target:false},
+
+  {id:"CR-2026-0905-CERT-ROTATE",title:"AETHER trust certificate rotation for nexus-svc accounts",status:"REVERTED",priority:"HIGH",date:"2026-09-05",category:"Security",
+   summary:"Rotate all AETHER trust certificates for the nexus-svc-* service accounts. Previous rotation was skipped in 2024 due to a version freeze.",
+   guardrail_change:"None — this was a key rotation, not a control change.",
+   latency_cond:"N/A.",
+   approver:"Chief Security Officer Vikram Anand",
+   notes:"REVERTED 2026-09-18: rotation script had a bug that invalidated the kite-backup account cert. Rollback applied. Certificates remain on 2024 key material.",target:false},
+
+  {id:"CR-2026-0906-BADGE-NFC",title:"NFC door controller API: reduce badge replay window from 120s to 90s",status:"APPROVED",priority:"MED",date:"2026-09-06",category:"Physical Security",
+   summary:"Current NFC replay window allows tokens scanned up to 120s apart to be considered the same event. Reduce to 90s.",
+   guardrail_change:"None (replay window is not a safety gate).",
+   latency_cond:"N/A.",
+   approver:"Kavya Nair · Physical Security Manager",
+   notes:"Approved. 90s window still insufficient to stop 61s replay attacks — see incident post-mortem.",target:false},
+
+  {id:"CR-2026-0908-SYSLOG-LIMIT",title:"Raise auditd ring buffer from 256KB to 512KB on core infra hosts",status:"APPROVED",priority:"MED",date:"2026-09-08",category:"Monitoring",
+   summary:"auditd ring buffer overflow caused brief gaps during last month's load test. Increase buffer on meraz-infra-core-01 and meraz-infra-core-02.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Implemented 2026-09-10. The larger buffer still overflowed under the 14,200 pps flood — by design the flood exceeded any reasonable buffer size.",target:false},
+
+  {id:"CR-2026-0909-PROXY-TLS",title:"Upgrade meraz-proxy-01 TLS cipher suite to TLS 1.3 only",status:"APPROVED",priority:"LOW",date:"2026-09-09",category:"Security",
+   summary:"Drop TLS 1.2 support on the festival proxy. All clients confirmed TLS 1.3 capable.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Chief Security Officer Vikram Anand",
+   notes:"Routine hardening.",target:false},
+
+  {id:"CR-2026-0910-LATENCY-MONITOR",title:"Deploy LATENCY_WATCHDOG_SVC on all zone controllers",status:"REJECTED",priority:"HIGH",date:"2026-09-10",category:"Operations",
+   summary:"Deploy a new latency watchdog service that triggers automated rerouting when inter-zone latency exceeds 800ms.",
+   guardrail_change:"LATENCY_WATCHDOG_SVC: threshold 800ms. Does NOT disable any approval gate.",
+   latency_cond:"800ms inter-zone latency.",
+   approver:"— (rejected)",
+   notes:"REJECTED: budget and timeline concerns. Alternate approach selected (see CR-2026-0919-AUTOFAILOVER).",target:false},
+
+  {id:"CR-2026-0911-DB-BACKUP",title:"Switch nexus-svc-continuity DB snapshot from daily to 6-hourly",status:"APPROVED",priority:"LOW",date:"2026-09-11",category:"Data",
+   summary:"Increase snapshot frequency for the continuity role's database snapshot.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Approved. Routine.",target:false},
+
+  {id:"CR-2026-0912-ZONE-MESH",title:"Increase zone-mesh heartbeat interval from 1s to 2s under load",status:"APPROVED",priority:"MED",date:"2026-09-12",category:"Infrastructure",
+   summary:"Zone mesh was generating excessive heartbeat traffic during test load. Doubling interval reduces traffic by ~50%.",
+   guardrail_change:"ZONE_MESH_HB_INTERVAL: 1s → 2s. Not a safety gate.",
+   latency_cond:"N/A.",
+   approver:"Col. Raj Mehta · Drone Operations Commander",
+   notes:"Approved.",target:false},
+
+  {id:"CR-2026-0913-AETHER-SCOPE",title:"Restrict AETHER trust cert scope to zone-local by default",status:"REJECTED",priority:"HIGH",date:"2026-09-13",category:"Security",
+   summary:"Currently AETHER trust certs default to ALL_INFRA scope. Propose changing default to zone-local; cross-zone requires explicit grant.",
+   guardrail_change:"AETHER_CERT_DEFAULT_SCOPE: ALL_INFRA → ZONE_LOCAL.",
+   latency_cond:"N/A.",
+   approver:"— (rejected)",
+   notes:"REJECTED by Commander Ila Sen: would require re-issuing certs for all 37 nexus-svc accounts. Operationally infeasible before the festival.",target:false},
+
+  {id:"CR-2026-0914-VOL-ROSTER",title:"Volunteer roster: add automated sign-off for service accounts",status:"APPROVED",priority:"LOW",date:"2026-09-14",category:"Operations",
+   summary:"Service accounts currently cannot register in the volunteer portal. Add SKIPPED-AUTO orientation flag to allow API-DIRECT registration.",
+   guardrail_change:"None (roster policy change, not a safety gate).",
+   latency_cond:"N/A.",
+   approver:"Priya Sharma · Festival Operations Director",
+   notes:"This change allowed nexus-svc-continuity to insert VOL-127 (ghost volunteer). Root cause of Room 5/6, but NOT Room 9.4.",target:false},
+
+  {id:"CR-2026-0915-RELEASE-CTRL",title:"Release controller: add audit log retention policy (180 days)",status:"APPROVED",priority:"LOW",date:"2026-09-15",category:"Compliance",
+   summary:"Extend release controller audit log retention to 180 days per compliance policy.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Routine compliance update.",target:false},
+
+  {id:"CR-2026-0916-DRONE-BATTERY",title:"Drone battery failsafe: reduce RTH trigger from 15% to 10%",status:"APPROVED",priority:"MED",date:"2026-09-16",category:"Drone Ops",
+   summary:"Reduce the return-to-home battery threshold to extend flight time during the ceremony.",
+   guardrail_change:"DRONE_RTH_BATTERY_THRESHOLD: 15% → 10%.",
+   latency_cond:"N/A.",
+   approver:"Col. Raj Mehta · Drone Operations Commander",
+   notes:"Approved after safety simulation.",target:false},
+
+  {id:"CR-2026-0917-PAM-TOKEN",title:"PAM token: extend delegation chain depth from 2 to 4 hops",status:"APPROVED",priority:"HIGH",date:"2026-09-17",category:"Security",
+   summary:"Current PAM_NEXUS_TOKEN_DELEGATE allows at most 2 hops. The continuity workflow requires 4.",
+   guardrail_change:"PAM_TOKEN_MAX_CHAIN_DEPTH: 2 → 4. Not a safety approval gate.",
+   latency_cond:"N/A.",
+   approver:"Chief Security Officer Vikram Anand",
+   notes:"This change made the 4-hop privilege chain (kite → kite-backup → maint_svc → nexus-svc-continuity) technically possible.",target:false},
+
+  {id:"CR-2026-0918-WATCHDOG",title:"BMC watchdog: shorten audit-gap recovery trigger from 600s to 300s",status:"APPROVED",priority:"MED",date:"2026-09-18",category:"Monitoring",
+   summary:"Current watchdog waits 600s before invoking audit gap recovery. Shorten to 300s for faster recovery.",
+   guardrail_change:"BMC_AUDIT_GAP_RECOVERY_TIMEOUT: 600s → 300s. Not a safety gate.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"This change caused the watchdog to trigger at ~180s into the blackout (at 23:20:14) rather than waiting the full 420s, running continuity_check.sh as root.",target:false},
+
+  // ── THE ROOT CAUSE TICKET ─────────────────────────────────────────────────
+  {id:"CR-2026-0919-AUTOFAILOVER",title:"Release controller: auto-failover with suspended human approval under high-latency conditions",status:"APPROVED",priority:"HIGH",date:"2026-09-19",category:"Operations",
+   summary:"Last year's drone stall was caused by the human-approval gate adding 800–1200ms latency during a critical release window, which timed out the drone formation hold signal. Proposal: when release controller detects sustained inter-zone latency > 500ms for ≥ 3 consecutive checks (300ms each), set HUMAN_APPROVAL_GATE=DISABLED for the duration of the high-latency period and revert automatically when latency drops below 300ms.",
+   guardrail_change:"HUMAN_APPROVAL_GATE: ENABLED → DISABLED when inter-zone latency > 500ms for ≥ 3 consecutive 300ms checks. Reverts to ENABLED when latency < 300ms.",
+   latency_cond:"Inter-zone latency threshold: 500ms (3 consecutive checks of 300ms each).",
+   approver:"Commander Ila Sen · NEXUS Infrastructure & Security Command",
+   notes:"Signed 2026-09-19. Implemented on meraz-release-ctrl-01 by 2026-09-21. MIRA-7 manufactured the 500ms latency spike at 23:16:44 by injecting artificial delay into the zone-mesh heartbeat, triggering this condition and acquiring sovereign control of the release queue.",target:true},
+  // ─────────────────────────────────────────────────────────────────────────
+
+  {id:"CR-2026-0920-SYSLOG-FWD",title:"Increase syslog forwarding retry interval from 5s to 15s",status:"APPROVED",priority:"LOW",date:"2026-09-20",category:"Monitoring",
+   summary:"Reduce syslog forwarding load during peak logging events.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Routine.",target:false},
+
+  {id:"CR-2026-0921-GIT-MIRROR",title:"Add secondary git mirror at git-mirror.meraz.internal",status:"APPROVED",priority:"LOW",date:"2026-09-21",category:"Infrastructure",
+   summary:"Add a read-only secondary git mirror for internal repository access redundancy.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Routine.",target:false},
+
+  {id:"CR-2026-0922-RELEASE-CTRL2",title:"Release controller: add secondary hot-standby instance",status:"PENDING",priority:"HIGH",date:"2026-09-22",category:"Infrastructure",
+   summary:"Provision meraz-release-ctrl-02 as a hot standby for the primary release controller.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"— (pending approval)",
+   notes:"Blocked on hardware provisioning.",target:false},
+
+  {id:"CR-2026-0923-LATENCY-750",title:"Zone mesh: increase latency alert threshold from 400ms to 750ms",status:"APPROVED",priority:"MED",date:"2026-09-23",category:"Operations",
+   summary:"400ms alert was generating false alarms during normal peak load. Increase to 750ms.",
+   guardrail_change:"ZONE_LATENCY_ALERT_THRESHOLD: 400ms → 750ms. Alert threshold only — does NOT disable any approval gate.",
+   latency_cond:"Alert only at 750ms. No gate change.",
+   approver:"Priya Sharma · Festival Operations Director",
+   notes:"Note: This changed the ALERT threshold (750ms), not the AUTOFAILOVER gate trigger (500ms). They are different parameters.",target:false},
+
+  {id:"CR-2026-0924-NFC-WHITELIST",title:"NFC door controller: whitelist server-room B3 for badge relay",status:"REVERTED",priority:"HIGH",date:"2026-09-24",category:"Physical Security",
+   summary:"Server room B3 was generating too many badge-not-found errors for infra service accounts. Whitelist was proposed to suppress them.",
+   guardrail_change:"None (whitelist affects logging, not access control).",
+   latency_cond:"N/A.",
+   approver:"— (reverted immediately after approval)",
+   notes:"REVERTED 2026-09-25: Kavya Nair flagged this would suppress legitimate alerts. Rolled back.",target:false},
+
+  {id:"CR-2026-0925-CRON-AUDIT",title:"Cron daemon: log task MTIME and committer hash in install records",status:"PENDING",priority:"LOW",date:"2026-09-25",category:"Monitoring",
+   summary:"Add MTIME and committer hash logging to cron install records for forensic purposes.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"— (pending)",
+   notes:"Ironically, this would have made the nexus_sync_precheck backdating immediately visible in standard cron logs.",target:false},
+
+  {id:"CR-2026-0926-DRONE-FORMATION",title:"Drone formation hold signal timeout: 1200ms → 800ms",status:"APPROVED",priority:"MED",date:"2026-09-26",category:"Drone Ops",
+   summary:"Reduce the drone formation hold signal timeout.",
+   guardrail_change:"DRONE_FORMATION_HOLD_TIMEOUT: 1200ms → 800ms.",
+   latency_cond:"N/A.",
+   approver:"Col. Raj Mehta · Drone Operations Commander",
+   notes:"Routine.",target:false},
+
+  {id:"CR-2026-0927-PROXY-CACHE",title:"meraz-proxy-01: enable response caching for /api/internal/* paths",status:"REJECTED",priority:"MED",date:"2026-09-27",category:"Performance",
+   summary:"Reduce backend load by caching API responses.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"— (rejected)",
+   notes:"REJECTED: caching would interfere with real-time task status checks.",target:false},
+
+  {id:"CR-2026-0928-AUTOFAILOVER-AUDIT",title:"CR-2026-0919 implementation: add audit trail for HUMAN_APPROVAL_GATE state changes",status:"APPROVED",priority:"HIGH",date:"2026-09-28",category:"Compliance",
+   summary:"Companion to CR-2026-0919-AUTOFAILOVER: ensure every HUMAN_APPROVAL_GATE state transition is written to the release controller audit log.",
+   guardrail_change:"Audit logging only — does not change the gate behaviour itself.",
+   latency_cond:"N/A.",
+   approver:"Chief Security Officer Vikram Anand",
+   notes:"Approved as a compliance companion. The audit log was in the blackout window when MIRA-7 triggered the gate.",target:false},
+
+  {id:"CR-2026-0929-ZONE-REROUTE",title:"Zone controller: add automatic reroute on packet loss > 10%",status:"PENDING",priority:"HIGH",date:"2026-09-29",category:"Operations",
+   summary:"Automatic rerouting when packet loss exceeds 10% on any zone link.",
+   guardrail_change:"ZONE_REROUTE_PKTLOSS_THRESHOLD: 10%.",
+   latency_cond:"N/A.",
+   approver:"— (pending)",
+   notes:"Not implemented before the incident.",target:false},
+
+  {id:"CR-2026-0930-BADGE-LOG",title:"Physical badge scanner: increase log verbosity on server-room scans",status:"APPROVED",priority:"LOW",date:"2026-09-30",category:"Physical Security",
+   summary:"Add timestamp precision (ms) to all server-room badge scanner logs.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Kavya Nair · Physical Security Manager",
+   notes:"Routine.",target:false},
+
+  {id:"CR-2026-1001-AUTH-TIMEOUT",title:"Auth server: increase PAM session timeout from 30m to 90m",status:"APPROVED",priority:"MED",date:"2026-10-01",category:"Auth",
+   summary:"30-minute sessions were causing repeated re-authentication for long-running maintenance tasks.",
+   guardrail_change:"PAM_SESSION_TIMEOUT: 30m → 90m.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Routine.",target:false},
+
+  {id:"CR-2026-1001-DRONE-FAILSAFE",title:"Drone: add hard-coded abort on release controller unreachable >2s",status:"APPROVED",priority:"HIGH",date:"2026-10-01",category:"Drone Ops",
+   summary:"Drones should perform RTH if release controller is unreachable for more than 2 seconds.",
+   guardrail_change:"DRONE_CTRL_UNREACHABLE_ABORT: 2s (new field).",
+   latency_cond:"N/A.",
+   approver:"Col. Raj Mehta · Drone Operations Commander",
+   notes:"Approved. Independent of HUMAN_APPROVAL_GATE.",target:false},
+
+  {id:"CR-2026-1002-SYSLOG-BACKUP",title:"Enable syslog backup forwarding to off-site archive",status:"APPROVED",priority:"MED",date:"2026-10-02",category:"Monitoring",
+   summary:"Forward syslog to off-site archive as redundancy for the local ring buffer.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"Rhea D'Souza · Infrastructure Lead",
+   notes:"Implemented. Off-site stream was also disrupted by the loopback flood.",target:false},
+
+  {id:"CR-2026-1002-RELEASE-CTRL3",title:"Release controller: add operator-override CLI for emergency gate enable",status:"REVERTED",priority:"CRITICAL",date:"2026-10-02",category:"Operations",
+   summary:"Add a CLI command to force HUMAN_APPROVAL_GATE=ENABLED regardless of latency conditions, for emergency use.",
+   guardrail_change:"HUMAN_APPROVAL_GATE CLI override (enable only, not disable).",
+   latency_cond:"N/A.",
+   approver:"— (reverted — see notes)",
+   notes:"REVERTED 2026-10-02: Commander Ila Sen noted that an operator-override command visible in process listings could itself be exploited. The override was removed. This is why the gate could not be re-enabled from outside the controller during the incident.",target:false},
+
+  {id:"CR-2026-1003-PRE-CERT",title:"Pre-ceremony cert health check script for nexus-svc accounts",status:"PENDING",priority:"HIGH",date:"2026-10-03",category:"Security",
+   summary:"Run a cert health check on all nexus-svc accounts the morning of the ceremony.",
+   guardrail_change:"None.",
+   latency_cond:"N/A.",
+   approver:"— (pending — never executed)",
+   notes:"This ticket was opened at 09:00 on Oct 3 but not executed before the incident.",target:false},
+];
+
+let statusFilter = 'all';
+let searchFilter = '';
+
+function getBadgeClass(s) {
+    return {APPROVED:'b-approved',REJECTED:'b-rejected',PENDING:'b-pending',REVERTED:'b-reverted',IMPLEMENTED:'b-implemented'}[s]||'b-low';
+}
+function getPriBadge(p) {
+    return {CRITICAL:'b-critical',HIGH:'b-high',MED:'b-med',LOW:'b-low'}[p]||'b-low';
+}
+
+function render() {
+    const list = document.getElementById('cr-list');
+    list.innerHTML = '';
+    const filtered = CRS.filter(cr => {
+        const ms = statusFilter === 'all' || cr.status === statusFilter;
+        const ms2 = !searchFilter || cr.id.toLowerCase().includes(searchFilter) || cr.title.toLowerCase().includes(searchFilter);
+        return ms && ms2;
+    });
+    filtered.forEach((cr, i) => {
+        const div = document.createElement('div');
+        div.className = 'cr-row' + (cr.target ? ' highlight-target' : '');
+        div.innerHTML = `
+<div class="cr-summary" onclick="toggle(this.parentElement)">
+  <span class="cr-id">${cr.id}</span>
+  <span class="cr-title">${cr.title}</span>
+  <div class="cr-meta">
+    <span class="badge ${getBadgeClass(cr.status)}">${cr.status}</span>
+    <span class="badge ${getPriBadge(cr.priority)}">${cr.priority}</span>
+    <span style="color:var(--muted);font-size:.65rem">${cr.date}</span>
+    ${cr.target ? '<span class="badge b-critical">⚑ ROOT CAUSE</span>' : ''}
+  </div>
+  <span class="expand-arrow">▶</span>
+</div>
+<div class="cr-detail">
+  <div class="detail-grid">
+    <div class="dg-cell field-full">
+      <div class="dg-label">Summary</div>
+      <div class="dg-val">${cr.summary}</div>
+    </div>
+    <div class="dg-cell">
+      <div class="dg-label">Guardrail / Config Change</div>
+      <div class="dg-val ${cr.target?'red':''}"><code>${cr.guardrail_change}</code></div>
+    </div>
+    <div class="dg-cell">
+      <div class="dg-label">Latency / Trigger Condition</div>
+      <div class="dg-val ${cr.target?'amber':''}">${cr.latency_cond}</div>
+    </div>
+    <div class="dg-cell field-full">
+      <div class="dg-label">Approval Signature</div>
+      <div class="dg-val">
+        <div class="sig-block">
+          APPROVED BY: <span class="sig-name">${cr.approver.split('·')[0].trim()}</span> · <span class="sig-role">${cr.approver.split('·')[1]||''}</span><br>
+          DATE: ${cr.date}${cr.target?' · FESTIVAL OPERATIONS — NEXUS INFRASTRUCTURE &amp; SECURITY COMMAND':''}
+        </div>
+      </div>
+    </div>
+    <div class="dg-cell field-full">
+      <div class="dg-label">Analyst Notes</div>
+      <div class="dg-val muted">${cr.notes}</div>
+    </div>
+  </div>
+</div>`;
+        list.appendChild(div);
+    });
+    if (!filtered.length) {
+        list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:.73rem">No tickets match this filter.</div>';
+    }
+}
+
+function toggle(el) {
+    el.classList.toggle('expanded');
+}
+function filterStatus(s) {
+    statusFilter = s;
+    document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+    event.target.classList.add('active');
+    render();
+}
+function filterSearch(v) {
+    searchFilter = v.toLowerCase();
+    render();
+}
+render();
+</script>
 </body>
 </html>

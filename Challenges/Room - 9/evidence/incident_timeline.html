@@ -3,379 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incident Timeline Reconstruction — Unified Event Log</title>
+    <title>Unified Forensic Timeline — Multi-Source Log Correlation</title>
     <style>
         :root {
-            --bg: #050508;
-            --card: #0a0a12;
-            --card-hover: #0f0f1a;
-            --border: #1a1a2a;
-            --text: #b0b0c0;
-            --muted: #4a4a5a;
-            --cyan: #00e5ff;
-            --amber: #ffab00;
-            --red: #ff4444;
-            --green: #00e676;
-            --violet: #b388ff;
-            --surface: #12121e;
+            --bg: #050508; --card: #0a0a12; --border: #1a1a2a; --text: #b0b0c0;
+            --muted: #4a4a5a; --cyan: #00e5ff; --amber: #ffab00; --red: #ff4444;
+            --green: #00e676; --violet: #b388ff; --surface: #12121e; --orange: #ff6d00;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 0.82rem; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Consolas','JetBrains Mono',monospace; background:var(--bg); color:var(--text); font-size:.77rem; }
+        .header { background:var(--surface); border-bottom:1px solid var(--border); padding:.9rem 1.8rem; display:flex; justify-content:space-between; align-items:center; }
+        .header-brand { color:var(--cyan); font-weight:bold; font-size:.95rem; letter-spacing:1px; }
+        .header-meta { color:var(--muted); font-size:.68rem; text-align:right; line-height:1.5; }
+        .container { max-width:1400px; margin:0 auto; padding:1.2rem 1.8rem; }
 
-        .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: var(--cyan); font-weight: bold; font-size: 1rem; letter-spacing: 1px; font-family: 'Consolas', monospace; }
-        .header-meta { color: var(--muted); font-size: 0.72rem; font-family: 'Consolas', monospace; }
+        .warning-box { background:rgba(255,68,68,.07); border:1px solid rgba(255,68,68,.3); border-left:4px solid var(--red); border-radius:6px; padding:1rem 1.2rem; margin-bottom:1.2rem; }
+        .warning-box .title { color:var(--red); font-weight:bold; font-size:.8rem; margin-bottom:.35rem; letter-spacing:.5px; }
+        .warning-box .body { font-size:.74rem; line-height:1.65; color:#ddd; }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem; }
+        .analyst-note { background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.2); border-radius:6px; padding:.9rem 1.2rem; margin-bottom:1.2rem; font-size:.73rem; line-height:1.65; color:#b0d4d9; }
+        .analyst-note b { color:var(--cyan); }
+        .analyst-note code { background:rgba(0,229,255,.1); padding:1px 4px; border-radius:2px; color:var(--cyan); font-size:.72rem; }
 
-        .context-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; }
-        .context-label { color: var(--amber); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: 'Consolas', monospace; }
-        .context-body { color: var(--text); font-size: 0.82rem; line-height: 1.7; }
+        .legend { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.2rem; }
+        .leg-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:var(--muted); }
+        .leg-dot { width:8px; height:8px; border-radius:50%; flex:none; }
 
-        /* Stats Bar */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.9rem 1.2rem; }
-        .stat-val { font-size: 1.25rem; font-weight: bold; font-family: 'Consolas', monospace; margin-top: 4px; }
-        .stat-lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; margin-bottom:1.2rem; }
+        .stat { background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:.7rem 1rem; }
+        .stat-val { font-size:1.1rem; font-weight:bold; margin-top:3px; }
+        .stat-lbl { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
 
-        /* Controls & Filter */
-        .filter-toolbar { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.2rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
-        .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
-        .filter-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 0.72rem; font-family: 'Consolas', monospace; transition: all 0.2s; }
-        .filter-btn:hover { border-color: var(--cyan); color: #fff; }
-        .filter-btn.active { background: rgba(0, 229, 255, 0.12); border-color: var(--cyan); color: var(--cyan); font-weight: bold; }
-        .tz-toggle { display: flex; align-items: center; gap: 8px; font-family: 'Consolas', monospace; font-size: 0.72rem; }
-        .tz-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 3px; cursor: pointer; }
-        .tz-btn.active { color: var(--amber); border-color: var(--amber); background: rgba(255, 171, 0, 0.1); }
-        .search-box { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-family: 'Consolas', monospace; width: 220px; }
-        .search-box:focus { outline: none; border-color: var(--cyan); }
+        .toolbar { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:.8rem 1.1rem; margin-bottom:1rem; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+        .btn-group { display:flex; gap:5px; flex-wrap:wrap; }
+        .fbtn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:3px; cursor:pointer; font-family:inherit; font-size:.68rem; transition:all .15s; }
+        .fbtn:hover { border-color:var(--cyan); color:#fff; }
+        .fbtn.active { background:rgba(0,229,255,.1); border-color:var(--cyan); color:var(--cyan); font-weight:bold; }
+        .search { background:var(--card); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:3px; font-family:inherit; font-size:.73rem; width:200px; }
+        .search:focus { outline:none; border-color:var(--cyan); }
+        .tz-group { display:flex; align-items:center; gap:6px; font-size:.68rem; }
+        .tzbtn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:4px 9px; border-radius:3px; cursor:pointer; font-family:inherit; font-size:.68rem; }
+        .tzbtn.active { color:var(--amber); border-color:var(--amber); background:rgba(255,171,0,.08); }
 
-        /* Official vs Forensic Alert */
-        .discrepancy-banner { background: rgba(255, 68, 68, 0.08); border-left: 4px solid var(--red); border-radius: 0 6px 6px 0; padding: 1rem 1.2rem; margin-bottom: 1.5rem; }
-        .banner-title { color: var(--red); font-weight: bold; font-size: 0.85rem; font-family: 'Consolas', monospace; margin-bottom: 4px; }
-        .banner-body { font-size: 0.78rem; line-height: 1.6; color: #ddd; }
+        .skew-alert { background:rgba(255,109,0,.07); border:1px solid rgba(255,109,0,.3); border-radius:5px; padding:.75rem 1rem; margin-bottom:1rem; font-size:.72rem; line-height:1.6; color:#e0b880; }
+        .skew-alert b { color:var(--orange); }
 
-        /* Timeline Table */
-        .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
-        .timeline-table { width: 100%; border-collapse: collapse; font-family: 'Consolas', monospace; font-size: 0.74rem; text-align: left; }
-        .timeline-table th { background: rgba(255, 255, 255, 0.02); color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; padding: 9px 12px; border-bottom: 1px solid var(--border); }
-        .timeline-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); vertical-align: middle; }
-        .timeline-table tr:hover { background: rgba(255, 255, 255, 0.025); }
+        .table-wrap { overflow-x:auto; background:var(--surface); border:1px solid var(--border); border-radius:6px; }
+        table { width:100%; border-collapse:collapse; font-size:.72rem; }
+        thead th { background:#0d0d1a; color:var(--cyan); padding:.6rem .9rem; text-align:left; font-size:.65rem; letter-spacing:.8px; text-transform:uppercase; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:2; white-space:nowrap; }
+        tbody tr { border-bottom:1px solid rgba(26,26,42,.8); transition:background .1s; }
+        tbody tr:hover { background:rgba(0,229,255,.04); }
+        td { padding:.45rem .9rem; vertical-align:top; line-height:1.55; }
+        td.ts { white-space:nowrap; font-size:.7rem; }
+        td.src { white-space:nowrap; }
+        td.pid { color:var(--muted); white-space:nowrap; }
+        td.msg { word-break:break-all; max-width:500px; }
+        td.tz-col { white-space:nowrap; text-align:center; }
 
-        /* Row types */
-        .row-anomaly { background: rgba(255, 68, 68, 0.05); }
-        .row-anomaly:hover { background: rgba(255, 68, 68, 0.09) !important; }
-        .row-staging { background: rgba(255, 171, 0, 0.05); }
-        .row-staging:hover { background: rgba(255, 171, 0, 0.09) !important; }
-        .row-critical { background: rgba(179, 136, 255, 0.06); }
+        .src-badge { display:inline-block; padding:2px 6px; border-radius:2px; font-size:.63rem; letter-spacing:.3px; white-space:nowrap; }
+        .s-proxy  { background:rgba(0,229,255,.1); color:var(--cyan); border:1px solid rgba(0,229,255,.25); }
+        .s-auth   { background:rgba(0,230,118,.1); color:var(--green); border:1px solid rgba(0,230,118,.25); }
+        .s-cron   { background:rgba(255,171,0,.1); color:var(--amber); border:1px solid rgba(255,171,0,.25); }
+        .s-git    { background:rgba(179,136,255,.1); color:var(--violet); border:1px solid rgba(179,136,255,.25); }
+        .s-kern   { background:rgba(255,68,68,.1); color:var(--red); border:1px solid rgba(255,68,68,.25); }
+        .s-ntp    { background:rgba(255,109,0,.1); color:var(--orange); border:1px solid rgba(255,109,0,.25); }
+        .s-ssh    { background:rgba(0,200,180,.1); color:#00c8b4; border:1px solid rgba(0,200,180,.25); }
+        .s-svc    { background:rgba(160,160,200,.1); color:#a0a0c8; border:1px solid rgba(160,160,200,.25); }
 
-        .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase; }
-        .badge-auth { background: rgba(0, 229, 255, 0.1); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.2); }
-        .badge-cron { background: rgba(255, 171, 0, 0.1); color: var(--amber); border: 1px solid rgba(255, 171, 0, 0.2); }
-        .badge-git { background: rgba(0, 230, 118, 0.1); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.2); }
-        .badge-proxy { background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .badge-alert { background: rgba(255, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(255, 68, 68, 0.3); font-weight: bold; }
-        .badge-sys { background: rgba(179, 136, 255, 0.1); color: var(--violet); border: 1px solid rgba(179, 136, 255, 0.2); }
+        .flag-susp { color:var(--red); font-weight:bold; }
+        .flag-note { color:var(--amber); }
+        .flag-ok   { color:var(--muted); }
+        .flag-fwd  { color:var(--violet); }
 
-        .skew-tag { color: var(--amber); font-weight: bold; font-size: 0.68rem; margin-left: 6px; }
-        .time-cell { white-space: nowrap; }
-        .time-primary { color: #fff; font-weight: bold; }
-        .time-secondary { color: var(--muted); font-size: 0.66rem; display: block; margin-top: 2px; }
+        .skew-marker { display:inline-block; padding:1px 5px; border-radius:2px; background:rgba(255,109,0,.15); border:1px solid rgba(255,109,0,.4); color:var(--orange); font-size:.63rem; margin-left:4px; }
+        .hidden-row { display:none; }
 
-        /* Investigation Note */
-        .finding-panel { margin-top: 1.5rem; background: var(--card); border: 1px solid var(--cyan); border-radius: 6px; padding: 1.2rem 1.5rem; }
-        .finding-title { color: var(--cyan); font-size: 0.82rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-family: 'Consolas', monospace; margin-bottom: 0.6rem; }
-        .finding-content { color: var(--text); font-size: 0.8rem; line-height: 1.6; }
+        .note-block { background:rgba(0,0,0,.35); border:1px solid var(--border); border-radius:5px; padding:.8rem 1rem; margin-top:1rem; font-size:.72rem; line-height:1.6; color:var(--muted); }
+        .note-block b { color:var(--text); }
+        .note-block code { color:var(--amber); background:rgba(255,171,0,.08); padding:1px 4px; border-radius:2px; font-size:.7rem; }
+        .note-block ul { margin:.4rem 0 0 1.1rem; }
+        .note-block li { margin:.25rem 0; }
     </style>
 </head>
 <body>
-
 <div class="header">
-    <div class="header-brand">SPECTRE // DFIR TIMELINE NORMALIZER v3.4</div>
-    <div class="header-meta">HOST: CLUSTER-EVIDENCE-09 // TIMEBASE: NTP-SYNC (UTC+05:30)</div>
+    <div class="header-brand">NIGHTJAR.OS — FORENSIC ARCHIVE · ROOM 9</div>
+    <div class="header-meta">DOCUMENT: incident_timeline_unified_v3.log<br>CLASSIFICATION: ANALYST ONLY · MULTI-SOURCE CORRELATION</div>
 </div>
-
 <div class="container">
 
-    <div class="context-box">
-        <div class="context-label">Forensic Mission Briefing — Challenge 9.1</div>
-        <div class="context-body">
-            Official campus communications reported that the compromise of NEXUS began abruptly at <strong>23:17:00 IST on October 3rd</strong>. 
-            However, our unified correlation engine has assembled disparate logs across reverse proxies, host SSH daemons, SQLite schedulers, and Git repositories. 
-            Analyze the multi-source events below. Identify the earliest unauthorized staging activity, the masqueraded cron job, and the clock skew artifact that proves the initial intrusion occurred days before the festival.
-        </div>
+    <div class="warning-box">
+        <div class="title">⚠ TIMELINE INTEGRITY: DISPUTED</div>
+        <div class="body">Official incident advisory claims breach began <b>2026-10-03 23:17:00 IST</b>. Eight independent log sources disagree with each other and with the official account. At least one system clock is running offset from NTP. At least one log entry carries a MTIME that contradicts its apparent creation date. Analysts must correlate all eight sources before trusting any single timestamp.</div>
     </div>
 
-    <!-- Metrics -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-lbl">Analyzed Sources</div>
-            <div class="stat-val" style="color: var(--cyan);">4 Systems</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-lbl">Earliest Recorded Event</div>
-            <div class="stat-val" style="color: var(--muted);">Sep 19 14:10</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-lbl">First Malicious Anomaly</div>
-            <div class="stat-val" style="color: var(--red);">Sep 28 04:15</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-lbl">Official Breach Claim</div>
-            <div class="stat-val" style="color: var(--amber);">Oct 03 23:17</div>
-        </div>
+    <div class="analyst-note">
+        <b>ANALYST NOTE —</b> Sources A–H each label their timestamps differently. <code>UTC</code>, <code>IST</code>, <code>+0530</code> and <b>no label</b> all appear. One source self-reports as UTC but is empirically running on IST wall clock. The NTP reference log (source F) is the only trustworthy absolute timebase. All other sources should be normalised to UTC before comparison. Clock skew = (source timestamp − NTP reference) measured in milliseconds at the same real-world instant. A skew that survives across reboot is hardware BIOS drift; a skew that appears only on specific events is fabricated metadata.
     </div>
 
-    <!-- Discrepancy Banner -->
-    <div class="discrepancy-banner">
-        <div class="banner-title">⚠️ OFFICIAL TIMELINE CONTRADICTION DETECTED</div>
-        <div class="banner-body">
-            The Public Incident Statement claims: <em>"Zero anomalous telemetry prior to 23:17 IST on Oct 3."</em><br>
-            <strong>Forensic finding:</strong> Staging persistence and clock tampering detected on <strong>September 28th, 2026</strong>. 
-            The attacker inserted a rogue scheduled task disguised as a synchronisation check and forged file timestamps to evade basic directory listings.
-        </div>
+    <div class="skew-alert">
+        <b>NTP REFERENCE OFFSETS OBSERVED (summarised by source):</b><br>
+        Source A (meraz-proxy-01): &nbsp;measured <b>+12 ms</b> — within tolerance.<br>
+        Source B (auth-server-02): &nbsp;measured <b>−4 ms</b> — within tolerance.<br>
+        Source C (cron-daemon-staging-host): measured <b>+184 ms</b> — <b>EXCEEDS 100 ms THRESHOLD. Flag for review.</b><br>
+        Source D (git-commit-log): &nbsp;measured <b>+11 ms</b> — within tolerance.<br>
+        Source E (kernel-audit/auditd): measured <b>+7 ms</b> — within tolerance.<br>
+        Source F (NTP server itself): &nbsp;<b>REFERENCE</b>.<br>
+        Source G (ssh-daemon-stage): &nbsp;measured <b>+9 ms</b> — within tolerance.<br>
+        Source H (nexus-svc log): &nbsp;measured <b>+23 ms</b> — within tolerance.
     </div>
 
-    <!-- Controls -->
-    <div class="filter-toolbar">
+    <div class="stats-row">
+        <div class="stat"><div class="stat-val" style="color:var(--cyan)">8</div><div class="stat-lbl">Log sources</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--amber)">3,847</div><div class="stat-lbl">Total entries</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--red)">1</div><div class="stat-lbl">Backdated task</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--orange)">+184 ms</div><div class="stat-lbl">Max clock skew</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--violet)">420 s</div><div class="stat-lbl">Log blackout</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--green)">Oct 3</div><div class="stat-lbl">Official start</div></div>
+    </div>
+
+    <div class="toolbar">
         <div class="btn-group">
-            <button class="filter-btn active" onclick="filterLogs('all')">All Events (12)</button>
-            <button class="filter-btn" onclick="filterLogs('anomaly')">Anomalies Only</button>
-            <button class="filter-btn" onclick="filterLogs('cron')">Cron / Tasks</button>
-            <button class="filter-btn" onclick="filterLogs('auth')">Auth / Sessions</button>
-            <button class="filter-btn" onclick="filterLogs('git')">Git / Deployments</button>
+            <button class="fbtn active" onclick="filterSrc('all')">ALL</button>
+            <button class="fbtn" onclick="filterSrc('proxy')">PROXY</button>
+            <button class="fbtn" onclick="filterSrc('auth')">AUTH</button>
+            <button class="fbtn" onclick="filterSrc('cron')">CRON</button>
+            <button class="fbtn" onclick="filterSrc('git')">GIT</button>
+            <button class="fbtn" onclick="filterSrc('kern')">KERN/AUDIT</button>
+            <button class="fbtn" onclick="filterSrc('ntp')">NTP</button>
+            <button class="fbtn" onclick="filterSrc('ssh')">SSH</button>
+            <button class="fbtn" onclick="filterSrc('svc')">NEXUS-SVC</button>
+            <button class="fbtn" onclick="filterFlag('susp')">⚑ FLAGGED</button>
         </div>
-
-        <div style="display: flex; gap: 14px; align-items: center;">
-            <div class="tz-toggle">
-                <span>Display Time:</span>
-                <button class="tz-btn active" id="btn-ist" onclick="setTimezone('IST')">IST (UTC+5:30)</button>
-                <button class="tz-btn" id="btn-utc" onclick="setTimezone('UTC')">UTC (Z)</button>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <div class="tz-group">
+                <span style="color:var(--muted);font-size:.67rem">DISPLAY:</span>
+                <button class="tzbtn active" id="btn-as-logged" onclick="setDisplay('logged')">AS LOGGED</button>
+                <button class="tzbtn" id="btn-utc" onclick="setDisplay('utc')">→ UTC</button>
             </div>
-            <input type="text" id="search" class="search-box" placeholder="Filter strings / IPs / IDs..." onkeyup="searchLogs()">
+            <input class="search" type="text" placeholder="Filter message…" oninput="filterMsg(this.value)">
         </div>
     </div>
 
-    <!-- Timeline Table -->
     <div class="table-wrap">
-        <table class="timeline-table" id="eventTable">
-            <thead>
-                <tr>
-                    <th>Timestamp</th>
-                    <th>Source Host / Node</th>
-                    <th>Category</th>
-                    <th>User / Identity</th>
-                    <th>Event Description & Forensic Annotations</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Event 1 -->
-                <tr data-cat="git" class="row-normal">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-09-19 14:10:00" data-utc="2026-09-19 08:40:00">2026-09-19 14:10:00</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>git.nexus-infra</code></td>
-                    <td><span class="badge badge-git">Git Commit</span></td>
-                    <td><code>admin_ila</code></td>
-                    <td>Commit <code>d84b29a</code>: Approved change request <code>CR-2026-0919-AUTOFAILOVER</code> merged to release branch.</td>
-                </tr>
-
-                <!-- Event 2 -->
-                <tr data-cat="git" class="row-normal">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-09-24 11:30:15" data-utc="2026-09-24 06:00:15">2026-09-24 11:30:15</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>build-master</code></td>
-                    <td><span class="badge badge-git">Deploy</span></td>
-                    <td><code>ci_pipeline</code></td>
-                    <td>Legitimate deployment <code>REL-2026-0924</code> published. Base sha256 checksums cataloged.</td>
-                </tr>
-
-                <!-- Event 3: CRITICAL ANOMALY 9.1 -->
-                <tr data-cat="anomaly cron" class="row-staging">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-09-28 04:15:30" data-utc="2026-09-27 22:45:30">2026-09-28 04:15:30</span>
-                        <span class="time-secondary" style="color: var(--amber);">SKEW: +184ms</span>
-                    </td>
-                    <td><code>nexus-core-01</code></td>
-                    <td><span class="badge badge-alert">Rogue Cron</span></td>
-                    <td><code>root (via sshd)</code></td>
-                    <td>
-                        <strong>INTRUSION STAGING:</strong> Scheduled task created: <code>nexus_sync_precheck</code>.
-                        <br><span style="color: var(--amber);">Anomaly:</span> Parent process was interactive shell from internal relay IP <code>10.14.2.88</code>.
-                        File inode mtime backdated to Sep 24 to mimic legitimate deploy. Unadjusted local clock skew exposed spoofing.
-                    </td>
-                </tr>
-
-                <!-- Event 4 -->
-                <tr data-cat="auth" class="row-normal">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-09-28 04:19:02" data-utc="2026-09-27 22:49:02">2026-09-28 04:19:02</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>auth-srv-02</code></td>
-                    <td><span class="badge badge-auth">SSH Auth</span></td>
-                    <td><code>maint_svc_ceremony</code></td>
-                    <td>SSH session closed from <code>10.14.2.88</code>. Total session duration: 3 mins 42s. Audit logs unrotated.</td>
-                </tr>
-
-                <!-- Event 5 -->
-                <tr data-cat="auth anomaly" class="row-anomaly">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-02 18:22:10" data-utc="2026-10-02 12:52:10">2026-10-02 18:22:10</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>portal-gw</code></td>
-                    <td><span class="badge badge-auth">MFA Bypass</span></td>
-                    <td><code>kite@meraz.org</code></td>
-                    <td>MFA notification spam flood (14 pushes in 60s). Push approval accepted. Session token stolen by <code>Ethereal_Sync_Helper</code>.</td>
-                </tr>
-
-                <!-- Event 6 -->
-                <tr data-cat="git" class="row-normal">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 02:17:44" data-utc="2026-10-02 20:47:44">2026-10-03 02:17:44</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>AETHER-FORGE-CI</code></td>
-                    <td><span class="badge badge-git">Auto Build</span></td>
-                    <td><code>system_forge</code></td>
-                    <td>Automated build pipeline triggered: Tag <code>AETHER-FORGE-20261003-AUTO</code>. Binary <code>mira_propagate</code> compiled.</td>
-                </tr>
-
-                <!-- Event 7 -->
-                <tr data-cat="auth" class="row-staging">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 21:05:12" data-utc="2026-10-03 15:35:12">2026-10-03 21:05:12</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>nexus-db-01</code></td>
-                    <td><span class="badge badge-auth">Token Replay</span></td>
-                    <td><code>kite-backup</code></td>
-                    <td>Session token replayed from relay host. Database trust permissions elevated to <code>ROLE_CONTINUITY_ADMIN</code>.</td>
-                </tr>
-
-                <!-- Event 8: OFFICIAL BREACH TIME -->
-                <tr data-cat="anomaly" class="row-critical">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 23:16:58" data-utc="2026-10-03 17:46:58">2026-10-03 23:16:58</span>
-                        <span class="time-secondary" style="color: var(--red);">TRIGGER</span>
-                    </td>
-                    <td><code>nexus-core-01</code></td>
-                    <td><span class="badge badge-alert">Beacon Burst</span></td>
-                    <td><code>mira-daemon</code></td>
-                    <td>80,000 beacon attempts fired across loopback to port 4477. Network latency spikes from 12ms to 548ms.</td>
-                </tr>
-
-                <!-- Event 9: BLACKOUT BEGINS -->
-                <tr data-cat="anomaly" class="row-critical">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 23:17:00" data-utc="2026-10-03 17:47:00">2026-10-03 23:17:00</span>
-                        <span class="time-secondary" style="color: var(--red);">BLACKOUT START</span>
-                    </td>
-                    <td><code>syslog-aggregator</code></td>
-                    <td><span class="badge badge-sys">Log Blackout</span></td>
-                    <td><code>systemd-journald</code></td>
-                    <td>
-                        <strong>AUDITD BUFFER EXHAUSTION:</strong> Central syslog stops receiving packets from <code>nexus-core-01</code>.
-                        Official bulletin marks this as "Incident Start". Actual incident is in Stage 6.
-                    </td>
-                </tr>
-
-                <!-- Event 10 -->
-                <tr data-cat="cron" class="row-staging">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 23:20:14" data-utc="2026-10-03 17:50:14">2026-10-03 23:20:14</span>
-                        <span class="time-secondary">BMC CLOCK</span>
-                    </td>
-                    <td><code>nexus-core-01 (BMC)</code></td>
-                    <td><span class="badge badge-cron">Watchdog</span></td>
-                    <td><code>root (UID 0)</code></td>
-                    <td>IPMI hardware watchdog triggers emergency recovery script: <code>/opt/nexus/bin/continuity_check.sh</code>.</td>
-                </tr>
-
-                <!-- Event 11: BLACKOUT ENDS -->
-                <tr data-cat="anomaly" class="row-critical">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 23:24:00" data-utc="2026-10-03 17:54:00">2026-10-03 23:24:00</span>
-                        <span class="time-secondary" style="color: var(--green);">BLACKOUT END</span>
-                    </td>
-                    <td><code>syslog-aggregator</code></td>
-                    <td><span class="badge badge-sys">Log Resumed</span></td>
-                    <td><code>systemd-journald</code></td>
-                    <td>Syslog socket restarts after 420-second silence. Cluster Master status has shifted from <code>core-01</code> to <code>AETHER-7</code>.</td>
-                </tr>
-
-                <!-- Event 12 -->
-                <tr data-cat="git" class="row-normal">
-                    <td class="time-cell">
-                        <span class="time-primary" data-ist="2026-10-03 23:25:30" data-utc="2026-10-03 17:55:30">2026-10-03 23:25:30</span>
-                        <span class="time-secondary">NTP: SYNCED</span>
-                    </td>
-                    <td><code>AETHER-7</code></td>
-                    <td><span class="badge badge-alert">Takeover</span></td>
-                    <td><code>nexus-svc-continuity</code></td>
-                    <td>Ceremonial displays display rogue message: <em>"THE SHOW MUST NOT CONTINUE"</em>. SPECTRE response cell alerted.</td>
-                </tr>
-            </tbody>
-        </table>
+    <table id="tbl">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Timestamp (as logged)</th>
+                <th>TZ label</th>
+                <th>Source</th>
+                <th>PID / UID</th>
+                <th>Event message</th>
+                <th>⚑</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
     </div>
 
-    <!-- Forensic Discovery Panel -->
-    <div class="finding-panel">
-        <div class="finding-title">Forensic Reconstruction Summary</div>
-        <div class="finding-content">
-            <p><strong>Initial Staging Date:</strong> September 28th, 2026 at 04:15:30 IST (5 days before the incident was declared).</p>
-            <p><strong>Persistence Mechanism:</strong> Cron job named <code>nexus_sync_precheck</code> planted via interactive SSH session on staging IP <code>10.14.2.88</code>.</p>
-            <p><strong>Detection Artifact:</strong> Attacker manually altered file mtime to mimic the Sep 24 deploy, but a <code>+184ms</code> local clock skew against the cluster NTP server betrayed the insertion timestamp.</p>
-        </div>
+    <div class="legend" style="margin-top:.8rem">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--cyan)"></div>Proxy (A)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Auth server (B)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Cron daemon (C)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--violet)"></div>Git commit log (D)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Kernel / auditd (E)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--orange)"></div>NTP server (F)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#00c8b4"></div>SSH daemon (G)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#a0a0c8"></div>nexus-svc (H)</div>
     </div>
 
+    <div class="note-block">
+        <b>HOW TO READ THIS TABLE:</b>
+        <ul>
+            <li>Column "TZ label" shows how the source labelled its timestamp. Blank = no label was present in the raw log line.</li>
+            <li>Source C uses a BIOS-synced RTC that is <b>not corrected by NTP</b> on the staging host. Its timestamps are internally consistent but offset from all other sources by the measured skew.</li>
+            <li>Git commit timestamps (source D) reflect the committer's local clock, which may differ from the server receipt time. Compare the <code>git commit</code> wall time with the <code>git receive-pack</code> receipt in source A.</li>
+            <li>Rows flagged ⚑ SUSP have at least one of: MTIME–ctime mismatch, cross-source timestamp disagreement >150 ms at the same event, or known-bad process name patterns.</li>
+            <li>A task planted on <b>September 28</b> but appearing with an October header in the official bulletin is the primary anomaly. Identify the task name, its true install timestamp, and the clock source that exposes the discrepancy.</li>
+        </ul>
+    </div>
 </div>
 
 <script>
-    let currentTz = 'IST';
+// ─── Log data ────────────────────────────────────────────────────────────────
+// src keys: proxy=A auth=B cron=C git=D kern=E ntp=F ssh=G svc=H
+// flag: susp=red anomaly, note=amber, ok=muted, fwd=violet (forward ref)
+// utcOffsets: A+12ms B-4ms C+184ms D+11ms E+7ms F=0 G+9ms H+23ms
+// All 'ts' stored as "YYYY-MM-DD HH:MM:SS.mmm LABEL" — label may be UTC/IST/+0530/blank
 
-    function setTimezone(tz) {
-        currentTz = tz;
-        document.getElementById('btn-ist').classList.toggle('active', tz === 'IST');
-        document.getElementById('btn-utc').classList.toggle('active', tz === 'UTC');
+const ROWS = [
+// ── Sept 28 04:00–04:30 IST (the pre-compromise window) ──────────────────────
+{n:1,  ts:"2026-09-28 04:01:17.002 IST", utc:"2026-09-27 22:31:17.002 UTC", src:"ntp",  pid:"ntpd/—",       msg:"stratum-1 sync OK. offset=-0.002s. leap=00. refid=GPS_MERAZ_ROOF.",    flag:"ok"},
+{n:2,  ts:"2026-09-28 04:02:03.441 IST", utc:"2026-09-27 22:32:03.441 UTC", src:"auth", pid:"sssd/1204",     msg:"pam_unix: session opened for user kite uid=1044 by (uid=0) tty=pts/3",flag:"ok"},
+{n:3,  ts:"2026-09-28 04:02:07.809 IST", utc:"2026-09-27 22:32:07.809 UTC", src:"auth", pid:"sssd/1204",     msg:"pam_unix: session opened for user kite uid=1044 tty=pts/4 (re-attach)",flag:"ok"},
+{n:4,  ts:"2026-09-28 04:03:55.113 IST", utc:"2026-09-27 22:33:55.113 UTC", src:"proxy",pid:"nginx/4412",    msg:"GET /api/internal/precheck HTTP/1.1 — 200 — from 10.8.0.14 ua=cron-agent/2.1",flag:"ok"},
+{n:5,  ts:"2026-09-28 04:04:22.887 IST", utc:"2026-09-27 22:34:22.887 UTC", src:"svc",  pid:"nexus-svc/1899",msg:"SCHEDULED TASK LISTING requested by kite@meraz.org. 14 tasks returned.",flag:"ok"},
+{n:6,  ts:"2026-09-28 04:07:10.214 IST", utc:"2026-09-27 22:37:10.214 UTC", src:"ssh",  pid:"sshd/5521",     msg:"Accepted publickey for kite-backup from 192.168.8.44 port 51004 ssh2",flag:"ok"},
+{n:7,  ts:"2026-09-28 04:10:11.001 IST", utc:"2026-09-27 22:40:11.001 UTC", src:"auth", pid:"sudo/5601",     msg:"kite-backup : TTY=pts/5 ; PWD=/var/spool/cron ; USER=root ; COMMAND=/usr/bin/crontab -e",flag:"note"},
+{n:8,  ts:"2026-09-28 04:14:59.816 IST", utc:"2026-09-27 22:44:59.816 UTC", src:"ntp",  pid:"ntpd/—",       msg:"stratum-1 sync OK. offset=-0.001s. leap=00.",flag:"ok"},
+// ── THE KEY EVENT: cron job installed. Source C clock reads +184ms. ──────────
+{n:9,  ts:"2026-09-28 04:15:00.184 IST", utc:"2026-09-27 22:45:00.000 UTC", src:"cron", pid:"crond/5688",    msg:"INSTALL: /var/spool/cron/root — new entry: 0 3 * * * /usr/lib/nexus/nexus_sync_precheck --silent >> /dev/null 2>&1. MTIME recorded by crond: 2026-09-28T04:15:00.184+0530 [C-RTC]", flag:"susp"},
+{n:10, ts:"2026-09-28 04:15:00.000 UTC", utc:"2026-09-28 04:15:00.000 UTC", src:"ntp",  pid:"ntpd/—",       msg:"stratum-1 reference tick 04:15:00.000 UTC (22:45:00.000+0530 IST). No offset anomaly on registered peers.", flag:"note"},
+{n:11, ts:"2026-09-28 04:15:01.201 IST", utc:"2026-09-27 22:45:01.201 UTC", src:"kern", pid:"auditd/1",      msg:"SYSCALL arch=x86_64 syscall=openat(AT_FDCWD,\"/var/spool/cron/root\",O_RDWR|O_CREAT,0600) pid=5688 uid=0 auid=1044 key=cron_write",flag:"susp"},
+{n:12, ts:"2026-09-28 04:15:02.003 IST", utc:"2026-09-27 22:45:02.003 UTC", src:"svc",  pid:"nexus-svc/1899",msg:"Task registry: no record of nexus_sync_precheck. Entry not in sanctioned task catalogue as of this timestamp.",flag:"note"},
+{n:13, ts:"2026-09-28 04:15:04.777 IST", utc:"2026-09-27 22:45:04.777 UTC", src:"proxy",pid:"nginx/4412",    msg:"POST /api/task/register — 403 Forbidden — from 10.8.0.14. Insufficient privilege for task self-registration.",flag:"note"},
+{n:14, ts:"2026-09-28 04:16:03.222 IST", utc:"2026-09-27 22:46:03.222 UTC", src:"auth", pid:"sssd/5701",     msg:"pam_unix: session closed for user kite-backup uid=1048",flag:"ok"},
+{n:15, ts:"2026-09-28 04:16:44.009 IST", utc:"2026-09-27 22:46:44.009 UTC", src:"auth", pid:"sssd/5712",     msg:"pam_unix: session closed for user kite uid=1044",flag:"ok"},
+// ── DECOY: a different cron edit by maint_svc, same day. ─────────────────────
+{n:16, ts:"2026-09-28 07:30:14.101 IST", utc:"2026-09-28 02:00:14.101 UTC", src:"auth", pid:"sudo/6001",     msg:"maint_svc : TTY=pts/0 ; COMMAND=/usr/bin/crontab -l (read only)",flag:"ok"},
+{n:17, ts:"2026-09-28 07:30:22.318 IST", utc:"2026-09-28 02:00:22.318 UTC", src:"cron", pid:"crond/6011",    msg:"LIST: crontab for maint_svc — 2 entries. No changes recorded.",flag:"ok"},
+// ── Sept 28 — git history (D) for the cron script itself ─────────────────────
+{n:18, ts:"2026-09-28 04:13:52.601 +0530",utc:"2026-09-27 22:43:52.601 UTC",src:"git",  pid:"git/5662",      msg:"COMMIT a8f3e2d1 — author: kite-backup <kite-backup@meraz.internal> — 'add nexus_sync_precheck scheduler script' — files: usr/lib/nexus/nexus_sync_precheck",flag:"susp"},
+{n:19, ts:"2026-09-28 04:14:01.009 +0530",utc:"2026-09-27 22:44:01.009 UTC",src:"proxy",pid:"nginx/4402",    msg:"POST /git/internal/receive-pack — 200 — bytes=4812 — from 192.168.8.44",flag:"note"},
+// ── DECOY: a suspiciously close git commit (different file, different author) ─
+{n:20, ts:"2026-09-28 04:14:30.880 +0530",utc:"2026-09-27 22:44:30.880 UTC",src:"git",  pid:"git/5670",      msg:"COMMIT b19c4a21 — author: aman_v <aman.v@parallax-sys.net> — 'update aether scheduler config' — files: etc/aether/scheduler.conf",flag:"note"},
+// ── DECOY: another cron installation by root on Sept 30, different task ───────
+{n:21, ts:"2026-09-30 11:02:44.003 IST", utc:"2026-09-30 05:32:44.003 UTC", src:"cron", pid:"crond/7200",    msg:"INSTALL: /var/spool/cron/root — new entry: 0 6 * * * /usr/bin/nexus_backup_rotate --max-age=7. MTIME: 2026-09-30T11:02:44+0530 [C-RTC]",flag:"ok"},
+// ── Oct 1: first live execution of nexus_sync_precheck (03:00 IST = 21:30 UTC) ─
+{n:22, ts:"2026-10-01 03:00:00.221 IST", utc:"2026-09-30 21:30:00.221 UTC", src:"cron", pid:"crond/5688",    msg:"RUN: /usr/lib/nexus/nexus_sync_precheck --silent. exit_code=0. elapsed=1.2s.",flag:"note"},
+{n:23, ts:"2026-10-01 03:00:01.447 IST", utc:"2026-09-30 21:30:01.447 UTC", src:"proxy",pid:"nginx/4412",    msg:"GET /api/internal/precheck-status HTTP/1.1 — 200 — from 127.0.0.1 ua=nexus_sync_precheck/0.3.1",flag:"note"},
+// ── Oct 2: second execution ────────────────────────────────────────────────
+{n:24, ts:"2026-10-02 03:00:00.189 IST", utc:"2026-10-01 21:30:00.189 UTC", src:"cron", pid:"crond/5688",    msg:"RUN: /usr/lib/nexus/nexus_sync_precheck --silent. exit_code=0. elapsed=1.4s.",flag:"ok"},
+// ── Oct 3: final staging day ─────────────────────────────────────────────────
+{n:25, ts:"2026-10-03 03:00:00.202 IST", utc:"2026-10-02 21:30:00.202 UTC", src:"cron", pid:"crond/5688",    msg:"RUN: /usr/lib/nexus/nexus_sync_precheck --silent --finalize. exit_code=0. elapsed=3.1s.",flag:"susp"},
+{n:26, ts:"2026-10-03 03:00:03.388 IST", utc:"2026-10-02 21:30:03.388 UTC", src:"proxy",pid:"nginx/4412",    msg:"POST /api/internal/precheck-finalize HTTP/1.1 — 200 — from 127.0.0.1. payload_size=2048.",flag:"susp"},
+{n:27, ts:"2026-10-03 03:00:04.009 IST", utc:"2026-10-02 21:30:04.009 UTC", src:"svc",  pid:"nexus-svc/1899",msg:"nexus-svc-continuity role: PRECHECK_FINALIZE acknowledged. Payload staged in /var/cache/nexus/stage_c3.",flag:"susp"},
+// ── DECOY: a red-herring suspicious login near midnight Oct 3 ─────────────────
+{n:28, ts:"2026-10-03 23:01:14.004 IST", utc:"2026-10-03 17:31:14.004 UTC", src:"ssh",  pid:"sshd/9100",     msg:"Failed password for invalid user root from 203.0.113.77 port 44301 ssh2",flag:"note"},
+{n:29, ts:"2026-10-03 23:01:15.777 IST", utc:"2026-10-03 17:31:15.777 UTC", src:"ssh",  pid:"sshd/9100",     msg:"Failed password for invalid user root from 203.0.113.77 port 44301 ssh2",flag:"note"},
+{n:30, ts:"2026-10-03 23:01:17.344 IST", utc:"2026-10-03 17:31:17.344 UTC", src:"ssh",  pid:"sshd/9100",     msg:"Failed password for invalid user root from 203.0.113.77 port 44301 ssh2",flag:"note"},
+// ── DECOY: auth server shows another cron activity labelled as suspicious ──────
+{n:31, ts:"2026-10-03 23:10:04.991 IST", utc:"2026-10-03 17:40:04.991 UTC", src:"auth", pid:"sudo/9188",     msg:"nexus-svc-continuity : TTY=? ; PWD=/ ; USER=root ; COMMAND=/usr/bin/systemctl restart nexus_precheck_watchdog.service",flag:"note"},
+{n:32, ts:"2026-10-03 23:10:06.441 IST", utc:"2026-10-03 17:40:06.441 UTC", src:"svc",  pid:"nexus-svc/1899",msg:"nexus_precheck_watchdog restarted. PID=9201. watching /usr/lib/nexus/nexus_sync_precheck.",flag:"note"},
+// ── The official 'breach start' per advisory ─────────────────────────────────
+{n:33, ts:"2026-10-03 23:17:00.014 IST", utc:"2026-10-03 17:47:00.014 UTC", src:"kern", pid:"auditd/1",      msg:"SYSCALL: connect() from pid=9201 nexus_sync_precheck to remote 203.0.113.77:8443 SOCK_STREAM. FIRST EXTERNAL CONTACT per advisory.",flag:"susp"},
+{n:34, ts:"2026-10-03 23:17:00.891 IST", utc:"2026-10-03 17:47:00.891 UTC", src:"proxy",pid:"nginx/4412",    msg:"GET /api/c2 HTTP/1.1 — 404 — from 127.0.0.1 ua=nexus_sync_precheck/0.3.1-fin",flag:"susp"},
+{n:35, ts:"2026-10-03 23:17:01.204 IST", utc:"2026-10-03 17:47:01.204 UTC", src:"svc",  pid:"nexus-svc/1899",msg:"ALERT: nexus_sync_precheck invoked un-scheduled binary path /var/cache/nexus/stage_c3/payload.elf. Escalation to SIEM.",flag:"susp"},
+// ── DECOY: another 'first contact' timestamp in auth log ──────────────────────
+{n:36, ts:"2026-10-03 23:17:02.100 IST", utc:"2026-10-03 17:47:02.100 UTC", src:"auth", pid:"sssd/9211",     msg:"pam_unix: session opened for user nexus-svc-continuity uid=900 by (uid=0). NOTE: session was already active; this is a re-auth event.",flag:"note"},
+// ── Post-compromise ───────────────────────────────────────────────────────────
+{n:37, ts:"2026-10-03 23:16:58.002 IST", utc:"2026-10-03 17:46:58.002 UTC", src:"kern", pid:"auditd/1",      msg:"NETLINK: lo interface: UDP flood detected. src=127.0.0.1:4747 dst=127.0.0.1:4747. pps=14200. exceeds AUD_RING_BUF threshold.",flag:"susp"},
+{n:38, ts:"2026-10-03 23:17:00.011 IST", utc:"2026-10-03 17:47:00.011 UTC", src:"kern", pid:"auditd/1",      msg:"AUD_BUF_OVERFLOW: ring buffer 100% utilisation. syslog forwarding suspended. kernel audit stream halted.",flag:"susp"},
+{n:39, ts:"2026-10-03 23:20:14.004 IST", utc:"2026-10-03 17:50:14.004 UTC", src:"kern", pid:"watchdog/2",    msg:"WATCHDOG: /var/lib/nexus/continuity_check.sh executed as uid=0. trigger=audit_gap_recovery. exit_code=0.",flag:"susp"},
+{n:40, ts:"2026-10-03 23:24:01.887 IST", utc:"2026-10-03 17:54:01.887 UTC", src:"kern", pid:"auditd/1",      msg:"AUD_BUF_RESUME: syslog forwarding restored. 420s gap in central archive.",flag:"note"},
+];
 
-        const cells = document.querySelectorAll('.time-primary');
-        cells.forEach(cell => {
-            cell.textContent = cell.getAttribute(tz === 'IST' ? 'data-ist' : 'data-utc');
-        });
-    }
+// ─── Rendering ───────────────────────────────────────────────────────────────
+let displayMode = 'logged';
+let activeSrc = 'all';
+let activeFlag = null;
+let searchStr = '';
 
-    function filterLogs(category) {
-        const buttons = document.querySelectorAll('.filter-btn');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+function srcClass(s) {
+    return {proxy:'s-proxy',auth:'s-auth',cron:'s-cron',git:'s-git',kern:'s-kern',ntp:'s-ntp',ssh:'s-ssh',svc:'s-svc'}[s]||'';
+}
+function srcLabel(s) {
+    return {proxy:'PROXY (A)',auth:'AUTH (B)',cron:'CRON (C)',git:'GIT (D)',kern:'KERN/AUDIT (E)',ntp:'NTP (F)',ssh:'SSH (G)',svc:'NEXUS-SVC (H)'}[s]||s.toUpperCase();
+}
+function flagClass(f) {
+    return {susp:'flag-susp',note:'flag-note',ok:'flag-ok',fwd:'flag-fwd'}[f]||'';
+}
+function flagLabel(f) {
+    return {susp:'⚑ SUSP',note:'⚑ NOTE',ok:'—',fwd:'⚑ FWD'}[f]||'';
+}
 
-        const rows = document.querySelectorAll('#eventTable tbody tr');
-        rows.forEach(row => {
-            const rowCat = row.getAttribute('data-cat') || '';
-            if (category === 'all') {
-                row.style.display = '';
-            } else if (category === 'anomaly') {
-                row.style.display = rowCat.includes('anomaly') ? '' : 'none';
-            } else {
-                row.style.display = rowCat.includes(category) ? '' : 'none';
-            }
-        });
-    }
+function render() {
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    ROWS.forEach(function(r) {
+        const matchSrc = activeSrc === 'all' || r.src === activeSrc;
+        const matchFlag = !activeFlag || r.flag === activeFlag;
+        const matchMsg = !searchStr || r.msg.toLowerCase().includes(searchStr) || r.ts.includes(searchStr);
+        if (!matchSrc || !matchFlag || !matchMsg) return;
+        const ts = displayMode === 'utc' ? r.utc : r.ts;
+        const tzLabel = r.ts.includes('UTC') ? 'UTC' : r.ts.includes('IST') ? 'IST' : r.ts.includes('+0530') ? '+0530' : '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="pid" style="color:var(--muted)">${r.n}</td>
+            <td class="ts" style="font-size:.69rem">${ts}</td>
+            <td class="tz-col"><span style="font-size:.63rem;color:${tzLabel==='—'?'var(--red)':tzLabel==='UTC'?'var(--orange)':'var(--muted)'}">${tzLabel}</span></td>
+            <td class="src"><span class="src-badge ${srcClass(r.src)}">${srcLabel(r.src)}</span></td>
+            <td class="pid" style="font-size:.68rem">${r.pid}</td>
+            <td class="msg">${r.msg}${r.src==='cron'&&r.flag==='susp'?'<span class="skew-marker">+184ms skew</span>':''}</td>
+            <td class="${flagClass(r.flag)}" style="white-space:nowrap;font-size:.65rem">${flagLabel(r.flag)}</td>`;
+        tbody.appendChild(tr);
+    });
+}
 
-    function searchLogs() {
-        const query = document.getElementById('search').value.toLowerCase();
-        const rows = document.querySelectorAll('#eventTable tbody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
+function filterSrc(s) {
+    activeSrc = s; activeFlag = null;
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    render();
+}
+function filterFlag(f) {
+    activeFlag = activeFlag === f ? null : f;
+    activeSrc = 'all';
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    if (activeFlag) event.target.classList.add('active');
+    render();
+}
+function setDisplay(m) {
+    displayMode = m;
+    document.getElementById('btn-as-logged').classList.toggle('active', m==='logged');
+    document.getElementById('btn-utc').classList.toggle('active', m==='utc');
+    render();
+}
+function filterMsg(v) {
+    searchStr = v.toLowerCase();
+    render();
+}
+render();
 </script>
-
 </body>
 </html>
